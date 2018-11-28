@@ -42,9 +42,6 @@ class Template(ACLModel):
 
     class Meta:
         default_related_name = 'template'
-        index_together = [
-            ["id", "name", "kind", "inventory", "project"]
-        ]
 
     template_fields = OrderedDict()
     template_fields["Task"] = ["playbook", "vars", "inventory"]
@@ -199,7 +196,7 @@ class PeriodicTask(AbstractModel):
                                        related_query_name="periodic_task",
                                        null=True, blank=True)
     inventory_file = models.CharField(max_length=2*1024, null=True, blank=True)
-    schedule       = models.CharField(max_length=4*1024)
+    schedule       = models.CharField(max_length=768)
     type           = models.CharField(max_length=10)
     save_result    = models.BooleanField(default=True)
     enabled        = models.BooleanField(default=True)
@@ -363,18 +360,18 @@ class History(BModel):
     objects        = HistoryQuerySet.as_manager()
     project        = models.ForeignKey(Project, on_delete=models.CASCADE,
                                        related_query_name="history", null=True)
-    inventory      = models.ForeignKey(Inventory, on_delete=models.CASCADE,
+    inventory      = models.ForeignKey(Inventory, on_delete=models.SET_NULL,
                                        related_query_name="history",
                                        blank=True, null=True, default=None)
     mode           = models.CharField(max_length=256)
     revision       = models.CharField(max_length=256, blank=True, null=True)
-    kind           = models.CharField(max_length=50, default="PLAYBOOK")
+    kind           = models.CharField(max_length=50, default="PLAYBOOK", db_index=True)
     start_time     = models.DateTimeField(default=timezone.now)
     stop_time      = models.DateTimeField(blank=True, null=True)
     raw_args       = models.TextField(default="")
     json_args      = models.TextField(default="{}")
     raw_inventory  = models.TextField(default="")
-    status         = models.CharField(max_length=50)
+    status         = models.CharField(max_length=50, db_index=True)
     initiator      = models.IntegerField(default=0)
     # Initiator type should be always as in urls for api
     initiator_type = models.CharField(max_length=50, default="project")
@@ -399,10 +396,6 @@ class History(BModel):
     class Meta:
         default_related_name = "history"
         ordering = ["-start_time"]
-        index_together = [
-            ["id", "project", "mode", "status", "inventory",
-             "start_time", "stop_time", "initiator", "initiator_type"]
-        ]
 
     @property
     def working(self):
@@ -550,7 +543,3 @@ class HistoryLines(BModel):
     class Meta:
         default_related_name = "raw_history_line"
         ordering = ['-line_gnumber', '-line_number']
-        index_together = [
-            ["history"], ["line_number"],
-            ["history", "line_number"]
-        ]

@@ -3,19 +3,18 @@
 {% load i18n %}
 
 {% block logo %}
-    <a href="/" class="logo app-logo">
-        <!-- mini logo for sidebar mini 50x50 pixels -->
-        <!-- <span class="logo-mini"><b>P</b></span> -->
-        <span class="logo-mini"><span class="bg-logo-min" style="margin-left: 4px;"></span></span>
-        <!-- logo for regular state and mobile devices -->
-        <!-- <span class="logo-lg"><b>P</b>olemarch</span> -->
-        <span class="logo-lg logo-span"><span class="bg-logo-min"></span> <span class="bg-logo"></span></span>
+
+    <!-- Logo -->
+    <a href="/" class="brand-link logo app-logo">
+        <img src="/static/img/logo/logo.png" alt="{{ project_gui_name }}" class="brand-image img-circle elevation-3" style="opacity: .8; float: inherit">
+        <img src="/static/img/logo/horizontal.svg" class="brand-image text-logo" style="opacity: .8">
     </a>
 {% endblock %}
 
 {% block common_sciprt %}
 <script type="text/javascript">
 window.resourceList = window.resourceList.concat([
+    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmElements.html?v={{gui_version}}"},
     { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmProject.html?v={{gui_version}}"},
     { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmHistory.html?v={{gui_version}}"},
     { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmUsers.html?v={{gui_version}}"},
@@ -27,9 +26,11 @@ window.resourceList = window.resourceList.concat([
 
     { prioritet:150, type:'js', name: "{% static 'js/libs/ansi_up.js' %}?v={{gui_version}}"},
     { prioritet:150, type:'js', name: "{% static 'js/libs/Sortable.min.js' %}?v={{gui_version}}"},
+    { prioritet:150, type:'js', name: "{% static 'js/pmCustomizer.js' %}?v={{gui_version}}"},
 
     { prioritet:160, type:'js', name: "{% static 'js/common.js' %}?v={{gui_version}}"},
     { prioritet:160, type:'js', name: "{% static 'js/hardcoder.js' %}?v={{gui_version}}"},
+    { prioritet:183, type:'js', name: "{% static 'js/pmElements.js' %}?v={{gui_version}}"},
     { prioritet:183, type:'js', name: "{% static 'js/pmUsers.js' %}?v={{gui_version}}"},
     { prioritet:184, type:'js', name: "{% static 'js/pmGroups.js' %}?v={{gui_version}}"},
     { prioritet:185, type:'js', name: "{% static 'js/pmInventories.js' %}?v={{gui_version}}"},

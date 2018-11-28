@@ -184,13 +184,14 @@ class _WithPermissionsSerializer(_SignalSerializer):
 
     def is_valid(self, *args, **kwargs):
         result = super(_WithPermissionsSerializer, self).is_valid(*args, **kwargs)
-        self.validated_data['owner'] = self.validated_data.get(
-            'owner', self.current_user()
-        )
+        if not hasattr(self, 'instance'):  # nocv
+            self.validated_data['owner'] = self.validated_data.get(
+                'owner', self.current_user()
+            )
         return result
 
     def current_user(self):
-        return self.context['request'].user
+        return self.context['request'].user  # nocv
 
 
 class UserSerializer(vst_serializers.UserSerializer):
@@ -261,7 +262,6 @@ class WidgetSettingsSerializer(vst_serializers.JsonObjectSerializer):
     pmwGroupsCounter = CounterWidgetSettingSerializer()
     pmwHostsCounter = CounterWidgetSettingSerializer()
     pmwChartWidget = WidgetSettingSerializer()
-    pmwAnsibleModuleWidget = WidgetSettingSerializer()
 
 
 class UserSettingsSerializer(vst_serializers.JsonObjectSerializer):
@@ -295,6 +295,8 @@ class OneTeamSerializer(TeamSerializer):
 
 
 class HistorySerializer(_SignalSerializer):
+    status = serializers.ChoiceField(choices=models.History.statuses, required=False)
+
     class Meta:
         model = models.History
         fields = (
@@ -332,6 +334,7 @@ class ProjectHistorySerializer(HistorySerializer):
 
 
 class OneHistorySerializer(_SignalSerializer):
+    status = serializers.ChoiceField(choices=models.History.statuses, required=False)
     raw_stdout = serializers.SerializerMethodField(read_only=True)
     execution_time = vst_fields.UptimeField()
 
@@ -850,7 +853,7 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
 
 
 class ProjectSerializer(_InventoryOperations):
-    status = vst_fields.VSTCharField(read_only=True)
+    status = serializers.ChoiceField(read_only=True, choices=models.Project.STATUSES)
     type   = vst_fields.VSTCharField(read_only=True)
 
     class Meta:

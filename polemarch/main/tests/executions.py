@@ -309,11 +309,11 @@ class BaseExecutionsTestCase(BaseTestCase):
         # Execute actions
         _exec = dict(
             connection="local", inventory="<9[data][id]>",
-            module="ping", group="all", args="", forks=1
+            module="ping", group="127.0.1.1", args="", forks=1, verbose=4
         )
         bulk_data += [
             self.get_mod_bulk(
-                'project', "<10[data][id]>", _exec, 'sync',
+                'project', "<10[data][id]>", {}, 'sync',
             ),
             self.get_mod_bulk(
                 'project', "<10[data][id]>", _exec, 'execute_module',
@@ -356,7 +356,10 @@ class BaseExecutionsTestCase(BaseTestCase):
                 self.assertEqual(history['mode'], 'ping')
                 self.assertEqual(history['kind'], 'MODULE')
                 self.assertEqual(history['inventory'], objects['inventory'][0]['id'])
-                self.assertEqual(history['status'], "OK")
+                self.assertEqual(
+                    history['status'], "OK",
+                    self.get_result('get', self.get_url('history', history['id'], 'raw'))
+                )
                 etalon = self._get_string_from_file('exemplary_complex_inventory')
                 etalon = etalon.replace('PATH', '[~~ENCRYPTED~~]')
                 etalon = etalon.replace('mypass', '[~~ENCRYPTED~~]')

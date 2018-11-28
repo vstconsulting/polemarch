@@ -56,7 +56,7 @@ PROJECT_GUI_MENU = [
     {
         'name': 'Projects',
         'url': '/project',
-        'span_class': 'glyphicon glyphicon-blackboard',
+        'span_class': 'fa fa-fort-awesome',
     },
     {
         'name': 'Inventories',
@@ -66,33 +66,33 @@ PROJECT_GUI_MENU = [
             {
                 'name': 'Groups',
                 'url': '/group',
-                'span_class': 'glyphicon glyphicon-tasks',
+                'span_class': 'fa fa-tasks',
             },
             {
                 'name': 'Hosts',
                 'url': '/host',
-                'span_class': 'glyphicon glyphicon-hdd',
+                'span_class': 'fa fa-codepen',
             },
         ]
     },
     {
         'name': 'History',
         'url': '/history',
-        'span_class': 'glyphicon glyphicon-calendar',
+        'span_class': 'fa fa-calendar',
     },
     {
         'name': 'System',
-        'span_class': 'glyphicon glyphicon-cog',
+        'span_class': 'fa fa-cog',
         'sublinks': [
             {
                 'name': 'Users',
                 'url': '/user',
-                'span_class': 'glyphicon glyphicon-user',
+                'span_class': 'fa fa-user',
             },
             {
                 'name': 'Hooks',
                 'url': '/hook',
-                'span_class': 'glyphicon glyphicon-console'
+                'span_class': 'fa fa-plug'
             },
         ]
     },

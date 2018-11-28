@@ -183,11 +183,11 @@ class OApiTestCase(BaseTestCase):
         history = definitions['History']
         objName = 'History'
 
-        self.check_fields(objName, history['required'], 'status', 'mode')
+        self.check_fields(objName, history['required'], 'mode')
         self.check_fields(objName, history['properties']['id'], **id_value)
         self.check_fields(
             objName, history['properties']['status'],
-            type='string', maxLength=50, minLength=1
+            type='string', enum=self.get_model_class('History').statuses
         )
         self.check_fields(objName, history['properties']['executor'], type='integer')
         self.check_fields(objName, history['properties']['project'], type='integer')
@@ -220,12 +220,12 @@ class OApiTestCase(BaseTestCase):
         objName = 'OneHistory'
 
         self.check_fields(
-            objName, oneHistory['required'], 'status', 'mode', 'execution_time'
+            objName, oneHistory['required'], 'mode', 'execution_time'
         )
         self.check_fields(objName, oneHistory['properties']['id'], **id_value)
         self.check_fields(
             objName, oneHistory['properties']['status'],
-            type='string', maxLength=50, minLength=1
+            type='string', enum=self.get_model_class('History').statuses
         )
         self.check_fields(objName, oneHistory['properties']['executor'], type='integer')
         self.check_fields(objName, oneHistory['properties']['project'], type='integer')
@@ -310,7 +310,7 @@ class OApiTestCase(BaseTestCase):
         self.check_fields(objName, hook['properties']['enable'], type='boolean')
         self.check_fields(
             objName, hook['properties']['recipients'],
-            type='string', maxLength=16383, minLength=1
+            type='string', minLength=1
         )
         del hook
 
@@ -342,7 +342,7 @@ class OApiTestCase(BaseTestCase):
         )
         self.check_fields(
             objName, project['properties']['status'],
-            type='string', readOnly=True, minLength=1
+            type='string', readOnly=True, enum=self.get_model_class('Project').STATUSES
         )
         del project
 
@@ -394,7 +394,7 @@ class OApiTestCase(BaseTestCase):
         )
         self.check_fields(
             objName, oneProject['properties']['status'],
-            type='string', readOnly=True, minLength=1
+            type='string', readOnly=True, enum=self.get_model_class('Project').STATUSES
         )
         self.check_fields(
             objName, oneProject['properties']['revision'],
@@ -760,11 +760,11 @@ class OApiTestCase(BaseTestCase):
         projectHistory = definitions['ProjectHistory']
         objName = 'ProjectHistory'
 
-        self.check_fields(objName, projectHistory['required'], 'status', 'mode')
+        self.check_fields(objName, projectHistory['required'], 'mode')
         self.check_fields(objName, projectHistory['properties']['id'], **id_value)
         self.check_fields(
             objName, projectHistory['properties']['status'],
-            type='string', minLength=1, maxLength=50
+            type='string', enum=self.get_model_class('History').statuses
         )
         self.check_fields(
             objName, projectHistory['properties']['revision'],
@@ -963,7 +963,7 @@ class OApiTestCase(BaseTestCase):
         self.check_fields(objName, periodicTaskVariable['properties']['id'], **id_value)
         self.check_fields(
             objName, periodicTaskVariable['properties']['key'],
-            type='string', minLength=1, maxLength=128
+            type='string', minLength=1, maxLength=512
         )
         self.check_fields(
             objName, periodicTaskVariable['properties']['value'],
@@ -978,7 +978,7 @@ class OApiTestCase(BaseTestCase):
         self.check_fields(objName, playbook['properties']['id'], **id_value)
         self.check_fields(
             objName, playbook['properties']['name'],
-            type='string', maxLength=256, minLength=1
+            type='string', maxLength=251, minLength=1
         )
         self.check_fields(
             objName, playbook['properties']['playbook'],
@@ -992,7 +992,7 @@ class OApiTestCase(BaseTestCase):
         self.check_fields(objName, onePlaybook['properties']['id'], **id_value)
         self.check_fields(
             objName, onePlaybook['properties']['name'],
-            type='string', maxLength=256, minLength=1
+            type='string', maxLength=251, minLength=1
         )
         self.check_fields(
             objName, onePlaybook['properties']['playbook'],
@@ -1252,7 +1252,7 @@ class OApiTestCase(BaseTestCase):
 
         widgetList = ['pmwUsersCounter', 'pmwProjectsCounter', 'pmwTemplatesCounter',
                       'pmwInventoriesCounter', 'pmwGroupsCounter', 'pmwHostsCounter',
-                      'pmwChartWidget', 'pmwAnsibleModuleWidget']
+                      'pmwChartWidget']
         self.check_fields(objName, widgetSettings['required'], *widgetList)
         ref = '#/definitions/CounterWidgetSetting'
         self.check_fields(
@@ -1274,10 +1274,6 @@ class OApiTestCase(BaseTestCase):
         ref = '#/definitions/WidgetSetting'
         self.check_fields(
             objName, widgetSettings['properties']['pmwChartWidget'], **{'$ref': ref}
-        )
-        self.check_fields(
-            objName, widgetSettings['properties']['pmwAnsibleModuleWidget'],
-            **{'$ref': ref}
         )
         del widgetSettings
 

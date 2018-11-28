@@ -33,9 +33,14 @@ window.qunitTestsArray['guiPaths.project'] = {
         guiTests.hasCreateButton(false, test_name)
         guiTests.hasAddButton(false, test_name)
 
+        guiTests.clickAndWaitRedirect(".btn-edit-one-entity")
 
         guiTests.updateObject(test_name, {notes:{value:rundomString(6)}}, true)
 
+
+        // ////////////////////////////////////////////////
+        //  Тест project/{pk}/template/***
+        // ////////////////////////////////////////////////
         guiTests.openPage(test_name, env, (env) =>{ return vstMakeLocalApiUrl("project/{pk}/template/new", {api_pk:env.objectId}) })
 
         // Проверка того что страница с флагом api_obj.canCreate == true открывается
@@ -52,19 +57,19 @@ window.qunitTestsArray['guiPaths.project'] = {
             let values = guiTests.setValues(assert, fieldsData)
 
             // Создали объект с набором случайных данных
-            $.when(window.curentPageObject.createAndGoEdit()).done(() => {
+            $.when(window.curentPageObject.createAndGoEdit()).done(() => { 
+                $.when(guiTests.actionAndWaitRedirect('project/{pk}/template/new', assert, () => { $(".btn-edit-one-entity").trigger('click') })).done(() => {
 
-                guiTests.compareValues(assert, test_name, fieldsData, values)
-
-                env.template_id = window.curentPageObject.model.data.id;
-
-                assert.ok(true, 'guiPaths["project/{pk}/template/new"] create new template ok');
-
-                // @todo добавить проверку того что поля правильно меняются от значений других полей
-
-                testdone(done)
+                    guiTests.compareValues(assert, 'project/{pk}/template/new', fieldsData, values)
+                    env.template_id = window.curentPageObject.model.data.id;
+                    assert.ok(true, 'guiPaths["project/{pk}/template/new"] create new template ok');
+                    testdone(done)
+                }).fail((err) => {
+                    assert.ok(false, 'guiPaths["project/{pk}/template/new"] create new template fail');
+                    testdone(done)
+                })
             }).fail((err) => {
-                assert.ok(false, 'guiPaths["'+test_name+'new"] create new template fail');
+                assert.ok(false, 'guiPaths["project/{pk}/template/new"] create new template fail');
                 testdone(done)
             })
         })
@@ -92,6 +97,9 @@ window.qunitTestsArray['guiPaths.project'] = {
         guiTests.setValuesAndCreate(test_name, option_data, (data) =>{}, true)
 
         test_name = "project/{pk}/template/{template_id}/option/@testUptime"
+        guiTests.openPage(test_name, env, (env) =>{ return vstMakeLocalApiUrl("project/{pk}/template/{template_id}/option/@testUptime/edit", {api_pk:env.objectId, api_template_id:env.template_id}) })
+
+        test_name = "project/{pk}/template/{template_id}/option/@testUptime/edit"
         guiTests.updateObject("project/{pk}/template/{template_id}/option/@testUptime", {args:{value:"uptime"}}, true);
 
 
@@ -140,119 +148,12 @@ window.qunitTestsArray['guiPaths.project'] = {
 
         guiTests.deleteObject(test_name)
 
+        // Удалить проект
         test_name = "project/{pk}"
         guiTests.openPage(test_name, env, (env) =>{
             return vstMakeLocalApiUrl("project/{pk}", {api_pk:env.objectId, api_template_id:env.template_id})
         })
 
         guiTests.deleteObject(test_name)
-    }
-}
-
-
-
-window.qunitTestsArray['guiElements.form'] = {
-    test:function()
-    {
-        syncQUnit.addTest('guiElements.form', function ( assert )
-        {
-            let element;
-            let formData;
-            let done = assert.async();
-
-            $("#guiElementsTestForm").remove();
-            $("body").append("<div id='guiElementsTestForm'></div>")
-
-
-            formData = {
-                title:"Deploy",
-                form:{
-                    'inventory' : {
-                        title:'inventory',
-                        required:true,
-                        format:'hybrid_autocomplete',
-                        dynamic_properties:{
-                            list_obj: "/project/{pk}/inventory/",
-                            value_field: "id",
-                            view_field: "name",
-                        }
-                    },
-                    user:{
-                        title:'User',
-                        description: "connect as this user (default=None)",
-                        format:'string',
-                        type: "string",
-                    },
-                    key_file: {
-                        title:'Key file',
-                        description: "use this file to authenticate the connection",
-                        format:'secretfile',
-                        type: "string",
-                        dynamic_properties:{
-                            list_obj: "/project/{pk}/inventory/",
-                            value_field: "id",
-                            view_field: "name",
-                        }
-                    },
-                    extra_vars: {
-                        title:"Execute parametrs",
-                        format:'form',
-                        form:{
-                            varName: {
-                                name:'varName',
-                                title:'Name',
-                                default:'NameDefaultValue',
-                                format:'string',
-                                help:'Name',
-                            },
-                            varTask: {
-                                name:'varTask',
-                                title:'Name',
-                                default:'B',
-                                format:'enum',
-                                help:'Name',
-                                enum:['A', 'B', 'C'],
-                            },
-                            varVersion: {
-                                name:'varVersion',
-                                title:'Name',
-                                default:true,
-                                format:'boolean',
-                                help:'Name',
-                            },
-                            RunBtn: {
-                                name:'RunBtn',
-                                title:'abc_yml',
-                                value:'abc.yml',
-                                format:'button',
-                                text:'Run abc.yml',
-                                onclick:function(){
-
-                                    let val = element.getValue()
-                                    val.playbook = this.getValue()
-
-                                    assert.ok(val.extra_vars['RunBtn'] == 'abc.yml', 'guiElements.form test RunBtn');
-                                    assert.ok(val.playbook == 'abc.yml', 'guiElements.form test playbook');
-
-                                    assert.ok(val.extra_vars['varName'] == 'NameDefaultValue', 'guiElements.form test varName');
-
-                                    assert.ok(val.extra_vars['varVersion'] == true, 'guiElements.form test values');
-
-                                    testdone(done)
-                                },
-                                class:'gui-test-form'
-                            },
-                        }
-                    }
-                }
-            }
-
-            element = new guiElements.form(undefined, formData);
-            $("#guiElementsTestForm").insertTpl(element.render())
-
-            setTimeout(() => {
-                $("#guiElementsTestForm .btn_abc_yml").trigger('click')
-            }, 50)
-        });
     }
 }

@@ -102,6 +102,7 @@ tabSignal.connect("openapi.schema.definition.AnsiblePlaybook", function(obj) {
 tabSignal.connect("openapi.schema", function(data)
 {
     window.guiSchema.path["/project/{pk}/"].schema.edit.fields.execute_view_data.format = 'null'
+    window.guiSchema.path["/project/{pk}/"].schema.get.fields.execute_view_data.format = 'null'
 })
 
 
@@ -167,38 +168,38 @@ gui_project = {
         let formData = {
             title:"Deploy",
             form:{
-                    'inventory' : {
-                        title:'inventory',
-                        required:true,
-                        format:'hybrid_autocomplete',
-                        dynamic_properties:{
-                            list_obj: "/project/{pk}/inventory/",
-                            value_field: "id",
-                            view_field: "name",
-                        }
-                    },
-                    user:{
-                        title:'User',
-                        description: "connect as this user (default=None)",
-                        format:'string',
-                        type: "string",
-                    },
-                    key_file: {
-                        title:'Key file',
-                        description: "use this file to authenticate the connection",
-                        format:'secretfile',
-                        type: "string",
-                        dynamic_properties:{
-                            list_obj: "/project/{pk}/inventory/",
-                            value_field: "id",
-                            view_field: "name",
-                        }
-                    },
-                    extra_vars: {
-                        title:"Execute parametrs",
-                        format:'form',
-                        form:extra_fields
+                'inventory' : {
+                    title:'inventory',
+                    required:true,
+                    format:'hybrid_autocomplete',
+                    dynamic_properties:{
+                        list_obj: "/project/{pk}/inventory/",
+                        value_field: "id",
+                        view_field: "name",
                     }
+                },
+                user:{
+                    title:'User',
+                    description: "connect as this user (default=None)",
+                    format:'string',
+                    type: "string",
+                },
+                key_file: {
+                    title:'Key file',
+                    description: "use this file to authenticate the connection",
+                    format:'secretfile',
+                    type: "string",
+                    dynamic_properties:{
+                        list_obj: "/project/{pk}/inventory/",
+                        value_field: "id",
+                        view_field: "name",
+                    }
+                },
+                extra_vars: {
+                    title:"Execute parametrs",
+                    format:'form',
+                    form:extra_fields
+                }
             }
         }
 
@@ -207,80 +208,11 @@ gui_project = {
     },
 }
 
-guiElements.form = function(opt = {}, value, parent_object)
+tabSignal.connect("openapi.schema.schema", function(obj)
 {
-    this.name = 'form'
-    guiElements.base.apply(this, arguments)
-
-    this.realElements = {};
-
-    this.prepareFieldOptions = function(field)
+    if (obj.path == '/project/{pk}/module/{module_id}/')
     {
-        if(field.enum)
-        {
-            field.format = "enum"
-        }
-
-        return field
+        obj.value.fields.data.format = 'ansible_json'
+        obj.value.fields.data.hide_title = true;
     }
-
-    this.setValue = function(value)
-    {
-        this.value = value
-        let realElements = {};
-        if(value.form)
-        {
-            for(let i in value.form)
-            {
-                let field = value.form[i]
-                field.name = i
-
-                field = this.prepareFieldOptions(field)
-                let type = getFieldType(field)
- 
-                realElements[i] = new guiElements[type]($.extend(true, {}, field), field.value);
-            }
-        }
-
-        this.realElements = realElements
-    }
-
-    if(opt.form && !value)
-    {
-        this.setValue(opt)
-    }
-    else
-    {
-        this.setValue(value)
-    }
-
-    this.insertTestValue = function(value)
-    {
-        this.setValue(value);
-        return value;
-    }
-
-    this.getValue = function()
-    {
-        let valueObj = {};
-        for(let element_name in this.realElements)
-        {
-            let element = this.realElements[element_name];
-            valueObj[element_name] = element.getValue();
-        }
-
-        return this.reductionToType(valueObj);
-    }
-
-    this.getValidValue = function()
-    {
-        let valueObj = {};
-        for(let element_name in this.realElements)
-        {
-            let element = this.realElements[element_name];
-            valueObj[element_name] = element.getValidValue();
-        }
-
-        return this.reductionToType(valueObj);
-    }
-}
+})

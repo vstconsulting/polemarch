@@ -50,7 +50,7 @@ example than general howto) you must do such steps:
 
         pip install polemarch
 
-#. Setup DB-server. MySQL for example. For all nodes edit :ref:`database`
+#. Setup DB-server. MariaDB for example. For all nodes edit :ref:`database`
    and provide credential for you database. Like this:
 
    .. sourcecode:: ini
@@ -70,11 +70,11 @@ example than general howto) you must do such steps:
 
       [cache]
       backend = django_redis.cache.RedisCache
-      location = redis://redis-server:6379/1
+      location = redis://redis_hostname_or_ip:6379/1
 
       [locks]
       backend = django_redis.cache.RedisCache
-      location = redis://redis-server:6379/2
+      location = redis://redis_hostname_or_ip:6379/2
 
 #. Setup some network filesystem. NFS, for example. Mount it in the same directory
    of all worker-intended nodes. Write this directory in :ref:`main`.
@@ -179,6 +179,18 @@ So in this case authorization logic will be the following:
      server creates session for him.
 
 
+* **debug** - Enable debug mode. Default: false.
+* **allowed_hosts** - Comma separated list of domains, which allowed to serve. Default: ``*``.
+* **ldap-server** - LDAP server connection.
+* **ldap-default-domain** - Default domain for auth.
+* **timezone** - Timezone of web-application. Default: UTC.
+* **log_level** - Logging level. Default: WARNING.
+* **enable_admin_panel** - Enable or disable Django Admin panel. Defaul: false.
+* **projects_dir** - Path where projects will be stored.
+* **hooks_dir** - Path where hook scripts stored.
+* **executor_path** - Path for polemarch-ansible wrapper binary.
+
+
 .. _database:
 
 Database settings
@@ -198,21 +210,22 @@ use some of client-server database (SQLite not suitable) shared for all nodes.
 If you use MySQL there is a list of required settings, that you should create for correct
 database work.
 
-Firstly, if you use MySQL and you have set timezone different from "UTC" you should run
+Firstly, if you use MariaDB and you have set timezone different from "UTC" you should run
 next command:
 
 .. sourcecode:: bash
 
       mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root -p mysql
 
-Secondly, for correct MySQL work you should set next options in ``settings.ini`` file:
+Secondly, for correct MariaDB work you should set next options in ``settings.ini`` file:
 
 .. sourcecode:: bash
 
       [database.options]
+      connect_timeout = 10
       init_command = SET sql_mode='STRICT_TRANS_TABLES', default_storage_engine=INNODB, NAMES 'utf8', CHARACTER SET 'utf8', SESSION collation_connection = 'utf8_unicode_ci'
 
-Finally, you should add some options to MySQL configuration:
+Finally, you should add some options to MariaDB configuration:
 
 .. sourcecode:: bash
 
@@ -240,6 +253,7 @@ additional plugins. You can find details about cache configuration at
 <https://docs.djangoproject.com/en/1.11/ref/settings/#caches>`_. In
 clusterization scenario we advice to share cache between nodes to speedup their
 work using client-server cache realizations.
+We recommend to use Redis in production environments.
 
 .. _locks:
 
@@ -258,6 +272,20 @@ example, is not suitable. In case of clusterization we strongly recommend
 to use Redis or Memcached as backend for that purpose. Cache and locks backend
 can be same, but don't forget about requirement we said above.
 
+
+.. _session:
+
+Session cache settings
+----------------------
+
+Section ``[session]``.
+
+Polemarch store sessions in :ref:`database`, but for better performance,
+we use a cache-based session backend. It is based on Django cache, so there is
+another bunch of same settings as :ref:`cache`. By default,
+settings getted from :ref:`cache`.
+
+
 .. _rpc:
 
 Rpc settings
@@ -273,6 +301,31 @@ and Celery itself. Those kinds of settings: broker backend, number of
 worker-processes per node and some settings used for troubleshoot
 server-broker-worker interaction problems.
 
+
+* **connection** - Celery broker connection. Read more: http://docs.celeryproject.org/en/latest/userguide/configuration.html#conf-broker-settings Default: ``filesystem:///var/tmp``.
+* **concurrency** - Count of celery worker threads. Default: 4.
+* **heartbeat** - Interval between sending heartbeat packages, which says that connection still alive. Default: 10.
+* **enable_worker** - Enable or disable worker with webserver. Default: true.
+* **clone_retry_count** - Count of retrys on project sync operation.
+
+
+.. _worker:
+
+Worker settings
+---------------
+
+Section ``[worker]``.
+
+Celery worker options for start. Useful settings:
+
+* **loglevel** - Celery worker logging level. Default: from main section ``log_level``.
+* **pidfile** - Celery worker pidfile. Default: ``/run/polemarch_worker.pid``
+* **autoscale** - Options for autoscaling. Two comma separated numbers: max,min.
+* **beat** - Enable or disable celery beat scheduler. Default: true.
+
+Other settings can be getted from command ``celery worker --help``.
+
+
 .. _web:
 
 Web settings
@@ -280,8 +333,23 @@ Web settings
 
 Section ``[web]``.
 
-Here placed settings related to web-server. Those settings like: allowed hosts,
-static files directory or pagination limit.
+Here placed settings related to web-server. Those settings like:
+session_timeout, static_files_url or pagination limit.
+
+* **session_timeout** - Session life-cycle time. Default: 2w (two weeks).
+* **rest_page_limit** - Default limit of objects in API list. Default: 1000.
+* **public_openapi** - Allow to have access to OpenAPI schema from public. Default: ``false``.
+
+
+.. _git:
+
+Git settings
+------------
+
+Sections ``[git.fetch]`` and ``[git.clone]``.
+
+Options for git commands. See options in ``git fetch --help`` or ``git clone --help``.
+
 
 Production web settings
 -----------------------

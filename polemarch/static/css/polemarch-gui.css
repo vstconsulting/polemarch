@@ -32,32 +32,29 @@
 
 .td_history_start_time, .td_history_stop_time,
 .td_project-history_start_time, .td_project-history_stop_time{
-    width:150px;
+    width:160px;
 }
 
 .td_history_status,
-.td_project-history_status {
-    font-weight: bold;
-    vertical-align: middle;
-    text-align: center;
-    max-width: 110px;
+.td_project-history_status{
+    width: 125px;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
     .td_history_stop_time,
     .td_project-history_stop_time {
         display: none;
     }
 }
 
-@media (max-width: 1100px) {
-    .td_history_mode,
-    .td_project-history_mode {
+@media (max-width: 1300px) {
+    .td_history_kind,
+    .td_project-history_kind {
         display: none;
     }
 }
 
-@media (max-width: 1050px) {
+@media (max-width: 1200px) {
     .td_history_initiator,
     .td_project-history_initiator,
     .td_history_revision,
@@ -66,69 +63,146 @@
     }
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1100px) {
     .td_history_inventory,
     .td_project-history_inventory {
         display: none;
     }
 }
 
-@media (max-width: 850px) {
+@media (max-width: 1000px) {
     .td_history_executor,
-    .td_project-history_executor {
+    .td_project-history_executor,
+    .td_hook_recipients {
         display: none;
     }
 }
 
-@media (max-width: 660px) {
+@media (max-width: 780px) {
     .td_history_project,
-    .td_project-history_project {
+    .td_project-history_project,
+    .td_hook_when {
         display: none;
     }
 }
 
-@media (max-width: 550px) {
-    .td_history_kind,
-    .td_project-history_kind {
+@media (max-width: 700px) {
+    .td_history_start_time,
+    .td_project-history_start_time {
+        width: 100px;
+    }
+}
+
+@media (max-width: 600px) {
+    .td_history_start_time,
+    .td_project-history_start_time {
         display: none;
     }
 }
 
 @media (max-width: 480px) {
-    .td_history_start_time,
-    .td_project-history_start_time {
-        width: 70px;
+    .td_user_is_active,
+
+    .td_hook_type,
+
+    .td_group_children,
+    .td_inventory-group_children,
+    .td_project-group_children,
+    .td_project-inventory-group_children,
+
+    .td_host_type,
+    .td_group-host_type,
+    .td_inventory-host_type,
+    .td_project-host_type,
+    .td_project-group-host_type,
+    .td_project-inventory-host_type,
+    .td_project-inventory-group-host_type{
+        display: none;
     }
 }
 
-.tr_status_OFFLINE .td_history_status,
-.tr_status_OFFLINE .td_project-history_status {
-    color: #9e9e9e;
+@media (max-width: 480px) {
+    .column_history_actions,
+    .column_project-history_actions,
+    .td_hook_enable {
+        display: none;
+    }
+} 
+
+body {
+    --history-status-ok: #276900;
+    --history-status-error: #dc3545;
+    --history-status-interrupted: #9b97e4;
+    --history-status-delay: #808419;
+    --history-status-offline: #9e9e9e;
+    --history-status-run: #0085ff;
+
+    --project-status-new: #8c8c8c;
+    --project-status-error: #dc3545;
+    --project-status-ok: #276900;
+    --project-status-wait-sync: #0085ff;
+    --project-status-sync: #ff8c00;
+
+    --chart-legend-text-color: #666666;
+    --chart-axes-text-color: #666666;
+    --chart-axes-lines-color: efefef;
 }
 
-.tr_status_INTERRUPTED .td_history_status,
-.tr_status_INTERRUPTED .td_project-history_status {
-    color: #9b97e4;
+
+.gui-skin-dark {
+    --history-status-ok: #56E401;
+    --history-status-error: #F61328;
+    --history-status-interrupted: #B68CF3;
+    --history-status-delay: #F1FF00;
+    --history-status-offline: #cccccc;
+    --history-status-run: #00D7FF;
+
+    --project-status-new: #D2D2D0;
+    --project-status-error: #F61328;
+    --project-status-ok: #56E401;
+    --project-status-wait-sync: #00D7FF;
+    --project-status-sync: #FF9600;
+
+    --chart-legend-text-color: #cccccc;
+    --chart-axes-text-color: #cccccc;
+    --chart-axes-lines-color: #bababa;
 }
 
-.tr_status_RUN .td_history_status,
-.tr_status_RUN .td_project-history_status {
-    color: #0085ff;
+
+.tr_status_offline .td_history_status,
+.tr_status_offline .td_project-history_status,
+.field_status_offline {
+    color: #var(--history-status-offline);
 }
 
-.tr_status_ERROR .td_history_status,
-.tr_status_ERROR .td_project-history_status {
-
+.tr_status_interrupted .td_history_status,
+.tr_status_interrupted .td_project-history_status,
+.field_status_interrupted {
+    color: var(--history-status-interrupted);
 }
 
-.tr_status_DELAY .td_history_status,
-.tr_status_DELAY .td_project-history_status {
-    color: #808419;
+.tr_status_run .td_history_status,
+.tr_status_run .td_project-history_status,
+.field_status_run {
+    color: var(--history-status-run);
 }
 
-.tr_status_OK .td_history_status,
-.tr_status_OK .td_project-history_status {
-    color: #276900;
+.tr_status_error .td_history_status,
+.tr_status_error .td_project-history_status,
+.field_status_error {
+    color: var(--history-status-error);
+}
+
+.tr_status_delay .td_history_status,
+.tr_status_delay .td_project-history_status,
+.field_status_delay {
+    color: var(--history-status-delay);
+}
+
+.tr_status_ok .td_history_status,
+.tr_status_ok .td_project-history_status,
+.field_status_ok {
+    color: var(--history-status-ok);
 }
 
 .project-status{
@@ -137,25 +211,59 @@
     vertical-align: middle;
 }
 
-.project-status-SYNC{
-    color: #f40;
+
+.tr_status_sync .td_project_status,
+.field_status_sync {
+    color: var(--project-status-sync);
 }
 
-.project-status-WAIT_SYNC{
-    color: #0085ff;
+.tr_status_wait_sync .td_project_status,
+.field_status_wait_sync {
+    color: var(--project-status-wait-sync);
 }
 
-.project-status-OK{
-    color: #276900;
+.tr_status_new .td_project_status,
+.field_status_new {
+    color: var(--project-status-new);
 }
 
+.tr_status_error .td_project_status,
+.field_status_error {
+    color: var(--project-status-error);
+}
 
+.tr_status_ok .td_project_status,
+.field_status_ok {
+    color: var(--project-status-ok);
+}
 
-.stdout-line .S{color:red}/* Строки красные */
-.stdout-line .func{color:blue}/* Юзер-функции синие */
-.stdout-line .C{color:orange}/* Комменты оранжевые */
-.stdout-line .kwrd{font-weight:bold}/* Ключевые слова полужирные */
-.stdout-line .R{color:gray} /*Серые регвыражения */
+.td_project_status {
+    display: none;
+    width: 15%;
+}
+
+.td_project_type {
+    display: none;
+    width: 18%;
+}
+
+@media (min-width: 767px) {
+    .td_project_type {
+        display: table-cell;
+    }
+}
+
+@media (min-width: 600px) {
+    .td_project_status {
+        display: table-cell;
+    }
+}
+
+.stdout-line .S{color:red}/* red - lines */
+.stdout-line .func{color:blue}/* blue - user-functions */
+.stdout-line .C{color:orange}/* comments - orange */
+.stdout-line .kwrd{font-weight:bold}/* bold - keywords */
+.stdout-line .R{color:gray} /* grey - regexps */
 .stdout-line.fatal{
     background: #ffe7e7;
 }
@@ -166,6 +274,8 @@
     min-height: 400px;
     line-height: 1;
     background: #000;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 @media (min-width: 767px) {
@@ -183,21 +293,21 @@
     display: none;
 }
 
-.history-mode .history-LeftInfo .btn-history-resize .glyphicon-resize-full{
+.history-mode .history-LeftInfo .btn-history-resize .fa-expand{
     display: block;
 }
 
-.history-mode.history-fullsize .history-LeftInfo .btn-history-resize .glyphicon-resize-full{
+.history-mode.history-fullsize .history-LeftInfo .btn-history-resize .fa-expand{
     display: none;
 }
 
 
 
-.history-mode .history-LeftInfo .btn-history-resize .glyphicon-resize-small{
+.history-mode .history-LeftInfo .btn-history-resize .fa-compress{
     display: none;
 }
 
-.history-mode.history-fullsize .history-LeftInfo .btn-history-resize .glyphicon-resize-small{
+.history-mode.history-fullsize .history-LeftInfo .btn-history-resize .fa-compress{
     display: block;
 }
 
@@ -224,7 +334,23 @@
     display: block;
     width:160px;
 }
-  
+
+.text-logo {
+    margin-left: auto;
+    width: 165px;
+    float: inherit;
+}
+
+.sidebar-collapse .text-logo {
+    display: none;
+}
+
+.sidebar-collapse .main-sidebar:hover .text-logo {
+    display: inline-block;
+}
+
+
+
 #menu-system-hooks {
     display: none;
 }
@@ -234,3 +360,10 @@
     display: block;
 }
 
+@media (max-width: 452px) {
+    #period-list {
+        width: 100%!important;
+        margin-top: 10px;
+    }
+
+}

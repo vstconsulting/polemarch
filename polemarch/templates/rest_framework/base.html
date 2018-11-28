@@ -2,13 +2,10 @@
 {% load request_static %}
 
 {% block logo %}
-    <a href="/" class="logo app-logo">
-        <!-- mini logo for sidebar mini 50x50 pixels -->
-        <!-- <span class="logo-mini"><b>P</b></span> -->
-        <span class="logo-mini"><span class="bg-logo-min" style="margin-left: 4px;"></span></span>
-        <!-- logo for regular state and mobile devices -->
-        <!-- <span class="logo-lg"><b>P</b>olemarch</span> -->
-        <span class="logo-lg logo-span"><span class="bg-logo-min"></span> <span class="bg-logo"></span></span>
+    <!-- Logo -->
+    <a href="/" class="brand-link logo app-logo">
+        <img src="/static/img/logo/logo.png" alt="{{ project_gui_name }}" class="brand-image img-circle elevation-3" style="opacity: .8; float: inherit">
+        <img src="/static/img/logo/horizontal.svg" class="brand-image text-logo" style="opacity: .8">
     </a>
 {% endblock %}
 
@@ -16,6 +13,11 @@
 {% block bootstrap_theme %}
     {{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% static_path "css/polemarch-gui.css" %}"/>
+    <style>
+        .hidden-in-api {
+            display: none;
+        }
+    </style>
 {% endblock %}
 
 {% block resource_list %}
@@ -24,31 +26,120 @@
     <script>
         window.resourceList = [
 
+            { prioritet:4, type:'js', name: "{% static 'js/libs/touchwipe.js' %}?v={{gui_version}}"},
+
+            { prioritet:4, type:'js', name: "{% static 'js/libs/visibility/visibility.core.js' %}?v={{gui_version}}"},
+
+            { prioritet:4, type:'js', name: "{% static 'js/libs/iziToast.min.js' %}?v={{gui_version}}"},
+            { prioritet:4, type:'js', name: "{% static 'js/libs/iziModal.min.js' %}?v={{gui_version}}"},
+            { prioritet:4, type:'js', name: "{% static 'js/libs/imask.js' %}?v={{gui_version}}"},
+
+            { prioritet:4, type:'js', name: "{% static 'AdminLTE-3.0.0/plugins/bootstrap/js/bootstrap.bundle.min.js' %}?v={{gui_version}}"},
+            { prioritet:5, type:'js', name: "{% static 'AdminLTE-3.0.0/plugins/slimScroll/jquery.slimscroll.min.js' %}?v={{gui_version}}"},
+            { prioritet:7, type:'js', name: "{% static 'js/guiCustomizer.js' %}?v={{gui_version}}"},
+
+            { prioritet:4, type:'js', name: "{% static 'plugins/fastclick/fastclick.min.js' %}?v={{gui_version}}"},
+
+            { prioritet:6, type:'js', name: "{% static 'js/libs/just.js' %}?v={{gui_version}}"},
+            { prioritet:7, type:'js', name: "{% static 'js/libs/just-watch.js' %}?v={{gui_version}}"},
+
+            { prioritet:11.5, type:'js', name: "{% static 'js/libs/xregexp-all.js' %}?v={{gui_version}}"},
+
+            { prioritet:8, type:'js', name: "{% static 'AdminLTE-3.0.0/min/js/adminlte.min.js' %}?v={{gui_version}}"},
             { prioritet:8, type:'js', name: "{% static 'js/common-utils.js' %}?v={{gui_version}}"},
+            { prioritet:9, type:'js', name: "{% static 'js/libs/spa.js' %}?v={{gui_version}}"},
 
+            { prioritet:110, type:'js', name: "{% static 'js/libs/autocomplete.js' %}?v={{gui_version}}"},
+            { prioritet:110, type:'js', name: "{% static 'plugins/select2/select2.full.min.js' %}?v={{gui_version}}"},
+            { prioritet:110, type:'js', name: "{% static 'js/libs/touchwipe.js' %}?v={{gui_version}}"},
 
-            { prioritet:8, type:'js', name: "{% static 'js/app.js' %}?v={{gui_version}}"},
-            { prioritet:102, type:'css', name: "{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}"},
-            { prioritet:103, type:'css', name: "{% static 'lte/css/font-awesome.min.css' %}?v={{gui_version}}"},
-            { prioritet:104, type:'css', name: "{% static 'lte/css/ionicons.min.css' %}?v={{gui_version}}"},
-            { prioritet:105, type:'css', name: "{% static 'lte/css/AdminLTE.min.css' %}?v={{gui_version}}"},
-            { prioritet:106, type:'css', name: "{% static 'lte/css/skins/_all-skins.min.css' %}?v={{gui_version}}"},
-            { prioritet:107, type:'css', name: "{% static 'js/libs/c3/c3.min.css' %}?v={{gui_version}}"},
+            { prioritet:50, type:'js', name: "{% static 'js/libs/moment.min.js' %}?v={{gui_version}}"},
+            { prioritet:51, type:'js', name: "{% static 'js/libs/moment-timezone.min.js' %}?v={{gui_version}}"},
+            { prioritet:51, type:'js', name: "{% static 'js/libs/Chart.min.js' %}?v={{gui_version}}"},
+            { prioritet:50, type:'js', name: "{% static 'js/libs/jquery.scrollTo.min.js' %}?v={{gui_version}}"},
+
+            { prioritet:10,   type:'js', name: "{% static 'js/guiSelections.js' %}?v={{gui_version}}"},
+            { prioritet:10.1, type:'js', name: "{% static 'js/guiPopUp.js' %}?v={{gui_version}}"},
+            { prioritet:10.2, type:'js', name: "{% static 'js/guiModal.js' %}?v={{gui_version}}"},
+            { prioritet:11.0, type:'js', name: "{% static 'js/guiElements.js' %}?v={{gui_version}}"},
+            { prioritet:11.0, type:'js', name: "{% static 'js/guiListElements.js' %}?v={{gui_version}}"},
+            { prioritet:11.0, type:'js', name: "{% static 'js/guiBreadcrumbers.js' %}?v={{gui_version}}"},
+            { prioritet:11.1, type:'js', name: "{% static 'js/guiApi.js' %}?v={{gui_version}}"},
+            { prioritet:11.3, type:'js', name: "{% static 'js/guiItemFactory.js' %}?v={{gui_version}}"},
+            { prioritet:11.3, type:'js', name: "{% static 'js/guiPageFactory.js' %}?v={{gui_version}}"},
+            { prioritet:11.3, type:'js', name: "{% static 'js/guiListFactory.js' %}?v={{gui_version}}"},
+            { prioritet:11.3, type:'js', name: "{% static 'js/guiActionFactory.js' %}?v={{gui_version}}"},
+            { prioritet:11.4, type:'js', name: "{% static 'js/guiSchema.js' %}?v={{gui_version}}"},
+            { prioritet:11.5, type:'js', name: "{% static 'js/guiFactory.js' %}?v={{gui_version}}"},
+
+            { prioritet:11.7, type:'js', name: "{% static 'js/guiForWeb.js' %}?v={{gui_version}}"},
+            { prioritet:300, type:'js', name: "{% static 'js/guiUser.js' %}?v={{gui_version}}"},
+            { prioritet:300, type:'js',  name: "{% static 'js/guiDashboard.js' %}?v={{gui_version}}"},
+
+            { prioritet:100, type:'tpl', name: "{% static 'templates/errorPage.html' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiDashboard.html' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiBreadcrumbers.html' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiElements.html' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiListElements.html' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiModals.html' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiItems.html' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiCustomizer.html' %}?v={{gui_version}}"},
+
+            //{ prioritet:101, type:'css', name: "{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}"},
+            { prioritet:101, type:'css', name: "{% static 'AdminLTE-3.0.0/plugins/bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}"},
+            { prioritet:102, type:'css', name: "{% static 'css/iziToast.min.css' %}?v={{gui_version}}"},
+            { prioritet:102, type:'css', name: "{% static 'css/iziModal.min.css' %}?v={{gui_version}}"},
+            { prioritet:103, type:'css', name: "{% static 'AdminLTE-3.0.0/plugins/font-awesome/css/font-awesome.min.css' %}?v={{gui_version}}"},
+            //{ prioritet:104, type:'css', name: "{% static 'lte/css/ionicons.min.css' %}?v={{gui_version}}"},
+            { prioritet:105, type:'css', name: "{% static 'AdminLTE-3.0.0/min/css/adminlte.min.css' %}?v={{gui_version}}"},
+            //{ prioritet:106, type:'css', name: "{% static 'lte/css/skins/_all-skins.min.css' %}?v={{gui_version}}"},
             { prioritet:108, type:'css', name: "{% static 'css/gui.css' %}?v={{gui_version}}"},
 
-            { prioritet:160, type:'js', name: "{% static 'js/common.js' %}?v={{gui_version}}"},
+            { prioritet:99, type:'css', name: "{% static 'plugins/select2/select2.min.css' %}?v={{gui_version}}"},
+                { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmElements.html?v={{gui_version}}"},
+                { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmProject.html?v={{gui_version}}"},
+                { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmHistory.html?v={{gui_version}}"},
+                { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmUsers.html?v={{gui_version}}"},
+                { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmDashboard.html?v={{gui_version}}"},
+                { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmTasksTemplates.html?v={{gui_version}}"},
 
-            { prioritet:200, type:'css', name: "{% static 'css/polemarch-gui.css' %}?v={{gui_version}}"},
+                { prioritet:110, type:'js', name: "{% static 'js/libs/c3/d3.min.js' %}?v={{gui_version}}"},
+                { prioritet:110, type:'js', name: "{% static 'js/libs/c3/c3.min.js' %}?v={{gui_version}}"},
+
+                { prioritet:150, type:'js', name: "{% static 'js/libs/ansi_up.js' %}?v={{gui_version}}"},
+                { prioritet:150, type:'js', name: "{% static 'js/libs/Sortable.min.js' %}?v={{gui_version}}"},
+                { prioritet:150, type:'js', name: "{% static 'js/pmCustomizer.js' %}?v={{gui_version}}"},
+
+                { prioritet:160, type:'js', name: "{% static 'js/common.js' %}?v={{gui_version}}"},
+                { prioritet:160, type:'js', name: "{% static 'js/hardcoder.js' %}?v={{gui_version}}"},
+                { prioritet:183, type:'js', name: "{% static 'js/pmElements.js' %}?v={{gui_version}}"},
+                { prioritet:183, type:'js', name: "{% static 'js/pmUsers.js' %}?v={{gui_version}}"},
+                { prioritet:184, type:'js', name: "{% static 'js/pmGroups.js' %}?v={{gui_version}}"},
+                { prioritet:185, type:'js', name: "{% static 'js/pmInventories.js' %}?v={{gui_version}}"},
+                { prioritet:186, type:'js', name: "{% static 'js/pmProjects.js' %}?v={{gui_version}}"},
+                { prioritet:188, type:'js', name: "{% static 'js/pmPeriodicTasks.js' %}?v={{gui_version}}"},
+                { prioritet:189, type:'js', name: "{% static 'js/pmHistory.js' %}?v={{gui_version}}"},
+                { prioritet:190, type:'js', name: "{% static 'js/pmTemplates.js' %}?v={{gui_version}}"},
+                { prioritet:400, type:'js', name: "{% static 'js/pmDashboard.js' %}?v={{gui_version}}"},
+                { prioritet:300, type:'js', name: "{% static 'js/guiForApp.js' %}?v={{gui_version}}"},
+
+                { prioritet:107, type:'css', name: "{% static 'js/libs/c3/c3.min.css' %}?v={{gui_version}}"},
+
+                { prioritet:200, type:'css', name: "{% static 'css/polemarch-gui.css' %}?v={{gui_version}}"},
+                { prioritet:200, type:'css', name: "{% static 'css/ansi-colors.css' %}?v={{gui_version}}"},
         ]
 
         tabSignal.connect("loading.completed", function()
         {
             hideLoadingProgress();
         })
-        
+
         tabSignal.connect("resource.loaded", function()
         {
             hideLoadingProgress();
+            tabSignal.emit("loading.completed");
+
         })
+
     </script>
 {% endblock %}

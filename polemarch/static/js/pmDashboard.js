@@ -28,7 +28,7 @@ guiDashboard.statsDataMomentType='day';
 
 
 /**
- * Двумерный массив с описанием списка отображаемых виджетов в каждой строке
+ * Two-dimensional array with structure of Dashboard widgets.
  *
  * @example
  * [
@@ -46,20 +46,20 @@ guiDashboard.model.widgets = [
     ],
 ]
 
-/*
-*Двумерный массив, хранящий в себе настройки виджетов по умолчанию.
+/**
+ * Two-dimensional array with default structure of Dashboard widgets.
  */
 guiDashboard.model.defaultWidgets = [
     [
-        /**/{
-        name:'pmwTemplatesCounter',
-        title:'Templates Counter',
-        sort:1,
-        active:true,
-        opt:{},
-        type:1,
-        collapse:false,
-    },
+        {
+            name:'pmwTemplatesCounter',
+            title:'Templates Counter',
+            sort:1,
+            active:true,
+            opt:{},
+            type:1,
+            collapse:false,
+        },
         {
             name:'pmwProjectsCounter',
             title:'Projects Counter',
@@ -105,19 +105,19 @@ guiDashboard.model.defaultWidgets = [
             type:1,
             collapse:false,
         },
-        {
-            name:'pmwAnsibleModuleWidget',
-            title:'Run shell command',
-            sort:7,
-            active:true,
-            opt:{},
-            type:0,
-            collapse:false,
-        },
+        // {
+        //     name:'pmwAnsibleModuleWidget',
+        //     title:'Run shell command',
+        //     sort:7,
+        //     active:true,
+        //     opt:{},
+        //     type:0,
+        //     collapse:false,
+        // },
         {
             name:'pmwChartWidget',
             title:'Tasks history',
-            sort:8,
+            sort:7,
             active:true,
             opt:{},
             type:0,
@@ -144,60 +144,70 @@ guiDashboard.model.defaultWidgets = [
     ],
 ]
 
-/*
- * Массив, хранящий в себе настройки линий графика на странице Dashboard'а.
+/**
+ * Array with Dashboard's Chart line settings.
  */
 guiDashboard.model.ChartLineSettings = [
 
 ]
 
-/*
- * Массив, хранящий в себе настройки по умолчанию линий графика на странице Dashboard'а.
+/**
+ * Array with default Dashboard's Chart line settings.
  */
 guiDashboard.model.defaultChartLineSettings = [
     {
         name: "all_tasks",
         title: "All tasks",
         color: "#1f77b4",
+        bg_color:"rgba(31, 119, 180, 0.3)",
         active: true
     },
     {
         name: "ok",
         title: "OK",
         color: "#276900",
+        bg_color:"rgba(39, 105, 0, 0.3)",
         active: true
     },
     {
         name: "error",
         title: "ERROR",
-        color: "#333333",
+        color: "#dc3545",
+        bg_color:"rgba(220, 53, 69, 0.3)",
         active: true
     },
     {
         name: "interrupted",
         title: "INTERRUPTED",
         color: "#9b97e4",
+        bg_color:"rgba(155, 151, 228, 0.3)",
         active: true
     },
     {
         name: "delay",
         title: "DELAY",
         color: "#808419",
+        bg_color:"rgba(128, 132, 25, 0.3)",
         active: true
     },
     {
         name: "offline",
         title: "OFFLINE",
         color: "#9e9e9e",
+        bg_color:"rgba(158, 158, 158, 0.3)",
         active: true
     }
 ]
 
 guiDashboard.model.autoupdateInterval = 15000;
 
+guiDashboard.model.skinsSettings = {};
+guiDashboard.model.selectedSkin = 'default';
+guiDashboard.model.dataFromApiLoaded = false;
+
 /**
- * Функция полностью копирует настройки для линий графика.
- * Подразумевается, что данная функция вызывается, когда пришел из API пустой JSON.
+ * Function copies all properties of default chart line settings.
+ * This function is supposed to be called when empty JSON was received from API.
  */
 guiDashboard.cloneChartLineSettingsTotally = function(){
     guiDashboard.model.ChartLineSettings = JSON.parse(JSON.stringify(guiDashboard.model.defaultChartLineSettings));
@@ -205,8 +215,8 @@ guiDashboard.cloneChartLineSettingsTotally = function(){
 }
 
 /**
- * Функция обновляет часть настроек линий графика, данные по которым пришли из API.
- * Подразумевается, что данная функция вызывается, когда пришел из API непустой JSON.
+ * Function updates properties of chart line settings, info about which was received from API.
+ * This function is supposed to be called when not empty JSON was received from API.
  */
 guiDashboard.cloneChartLineSettingsFromApi = function(data){
     guiDashboard.model.ChartLineSettings = JSON.parse(JSON.stringify(guiDashboard.model.defaultChartLineSettings));
@@ -230,8 +240,8 @@ guiDashboard.cloneChartLineSettingsFromApi = function(data){
 }
 
 /**
- * Функция полностью копирует настройки по умолчанию для виджетов.
- * Подразумевается, что данная функция вызывается, когда пришел из API пустой JSON.
+ * Function copies all properties of default widget settings.
+ * This function is supposed to be called when empty JSON was received from API.
  */
 guiDashboard.cloneDefaultWidgetsTotally = function(){
     for(var i in guiDashboard.model.defaultWidgets[0])
@@ -247,10 +257,10 @@ guiDashboard.cloneDefaultWidgetsTotally = function(){
 }
 
 /**
- * Функция копирует "статичные" настройки по умолчанию для виджетов.
- * Под "статичными" понимается name, title, opt, type.
- * Данные настройки не меняются в ходе работы пользователя с интерфейсом.
- * Подразумевается, что данная функция вызывается, когда пришел из API непустой JSON.
+ * Function copies all properties of default 'static' widget settings.
+ * 'Static' settings - settings, that don't change during user work with GUI.
+ * For example, name, title, opt, type.
+ * This function is supposed to be called when not empty JSON was received from API.
  */
 guiDashboard.cloneDefaultWidgetsStaticSettingsOnly = function(){
     for(var i in guiDashboard.model.defaultWidgets[0])
@@ -265,11 +275,8 @@ guiDashboard.cloneDefaultWidgetsStaticSettingsOnly = function(){
 }
 
 /**
- * Функция добавляет виджету оставшиеся(не "статичные") настройки.
- * Функция проверяет есть ли соответсвуют ли пришедшие настройки для виджетов из API тем,
- * что хранятся в массиве с настройками по умолчанию.
- * Если данное свойство соответсвует, то его значение присваивается настройкам виджета.
- * В противном случае ему присваивается настройка по умолчанию.
+ * Function adds not static properties to widget.
+ * Function sets value from API if it is, otherwise, it sets default value.
  */
 guiDashboard.clonetWidgetsSettingsFromApiAndVerify = function(data){
     guiDashboard.cloneDefaultWidgetsStaticSettingsOnly();
@@ -296,14 +303,11 @@ guiDashboard.clonetWidgetsSettingsFromApiAndVerify = function(data){
 }
 
 /**
- * Функция проверяет необходимо ли посылать запрос к API для загрузки
- * пользовательских настроек Dashboard'a (настройки виджетов, настройки линий графика).
- * Например, если в модели отсутствует какой-либо виджет,
- * либо у виджета отсутсвует какое-нибудь свойство,
- * то запрос к API будет отправлен.
- * @param {Object} defaultObj - объект с настройками по умолчанию
- * @param {Object} currentObj - объект с текущими настройками
- *
+ * Function checks Necessity to send API request for loading of user's dashboard settings.
+ * For example, if some property is missed in current widget object
+ * or even if widget is missed, request will be sent.
+ * @param {Object} defaultObj - object with default settings.
+ * @param {Object} currentObj - object with current settings.
  */
 guiDashboard.checkNecessityToLoadDashboardSettingsFromApi = function(defaultObj, currentObj)
 {
@@ -331,21 +335,20 @@ guiDashboard.checkNecessityToLoadDashboardSettingsFromApi = function(defaultObj,
 
     if(bool1 || bool2)
     {
-        //нужно послать запрос к api
+        // request will be sent
         return true;
     }
     else
     {
-        //не нужно посылать запрос к api
+        // request will not be sent
         return false;
     }
 }
 
 /**
- *Функция создает объект, в который вносит актуальные настройки виджета,
- *на основе изменений, внесенных в guiDashboard.model.widgets[0][i].
- *localObj- guiDashboard.model.widgets[0][i]
- * @type Object
+ * Function creates object with current widget settings,
+ * based on changes in guiDashboard.model.widgets[0][i].
+ * @param localObj(Object) - guiDashboard.model.widgets[0][i].
  */
 guiDashboard.getNewWidgetSettings = function(localObj)
 {
@@ -357,9 +360,9 @@ guiDashboard.getNewWidgetSettings = function(localObj)
 }
 
 /**
- *Функция заправшивает у API пользовательские настройки
- *(настройки виджетов, настройки линий графика, интервал автообновлений).
- *Если они есть(пришел не пустой объект), то данные настройки добавляются в guiDashboard.model.
+ * Function sends request to API for getting user's settings
+ * (dashboard settings, chartline settings, autoupdate interval).
+ * If request answer is not empty, API settings will be added to Dashboard model.
  */
 guiDashboard.getUserSettingsFromAPI = function()
 {
@@ -425,6 +428,26 @@ guiDashboard.setUserSettingsFromApiAnswer = function(data)
     {
         guiDashboard.cloneDefaultAutoupdateInterval()
     }
+
+    if(data.skinsSettings)
+    {
+        guiDashboard.cloneDataSkinsFromApi(data.skinsSettings);
+    }
+    else
+    {
+        guiLocalSettings.set('skins_settings', guiDashboard.model.skinsSettings);
+    }
+
+    if(data.selectedSkin)
+    {
+        guiDashboard.cloneSelectedSkinFromApi(data.selectedSkin);
+    }
+    else
+    {
+        guiDashboard.setSelectedSkin(guiDashboard.model.selectedSkin);
+    }
+
+    guiDashboard.model.dataFromApiLoaded = true;
 }
 
 /*
@@ -446,8 +469,38 @@ guiDashboard.cloneDefaultAutoupdateInterval = function()
 }
 
 /**
- *Функция сохраняет в API пользовательские настройки Dashboard'a
- *(настройки виджетов, настройки линий графика).
+ * Function sets skinsSettings from API to local storage and to guiDashboard.model.skinsSettings.
+ */
+guiDashboard.cloneDataSkinsFromApi = function(skins)
+{
+    guiDashboard.model.skinsSettings = $.extend(true, {}, skins);
+    guiLocalSettings.set('skins_settings', guiDashboard.model.skinsSettings);
+}
+
+/**
+ * Function sets selected skin.
+ */
+guiDashboard.setSelectedSkin = function(selectedSkin)
+{
+    guiCustomizer.setSkin(selectedSkin);
+    guiCustomizer.skin.init();
+    guiCustomizer.render();
+}
+
+/**
+ * Function sets selected skin form api;
+ */
+guiDashboard.cloneSelectedSkinFromApi = function(selectedSkin)
+{
+    guiDashboard.model.selectedSkin = selectedSkin;
+    guiDashboard.setSelectedSkin(selectedSkin);
+}
+
+
+
+/**
+ * Function sends request to API for putting user's settings
+ * (dashboard settings, chartline settings, autoupdate interval).
  */
 guiDashboard.putUserDashboardSettingsToAPI = function()
 {
@@ -466,12 +519,20 @@ guiDashboard.putUserDashboardSettingsToAPI = function()
     let query = {
         method: "post",
         data_type: ["user", userId, "settings"],
-        data:{widgetSettings:widgetSettings, chartLineSettings:chartLineSettings}
+        data:{
+            autoupdateInterval: guiDashboard.model.autoupdateInterval,
+            widgetSettings:widgetSettings,
+            chartLineSettings:chartLineSettings,
+            skinsSettings: guiDashboard.model.skinsSettings,
+            selectedSkin: guiDashboard.model.selectedSkin,
+        }
     }
 
     let def = new $.Deferred();
 
-    $.when(api.query(query, true)).fail(e => {
+    $.when(api.query(query, true)).done(d => {
+        def.resolve();
+    }).fail(e => {
         console.warn(e)
         webGui.showErrors(e)
         def.reject()
@@ -481,7 +542,7 @@ guiDashboard.putUserDashboardSettingsToAPI = function()
 }
 
 /**
- *Функция, сортирующая массив объектов.
+ * Function sorts widgets array.
  */
 guiDashboard.sortCountWidget=function(Obj1, Obj2)
 {
@@ -489,7 +550,7 @@ guiDashboard.sortCountWidget=function(Obj1, Obj2)
 }
 
 /**
- *Функция, меняющая свойство виджета active на false.
+ * Function toggles 'active' widget property to false.
  */
 guiDashboard.setNewWidgetActiveValue = function(thisButton)
 {
@@ -505,7 +566,7 @@ guiDashboard.setNewWidgetActiveValue = function(thisButton)
 }
 
 /**
- *Функция, меняющая свойство виджета collapse на противоположное (true-false).
+ * Function toggles 'collapse' widget property to opposite (true/false).
  */
 guiDashboard.setNewWidgetCollapseValue = function(thisButton)
 {
@@ -516,7 +577,7 @@ guiDashboard.setNewWidgetCollapseValue = function(thisButton)
         {
             guiDashboard.model.widgets[0][i].collapse=!guiDashboard.model.widgets[0][i].collapse;
 
-            //скрываем селект с выбором периода на виджете-графике при его сворачивании
+            // hides select with period value on chart widget during its collapsing
             if(widgetName=="pmwChartWidget")
             {
                 if(guiDashboard.model.widgets[0][i].collapse==false)
@@ -534,8 +595,7 @@ guiDashboard.setNewWidgetCollapseValue = function(thisButton)
 }
 
 /**
- *Функция, сохраняющая настройки виджетов/линий графика,
- *внесенные в таблицу редактирования настроек Dashboard'a.
+ * Function gets dashboard settings from table in modal.
  */
 guiDashboard.getOptionsFromTable = function(table_id, guiDashboard_obj)
 {
@@ -573,7 +633,7 @@ guiDashboard.getOptionsFromTable = function(table_id, guiDashboard_obj)
 }
 
 /**
- *Функция, сохраняющая настройки виджетов, внесенные в форму настроек виджетов Dashboard'a.
+ * Function gets dashboard settings from modal and send them to API.
  */
 guiDashboard.saveWigdetsOptions = function()
 {
@@ -582,72 +642,22 @@ guiDashboard.saveWigdetsOptions = function()
 }
 
 /**
- *Функция, сохраняющая настройки виджетов, внесенные в форму настроек виджетов Dashboard'a,
- *из модального окна на странице Dashboard'a.
+ * Function saves dashboard settings from modal.
  */
 guiDashboard.saveWigdetsOptionsFromModal = function()
 {
     return $.when(guiDashboard.saveWigdetsOptions()).done(function(){
-        return $.when(hidemodal(), guiDashboard.HideAfterSaveModalWindow()).done(function(){
-            return spajs.openURL("/");
-        }).promise();
-    }).promise();
-
-}
-
-/**
- *Функция, сохраняющая настройки виджетов, внесенные в форму настроек виджетов Dashboard'a,
- *из секции на странице профиля пользователя.
- */
-guiDashboard.saveWigdetsOptionsFromProfile = function()
-{
-    return $.when(guiDashboard.saveWigdetsOptions()).done(function(){
-        return guiPopUp.success("Dashboard widget options were successfully saved");
-    }).fail(function(){
-        return guiPopUp.error("Dashboard widget options were not saved");
+        guiModal.modalClose();
+        return spajs.openURL("/");
     }).promise();
 }
 
 /**
- *Функция, сохраняющая настройки линий графика Dashboard'a.
+ * Function generates array with data for chart lines.
  */
-guiDashboard.saveChartLineSettings = function()
+guiDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status, date_format)
 {
-    guiDashboard.getOptionsFromTable("chart_line_settings_table", guiDashboard.model.ChartLineSettings);
-    guiDashboard.putUserDashboardSettingsToAPI();
-}
 
-/**
- *Функция, сохраняющая настройки линий графика, внесенных в форму настроек виджетов Dashboard'a,
- *из секции на странице профиля пользователя.
- */
-guiDashboard.saveChartLineSettingsFromProfile = function()
-{
-    return $.when(guiDashboard.saveChartLineSettings()).done(function(){
-        return guiPopUp.success("Dashboard chart lines settings were successfully saved");
-    }).fail(function(){
-        return guiPopUp.error("Dashboard chart lines settings were not saved");
-    }).promise();
-}
-
-/**
- *Функция, сохраняющая все настройки, касающиеся Dashboard'a, со страницы профиля пользователя.
- */
-guiDashboard.saveAllDashboardSettingsFromProfile = function(){
-    guiDashboard.getOptionsFromTable("modal-table",guiDashboard.model.widgets[0]);
-    guiDashboard.getOptionsFromTable("chart_line_settings_table", guiDashboard.model.ChartLineSettings);
-    return $.when(guiDashboard.putUserDashboardSettingsToAPI()).done(function(){
-        return guiPopUp.success("Dashboard settings were successfully saved");
-    }).fail(function(){
-        return guiPopUp.error("Dashboard settings were not saved");
-    }).promise();
-}
-
-/**
- * Функция, которая формирует массив данных для кривых графика по отдельному статусу
- */
-guiDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
-{
     for(var i in tasks_data) {
         tasks_data[i]=0;
     }
@@ -656,14 +666,14 @@ guiDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
     {
         var val = guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType][i];
         var time =+ moment(val[guiDashboard.statsDataMomentType]).tz(window.timeZone).format("x");
+        time = moment(time).tz(window.timeZone).format(date_format);
 
         if(val.status==status){
             tasks_data[time] = val.sum;
-            tasks_data_t.push(time)
         }
     }
 
-    var chart_tasks_data1 = [status];
+    var chart_tasks_data1 = [];
 
     for(var j in tasks_data_t)
     {
@@ -675,35 +685,16 @@ guiDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status)
 }
 
 /**
- * Функция, отправляющая запрос /api/v2/stats/,
- * который дает нам информацию для виджетов класса pmwItemsCounter,
- * а также для графика на странице Dashboard.
+ * Function sends API request (/api/v2/stats/).
  */
 guiDashboard.loadStats=function()
 {
     var thisObj = this;
 
-    /*var limit=1;
-    return spajs.ajax.Call({
-        url: hostname + "/api/v2/stats/?last="+guiDashboard.statsDataLastQuery,
-        type: "GET",
-        contentType: 'application/json',
-        data: "limit=" + encodeURIComponent(limit)+"&rand="+Math.random(),
-        success: function (data)
-        {
-            thisObj.statsData=data;
-        },
-        error: function (e)
-        {
-            console.warn(e)
-            webGui.showErrors(e)
-        }
-    });*/
-
     let query = {
         type: "get",
         item: "stats",
-        filter:"last="+guiDashboard.statsDataLastQuery
+        filters:"last="+guiDashboard.statsDataLastQuery,
     }
 
     let def = new $.Deferred();
@@ -716,12 +707,12 @@ guiDashboard.loadStats=function()
         def.reject(e)
     })
 
-    return def.promise();  /**/
+    return def.promise();
 }
 
 /**
- *Функция вызывается, когда происходит изменение периода на графике(пользователь выбрал другой option в select).
- *Функция обновляет значения переменных, которые в дальнейшем используются для запроса к api/v2/stats и отрисовки графика.
+ * Function is supposed to be called when period value was changed on Chart widget.
+ * Function updates values of variables that are used for API request (api/v2/stats) and for chart rendering.
  */
 guiDashboard.updateStatsDataLast=function(thisEl)
 {
@@ -745,42 +736,9 @@ guiDashboard.updateStatsDataLast=function(thisEl)
             break;
     }
     guiDashboard.statsDataLastQuery=+newLast;
+    guiLocalSettings.set('chart_period', +newLast);
     guiDashboard.updateData();
 }
-
-/**
- * Ниже представлены 3 функции для работы с модальным окном - Set widget options
- * guiDashboard.showModalWindow - открывает модальное окно, предварительно обновляя данные
- * guiDashboard.HideAfterSaveModalWindow - скрывает модальное окно
- * guiDashboard.renderModalWindow - отрисовывает модальное окно
- */
-guiDashboard.showModalWindow = function()
-{
-    if($('div').is('#modal-widgets-settings'))
-    {
-        guiDashboard.model.widgets[0].sort(guiDashboard.sortCountWidget);
-        $('#modal-widgets-settings').empty();
-        $('#modal-widgets-settings').html(guiDashboard.renderModalWindow());
-        $("#modal-widgets-settings").modal('show');
-    }
-}
-
-guiDashboard.HideAfterSaveModalWindow = function()
-{
-    if($('div').is('#modal-widgets-settings'))
-    {
-        return $("#modal-widgets-settings").modal('hide');
-    }
-
-}
-
-guiDashboard.renderModalWindow = function()
-{
-    var html=spajs.just.render('modalWidgetsSettings');
-    return html;
-}
-
-
 
 guiDashboard.stopUpdates = function()
 {
@@ -789,7 +747,7 @@ guiDashboard.stopUpdates = function()
 }
 
 /**
- * Для перетаскивания виджетов и изменения их порядка
+ * Turn on/off drag-and-drop property of Dashboard widgets.
  */
 guiDashboard.toggleSortable = function(thisButton)
 {
@@ -828,17 +786,8 @@ tabSignal.connect('guiLocalSettings.hideMenu', function(){
     }, 200)
 })
 
-/*
-tabSignal.connect('hideLoadingProgress', function(){
-    if(spajs.currentOpenMenu && spajs.currentOpenMenu.id == 'home')
-    {
-        guiDashboard.updateData()
-    }
-})*/
-
 guiDashboard.updateData = function()
 {
-    var thisObj = this
     if(this.model.updateTimeoutId)
     {
         clearTimeout(this.model.updateTimeoutId)
@@ -847,7 +796,7 @@ guiDashboard.updateData = function()
 
     $.when(guiDashboard.loadStats()).done(function()
     {
-        //обновляем счетчики для виджетов
+        // updates counters of widgets
         pmwHostsCounter.updateCount();
         pmwTemplatesCounter.updateCount();
         pmwGroupsCounter.updateCount();
@@ -855,92 +804,11 @@ guiDashboard.updateData = function()
         pmwInventoriesCounter.updateCount();
         pmwUsersCounter.updateCount();
 
-        //строим график
-        //определяем текущий месяц и год
-        var monthNum=moment().format("MM");
-        var yearNum=moment().format("YYYY");
-        var dayNum=moment().format("DD");
-        var hourNum=",T00:00:00";
-        var startTimeOrg="";
+        // renders chart
+        guiDashboard.renderChart();
 
-        switch (guiDashboard.statsDataMomentType) {
-            case "year":
-                startTimeOrg=yearNum+"-01-01"+hourNum;
-                break;
-            case "month":
-                startTimeOrg=yearNum+"-"+monthNum+"-01"+hourNum;
-                break;
-            case "day":
-                startTimeOrg=yearNum+"-"+monthNum+"-"+dayNum+hourNum;
-                break;
-        }
-
-        //задаем стартовую дату для графика.
-        //guiDashboard.statsDataLast - количество периодов назад
-        //guiDashboard.statsDataMomentType - тип периода - месяц/год
-        var startTime =+ moment(startTimeOrg).subtract(guiDashboard.statsDataLast-1, guiDashboard.statsDataMomentType).tz(window.timeZone).format("x");
-
-        tasks_data = {};
-        tasks_data_t = [];
-
-        //формируем в цикле временные отрезки для графика относительно стартовой даты
-        for(var i = 0; i< guiDashboard.statsDataLast; i++)
-        {
-            //идем на период вперед
-            var time=+moment(startTime).add(i, guiDashboard.statsDataMomentType).tz(window.timeZone).format("x");
-            tasks_data[time] = 0;
-            tasks_data_t.push(time);
-        }
-
-        //массив для линий графика, которые необходимо отобразить на странице
-        var linesForChartArr = [];
-        //объект, хранящий в себе цвета этих линий
-        var colorPaternForLines = {};
-        for(var i in guiDashboard.model.ChartLineSettings)
-        {
-            var lineChart = guiDashboard.model.ChartLineSettings[i];
-
-            //формируем массив значений для кривой all tasks
-            if(lineChart.name == 'all_tasks')
-            {
-                for (var i in guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType]) {
-                    var val = guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType][i];
-                    var time = +moment(val[guiDashboard.statsDataMomentType]).tz(window.timeZone).format("x");
-                    if (!tasks_data[time]) {
-                        tasks_data[time] = val.all;
-                        tasks_data_t.push(time)
-                    }
-                }
-                chart_tasks_start_x = ['time'];
-                chart_tasks_data = [lineChart.title];
-                for (var j in tasks_data_t) {
-                    var time = tasks_data_t[j]
-                    chart_tasks_start_x.push(time / 1);
-                    chart_tasks_data.push(tasks_data[time] / 1);
-                }
-
-                linesForChartArr.push(chart_tasks_start_x);
-                if(lineChart.active == true)
-                {
-                    linesForChartArr.push(chart_tasks_data);
-                    colorPaternForLines[lineChart.title]=lineChart.color;
-                }
-            }
-
-            //формируем массив значений для кривой каждого статуса
-            if(lineChart.name != 'all_tasks' && lineChart.active == true)
-            {
-                var chart_tasks_data_var = guiDashboard.getDataForStatusChart(tasks_data, tasks_data_t, lineChart.title);
-                linesForChartArr.push(chart_tasks_data_var);
-                colorPaternForLines[lineChart.title]=lineChart.color;
-            }
-        }
-
-        //загружаем график, перечисляем массивы данных для графика и необходимые цвета для графиков
-        guiDashboard.model.historyChart.load({
-            columns: linesForChartArr,
-            colors: colorPaternForLines
-        });
+        // renders Statistic bars on chart
+        guiDashboard.renderChartProgressBars();
     });
 
     this.model.updateTimeoutId = setTimeout(function(){
@@ -948,8 +816,288 @@ guiDashboard.updateData = function()
     }, 1000*30)
 }
 
+/**
+ * Function gets Start time for chart.
+ * start time - time in milliseconds, from which chart will be representing data.
+ */
+guiDashboard.getChartStartTime = function()
+{
+    // defines current months and year
+    let monthNum=moment().format("MM");
+    let yearNum=moment().format("YYYY");
+    let dayNum=moment().format("DD");
+    let hourNum=",T00:00:00";
+    let startTimeOrg="";
+
+    switch (guiDashboard.statsDataMomentType) {
+        case "year":
+            startTimeOrg=yearNum+"-01-01"+hourNum;
+            break;
+        case "month":
+            startTimeOrg=yearNum+"-"+monthNum+"-01"+hourNum;
+            break;
+        case "day":
+            startTimeOrg=yearNum+"-"+monthNum+"-"+dayNum+hourNum;
+            break;
+    }
+
+    // guiDashboard.statsDataLast - amount of previous periods (periods to reduce)
+    // guiDashboard.statsDataMomentType - period type - month/year
+    let startTime =+ moment(startTimeOrg).subtract(guiDashboard.statsDataLast-1, guiDashboard.statsDataMomentType).tz(window.timeZone).format("x");
+
+    return startTime;
+}
+
+/**
+ * Function gets data for Chart.
+ * @param startTime(number) - start time in milliseconds, from which chart will be representing data.
+ * @param date_format(string) - format of time labels for x axes on chart.
+ */
+guiDashboard.getChartData = function(startTime, date_format)
+{
+    let tasks_data = {};
+    let tasks_data_t = [];
+
+    // forms chart time intervals based on start date
+    for(let i = -1; i< guiDashboard.statsDataLast; i++)
+    {
+        // period up
+        let time =+ moment(startTime).add(i, guiDashboard.statsDataMomentType).tz(window.timeZone).format("x");
+        time = moment(time).tz(window.timeZone).format(date_format);
+        tasks_data[time] = 0;
+        tasks_data_t.push(time);
+    }
+
+    // object for chart settings
+    let chart_data_obj = {datasets:[], labels:[]};
+    for(let i in guiDashboard.model.ChartLineSettings)
+    {
+        let lineChart = guiDashboard.model.ChartLineSettings[i];
+
+        // forms array with values for 'all tasks' line
+        if(lineChart.name == 'all_tasks')
+        {
+            for (let i in guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType]) {
+                let val = guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType][i];
+                let time = +moment(val[guiDashboard.statsDataMomentType]).tz(window.timeZone).format("x");
+                time = moment(time).tz(window.timeZone).format(date_format);
+                if(tasks_data[time] !== undefined)
+                {
+                    tasks_data[time] = val.all;
+                }
+            }
+
+            let chart_tasks_data = [];
+            for (let j in tasks_data_t) {
+                let time = tasks_data_t[j]
+                chart_tasks_data.push(tasks_data[time] / 1);
+                chart_data_obj.labels.push(time);
+            }
+
+            if(lineChart.active == true)
+            {
+
+                chart_data_obj.datasets.push({
+                    label: 'All tasks',
+                    data: chart_tasks_data,
+                    borderColor: lineChart.color,
+                    backgroundColor: lineChart.bg_color,
+                })
+            }
+        }
+
+        // forms array with values for others line
+        if(lineChart.name != 'all_tasks' && lineChart.active == true)
+        {
+            let chart_tasks_data_var = guiDashboard.getDataForStatusChart(tasks_data, tasks_data_t, lineChart.title, date_format);
+
+            chart_data_obj.datasets.push({
+                label: lineChart.title,
+                data: chart_tasks_data_var,
+                borderColor: guiDashboard.getChartLineColor(lineChart),
+                backgroundColor: guiDashboard.getChartLineColor(lineChart, true),
+            })
+        }
+    }
+
+    return chart_data_obj;
+}
+
+/**
+ * Function gets colors for chartLines.
+ * @param lineChart(object) - object with chartLine settings
+ * @param bg(boolean) - if true, function returns color for line's background,
+ * otherwise, it returns color for line's border.
+ */
+guiDashboard.getChartLineColor = function(lineChart, bg)
+{
+    let alpha = 1;
+    let prop = 'color';
+    if(bg)
+    {
+        alpha = 0.3;
+        prop = 'bg_color';
+    }
+
+    if(guiCustomizer.skin.value['history_status_' + lineChart.name])
+    {
+        if(guiCustomizer.skin.value['history_status_' + lineChart.name][0] == "#")
+        {
+            return hexToRgbA(guiCustomizer.skin.value['history_status_' + lineChart.name], alpha);
+        }
+
+        return guiCustomizer.skin.value['history_status_' + lineChart.name]
+
+    }
+
+    return lineChart[prop];
+}
+
+/**
+ * Function sets chart data and chart settings.
+ */
+guiDashboard.setChartSettings = function(ctx, chart_data_obj)
+{
+    guiDashboard.model.historyChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: chart_data_obj.datasets,
+            labels: chart_data_obj.labels,
+        },
+
+        options:{
+            maintainAspectRatio: false,
+            legend: {
+                labels: {
+                    fontColor: guiCustomizer.skin.value.chart_legend_text_color,
+                },
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero:true,
+                        fontColor: guiCustomizer.skin.value.chart_axes_text_color,
+
+                    },
+                    gridLines: {
+                        color: guiCustomizer.skin.value.chart_axes_lines_color,
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontColor: guiCustomizer.skin.value.chart_axes_text_color,
+
+                    },
+                    gridLines: {
+                        color: guiCustomizer.skin.value.chart_axes_lines_color,
+                    }
+                }]
+            }
+
+        }
+
+    });
+}
+
+/**
+ * Function renders Dashboard chart
+ */
+guiDashboard.renderChart = function (need_update)
+{
+    let ctx = document.getElementById("chart_js_canvas");
+
+    if(ctx && ctx.getContext)
+    {
+        ctx = ctx.getContext('2d');
+
+        // defines current months and year
+        let startTime = guiDashboard.getChartStartTime();
+
+        let date_format = 'DD.MM.YY';
+
+        // gets data for chart
+        let chart_data_obj = guiDashboard.getChartData(startTime, date_format);
+
+        // renders chart
+        if(guiDashboard.model.historyChart)
+        {
+            if(guiDashboard.updateChartOrNot(guiDashboard.model.historyChart, chart_data_obj) || need_update)
+            {
+                try
+                {
+                    guiDashboard.model.historyChart.destroy();
+                }
+                catch(e){}
+
+                guiDashboard.setChartSettings(ctx, chart_data_obj);
+            }
+        }
+        else
+        {
+            guiDashboard.setChartSettings(ctx, chart_data_obj);
+        }
+    }
+}
+
+/**
+ * Function renders progress bars with statistic near the chart.
+ */
+guiDashboard.renderChartProgressBars = function()
+{
+    let el = $("#chart_progress_bars");
+    if(el.length != 0)
+    {
+
+        let opt = {
+            settings: guiDashboard.model.ChartLineSettings,
+            stats_data: guiDashboard.statsData,
+        }
+
+        let html = spajs.just.render('chart_progress_bars', {opt: opt});
+
+        $("#chart_progress_bars").html(html);
+    }
+};
 
 
+/**
+ * Function check necessity of chart updating(render chart with new data.)
+ * If data for chart has changed, function return true,
+ * otherwise it returns false.
+ * @param chart(object) - chart object;
+ * @param new_data_obj(object) - object with new data for chart.
+ * @returns boolean
+ */
+guiDashboard.updateChartOrNot = function(chart, new_data_obj)
+{
+    let chart_data = chart.config.data;
+    let bool1 = deepEqual(chart_data.labels, new_data_obj.labels);
+
+    if(!bool1)
+    {
+        return true;
+    }
+
+    for(let i in chart_data.datasets)
+    {
+        let old_item = chart_data.datasets[i];
+        for(let j in new_data_obj.datasets)
+        {
+            let new_item = new_data_obj.datasets[i];
+            if(old_item.label == new_item.label)
+            {
+                let bool2 = deepEqual(new_item.data, old_item.data);
+
+                if(!bool2)
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
 
 guiDashboard.open  = function(holder, menuInfo, data)
 {
@@ -958,7 +1106,7 @@ guiDashboard.open  = function(holder, menuInfo, data)
 
     return $.when(guiDashboard.getUserSettingsFromAPI()).always(function()
     {
-        // Инициализация всех виджетов на странице
+        // inits all widgets
         for(var i in guiDashboard.model.widgets)
         {
             for(var j in guiDashboard.model.widgets[i])
@@ -976,6 +1124,7 @@ guiDashboard.open  = function(holder, menuInfo, data)
             }
         }
 
+        guiDashboard.model.historyChart = undefined;
         thisObj.updateData()
         $(holder).insertTpl(spajs.just.render(thisObj.tpl_name, {guiObj:thisObj}))
 
@@ -984,46 +1133,13 @@ guiDashboard.open  = function(holder, menuInfo, data)
         pmwAnsibleModuleWidget.render();
         pmwChartWidget.render();
 
-        guiDashboard.model.historyChart = c3.generate({
-            bindto: '#c3-history-chart',
-            data: {
-                x: 'time',
-                columns: [
-                    ['time'],
-                    ['All tasks'],
-                    ['OK'],
-                    ['ERROR'],
-                    ['INTERRUPTED'],
-                    ['DELAY'],
-                    ['OFFLINE']
-                ],
-                type: 'area',
-                types: {
-                    OK: 'line',
-                    ERROR: 'line',
-                    INTERRUPTED: 'line',
-                    DELAY: 'line',
-                    OFFLINE: 'line'
-                },
-            },
-            axis: {
-                x: {
-                    type: 'timeseries',
-                    tick: {
-                        format: '%Y-%m-%d'
-                    }
-                }
-            },
-            color: {
-                pattern: ['#1f77b4',  '#276900', '#333333', '#9b97e4', '#808419', '#9e9e9e', '#d62728',  '#9467bd', '#c5b0d5', '#8c564b', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5']
-            }
-        });
         if($('select').is('#chart-period'))
         {
-            $('#chart-period').val(guiDashboard.statsDataLastQuery).change();
+            let chart_period = guiLocalSettings.get('chart_period') || guiDashboard.statsDataLastQuery;
+            $('#chart-period').val(chart_period).change();
         }
 
-        //drag and drop для виджетов
+        //drag and drop for widgets
         if($('div').is('#dnd-container'))
         {
             widget_sort = Sortable.create(document.getElementById("dnd-container"), {
@@ -1033,9 +1149,8 @@ guiDashboard.open  = function(holder, menuInfo, data)
                 disabled: true,
                 onUpdate: function (evt)
                 {
-                    // console.log("onUpdate[1]", evt);
                     var item = evt.item; // the current dragged HTMLElement
-                    //запоминаем новый порядок сортировки
+                    // saves new sorting order
                     var divArr=$('.dnd-block');
                     var idArr=[];
                     for (var i=0; i<divArr.length; i++)
@@ -1062,7 +1177,7 @@ guiDashboard.open  = function(holder, menuInfo, data)
 }
 
 /**
- * Базовый класс виджета
+ * Base widget class
  * @type Object
  */
 guiDashboardWidget = {
@@ -1079,7 +1194,7 @@ guiDashboardWidget = {
 }
 
 /**
- * Создание классов для виджетов: tasks history, run shell command, template tasks, template module
+ * Creating classes for tasks history, run shell command, template tasks, template module
  * @type Object
  */
 
@@ -1102,7 +1217,7 @@ pmwChartWidget.render = function()
 
 
 /**
- * Базовый класс виджета показывающего количество элементов
+ * Base class for counter widget
  * @type Object
  */
 var pmwItemsCounter = inheritance(guiDashboardWidget);
@@ -1124,7 +1239,7 @@ pmwItemsCounter.updateCount = function()
 }
 
 /**
- * Класс виджета показывающий количество хостов
+ * Class for hosts counter widget
  * @type Object
  */
 var pmwHostsCounter = inheritance(pmwItemsCounter);
@@ -1133,7 +1248,7 @@ pmwHostsCounter.model.nameInStats = "hosts";
 pmwHostsCounter.model.path = "host";
 
 /**
- * Класс виджета показывающий количество шаблонов
+ * Class for templates counter widget
  * @type Object
  */
 var pmwTemplatesCounter = inheritance(pmwItemsCounter);
@@ -1142,7 +1257,7 @@ pmwTemplatesCounter.model.nameInStats = "templates";
 pmwTemplatesCounter.model.path = "";
 
 /**
- * Класс виджета показывающий количество групп
+ * Class for group counter widget
  * @type Object
  */
 var pmwGroupsCounter = inheritance(pmwItemsCounter);
@@ -1151,7 +1266,7 @@ pmwGroupsCounter.model.nameInStats = "groups";
 pmwGroupsCounter.model.path = "group";
 
 /**
- * Класс виджета показывающий количество проектов
+ * Class for projects counter widget
  * @type Object
  */
 var pmwProjectsCounter = inheritance(pmwItemsCounter);
@@ -1160,7 +1275,7 @@ pmwProjectsCounter.model.nameInStats = "projects";
 pmwProjectsCounter.model.path = "project";
 
 /**
- * Класс виджета показывающий количество инвенториев
+ * Class for inventories counter widget
  * @type Object
  */
 var pmwInventoriesCounter = inheritance(pmwItemsCounter);
@@ -1169,7 +1284,7 @@ pmwInventoriesCounter.model.nameInStats = "inventories";
 pmwInventoriesCounter.model.path = "inventory";
 
 /**
- * Класс виджета показывающий количество пользователей
+ * Class for users counter widget
  * @type Object
  */
 var pmwUsersCounter = inheritance(pmwItemsCounter);
@@ -1177,6 +1292,42 @@ var pmwUsersCounter = inheritance(pmwItemsCounter);
 pmwUsersCounter.model.nameInStats = "users";
 pmwUsersCounter.model.path = "user";
 
-tabSignal.connect("loading.completed", function(){
+tabSignal.connect("webGui.start", function(){
     guiDashboard.getUserSettingsFromAPI();
 })
+
+guiDashboard.showWidgetSettingsModal = function ()
+{
+    let opt = {
+        title: 'Widget settings',
+    };
+
+    let html = spajs.just.render('widget_settings_modal');
+    guiModal.setModalHTML(html, opt);
+    guiModal.modalOpen();
+}
+
+tabSignal.connect("guiSkins.save", function(obj)
+{
+    guiDashboard.model.skinsSettings[obj.skin.name] = obj.skin.value;
+    guiDashboard.putUserDashboardSettingsToAPI();
+})
+
+tabSignal.connect("guiSkins.deleteSettings", function(obj)
+{
+    delete guiDashboard.model.skinsSettings[obj.skin.name];
+    guiDashboard.putUserDashboardSettingsToAPI();
+
+});
+
+tabSignal.connect("guiSkin.changed", function(obj){
+
+    if(guiDashboard.model.dataFromApiLoaded)
+    {
+        guiDashboard.model.selectedSkin = obj.skinId;
+        guiDashboard.putUserDashboardSettingsToAPI();
+    }
+
+    guiDashboard.renderChart(true);
+    guiDashboard.renderChartProgressBars();
+});

@@ -99,14 +99,14 @@ compile: build-clean print_vars
 
 prebuild: print_vars
 	# Create virtualenv
-	$(PY) -m virtualenv -p $(INSTALL_PY) --no-site-packages $(PREBUILD_DIR)
+	$(PY) -m virtualenv -p $(INSTALL_PY) --download --no-site-packages $(PREBUILD_DIR)
 	# Install required packages
 	$(PREBUILD_BINDIR)/pip install -U pip
 	$(PREBUILD_BINDIR)/pip install -U dist/$(NAME)-$(VER).tar.gz $(REQUIREMENTS)
 	$(PREBUILD_BINDIR)/pip install -U -r requirements-git.txt
 	# RECORD files are used by wheels for checksum. They contain path names which
 	# match the buildroot and must be removed or the package will fail to build.
-	find $(PREBUILD_DIR) -name "RECORD" -exec rm -rf {} \;
+	# find $(PREBUILD_DIR) -name "RECORD" -exec rm -rf {} \;
 	# Change the virtualenv path to the target installation direcotry.
 	$(RELOCATE_BIN) --source=$(PREBUILD_DIR) --destination=$(INSTALL_DIR)
 	# Remove sources for Clang
