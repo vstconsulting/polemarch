@@ -52,6 +52,7 @@ gui_user_settings = {
         let base_data_from_form = gui_base_object.getDataFromForm.apply(this, arguments);
 
         base_data_from_form['skinsSettings'] = $.extend(true, {}, guiDashboard.model.skinsSettings);
+        base_data_from_form['selectedSkin'] = guiDashboard.model.selectedSkin;
 
         return base_data_from_form;
     },
