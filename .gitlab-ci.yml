@@ -32,15 +32,17 @@ stages:
       - GUI
       - tags
       - issue_building
+  only:
     changes:
-      - polemarch/static/*
-      - polemarch/templates/*
-      - polemarch/main/settings.ini
-      - initbin/*
-      - docker/*
-      - doc/*
-      - README.rst
-      - LICENSE
+      - polemarch/**/*.{py,pyx}
+      - tests.py
+      - setup.{py,cfg}
+      - MANIFEST.in
+      - requirements.txt
+      - requirements-test.txt
+      - Makefile
+      - tox.ini
+      - .coveragerc
   retry: 2
 
 .pack_tamplate: &packing-test
@@ -81,15 +83,14 @@ code_style:
     refs:
       - tags
       - issue_building
+  only:
     changes:
-      - polemarch/static/*
-      - polemarch/templates/*
-      - polemarch/main/settings.ini
-      - initbin/*
-      - docker/*
-      - doc/*
-      - README.rst
-      - LICENSE
+    - polemarch/**/*.{py,pyx}
+    - requirements.txt
+    - Makefile
+    - tox.ini
+    - .pylintrc
+    - .pep8
   retry: 2
 
 py27-install:
@@ -166,6 +167,7 @@ pages:
   only:
     refs:
       - developer
+  when: always
 
 release_pypi:
   stage: release
