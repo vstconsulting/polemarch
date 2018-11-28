@@ -27,6 +27,11 @@ We also help you via:
 <https://stackoverflow.com/questions/tagged/polemarch>`_ - tag for questions about our application on Stack Overflow
 
 .. toctree::
+   :hidden:
+
+   Home <self>
+
+.. toctree::
    :maxdepth: 2
    :caption: Contents:
 
