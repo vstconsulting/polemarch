@@ -15,13 +15,13 @@
    id="Layer_1"
    x="0px"
    y="0px"
-   width="2163.0837"
-   height="514.15894"
-   viewBox="0 0 2163.0838 514.15894"
+   width="2163.6321"
+   height="357.70438"
+   viewBox="0 0 2163.6322 357.70438"
    enable-background="new 0 0 1503.927 1531"
    xml:space="preserve"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="polemarch.svg"
+   sodipodi:docname="horizontal.svg"
    inkscape:export-filename="/home/kirill/Projects/PyCharm/ce/polemarch/static/img/logo/horizontal.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90"><metadata
@@ -144,8 +144,8 @@
      id="namedview4984"
      showgrid="false"
      inkscape:zoom="0.4359953"
-     inkscape:cx="1040.7746"
-     inkscape:cy="-39.537543"
+     inkscape:cx="1000.9108"
+     inkscape:cy="-39.782275"
      inkscape:window-x="1431"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
@@ -155,14 +155,12 @@
      fit-margin-right="0"
      fit-margin-bottom="0" /><g
      id="g4899"
-     transform="matrix(4.5809218,0,0,6.7930936,-4040.0844,-1475.4057)"
+     transform="matrix(4.5820833,0,0,4.726008,-4041.1088,-1026.4512)"
      inkscape:export-filename="/home/kirill/Projects/PyCharm/ce/polemarch/static/img/logo/horizontal.png"
      inkscape:export-xdpi="90"
      inkscape:export-ydpi="90"
      clip-path="none"><g
-       id="g4901">
-       <!--letter P-->
-        <linearGradient
+       id="g4901"><!--letter P--><linearGradient
          id="SVGID_7_"
          gradientUnits="userSpaceOnUse"
          x1="881.9375"
@@ -181,9 +179,7 @@
          d="m 898.156,292.385 -16.219,0 0,-47.565 c 0,-9.219 3.553,-16.531 10.656,-21.938 4.748,-3.36 10.658,-5.042 17.727,-5.042 10.396,0 18.264,3.761 23.602,11.28 3.119,4.679 4.678,10.172 4.678,16.479 0,10.259 -4.141,18.126 -12.424,23.601 -4.678,2.565 -9.912,3.847 -15.699,3.847 l -0.52,0 c -4.436,0 -8.369,-1.073 -11.801,-3.223 l 0,22.561 z M 923.16,245.6 c 0,-5.96 -2.166,-10.326 -6.498,-13.1 -1.941,-1.04 -3.969,-1.56 -6.082,-1.56 l -1.039,0 c -5.061,0 -8.82,2.669 -11.279,8.006 -0.695,2.184 -1.041,4.229 -1.041,6.134 l 0,0.78 c 0,6.064 2.461,10.414 7.383,13.048 2.078,0.797 3.898,1.195 5.457,1.195 6.168,0 10.328,-3.205 12.477,-9.617 0.415,-2.183 0.622,-3.811 0.622,-4.886 z"
          id="path4910"
          style="fill:url(#SVGID_7_);stroke:none"
-         inkscape:connector-curvature="0" />
-         <!--letter O-->
-         <radialGradient
+         inkscape:connector-curvature="0" /><!--letter O--><radialGradient
          id="SVGID_8_"
          cx="968.80182"
          cy="265.6655"
@@ -210,9 +206,7 @@
          inkscape:connector-curvature="0"
          inkscape:export-xdpi="90"
          inkscape:export-ydpi="90"
-         inkscape:export-filename="/home/kirill/Projects/PyCharm/ce/polemarch/static/img/logo/horizontal.png" />
-         <!--letter L-->
-         <radialGradient
+         inkscape:export-filename="/home/kirill/Projects/PyCharm/ce/polemarch/static/img/logo/horizontal.png" /><!--letter L--><radialGradient
          id="SVGID_9_"
          cx="1008.1543"
          cy="255.0347"
@@ -233,9 +227,7 @@
          inkscape:connector-curvature="0"
          inkscape:export-xdpi="90"
          inkscape:export-ydpi="90"
-         inkscape:export-filename="/home/kirill/Projects/PyCharm/ce/polemarch/static/img/logo/horizontal.png" />
-         <!--letter E-->
-         <radialGradient
+         inkscape:export-filename="/home/kirill/Projects/PyCharm/ce/polemarch/static/img/logo/horizontal.png" /><!--letter E--><radialGradient
          id="SVGID_10_"
          cx="1044.5938"
          cy="265.43161"
@@ -256,9 +248,7 @@
          inkscape:connector-curvature="0"
          inkscape:export-xdpi="90"
          inkscape:export-ydpi="90"
-         inkscape:export-filename="/home/kirill/Projects/PyCharm/ce/polemarch/static/img/logo/horizontal.png" />
-         <!--letter M-->
-         <linearGradient
+         inkscape:export-filename="/home/kirill/Projects/PyCharm/ce/polemarch/static/img/logo/horizontal.png" /><!--letter M--><linearGradient
          id="SVGID_11_"
          gradientUnits="userSpaceOnUse"
          x1="1077.709"
@@ -277,9 +267,7 @@
          d="m 1146.689,217.342 0,75.033 -19.619,-0.053 0,-34.959 -15.549,14.87 -14.453,-14.297 -0.053,34.438 -19.307,0 0,-75.033 33.813,28.907 35.168,-28.906 z"
          id="path4946"
          style="fill:url(#SVGID_11_);stroke:none"
-         inkscape:connector-curvature="0" />
-         <!--letter A-->
-         <radialGradient
+         inkscape:connector-curvature="0" /><!--letter A--><radialGradient
          id="SVGID_12_"
          cx="1175.0244"
          cy="265.43161"
@@ -300,9 +288,7 @@
          inkscape:connector-curvature="0"
          inkscape:export-xdpi="90"
          inkscape:export-ydpi="90"
-         inkscape:export-filename="/home/kirill/Projects/PyCharm/ce/polemarch/static/img/logo/horizontal.png" />
-         <!--letter R-->
-         <radialGradient
+         inkscape:export-filename="/home/kirill/Projects/PyCharm/ce/polemarch/static/img/logo/horizontal.png" /><!--letter R--><radialGradient
          id="SVGID_13_"
          cx="1221.4463"
          cy="265.50931"
@@ -323,9 +309,7 @@
          inkscape:connector-curvature="0"
          inkscape:export-xdpi="90"
          inkscape:export-ydpi="90"
-         inkscape:export-filename="/home/kirill/Projects/PyCharm/ce/polemarch/static/img/logo/horizontal.png" />
-         <!--letter C-->
-         <radialGradient
+         inkscape:export-filename="/home/kirill/Projects/PyCharm/ce/polemarch/static/img/logo/horizontal.png" /><!--letter C--><radialGradient
          id="SVGID_14_"
          cx="1268.3359"
          cy="265.74371"
@@ -346,9 +330,7 @@
          inkscape:connector-curvature="0"
          inkscape:export-xdpi="90"
          inkscape:export-ydpi="90"
-         inkscape:export-filename="/home/kirill/Projects/PyCharm/ce/polemarch/static/img/logo/horizontal.png" />
-         <!--letter H-->
-         <radialGradient
+         inkscape:export-filename="/home/kirill/Projects/PyCharm/ce/polemarch/static/img/logo/horizontal.png" /><!--letter H--><radialGradient
          id="SVGID_15_"
          cx="1325.3604"
          cy="255.061"
