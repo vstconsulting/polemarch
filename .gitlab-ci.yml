@@ -142,6 +142,7 @@ default_deb_tests:
 
 developer_rpm_tests:
   <<: *packing-test-rpm_tests
+  stage: release
   only:
     refs:
     - developer
@@ -149,6 +150,7 @@ developer_rpm_tests:
 
 developer_deb_tests:
   <<: *packing-test-deb_tests
+  stage: release
   only:
     refs:
     - developer
