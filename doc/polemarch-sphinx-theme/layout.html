@@ -1,10 +1,15 @@
 {% extends "vst-sphinx-theme/layout.html" %}
 
+{%- block css %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ pathto('_static/css/polemarch-gui.css', 1) }}" type="text/css" />
+{%- endblock %}
+
 {% block logo %}
     <!-- Logo -->
     <a href="index.html"  id="root_link" class="brand-link logo app-logo">
-        <img src="_static/img/logo/logo.png" class="brand-image img-circle elevation-3" style="opacity: .8">
-        <span class="brand-text font-weight-light">{{ project }}</span>
+        <img src="/static/img/logo/logo.png" alt="{{ project_gui_name }}" class="brand-image img-circle elevation-3" style="opacity: .8; float: inherit">
+        <img src="/static/img/logo/horizontal.svg" class="brand-image text-logo" style="opacity: .8">
     </a>
 {% endblock %}
 

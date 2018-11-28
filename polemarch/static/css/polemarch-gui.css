@@ -335,6 +335,22 @@ body {
     width:160px;
 }
 
+.text-logo {
+    margin-left: auto;
+    width: 165px;
+    float: inherit;
+}
+
+.sidebar-collapse .text-logo {
+    display: none;
+}
+
+.sidebar-collapse .main-sidebar:hover .text-logo {
+    display: inline-block;
+}
+
+
+
 #menu-system-hooks {
     display: none;
 }
