@@ -954,9 +954,55 @@ guiDashboard.getChartLineColor = function(lineChart, bg)
 }
 
 /**
+ * Function sets chart data and chart settings.
+ */
+guiDashboard.setChartSettings = function(ctx, chart_data_obj)
+{
+    guiDashboard.model.historyChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: chart_data_obj.datasets,
+            labels: chart_data_obj.labels,
+        },
+
+        options:{
+            maintainAspectRatio: false,
+            legend: {
+                labels: {
+                    fontColor: guiCustomizer.skin.value.chart_legend_text_color,
+                },
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero:true,
+                        fontColor: guiCustomizer.skin.value.chart_axes_text_color,
+
+                    },
+                    gridLines: {
+                        color: guiCustomizer.skin.value.chart_axes_lines_color,
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontColor: guiCustomizer.skin.value.chart_axes_text_color,
+
+                    },
+                    gridLines: {
+                        color: guiCustomizer.skin.value.chart_axes_lines_color,
+                    }
+                }]
+            }
+
+        }
+
+    });
+}
+
+/**
  * Function renders Dashboard chart
  */
-guiDashboard.renderChart = function ()
+guiDashboard.renderChart = function (need_update)
 {
     let ctx = document.getElementById("chart_js_canvas");
 
@@ -972,54 +1018,25 @@ guiDashboard.renderChart = function ()
         // gets data for chart
         let chart_data_obj = guiDashboard.getChartData(startTime, date_format);
 
-        try
-        {
-            guiDashboard.model.historyChart.destroy();
-        }
-        catch(e){}
-
         // renders chart
-        guiDashboard.model.historyChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                datasets: chart_data_obj.datasets,
-                labels: chart_data_obj.labels,
-            },
-
-            options:{
-                maintainAspectRatio: false,
-                legend: {
-                    labels: {
-                        fontColor: guiCustomizer.skin.value.chart_legend_text_color,
-                    },
-                },
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero:true,
-                            fontColor: guiCustomizer.skin.value.chart_axes_text_color,
-
-                        },
-                        gridLines: {
-                            color: guiCustomizer.skin.value.chart_axes_lines_color,
-                        }
-                    }],
-                    xAxes: [{
-                        ticks: {
-                            fontColor: guiCustomizer.skin.value.chart_axes_text_color,
-
-                        },
-                        gridLines: {
-                            color: guiCustomizer.skin.value.chart_axes_lines_color,
-                        }
-                    }]
+        if(guiDashboard.model.historyChart)
+        {
+            if(guiDashboard.updateChartOrNot(guiDashboard.model.historyChart, chart_data_obj) || need_update)
+            {
+                try
+                {
+                    guiDashboard.model.historyChart.destroy();
                 }
+                catch(e){}
 
+                guiDashboard.setChartSettings(ctx, chart_data_obj);
             }
-
-        });
+        }
+        else
+        {
+            guiDashboard.setChartSettings(ctx, chart_data_obj);
+        }
     }
-
 }
 
 /**
@@ -1041,6 +1058,46 @@ guiDashboard.renderChartProgressBars = function()
         $("#chart_progress_bars").html(html);
     }
 };
+
+
+/**
+ * Function check necessity of chart updating(render chart with new data.)
+ * If data for chart has changed, function return true,
+ * otherwise it returns false.
+ * @param chart(object) - chart object;
+ * @param new_data_obj(object) - object with new data for chart.
+ * @returns boolean
+ */
+guiDashboard.updateChartOrNot = function(chart, new_data_obj)
+{
+    let chart_data = chart.config.data;
+    let bool1 = deepEqual(chart_data.labels, new_data_obj.labels);
+
+    if(!bool1)
+    {
+        return true;
+    }
+
+    for(let i in chart_data.datasets)
+    {
+        let old_item = chart_data.datasets[i];
+        for(let j in new_data_obj.datasets)
+        {
+            let new_item = new_data_obj.datasets[i];
+            if(old_item.label == new_item.label)
+            {
+                let bool2 = deepEqual(new_item.data, old_item.data);
+
+                if(!bool2)
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
 
 guiDashboard.open  = function(holder, menuInfo, data)
 {
@@ -1270,6 +1327,6 @@ tabSignal.connect("guiSkin.changed", function(obj){
         guiDashboard.putUserDashboardSettingsToAPI();
     }
 
-    guiDashboard.renderChart();
+    guiDashboard.renderChart(true);
     guiDashboard.renderChartProgressBars();
 });
