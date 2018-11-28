@@ -202,6 +202,8 @@ guiDashboard.model.defaultChartLineSettings = [
 guiDashboard.model.autoupdateInterval = 15000;
 
 guiDashboard.model.skinsSettings = {};
+guiDashboard.model.selectedSkin = 'default';
+guiDashboard.model.dataFromApiLoaded = false;
 
 /**
  * Function copies all properties of default chart line settings.
@@ -435,6 +437,17 @@ guiDashboard.setUserSettingsFromApiAnswer = function(data)
     {
         guiLocalSettings.set('skins_settings', guiDashboard.model.skinsSettings);
     }
+
+    if(data.selectedSkin)
+    {
+        guiDashboard.cloneSelectedSkinFromApi(data.selectedSkin);
+    }
+    else
+    {
+        guiDashboard.setSelectedSkin(guiDashboard.model.selectedSkin);
+    }
+
+    guiDashboard.model.dataFromApiLoaded = true;
 }
 
 /*
@@ -455,14 +468,35 @@ guiDashboard.cloneDefaultAutoupdateInterval = function()
     guiLocalSettings.setIfNotExists('page_update_interval', guiDashboard.model.autoupdateInterval)
 }
 
-
+/**
+ * Function sets skinsSettings from API to local storage and to guiDashboard.model.skinsSettings.
+ */
 guiDashboard.cloneDataSkinsFromApi = function(skins)
 {
     guiDashboard.model.skinsSettings = $.extend(true, {}, skins);
-
     guiLocalSettings.set('skins_settings', guiDashboard.model.skinsSettings);
-
 }
+
+/**
+ * Function sets selected skin.
+ */
+guiDashboard.setSelectedSkin = function(selectedSkin)
+{
+    guiCustomizer.setSkin(selectedSkin);
+    guiCustomizer.skin.init();
+    guiCustomizer.render();
+}
+
+/**
+ * Function sets selected skin form api;
+ */
+guiDashboard.cloneSelectedSkinFromApi = function(selectedSkin)
+{
+    guiDashboard.model.selectedSkin = selectedSkin;
+    guiDashboard.setSelectedSkin(selectedSkin);
+}
+
+
 
 /**
  * Function sends request to API for putting user's settings
@@ -490,6 +524,7 @@ guiDashboard.putUserDashboardSettingsToAPI = function()
             widgetSettings:widgetSettings,
             chartLineSettings:chartLineSettings,
             skinsSettings: guiDashboard.model.skinsSettings,
+            selectedSkin: guiDashboard.model.selectedSkin,
         }
     }
 
@@ -1228,6 +1263,13 @@ tabSignal.connect("guiSkins.deleteSettings", function(obj)
 });
 
 tabSignal.connect("guiSkin.changed", function(obj){
+
+    if(guiDashboard.model.dataFromApiLoaded)
+    {
+        guiDashboard.model.selectedSkin = obj.skinId;
+        guiDashboard.putUserDashboardSettingsToAPI();
+    }
+
     guiDashboard.renderChart();
     guiDashboard.renderChartProgressBars();
 });
