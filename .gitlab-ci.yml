@@ -147,6 +147,7 @@ developer_rpm_tests:
     refs:
     - developer
   when: manual
+  allow_failure: true
 
 developer_deb_tests:
   <<: *packing-test-deb_tests
@@ -155,6 +156,7 @@ developer_deb_tests:
     refs:
     - developer
   when: manual
+  allow_failure: true
 
 # Realese
 ###########################################

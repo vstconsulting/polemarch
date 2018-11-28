@@ -145,7 +145,7 @@ After your project's status has been changed into "OK" you can confidently start
 
 
 Module execution
----------------
+----------------
 
 The simplest way to start using Polemarch is to execute module.
 To make this action click on 'execute module' button on project page.
