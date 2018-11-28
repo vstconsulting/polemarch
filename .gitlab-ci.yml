@@ -104,7 +104,7 @@ py36-install:
 
 ####################################################
 # DEPRECATED
-default_rpm_tests:
+.rpm_tests_tamplate: &packing-test-rpm_tests
   <<: *packing-test
   script:
    - cat /etc/hosts
@@ -115,7 +115,8 @@ default_rpm_tests:
    - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
    - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests --failfast
 
-default_deb_tests:
+
+.deb_tests_tamplate: &packing-test-deb_tests
   <<: *packing-test
   image: onegreyonewhite/tox:ubuntu
   script:
@@ -128,6 +129,29 @@ default_deb_tests:
    - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
    - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
    - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests --failfast
+
+
+default_rpm_tests:
+  <<: *packing-test-rpm_tests
+
+
+default_deb_tests:
+  <<: *packing-test-deb_tests
+
+
+developer_rpm_tests:
+  <<: *packing-test-rpm_tests
+  only:
+    refs:
+    - developer
+  when: manual
+
+developer_deb_tests:
+  <<: *packing-test-deb_tests
+  only:
+    refs:
+    - developer
+  when: manual
 
 # Realese
 ###########################################
