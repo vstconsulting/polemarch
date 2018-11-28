@@ -291,6 +291,7 @@ function signal_gui_schema_name_periodic_task(data){
 
 tabSignal.connect("gui.schema.name.periodic_task.edit", signal_gui_schema_name_periodic_task)
 tabSignal.connect("gui.schema.name.periodic_task.new", signal_gui_schema_name_periodic_task)
+tabSignal.connect("gui.schema.name.periodic_task.get", signal_gui_schema_name_periodic_task)
 
 
 tabSignal.connect("guiList.renderLine.periodic_task", function(obj)
