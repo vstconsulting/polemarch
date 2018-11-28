@@ -1124,6 +1124,7 @@ guiDashboard.open  = function(holder, menuInfo, data)
             }
         }
 
+        guiDashboard.model.historyChart = undefined;
         thisObj.updateData()
         $(holder).insertTpl(spajs.just.render(thisObj.tpl_name, {guiObj:thisObj}))
 
