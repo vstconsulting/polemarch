@@ -34,7 +34,8 @@ stages:
       - issue_building
   only:
     changes:
-      - polemarch/**/*.{py,pyx}
+      - polemarch/main/**/*
+      - polemarch/api/**/*
       - tests.py
       - setup.{py,cfg}
       - MANIFEST.in
@@ -43,6 +44,7 @@ stages:
       - Makefile
       - tox.ini
       - .coveragerc
+      - .gitlab-ci.yml
   retry: 2
 
 .pack_tamplate: &packing-test
