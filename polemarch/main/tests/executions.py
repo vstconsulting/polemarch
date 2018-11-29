@@ -1054,6 +1054,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         repo.index.add(["other.yml", ".polemarch.yaml"])
         repo.index.commit("no message 2")
         second_revision = repo.head.object.hexsha
+        repo.create_tag('new_branch')
 
         # Test project
         self.revisions = [first_revision, second_revision]

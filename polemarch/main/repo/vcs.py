@@ -59,7 +59,9 @@ class Git(_VCS):
         fetch_result = self._fetch_from_remote(repo, env)
         with raise_context():
             branch = self.proj.vars.get('repo_branch', None)
-            if branch:
+            if branch in repo.tags:
+                repo.tags[branch].checkout()
+            elif branch in repo.heads:
                 repo.heads[branch].checkout()
         return fetch_result
 
