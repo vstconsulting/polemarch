@@ -1,7 +1,11 @@
 # pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
+import warnings
 from vstutils.utils import tmp_file_context, raise_context
-import git
+try:
+    import git
+except:  # nocv
+    warnings.warn("Git is not installed or have problems.")
 from ._base import _Base, os
 
 
@@ -45,10 +49,18 @@ class Git(_VCS):
     def vsc_clone(self, *args, **kwargs):
         return git.Repo.clone_from(*args, **kwargs)
 
-    def vcs_update(self, repo, env):
+    @raise_context()
+    def _fetch_from_remote(self, repo, env):
         with repo.git.custom_environment(**env):
             kwargs = self.options.get("FETCH_KWARGS", dict())
-            fetch_result = repo.remotes.origin.pull(**kwargs)
+            return repo.remotes.origin.fetch(**kwargs)
+
+    def vcs_update(self, repo, env):
+        fetch_result = self._fetch_from_remote(repo, env)
+        with raise_context():
+            branch = self.proj.vars.get('repo_branch', None)
+            if branch:
+                repo.heads[branch].checkout()
         return fetch_result
 
     def get_branch_name(self):
@@ -64,9 +76,10 @@ class Git(_VCS):
         if branch:
             kw['branch'] = branch
         repo = self.vsc_clone(self.proj.repository, self.path, env=env, **kw)
-        self.proj.variables.update_or_create(
-            key='repo_branch', defaults=dict(value=repo.active_branch.name)
-        )
+        with raise_context():
+            self.proj.variables.update_or_create(
+                key='repo_branch', defaults=dict(value=repo.active_branch.name)
+            )
         return repo, None
 
     def _get_or_create_repo(self, env):

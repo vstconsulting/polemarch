@@ -65,11 +65,17 @@ class Project(AbstractModel):
             self.ext = os.path.splitext(file_name)[1]
             self.file_name = self.path + '/' + file_name
 
+        def _read(self, file):
+            data = file.read()
+            with raise_context():
+                data = data.decode('utf-8')
+            return data
+
         def _make_rst(self, file):
-            return rst_gen(file.read(), writer_name='html')['html_body']
+            return rst_gen(self._read(file), writer_name='html')['html_body']
 
         def _make_md(self, file):
-            return Markdown(extras=['tables', 'header-ids']).convert(file.read())
+            return Markdown(extras=['tables', 'header-ids']).convert(self._read(file))
 
         def set_readme(self):
             if not os.path.exists(self.path):
@@ -280,10 +286,12 @@ class Project(AbstractModel):
         return self.repo_class.clone()
 
     @property
+    @raise_context()
     def revision(self):
         return self.repo_class.revision()
 
     @property
+    @raise_context()
     def branch(self):
         return self.repo_class.get_branch_name()
 
@@ -291,6 +299,7 @@ class Project(AbstractModel):
     def module(self):
         return Module.objects.filter(Q(project=self) | Q(project=None))
 
+    @raise_context()
     def __get_readme(self):
         if not hasattr(self, 'readme'):
             self.readme = self.ReadMe(self)
