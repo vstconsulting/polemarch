@@ -575,14 +575,30 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(project_data['revision'], self.revisions[-1])
         self.assertEqual(project_data['branch'], 'master')
         # Update branch
-        new_branch_var = dict(key='repo_branch', value='new_branch')
+        new_branch_var = dict(key='repo_branch', value='invalid_branch')
+        self.make_bulk([
+            self.get_mod_bulk('project', project_data['id'], new_branch_var)
+        ])
+        project_data = self.sync_project(project_data['id'])
+        self.assertEqual(project_data['status'], 'ERROR')
+        self.assertEqual(project_data['branch'], 'waiting...')
+
+        new_branch_var = dict(key='repo_branch', value='master')
+        self.make_bulk([
+            self.get_mod_bulk('project', project_data['id'], new_branch_var)
+        ])
+        project_data = self.sync_project(project_data['id'])
+        self.assertEqual(project_data['status'], 'OK')
+        self.assertEqual(project_data['branch'], 'master')
+
+        new_branch_var = dict(key='repo_branch', value='tags/new_branch')
         self.make_bulk([
             self.get_mod_bulk('project', project_data['id'], new_branch_var)
         ])
         project_data = self.sync_project(project_data['id'])
         # Check updated brunch and revision
-        self.assertEqual(project_data['revision'], self.revisions[0])
-        self.assertEqual(project_data['branch'], 'new_branch')
+        self.assertEqual(project_data['branch'], 'tags/new_branch')
+        self.assertEqual(project_data['revision'], self.revisions[1])
         # Return old branch
         new_branch_var['value'] = 'master'
         results = self.make_bulk([

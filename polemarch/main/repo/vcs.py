@@ -57,19 +57,24 @@ class Git(_VCS):
 
     def vcs_update(self, repo, env):
         fetch_result = self._fetch_from_remote(repo, env)
-        with raise_context():
-            branch = self.proj.vars.get('repo_branch', None)
-            if branch in repo.tags:
-                repo.tags[branch].checkout()
-            elif branch in repo.heads:
-                repo.heads[branch].checkout()
+        branch = self.proj.vars.get('repo_branch', None)
+        if branch.replace('tags/', '') in repo.tags:
+            repo.git.checkout(branch)
+        elif branch in repo.heads:
+            repo.git.checkout(branch)
+        else:
+            raise git.GitError('Unknown branch or tag "{}".'.format(branch))
         return fetch_result
 
     def get_branch_name(self):
         # pylint: disable=broad-except
         reponame = "waiting..."
         with raise_context():
-            reponame = self.get_repo().active_branch.name
+            repo = self.get_repo()
+            repo_branch = self.proj.vars['repo_branch']
+            if repo.head.is_detached and repo_branch.replace('tags/', '') in repo.tags:
+                return repo_branch
+            reponame = repo.active_branch.name
         return reponame
 
     def make_clone(self, env):
@@ -88,9 +93,15 @@ class Git(_VCS):
         try:
             repo = self.get_repo()
             branch = self.proj.vars.get('repo_branch', None)
-            if branch and repo.active_branch.name != branch:
+            with raise_context():
+                active_branch = ''
+                active_branch = repo.active_branch.name or active_branch
+            if branch and not active_branch:
                 self.delete()
                 raise git.NoSuchPathError
+            # if not repo.head.is_detached and repo.active_branch.name != branch:
+            #     self.delete()
+            #     raise git.NoSuchPathError
         except git.NoSuchPathError:
             repo = self.make_clone(env)[0]
         return repo
