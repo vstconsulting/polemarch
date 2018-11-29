@@ -9,6 +9,7 @@ from django.utils.timezone import now
 from yaml import dump
 from ._base import BaseTestCase, os
 from ..tasks import ScheduledTask
+from ..unittests.ansible import inventory_data, valid_inventory
 
 
 test_ansible_cfg = '''
@@ -1252,3 +1253,69 @@ class ProjectTestCase(BaseExecutionsTestCase):
         history.kind = "PLAYBOOK"
         history.save()
         self.get_result("get", url, code=404)
+
+    def test_import_inventory(self):
+        bulk_data = [
+            dict(data_type=['project'], method='post', data=dict(name='testProj')),
+            self.get_mod_bulk(
+                'project', '<0[data][id]>',
+                {'name': 'test-inventory', 'raw_data': inventory_data},
+                ['inventory', 'import_inventory'],
+            ),
+            self.get_mod_bulk(
+                'inventory',
+                '<1[data][inventory_id]>',
+                {},
+                'all_hosts',
+                method='get'
+            ),
+            self.get_mod_bulk(
+                'inventory',
+                '<1[data][inventory_id]>',
+                {},
+                'all_groups',
+                method='get'
+            ),
+            self.get_mod_bulk(
+                'inventory',
+                '<1[data][inventory_id]>',
+                {},
+                'variables',
+                method='get'
+            ),
+            self.get_mod_bulk(
+                'project',
+                '<0[data][id]>',
+                {},
+                ['inventory', '<1[data][inventory_id]>'],
+                method='get'
+            ),
+        ]
+        results = self.make_bulk(bulk_data, 'put')
+
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 201)
+        self.assertIn('inventory_id', results[1]['data'])
+
+        self.assertEqual(
+            results[2]['data']['count'],
+            len(valid_inventory['hosts'])
+        )
+        self.assertEqual(
+            results[3]['data']['count'],
+            len(valid_inventory['groups'])
+        )
+        self.assertEqual(
+            results[4]['data']['count'],
+            len(valid_inventory['vars'])
+        )
+
+        self.assertEqual(results[5]['status'], 200)
+        self.assertEqual(results[5]['data']['name'], 'test-inventory')
+
+        for host in results[2]['data']['results']:
+            self.assertIn(host['name'], valid_inventory['hosts'].keys())
+        for group in results[3]['data']['results']:
+            self.assertIn(group['name'], valid_inventory['groups'].keys())
+        for variable in results[4]['data']['results']:
+            self.assertIn(variable['key'], valid_inventory['vars'].keys())
