@@ -592,15 +592,20 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(project_data['status'], 'OK')
         self.assertEqual(project_data['branch'], 'master')
 
-        new_branch_var = dict(key='repo_branch', value='tags/new_branch')
+        new_branch_var = dict(key='repo_branch', value='tags/new_tag')
         self.make_bulk([
             self.get_mod_bulk('project', project_data['id'], new_branch_var)
         ])
         project_data = self.sync_project(project_data['id'])
         # Check updated brunch and revision
-        self.assertEqual(project_data['branch'], 'tags/new_branch')
+        self.assertEqual(project_data['branch'], 'tags/new_tag')
         self.assertEqual(project_data['revision'], self.revisions[1])
         # Return old branch
+        new_branch_var['value'] = 'new_branch'
+        self.make_bulk([
+            self.get_mod_bulk('project', project_data['id'], new_branch_var)
+        ])
+        project_data = self.sync_project(project_data['id'])
         new_branch_var['value'] = 'master'
         results = self.make_bulk([
             self.get_mod_bulk('project', project_data['id'], new_branch_var),
@@ -1071,7 +1076,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         repo.index.add(["other.yml", ".polemarch.yaml"])
         repo.index.commit("no message 2")
         second_revision = repo.head.object.hexsha
-        repo.create_tag('new_branch')
+        repo.create_tag('new_tag')
 
         # Test project
         self.revisions = [first_revision, second_revision]
