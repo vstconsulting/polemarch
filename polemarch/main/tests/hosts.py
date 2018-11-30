@@ -1,5 +1,4 @@
 from ._base import BaseTestCase, json
-from ..unittests.ansible import inventory_data, valid_inventory
 
 
 class InvBaseTestCase(BaseTestCase):
@@ -251,57 +250,3 @@ class InventoriesTestCase(InvBaseTestCase):
             'Host', dict(name='inv-host'),
             copy_check=dict(host='hosts')
         )
-
-    def test_import_inventory(self):
-        result = self.get_result(
-            'post', self.get_url('inventory', 'import_inventory'), 201,
-            data=json.dumps(dict(name='test-inventory', raw_data=inventory_data))
-        )
-        self.assertIn('inventory_id', result)
-        bulk_data = [
-            self.get_bulk('inventory', {}, 'get', pk=result['inventory_id']),
-            self.get_mod_bulk(
-                'inventory',
-                '<0[data][id]>',
-                {},
-                'all_hosts',
-                method='get'
-            ),
-            self.get_mod_bulk(
-                'inventory',
-                '<0[data][id]>',
-                {},
-                'all_groups',
-                method='get'
-            ),
-            self.get_mod_bulk(
-                'inventory',
-                '<0[data][id]>',
-                {},
-                'variables',
-                method='get'
-            ),
-        ]
-        results = self.make_bulk(bulk_data, 'put')
-        self.assertEqual(
-            results[0]['data']['id'],
-            result['inventory_id']
-        )
-        self.assertEqual(
-            results[1]['data']['count'],
-            len(valid_inventory['hosts'])
-        )
-        self.assertEqual(
-            results[2]['data']['count'],
-            len(valid_inventory['groups'])
-        )
-        self.assertEqual(
-            results[3]['data']['count'],
-            len(valid_inventory['vars'])
-        )
-        for host in results[1]['data']['results']:
-            self.assertIn(host['name'], valid_inventory['hosts'].keys())
-        for group in results[2]['data']['results']:
-            self.assertIn(group['name'], valid_inventory['groups'].keys())
-        for variable in results[3]['data']['results']:
-            self.assertIn(variable['key'], valid_inventory['vars'].keys())

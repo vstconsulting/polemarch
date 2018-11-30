@@ -448,6 +448,12 @@ class InventoryViewSet(_GroupMixin):
         serializer = sers.InventoryImportSerializer(data=request.data)
         serializer.is_valid(True)
         serializer.save()
+        if hasattr(self, 'nested_manager'):
+            data = {self.lookup_field: serializer.data['inventory_id']}
+            self._data_create(
+                self.prepare_request_data(data, False),
+                self.lookup_field
+            )
         return base.Response(serializer.data, status.HTTP_201_CREATED).resp
 
 
