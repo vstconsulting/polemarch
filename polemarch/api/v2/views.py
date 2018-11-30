@@ -2,7 +2,7 @@
 from collections import OrderedDict
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
-from rest_framework import exceptions as excepts, status
+from rest_framework import exceptions as excepts, status, permissions
 from rest_framework.authtoken import views as token_views
 from drf_yasg.utils import swagger_auto_schema
 from vstutils.api.permissions import StaffPermission
@@ -209,7 +209,8 @@ class UserViewSet(views.UserViewSet, base.CopyMixin):
 
     @deco.action(
         ["post", "delete", "get"], url_path="settings",
-        detail=yes, serializer_class=sers.UserSettingsSerializer
+        detail=yes, serializer_class=sers.UserSettingsSerializer,
+        permission_classes=(permissions.IsAuthenticated,)
     )
     def user_settings(self, request, *args, **kwargs):
         '''
@@ -222,7 +223,7 @@ class UserViewSet(views.UserViewSet, base.CopyMixin):
             obj.settings.save()
         return base.Response(obj.settings.data, status.HTTP_200_OK).resp
 
-    @deco.action(["post"], detail=yes)
+    @deco.action(["post"], detail=yes, permission_classes=(permissions.IsAuthenticated,))
     def change_password(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_object(), data=request.data)
         serializer.is_valid(raise_exception=True)
