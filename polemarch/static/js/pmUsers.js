@@ -12,28 +12,37 @@ tabSignal.connect("openapi.completed", function()
     user_settings.canEdit = true;
     user_settings.canEditInView = true;
     user_settings.methodEdit = 'post';
-    ['chartLineSettings', 'widgetSettings'].forEach(function (name) {
-        user_settings.schema.get.fields[name].format = 'inner_api_object';
-        user_settings.schema.get.fields[name].readOnly = false;
-    })
-    user_settings.schema.get.fields['autoupdateInterval'].readOnly = false;
-    user_settings.schema.get.fields['autoupdateInterval'].min = 1;
-    user_settings.schema.get.fields['autoupdateInterval'].default = guiDashboard.model.autoupdateInterval / 1000;
-    user_settings.schema.get.fields['autoupdateInterval'].title = 'Data autoupdate interval';
-    user_settings.schema.get.fields['autoupdateInterval'].format = 'time_interval';
 
-    user_settings.schema.edit = {
-        fields: $.extend(true, {}, user_settings.schema.get.fields),
-        operationId: 'user_settings_edit',
-        query_type: 'post',
+    if(user_settings && user_settings.method)
+    {
+        user_settings.method.post = 'edit';
     }
 
-    user_settings.method.post = 'edit';
+    try {
+        ['chartLineSettings', 'widgetSettings'].forEach(function (name) {
+            user_settings.schema.get.fields[name].format = 'inner_api_object';
+            user_settings.schema.get.fields[name].readOnly = false;
+        })
+        user_settings.schema.get.fields['autoupdateInterval'].readOnly = false;
+        user_settings.schema.get.fields['autoupdateInterval'].min = 1;
+        user_settings.schema.get.fields['autoupdateInterval'].default = guiDashboard.model.autoupdateInterval / 1000;
+        user_settings.schema.get.fields['autoupdateInterval'].title = 'Data autoupdate interval';
+        user_settings.schema.get.fields['autoupdateInterval'].format = 'time_interval';
+
+        user_settings.schema.edit = {
+            fields: $.extend(true, {}, user_settings.schema.get.fields),
+            operationId: 'user_settings_edit',
+            query_type: 'post',
+        }
+    }
+    catch(e){}
 
     let user = guiSchema.path['/user/'];
-    user.schema.new.fields['password'].format = "password";
-    user.schema.new.fields['password2'].format = "password";
-
+    try{
+        user.schema.new.fields['password'].format = "password";
+        user.schema.new.fields['password2'].format = "password";
+    }
+    catch(e){}
 })
 
 tabSignal.connect("openapi.schema.definition.ChangePassword", addSettingsToChangePassword);
