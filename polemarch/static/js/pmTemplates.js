@@ -1,3 +1,5 @@
+window.projPath = "/project/{pk}"
+
 gui_project_template = {
 
     getValue : function (hideReadOnly)

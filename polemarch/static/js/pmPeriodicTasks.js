@@ -1,5 +1,5 @@
 
-let projPath = "/project/{pk}"
+window.projPath = "/project/{pk}"
 
 function PeriodicTaskVariable_key_onInit(opt = {}, value, parent_object)
 {
