@@ -11,7 +11,7 @@ Vcs-Browser: https://gitlab.com/vstconsulting/polemarch.git
 
 Package: $(NAME)
 Architecture: amd64
-Depends: $${shlibs:Depends}, $${misc:Depends}, python3-virtualenv, libffi6, libssl-dev, sshpass, libpython3.5, git, libyaml-dev, libkrb5-dev, libssl-dev, libsasl2-dev, libldap2-dev
+Depends: $${shlibs:Depends}, $${misc:Depends}, python3-virtualenv, libffi6, libssl-dev, sshpass, libpython3.5, git, libyaml-dev, libkrb5-dev, libssl-dev, libsasl2-dev, libldap2-dev, mime-support
 Description: $(SUMMARY)
 $(DESCRIPTION)
 endef

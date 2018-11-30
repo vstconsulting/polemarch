@@ -1,7 +1,11 @@
 # pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
+import warnings
 from vstutils.utils import tmp_file_context, raise_context
-import git
+try:
+    import git
+except:  # nocv
+    warnings.warn("Git is not installed or have problems.")
 from ._base import _Base, os
 
 
@@ -38,6 +42,7 @@ class Git(_VCS):
         self._fetch_map = {
             1 << x: self._fetch_statuses[x] for x in range(8)
         }
+        self.target_branch = self.proj.vars.get('repo_branch', None)
 
     def get_repo(self):
         return git.Repo(self.path)
@@ -45,35 +50,46 @@ class Git(_VCS):
     def vsc_clone(self, *args, **kwargs):
         return git.Repo.clone_from(*args, **kwargs)
 
-    def vcs_update(self, repo, env):
+    @raise_context()
+    def _fetch_from_remote(self, repo, env):
         with repo.git.custom_environment(**env):
             kwargs = self.options.get("FETCH_KWARGS", dict())
-            fetch_result = repo.remotes.origin.pull(**kwargs)
+            return repo.remotes.origin.fetch(**kwargs)
+
+    def vcs_update(self, repo, env):
+        fetch_result = self._fetch_from_remote(repo, env)
         return fetch_result
 
     def get_branch_name(self):
         # pylint: disable=broad-except
         reponame = "waiting..."
         with raise_context():
-            reponame = self.get_repo().active_branch.name
+            repo = self.get_repo()
+            repo_branch = self.target_branch or 'ERROR'
+            if repo.head.is_detached and repo_branch.replace('tags/', '') in repo.tags:
+                return repo_branch
+            reponame = repo.active_branch.name
         return reponame
 
     def make_clone(self, env):
         kw = dict(**self.options.get("CLONE_KWARGS", dict()))
-        branch = self.proj.vars.get('repo_branch', None)
-        if branch:
-            kw['branch'] = branch
+        if self.target_branch:
+            kw['branch'] = self.target_branch.replace('tags/', '')
         repo = self.vsc_clone(self.proj.repository, self.path, env=env, **kw)
-        self.proj.variables.update_or_create(
-            key='repo_branch', defaults=dict(value=repo.active_branch.name)
-        )
+        with raise_context():
+            self.proj.variables.update_or_create(
+                key='repo_branch', defaults=dict(value=repo.active_branch.name)
+            )
         return repo, None
 
     def _get_or_create_repo(self, env):
         try:
             repo = self.get_repo()
-            branch = self.proj.vars.get('repo_branch', None)
-            if branch and repo.active_branch.name != branch:
+            branch = self.target_branch
+            with raise_context():
+                repo.git.checkout(branch)
+            is_not_detached = not repo.head.is_detached
+            if branch and is_not_detached and repo.active_branch.name != branch:
                 self.delete()
                 raise git.NoSuchPathError
         except git.NoSuchPathError:
@@ -82,7 +98,10 @@ class Git(_VCS):
 
     def make_update(self, env):
         repo = self._get_or_create_repo(env)
-        return repo, self.vcs_update(repo, env)
+        resutls = repo, self.vcs_update(repo, env)
+        with raise_context():
+            repo.git.checkout(self.target_branch)
+        return resutls
 
     def get_revision(self, *args, **kwargs):
         # pylint: disable=unused-argument

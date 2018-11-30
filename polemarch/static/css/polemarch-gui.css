@@ -172,7 +172,7 @@ body {
 .tr_status_offline .td_history_status,
 .tr_status_offline .td_project-history_status,
 .field_status_offline {
-    color: #var(--history-status-offline);
+    color: var(--history-status-offline);
 }
 
 .tr_status_interrupted .td_history_status,
@@ -311,29 +311,6 @@ body {
     display: block;
 }
 
-
-.bg-logo {
-    background-image: url(/static/img/logo/horizontal.png);
-    background-position: center center;
-    background-repeat: no-repeat;
-    -webkit-background-size:150px 40px;
-    -o-background-size: 150px 40px;
-    -moz-background-size:150px 40px;
-    background-size: 150px 40px;
-    display: block;
-    width:150px;
-    height: 40px;
-    margin:0px;
-    margin-top: 5px;
-    float: left;
-
-
-}
-
-.bg-logo {
-    display: block;
-    width:160px;
-}
 
 .text-logo {
     margin-left: auto;
