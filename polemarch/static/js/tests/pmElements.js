@@ -14,7 +14,7 @@ window.qunitTestsArray['guiElements.form_pm'] = {
             formData = {
                 title:"Deploy",
                 form:{
-                    'inventory' : {
+                    inventory : {
                         title:'inventory',
                         required:true,
                         format:'hybrid_autocomplete',
