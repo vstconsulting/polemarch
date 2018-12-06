@@ -235,7 +235,7 @@ tabSignal.connect('guiSkin.dark.init', function(obj)
         title:'History status delay',
         format:'color',
         type: "string",
-        default:"#F1FF00",
+        default:"#DBEA10",
         priority: 44,
         value:obj.guiSkin.value.history_status_delay,
         onchange:() => {
@@ -248,7 +248,7 @@ tabSignal.connect('guiSkin.dark.init', function(obj)
         title:'History status offline',
         format:'color',
         type: "string",
-        default:"#cccccc",
+        default:"#90C1C0",
         priority: 45,
         value:obj.guiSkin.value.history_status_offline,
         onchange:() => {
@@ -275,7 +275,7 @@ tabSignal.connect('guiSkin.dark.init', function(obj)
         title:'Project status new',
         format:'color',
         type: "string",
-        default:"#D2D2D0",
+        default:"#D48CCA",
         priority: 47,
         value:obj.guiSkin.value.project_status_new,
         onchange:() => {
