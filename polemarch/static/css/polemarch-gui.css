@@ -32,12 +32,12 @@
 
 .td_history_start_time, .td_history_stop_time,
 .td_project-history_start_time, .td_project-history_stop_time{
-    width:160px;
+    width:180px;
 }
 
 .td_history_status,
 .td_project-history_status{
-    width: 125px;
+    width: 140px;
 }
 
 @media (max-width: 1400px) {
@@ -102,7 +102,7 @@
 @media (max-width: 700px) {
     .td_history_start_time,
     .td_project-history_start_time {
-        width: 100px;
+        width: 120px;
     }
 }
 
