@@ -15,7 +15,7 @@ As you can see, Polemarch GUI provides user with 2 menus:
 * the first one is located in the left sidebar and it is aimed
   to provide user with navigation between main system objects, like projects, inventories, history records and ect.
 
-* the second one is located in the top right conner of browser window and it is aimed
+* the second one is located at the top of browser window and it is aimed
   to navigate user to API section, to user's page and to logout page.
 
 Also there are some widgets on content block of Dashboard page. User can customize Dashboard page as he wish.
@@ -117,7 +117,7 @@ Sublinks buttons:
 
 Action buttons:
 
-* **save** - |save_button_def|
+* **edit** - |edit_button_def|
 * **copy** - |copy_button_def|
 * **execute module** - this button opens "execute module" action page.
 * **execute playbook** - this button opens "execute plabook" action page.
@@ -126,14 +126,26 @@ Action buttons:
 * **remove** - |remove_button_def| project.
 
 .. |create_button_def| replace:: this button creates new
+.. |edit_button_def| replace:: this button turns on edit mod for this page.
 .. |save_button_def| replace:: this button saves all changes you have made on this page.
 .. |copy_button_def| replace:: this button opens "copy" action page.
 .. |set_owner_button_def| replace:: this button opens "set owner" action page.
 .. |remove_button_def| replace:: this button deletes
 
 
-If you update something in your GIT repository, don't forget to run sync in
-Polemarch for pulling your changes.
+If you want to edit values of some fields on any page in Polemarch, you should click on
+"Edit" button to activate edit mod.
+
+.. image:: gui_screenshots/test_project_1_edit.png
+
+As you can see, edit mod looks exactly the same as read only mod, except several points:
+
+* you have opportunity to change values of editable fields;
+* there is **save** button - |save_button_def|
+
+Now, let's back to edit mod of our project page.
+
+.. image:: gui_screenshots/test_project_1.png
 
 As you can see, now project's status is "NEW", so we need to click on "sync" button
 to get all needed data from your GIT project.
@@ -142,6 +154,9 @@ to get all needed data from your GIT project.
 .. image:: gui_screenshots/test_project_3.png
 
 After your project's status has been changed into "OK" you can confidently start working with Polemarch.
+
+ATTENTION! If you update something in your GIT repository, don't forget to run sync in
+Polemarch for pulling your changes.
 
 
 Module execution
@@ -240,7 +255,7 @@ Sublinks buttons:
 
 Action buttons:
 
-* **save** - |save_button_def|
+* **edit** - |edit_button_def|
 * **execute** - this button opens "execute template" action page.
 * **remove** - |remove_button_def| template.
 
@@ -372,7 +387,7 @@ Also there are several buttons here:
 
 Action buttons:
 
-* **save** - |save_button_def|
+* **edit** - |edit_button_def|
 * **execute** - this button opens "execute periodic task" action page.
 * **remove** - |remove_button_def| periodic task.
 
@@ -438,7 +453,7 @@ Sublinks buttons:
 
 Action buttons:
 
-* **save** - |save_button_def|
+* **edit** - |edit_button_def|
 * **copy** - |copy_button_def|
 * **set owner** - |set_owner_button_def|
 * **remove** - |remove_button_def| inventory.
@@ -492,7 +507,7 @@ Sublinks buttons:
 
 Action buttons:
 
-* **save** - |save_button_def|
+* **edit** - |edit_button_def|
 * **copy** - |copy_button_def|
 * **set owner** - |set_owner_button_def|
 * **remove** - |remove_button_def| group.
@@ -548,7 +563,7 @@ Sublinks buttons:
 
 Action buttons:
 
-* **save** - |save_button_def|
+* **edit** - |edit_button_def|
 * **copy** - |copy_button_def|
 * **set owner** - |set_owner_button_def|
 * **remove** - |remove_button_def| host.
@@ -761,17 +776,16 @@ After project creation you will see the ordinary project page:
 
 .. image:: gui_screenshots/create_project_with_polemarch_yaml_2.png
 
-Then you need to click on "sync" button. After project synchronization you will see the next page:
+Then you need to click on "sync" button. After project synchronization and page update you will see the next page:
 
 .. image:: gui_screenshots/create_project_with_polemarch_yaml_3.png
-.. image:: gui_screenshots/create_project_with_polemarch_yaml_4.png
 
 As you can see, all fields that we mentioned in the exmaple ``.polemarch.yaml`` were added
 to this web-form.
 
 Also templates from ``.polemarch.yaml`` were added to just created Polemarch project.
 
-.. image:: gui_screenshots/create_project_with_polemarch_yaml_5.png
+.. image:: gui_screenshots/create_project_with_polemarch_yaml_4.png
 
 Hooks
 -----
@@ -863,7 +877,7 @@ Sublinks buttons:
 
 Action buttons:
 
-* **save** - |save_button_def|
+* **edit** - |edit_button_def|
 * **copy** - |copy_button_def|
 * **change password** - this button opens "change password" action page.
 * **remove** - |remove_button_def| periodic task.
