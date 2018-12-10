@@ -54,7 +54,10 @@ class Git(_VCS):
     def _fetch_from_remote(self, repo, env):
         with repo.git.custom_environment(**env):
             kwargs = self.options.get("FETCH_KWARGS", dict())
-            return repo.remotes.origin.fetch(**kwargs)
+            fetch_method = repo.git.fetch
+            if not repo.head.is_detached:
+                fetch_method = repo.git.pull
+            return fetch_method(**kwargs)
 
     def vcs_update(self, repo, env):
         fetch_result = self._fetch_from_remote(repo, env)
