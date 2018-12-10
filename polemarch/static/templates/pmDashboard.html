@@ -160,7 +160,9 @@
                                          </div>
                                         </td>
                                         <td valuename="collapse">
-                                            <div class="form-control boolean-select <% if(guiDashboard.model.widgets[i][j].collapse){ %> selected <% } %>" <% if(guiDashboard.model.widgets[i][j].type==0){ %> onclick="$(this).toggleClass('selected');" onselectstart="return false" onmousedown="return false" <% } %>>
+                                            <div class="form-control boolean-select
+                                                <% if(guiDashboard.model.widgets[i][j].collapse){ %> selected <% } %>"
+                                                    <% if(guiDashboard.model.widgets[i][j].type==0){ %> onclick="$(this).toggleClass('selected');" onselectstart="return false" onmousedown="return false" <% } else { %> style="background-color: #eaedf0;" <% } %>>
                                                 <div class="ico-on fa fa-toggle-on" <% if(guiDashboard.model.widgets[i][j].type==1){ %> style="cursor: not-allowed!important;"<% } %>></div>
                                                 <div class="ico-off fa  fa-toggle-off" <% if(guiDashboard.model.widgets[i][j].type==1){ %> style="cursor: not-allowed!important;"<% } %>></div>
                                              </div>

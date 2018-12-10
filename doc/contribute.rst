@@ -48,7 +48,7 @@ Here is how to proceed:
 
    .. sourcecode:: bash
 
-      git clone https://gitlab.com/cepreu/polemarch.git
+      git clone https://gitlab.com/vstconsulting/polemarch.git
 
 6. Create a branch for your work named with number of issue:
 

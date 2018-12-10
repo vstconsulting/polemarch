@@ -32,17 +32,19 @@
 
 .td_history_start_time, .td_history_stop_time,
 .td_project-history_start_time, .td_project-history_stop_time{
-    width:160px;
+    width:180px;
 }
 
 .td_history_status,
 .td_project-history_status{
-    width: 125px;
+    width: 140px;
 }
 
 @media (max-width: 1400px) {
     .td_history_stop_time,
-    .td_project-history_stop_time {
+    .td_project-history_stop_time,
+    .td_project-periodic_task_schedule,
+    .td_project-periodic_task_type {
         display: none;
     }
 }
@@ -58,7 +60,9 @@
     .td_history_initiator,
     .td_project-history_initiator,
     .td_history_revision,
-    .td_project-history_revision {
+    .td_project-history_revision,
+    .td_project-periodic_task_template_opt,
+    .td_project-periodic_task_template {
         display: none;
     }
 }
@@ -73,7 +77,14 @@
 @media (max-width: 1000px) {
     .td_history_executor,
     .td_project-history_executor,
-    .td_hook_recipients {
+    .td_hook_recipients,
+    .td_project-periodic_task_inventory {
+        display: none;
+    }
+}
+
+@media (max-width: 900px) {
+    .td_project-periodic_task_mode {
         display: none;
     }
 }
@@ -81,7 +92,9 @@
 @media (max-width: 780px) {
     .td_history_project,
     .td_project-history_project,
-    .td_hook_when {
+    .td_hook_when,
+    .td_project-template_kind,
+    .td_project-periodic_task_kind {
         display: none;
     }
 }
@@ -89,13 +102,16 @@
 @media (max-width: 700px) {
     .td_history_start_time,
     .td_project-history_start_time {
-        width: 100px;
+        width: 120px;
     }
 }
 
 @media (max-width: 600px) {
     .td_history_start_time,
-    .td_project-history_start_time {
+    .td_project-history_start_time,
+    .td_project-template_options_list,
+    .td_project-periodic_task_save_result,
+    .td_project-module_path {
         display: none;
     }
 }
@@ -116,7 +132,9 @@
     .td_project-host_type,
     .td_project-group-host_type,
     .td_project-inventory-host_type,
-    .td_project-inventory-group-host_type{
+    .td_project-inventory-group-host_type,
+    .td_project-periodic_task_enabled,
+    .td_project-playbook_playbook {
         display: none;
     }
 }
@@ -153,11 +171,11 @@ body {
     --history-status-ok: #56E401;
     --history-status-error: #F61328;
     --history-status-interrupted: #B68CF3;
-    --history-status-delay: #F1FF00;
-    --history-status-offline: #cccccc;
+    --history-status-delay: #DBEA10;
+    --history-status-offline: #90C1C0;
     --history-status-run: #00D7FF;
 
-    --project-status-new: #D2D2D0;
+    --project-status-new: #D48CCA;
     --project-status-error: #F61328;
     --project-status-ok: #56E401;
     --project-status-wait-sync: #00D7FF;
