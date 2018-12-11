@@ -365,7 +365,7 @@ function addHistoryPrefetchBase(obj){
     {
         properties['executor']['prefetch'] = {
             __func__path: "get_prefetch_history_executor_path",
-            field_name: "email",
+            field_name: "username",
         }
     }
 
