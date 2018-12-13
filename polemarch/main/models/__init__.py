@@ -15,7 +15,7 @@ from vstutils.utils import raise_context
 
 from .vars import Variable
 from .hosts import Host, Group, Inventory
-from .projects import Project, Task, Module
+from .projects import Project, Task, Module, ProjectTemplate, list_to_choices
 from .users import BaseUser, UserGroup, ACLPermission, UserSettings
 from .tasks import PeriodicTask, History, HistoryLines, Template
 from .hooks import Hook
