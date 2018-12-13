@@ -871,7 +871,9 @@ class OneProjectTemplateSerializer(ProjectTemplateSerializer):
 
 
 class ProjectTemplateCreateSerializer(vst_serializers.VSTSerializer):
-    project_id = vst_fields.RedirectIntegerField(read_only=True, default=None, allow_null=True)
+    project_id = vst_fields.RedirectIntegerField(read_only=True,
+                                                 default=None,
+                                                 allow_null=True)
     name = serializers.CharField(required=False)
 
     class Meta:

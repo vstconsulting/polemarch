@@ -87,7 +87,8 @@ code_style:
       - issue_building
   only:
     changes:
-    - polemarch/**/*.{py,pyx}
+    - polemarch/main/**/*
+    - polemarch/api/**/*
     - requirements.txt
     - Makefile
     - tox.ini
