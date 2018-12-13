@@ -4,6 +4,7 @@ import shutil
 import uuid
 import six
 import git
+import requests
 from datetime import timedelta
 from django.utils.timezone import now
 from yaml import dump
@@ -136,6 +137,24 @@ test_yaml_view = {
         }
     }
 }
+
+project_template_response = '''
+---
+- id: 1
+  name: test_template_1
+  repository: git@test.repo.url:/path/to/project
+- id: 2
+  name: test_template_2
+  repository: http://test.repo.url/path/to/project.git
+- id: 3
+  name: test_template_3
+  description: |
+    Some text with
+    new
+    lines
+  type: TAR
+  repository: http://test.repo.url/path/to/project.tar.gz
+'''
 
 
 class Object(object):
@@ -1340,3 +1359,36 @@ class ProjectTestCase(BaseExecutionsTestCase):
             self.assertIn(group['name'], valid_inventory['groups'].keys())
         for variable in results[4]['data']['results']:
             self.assertIn(variable['key'], valid_inventory['vars'].keys())
+
+    def test_project_repos(self):
+        bulk_data = [
+            dict(data_type=['community_template'], method='get'),
+            dict(data_type=['community_template', 1], method='get'),
+            dict(data_type=['community_template', 2], method='get'),
+            dict(data_type=['community_template', 3], method='get'),
+            dict(data_type=['community_template', 3, 'use_it'], method='post'),
+            dict(data_type=['project', '<4[data][project_id]>'], method='get'),
+        ]
+        response = requests.Response()
+        response.status_code = 200
+        response._content = str(project_template_response).encode('utf-8')
+        with self.patch('requests.get', side_effect=[response]):
+            results = self.make_bulk(bulk_data, 'put')
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(results[0]['data']['count'], 3)
+        self.assertEqual(results[1]['data']['name'], 'test_template_1')
+        self.assertEqual(results[1]['data']['type'], 'GIT')
+        self.assertEqual(results[2]['data']['name'], 'test_template_2')
+        self.assertEqual(results[2]['data']['type'], 'GIT')
+        self.assertEqual(results[3]['data']['name'], 'test_template_3')
+        self.assertEqual(results[3]['data']['type'], 'TAR')
+        self.assertEqual(
+            results[3]['data']['description'], 'Some text with\nnew\nlines\n'
+        )
+        self.assertEqual(results[4]['status'], 201)
+        self.assertEqual(results[5]['status'], 200)
+        self.assertIn('test_template_3', results[5]['data']['name'])
+        self.assertEqual(
+            results[5]['data']['repository'],
+            'http://test.repo.url/path/to/project.tar.gz'
+        )

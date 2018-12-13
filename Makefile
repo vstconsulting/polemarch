@@ -14,7 +14,7 @@ NAME = $(NAMEBASE)
 VER = $(shell $(PY) -c 'import $(NAME); print($(NAME).__version__)')
 PROJECT_CTL = $(NAME)ctl
 MAIN_APP = main
-VSTUTILS_REQ = $(shell cat requirements.txt | grep vstutils | sed 's/\[.*\]/[doc]/')
+VSTUTILS_REQ = $(shell cat requirements-doc.txt | grep vstutils | sed 's/\[.*\]/[doc]/')
 VSTUTILS = $(VSTUTILS_REQ)
 PIPARGS = $(shell echo -n "--cache-dir=$$(pwd)/.pip-cache")
 ARCHIVE = $(NAME)-$(VER).tar.gz

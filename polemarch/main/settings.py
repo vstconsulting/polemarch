@@ -40,6 +40,7 @@ DEFAULT_API_URL = "/{}/{}".format(API_URL, VST_API_VERSION)
 API = {
     VST_API_VERSION: OrderedDict(
         project={'view': 'polemarch.api.v2.views.ProjectViewSet'},
+        community_template={'view': 'polemarch.api.v2.views.ProjectTemplateViewSet'},
         inventory={'view': 'polemarch.api.v2.views.InventoryViewSet'},
         group={'view': 'polemarch.api.v2.views.GroupViewSet'},
         host={'view': 'polemarch.api.v2.views.HostViewSet'},
@@ -57,6 +58,11 @@ PROJECT_GUI_MENU = [
         'name': 'Projects',
         'url': '/project',
         'span_class': 'fa fa-fort-awesome',
+    },
+    {
+        'name': 'Community',
+        'url': '/community_template',
+        'span_class': 'fa fa-cloud',
     },
     {
         'name': 'Inventories',
@@ -205,6 +211,10 @@ REPO_BACKENDS = {
         "BACKEND": "polemarch.main.repo.Tar",
     },
 }
+
+# Custom user repos
+DEFAULT_COMMUNITY_REPOS_URL = 'https://gitlab.com/vstconsulting/polemarch-community-repos/raw/master/projects.yaml'
+COMMUNITY_REPOS_URL = main.get('community_projects_url', fallback=DEFAULT_COMMUNITY_REPOS_URL)
 
 # RPC tasks settings
 TASKS_HANDLERS = {
