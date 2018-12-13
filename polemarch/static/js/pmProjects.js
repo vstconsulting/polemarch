@@ -142,11 +142,12 @@ gui_project = {
     {
         let thisObj = this;
         let extra_fields = $.extend(true, {}, this.model.data.execute_view_data.fields)
+        let execute_buttons = {};
         for(let i in this.model.data.execute_view_data.playbooks)
         {
             let val = this.model.data.execute_view_data.playbooks[i]
 
-            extra_fields[i] = {
+            execute_buttons[i] = {
                 title:val.title,
                 text:val.title,
                 description: val.help || val.description,
@@ -198,7 +199,11 @@ gui_project = {
                 extra_vars: {
                     title:"Execute parametrs",
                     format:'form',
-                    form:extra_fields
+                    form:extra_fields,
+                },
+                execute_buttons: {
+                    format:'form',
+                    form: execute_buttons,
                 }
             }
         }
