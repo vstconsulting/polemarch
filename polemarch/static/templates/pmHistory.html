@@ -8,12 +8,12 @@
     <%[ main_content_row %>
         <div class="container-fluid">
             <div class="history-mode row">
-            <section class="col history-LeftInfo">
+            <section class="col col-xl-8 history-LeftInfo" id="history-mode-section">
                 <div class="card card-info collapsed-card">
                     <div class="card-header with-border collapsed-card">
                         Inventory<br>
                         <div class="card-tools pull-right">
-                            <button type="button" class="btn btn-history-resize btn-sm btn-light btn-icon" onclick="$('.history-mode').toggleClass('history-fullsize');" >
+                            <button type="button" class="btn btn-history-resize btn-sm btn-light btn-icon" onclick="$('.history-mode').toggleClass('history-fullsize'); $('#history-mode-section').toggleClass('col-xl-8');" >
                                 <i class="fa fa-expand"></i>
                                 <i class="fa fa-compress"></i>
                             </button>
@@ -54,7 +54,7 @@
                                     <% } %>
                                 <~>
 
-                            <button type="button" class="btn btn-card-tool btn-history-resize btn-sm btn-light btn-icon" onclick="$('.history-mode').toggleClass('history-fullsize');" >
+                            <button type="button" class="btn btn-card-tool btn-history-resize btn-sm btn-light btn-icon" onclick="$('.history-mode').toggleClass('history-fullsize'); $('#history-mode-section').toggleClass('col-xl-8');" >
                                 <i class="fa fa-expand"></i>
                                 <i class="fa fa-compress"></i>
                             </button>
@@ -84,7 +84,7 @@
                     <div class="card-header with-border">
                         Task<br>
                         <div class="card-tools pull-right">
-                            <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon" onclick="$('.history-mode').toggleClass('history-fullsize');" ><i class="fa fa-compress"></i> </button>
+                            <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon" onclick="$('.history-mode').toggleClass('history-fullsize'); $('#history-mode-section').toggleClass('col-xl-8');" ><i class="fa fa-compress"></i> </button>
                         </div>
                     </div>
                     <div class="card-body">
