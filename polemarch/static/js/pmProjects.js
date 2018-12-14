@@ -231,3 +231,20 @@ tabSignal.connect("openapi.schema.schema", function(obj)
         obj.value.fields.data.hide_title = true;
     }
 })
+
+gui_community_template = {
+    getTitle: function () {
+        if (this.api.type == 'list')
+        {
+            return 'Community project samples'
+        }
+        else if(this.api.type == 'page')
+        {
+            return gui_page_object.getTitle.apply(this, arguments);
+        }
+        else
+        {
+            return gui_base_object.getTitle.apply(this, arguments);
+        }
+    }
+}
