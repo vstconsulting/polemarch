@@ -148,9 +148,8 @@ gui_project = {
             let val = this.model.data.execute_view_data.playbooks[i]
 
             execute_buttons[i] = {
-                title:val.title,
+                title:val.help || val.description,
                 text:val.title,
-                description: val.help || val.description,
                 format:'formButton',
                 value: i,
                 class:'btn-primary',
@@ -158,8 +157,11 @@ gui_project = {
                     let val = thisObj.polemarchYamlForm.getValue()
                     val.playbook = this.getValue()
 
-                    delete val.extra_vars[val.playbook]
-                    val.extra_vars = JSON.stringify(val.extra_vars);
+                    if(val && val.extra_vars)
+                    {
+                        delete val.extra_vars[val.playbook]
+                        val.extra_vars = JSON.stringify(val.extra_vars);
+                    }
 
                     return thisObj.executePlaybook(val)
                 }
@@ -196,15 +198,23 @@ gui_project = {
                         view_field: "name",
                     }
                 },
-                extra_vars: {
-                    title:"Execute parametrs",
-                    format:'form',
-                    form:extra_fields,
-                },
-                execute_buttons: {
-                    format:'form',
-                    form: execute_buttons,
-                }
+            }
+        }
+
+        if(!isEmptyObject(extra_fields))
+        {
+            formData.form['extra_vars'] = {
+                title:"Execute parameters",
+                format:'form',
+                form:extra_fields,
+            }
+        }
+
+        if(!isEmptyObject(execute_buttons))
+        {
+            formData.form['execute_buttons'] = {
+                format:'form',
+                form: execute_buttons,
             }
         }
 
