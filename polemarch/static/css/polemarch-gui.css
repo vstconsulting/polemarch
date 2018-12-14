@@ -132,7 +132,8 @@
     .td_project-inventory-host_type,
     .td_project-inventory-group-host_type,
     .td_project-periodic_task_enabled,
-    .td_project-playbook_playbook {
+    .td_project-playbook_playbook,
+    .td_community_template_type {
         display: none;
     }
 }
@@ -359,4 +360,8 @@ body {
         margin-top: 10px;
     }
 
+}
+
+.table_community_template .td_select_btn {
+    display: none;
 }
