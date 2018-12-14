@@ -21,5 +21,6 @@ index.html
 /polemarch.egg-info/
 /polemarch/projects/
 doc/_build
+/polemarch/doc
 test_screenshot.png
 .coverage.*
