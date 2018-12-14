@@ -49,7 +49,8 @@ window.qunitTestsArray['guiPaths.project'] = {
             let done = assert.async();
 
             let fieldsData = {
-                name:{value:rundomString(6)}
+                name:{value:rundomString(6)},
+                kind:{value:"Module"},
             }
 
             // @todo добавить проверку того что поля правильно меняются от значений других полей

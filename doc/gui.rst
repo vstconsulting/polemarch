@@ -15,7 +15,7 @@ As you can see, Polemarch GUI provides user with 2 menus:
 * the first one is located in the left sidebar and it is aimed
   to provide user with navigation between main system objects, like projects, inventories, history records and ect.
 
-* the second one is located in the top right conner of browser window and it is aimed
+* the second one is located at the top of browser window and it is aimed
   to navigate user to API section, to user's page and to logout page.
 
 Also there are some widgets on content block of Dashboard page. User can customize Dashboard page as he wish.
@@ -57,7 +57,7 @@ Let's look at the example of GIT project's creation:
 
 .. image:: gui_screenshots/create_project.png
 
-As you can see, the form of new project creation consist of 5 fields:
+As you can see, the form of new project creation consists of 5 fields:
 
 * **name** - name of your project.
 
@@ -117,7 +117,7 @@ Sublinks buttons:
 
 Action buttons:
 
-* **save** - |save_button_def|
+* **edit** - |edit_button_def|
 * **copy** - |copy_button_def|
 * **execute module** - this button opens "execute module" action page.
 * **execute playbook** - this button opens "execute plabook" action page.
@@ -126,14 +126,26 @@ Action buttons:
 * **remove** - |remove_button_def| project.
 
 .. |create_button_def| replace:: this button creates new
+.. |edit_button_def| replace:: this button turns on edit mod for this page.
 .. |save_button_def| replace:: this button saves all changes you have made on this page.
 .. |copy_button_def| replace:: this button opens "copy" action page.
 .. |set_owner_button_def| replace:: this button opens "set owner" action page.
 .. |remove_button_def| replace:: this button deletes
 
 
-If you update something in your GIT repository, don't forget to run sync in
-Polemarch for pulling your changes.
+If you want to edit values of some fields on any page in Polemarch, you should click on
+"Edit" button to activate edit mod.
+
+.. image:: gui_screenshots/test_project_1_edit.png
+
+As you can see, edit mod looks exactly the same as read only mod, except several points:
+
+* you have opportunity to change values of editable fields;
+* there is **save** button - |save_button_def|
+
+Now, let's back to edit mod of our project page.
+
+.. image:: gui_screenshots/test_project_1.png
 
 As you can see, now project's status is "NEW", so we need to click on "sync" button
 to get all needed data from your GIT project.
@@ -142,6 +154,9 @@ to get all needed data from your GIT project.
 .. image:: gui_screenshots/test_project_3.png
 
 After your project's status has been changed into "OK" you can confidently start working with Polemarch.
+
+ATTENTION! If you update something in your GIT repository, don't forget to run sync in
+Polemarch for pulling your changes.
 
 
 Module execution
@@ -166,7 +181,7 @@ Also there is only one button on this page:
 For example, let's execute module **shell** on **localhost** with argument **uptime**.
 To do it we need to add next fields:
 
-* **inventory** - it can be inventory from database or just list of hosts, that are separated by ",".
+* **inventory** - it can be inventory from Polemarch system or just list of hosts, that are separated by ",".
 * **group** - to which hosts from inventory execute this module.
 * **connection** - type of connection.
 * **args** - list of arguments for current module.
@@ -215,7 +230,7 @@ As you can see, there are several fields on this page:
 
 * **type** - type of template (MODULE or TASK).
 
-* **inventory** - it can be inventory from database or just list of hosts, that are separated by ",".
+* **inventory** - it can be inventory from Polemarch system or just list of hosts, that are separated by ",".
 
 * **playbook** - name of playbook, which template will use during execution.
 
@@ -240,7 +255,7 @@ Sublinks buttons:
 
 Action buttons:
 
-* **save** - |save_button_def|
+* **edit** - |edit_button_def|
 * **execute** - this button opens "execute template" action page.
 * **remove** - |remove_button_def| template.
 
@@ -328,7 +343,7 @@ To create periodic task click on "create" button on this page.
 
 .. image:: gui_screenshots/create_periodic_task_1.png
 
-As you can see, the form of new periodic task creation consist of following fields:
+As you can see, the form of new periodic task creation consists of following fields:
 
 * **name** - name of your periodic task.
 
@@ -336,7 +351,7 @@ As you can see, the form of new periodic task creation consist of following fiel
 
 * **mode** - name of module or playbook (for periodic tasks with PLAYBOOK/MODULE type only).
 
-* **inventory** - it can be inventory from database or just list of hosts, that are separated by ","
+* **inventory** - it can be inventory from Polemarch system or just list of hosts, that are separated by ","
   (for periodic tasks with PLAYBOOK/MODULE type only).
 
 * **template** - name of template (for periodic tasks with TEMPLATE type only).
@@ -372,7 +387,7 @@ Also there are several buttons here:
 
 Action buttons:
 
-* **save** - |save_button_def|
+* **edit** - |edit_button_def|
 * **execute** - this button opens "execute periodic task" action page.
 * **remove** - |remove_button_def| periodic task.
 
@@ -438,7 +453,7 @@ Sublinks buttons:
 
 Action buttons:
 
-* **save** - |save_button_def|
+* **edit** - |edit_button_def|
 * **copy** - |copy_button_def|
 * **set owner** - |set_owner_button_def|
 * **remove** - |remove_button_def| inventory.
@@ -464,7 +479,7 @@ We need to create group. To do it click on "create" button.
 
 .. image:: gui_screenshots/create_group.png
 
-As you can see, the form of new group creation consist of following fields:
+As you can see, the form of new group creation consists of following fields:
 
 * **name** - name of your group.
 
@@ -492,7 +507,7 @@ Sublinks buttons:
 
 Action buttons:
 
-* **save** - |save_button_def|
+* **edit** - |edit_button_def|
 * **copy** - |copy_button_def|
 * **set owner** - |set_owner_button_def|
 * **remove** - |remove_button_def| group.
@@ -518,7 +533,7 @@ We need to create host. To do it click on "create" button.
 
 .. image:: gui_screenshots/create_host.png
 
-As you can see, the form of new host creation consist of following fields:
+As you can see, the form of new host creation consists of following fields:
 
 * **name** - name of your host.
 
@@ -548,7 +563,7 @@ Sublinks buttons:
 
 Action buttons:
 
-* **save** - |save_button_def|
+* **edit** - |edit_button_def|
 * **copy** - |copy_button_def|
 * **set owner** - |set_owner_button_def|
 * **remove** - |remove_button_def| host.
@@ -578,7 +593,7 @@ To create variable click on "create" button:
 
 .. image:: gui_screenshots/test_host_variables_1.png
 
-As you can see, the form of new host variable creation consist of following fields:
+As you can see, the form of new host variable creation consists of following fields:
 
 * **key** - key of variable.
 
@@ -619,7 +634,7 @@ And click on "Import inventory" button. Then you will see the next page:
 
 .. image:: gui_screenshots/import_inventory_2.png
 
-As you can see, the form of "Import inventory" action consist of 2 fields:
+As you can see, the form of "Import inventory" action consists of 2 fields:
 
 * **name** - name of your inventory.
 * **inventory file** - content of your inventory file.
@@ -761,17 +776,94 @@ After project creation you will see the ordinary project page:
 
 .. image:: gui_screenshots/create_project_with_polemarch_yaml_2.png
 
-Then you need to click on "sync" button. After project synchronization you will see the next page:
+Then you need to click on "sync" button. After project synchronization and page update you will see the next page:
 
 .. image:: gui_screenshots/create_project_with_polemarch_yaml_3.png
-.. image:: gui_screenshots/create_project_with_polemarch_yaml_4.png
+.. image:: gui_screenshots/create_project_with_polemarch_yaml_3_1.png
 
 As you can see, all fields that we mentioned in the exmaple ``.polemarch.yaml`` were added
-to this web-form.
+to this web-form into section "Execute parameters". Values of all these fields will be
+used as ansible ``extra_vars`` parameter during task execution.
+
+The remaining fields mean following:
+
+* **inventory** - it can be inventory from Polemarch system or just list of hosts, that are separated by ",".
+* **user** - set it if your do not have ``ansible_user`` variable in your inventory.
+* **key file** - set it if your do not have ``ansible_ssh_private_key_file`` variable in your inventory.
+
+Button "execute title" will execute playbook "main.yml", as we mentioned in ``.polemarch.yaml`` file.
 
 Also templates from ``.polemarch.yaml`` were added to just created Polemarch project.
 
-.. image:: gui_screenshots/create_project_with_polemarch_yaml_5.png
+.. image:: gui_screenshots/create_project_with_polemarch_yaml_4.png
+
+Community project samples
+-------------------------
+
+Polemarch has his own list of community repositories, which provide you with stuff,
+that is able to deploy different services in extremely quick and convenient way.
+Community project sample is an entity, that clones repository from community list into your Polemarch.
+Some community project samples have only list of playbooks, but most have ``.polemarch.yaml`` file,
+that helps you to deploy tasks even faster.
+
+Let's look how it works on examples.
+
+Firstly, open page with community project samples list.
+
+.. image:: gui_screenshots/community_template.png
+
+As you can see, there is a table with list of community repositories,
+that consists of following columns:
+
+* **name** - name of community repository.
+* **type** - type of community repository.
+* **actions** - actions that you can execute on community repository.
+
+Let's open "WordPress" community repository page.
+
+.. image:: gui_screenshots/community_template_1.png
+
+As you can see, the community repository page consists of following fields:
+
+* **id** - id of community repository.
+* **name** - name of community repository.
+* **description** - Description of community repository.
+* **type** - type of community repository.
+* **repository** - url of community repository.
+
+Also there is only one action button on this page:
+
+* **use it** - this buttons open page of "use_it" action.
+
+Let's click on "use it" button.
+
+.. image:: gui_screenshots/community_template_2.png
+
+As you can see, this action page has only one field:
+
+* **name** - name of project, that will be clone of current community repository in your Polemarch.
+
+After "use_it" action execution you will see the page of just created project:
+
+.. image:: gui_screenshots/community_template_3.png
+
+As you can see value of field "repository" is the same as in "WordPress" community repository.
+
+Then you need to click on "sync" button. After project synchronization and page update you will see the next page:
+
+.. image:: gui_screenshots/community_template_4.png
+
+This page has "run playbook from" (because project has ``.polemarch.yaml`` file)
+and all that you need to do for WordPress deployment on your hosts is filling following fields:
+
+* **inventory** - it can be inventory from Polemarch system or just list of hosts, that are separated by ",".
+* **user** - set it if your do not have ``ansible_user`` variable in your inventory.
+* **key file** - set it if your do not have ``ansible_ssh_private_key_file`` variable in your inventory.
+* **mysql user** - name of MySQL user of your wordpress site's database.
+* **mysql password** - password of MySQL user of your wordpress site's database.
+
+After all required fields have been filled, you need to click on "deploy wordpress" button
+to start wordpress deployment on your hosts.
 
 Hooks
 -----
@@ -796,7 +888,7 @@ To create hook click on "create" button.
 
 .. image:: gui_screenshots/create_hook.png
 
-As you can see, the form of new hook creation consist of following fields:
+As you can see, the form of new hook creation consists of following fields:
 
 * **name** - name of your hook.
 
@@ -831,7 +923,7 @@ To create new user click on "create" button.
 
 .. image:: gui_screenshots/create_user.png
 
-As you can see, the form of new user creation consist of following fields:
+As you can see, the form of new user creation consists of following fields:
 
 * **username** - name of new user.
 
@@ -863,7 +955,7 @@ Sublinks buttons:
 
 Action buttons:
 
-* **save** - |save_button_def|
+* **edit** - |edit_button_def|
 * **copy** - |copy_button_def|
 * **change password** - this button opens "change password" action page.
 * **remove** - |remove_button_def| periodic task.
@@ -880,7 +972,7 @@ Let's look on "change password" action page.
 
 .. image:: gui_screenshots/change_password.png
 
-As you can see, the form of "change password" action consist of following fields:
+As you can see, the form of "change password" action consists of following fields:
 
 * **old password** - current password of user.
 

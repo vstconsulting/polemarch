@@ -635,6 +635,26 @@ class ProjectViewSet(_GroupMixin):
         return serializer.execute_module(request).resp
 
 
+class ProjectTemplateViewSet(base.ReadOnlyModelViewSet):
+    model = sers.models.ProjectTemplate
+    serializer_class = sers.ProjectTemplateSerializer
+    serializer_class_one = sers.OneProjectTemplateSerializer
+    action_serializers = {
+        'use_it': sers.ProjectTemplateCreateSerializer
+    }
+
+    @deco.subaction(
+        serializer_class=sers.ProjectTemplateCreateSerializer,
+        response_code=status.HTTP_201_CREATED,
+        **default_action
+    )
+    def use_it(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object(), data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return base.Response(serializer.data, status=status.HTTP_201_CREATED).resp
+
+
 class HookViewSet(base.ModelViewSetSet):
     '''
     retrieve:

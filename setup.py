@@ -217,4 +217,5 @@ kwargs = dict(
     },
 )
 
-make_setup(**kwargs)
+if __name__ == '__main__':
+    make_setup(**kwargs)

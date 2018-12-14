@@ -1,6 +1,7 @@
 # pylint: disable=no-member,unused-argument,too-many-lines
 from __future__ import unicode_literals
 import json
+import uuid
 from collections import OrderedDict
 import six
 from django.contrib.auth.models import User
@@ -795,16 +796,9 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
                   'owner',)
 
 
-def list_to_choices(items_list):
-    def handler(item):
-        return (item, item)
-
-    return list(map(handler, items_list))
-
-
 class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
-    types = list_to_choices(models.Project.repo_handlers.keys())
-    auth_types = list_to_choices(['NONE', 'KEY', 'PASSWORD'])
+    types = models.list_to_choices(models.Project.repo_handlers.keys())
+    auth_types = models.list_to_choices(['NONE', 'KEY', 'PASSWORD'])
 
     status = vst_fields.VSTCharField(read_only=True)
     type = serializers.ChoiceField(choices=types, default='MANUAL', label='Repo type')
@@ -850,6 +844,66 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
             key = 'repo_{}'.format(repo_auth_type.lower())
             instance.variables.create(key=key, value=repo_auth_data)
         return instance
+
+
+class ProjectTemplateSerializer(vst_serializers.VSTSerializer):
+
+    class Meta:
+        model = models.ProjectTemplate
+        fields = (
+            'id',
+            'name',
+            'type',
+        )
+
+
+class OneProjectTemplateSerializer(ProjectTemplateSerializer):
+
+    class Meta:
+        model = models.ProjectTemplate
+        fields = (
+            'id',
+            'name',
+            'description',
+            'type',
+            'repository',
+        )
+
+
+class ProjectTemplateCreateSerializer(vst_serializers.VSTSerializer):
+    project_id = vst_fields.RedirectIntegerField(read_only=True,
+                                                 default=None,
+                                                 allow_null=True)
+    name = serializers.CharField(required=False)
+
+    class Meta:
+        model = models.ProjectTemplate
+        fields = (
+            'project_id',
+            'name',
+        )
+
+    def update(self, instance, validated_data):
+        validated_data['name'] = validated_data.get(
+            'name', '{} {}'.format(instance.name, uuid.uuid1())
+        )
+        data = dict(
+            name=validated_data['name'],
+            repository=instance.repository,
+            type=instance.type,
+            repo_auth=instance.repo_auth,
+            auth_data=instance.auth_data or '',
+        )
+        serializer = ProjectCreateMasterSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return serializer.instance
+
+    def to_representation(self, instance):
+        return {
+            'name': instance.name,
+            'project_id': instance.id
+        }
 
 
 class ProjectSerializer(_InventoryOperations):

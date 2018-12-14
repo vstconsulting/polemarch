@@ -6,12 +6,16 @@ import logging
 import traceback
 import uuid
 import six
+import requests
 from docutils.core import publish_parts as rst_gen
 from markdown2 import Markdown
 from django.conf import settings
 from django.db.models import Q
 from django.core.validators import ValidationError
+from django.core.cache import caches
 from vstutils.utils import ModelHandlers, raise_context
+# pylint: disable=no-name-in-module
+from vstutils import custom_model
 from yaml import load
 try:
     from yaml import CLoader as Loader
@@ -27,6 +31,13 @@ from ..utils import AnsibleModules, AnsibleConfigParser, SubCacheInterface
 
 
 logger = logging.getLogger("polemarch")
+
+
+def list_to_choices(items_list):
+    def handler(item):
+        return (item, item)
+
+    return list(map(handler, items_list))
 
 
 class ProjectQuerySet(AbstractVarsQuerySet):
@@ -379,3 +390,38 @@ class Module(BModel):
         if not data:
             data = self._get_module_data_from_cli()
         return data
+
+
+class ProjectTemplate(custom_model.FileModel):
+    _template_types = (t for t in Project.repo_handlers.keys() if t != 'MANUAL')
+    _auth_types = ['NONE', 'KEY', 'PASSWORD']
+
+    id = custom_model.IntegerField(primary_key=True)
+    name = custom_model.CharField(max_length=1024)
+    description = custom_model.TextField()
+    repository = custom_model.CharField(max_length=2*1024)
+    type = custom_model.CharField(max_length=256,
+                                  choices=list_to_choices(_template_types),
+                                  default='GIT')
+    repo_auth = custom_model.CharField(max_length=256,
+                                       choices=list_to_choices(_auth_types),
+                                       default='NONE')
+    auth_data = custom_model.TextField(blank=True, null=True, default=None)
+
+    class Meta:
+        managed = False
+
+    @classmethod
+    def load_file_data(cls):
+        cache = caches["default"]
+        cache_key = 'community_projects_data'
+        data = cache.get(cache_key) or []
+        if not data:
+            response = requests.get(getattr(settings, 'COMMUNITY_REPOS_URL', ''))
+            if response.status_code == 200:
+                data = response.text
+                data = cache.get_or_set(cache_key, data)
+        return data
+
+    def __unicode__(self):  # nocv
+        return str('{} [{}]'.format(self.name, self.repository))

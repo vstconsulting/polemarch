@@ -87,7 +87,8 @@ code_style:
       - issue_building
   only:
     changes:
-    - polemarch/**/*.{py,pyx}
+    - polemarch/main/**/*
+    - polemarch/api/**/*
     - requirements.txt
     - Makefile
     - tox.ini
@@ -124,7 +125,7 @@ py36-install:
   image: onegreyonewhite/tox:ubuntu
   script:
    - cat /etc/hosts
-   - tox ${TOX_ARGS} -e deb RELEASE=${CI_BUILD_ID} RELOCATE_BIN=/usr/local/bin/venvctrl-relocate INSTALL_PY=python3
+   - tox ${TOX_ARGS} -e deb RELEASE=${CI_BUILD_ID} RELOCATE_BIN=/usr/local/bin/venvctrl-relocate
    - echo "echo 'hello'" > /bin/systemctl
    - sudo apt update
    - sudo apt install ./dist/*.deb -y -q
@@ -227,7 +228,7 @@ release_deb:
     - $PYPI_UPLOAD_PASSWORD
   image: onegreyonewhite/tox:ubuntu
   script:
-   - make test ENVS=deb INSTALL_PY=python3
+   - make test ENVS=deb
   allow_failure: false
   artifacts:
     name: "release-deb-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"

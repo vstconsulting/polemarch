@@ -142,14 +142,14 @@ gui_project = {
     {
         let thisObj = this;
         let extra_fields = $.extend(true, {}, this.model.data.execute_view_data.fields)
+        let execute_buttons = {};
         for(let i in this.model.data.execute_view_data.playbooks)
         {
             let val = this.model.data.execute_view_data.playbooks[i]
 
-            extra_fields[i] = {
-                title:val.title,
+            execute_buttons[i] = {
+                title:val.help || val.description,
                 text:val.title,
-                description: val.help || val.description,
                 format:'formButton',
                 value: i,
                 class:'btn-primary',
@@ -157,8 +157,11 @@ gui_project = {
                     let val = thisObj.polemarchYamlForm.getValue()
                     val.playbook = this.getValue()
 
-                    delete val.extra_vars[val.playbook]
-                    val.extra_vars = JSON.stringify(val.extra_vars);
+                    if(val && val.extra_vars)
+                    {
+                        delete val.extra_vars[val.playbook]
+                        val.extra_vars = JSON.stringify(val.extra_vars);
+                    }
 
                     return thisObj.executePlaybook(val)
                 }
@@ -195,11 +198,23 @@ gui_project = {
                         view_field: "name",
                     }
                 },
-                extra_vars: {
-                    title:"Execute parametrs",
-                    format:'form',
-                    form:extra_fields
-                }
+            }
+        }
+
+        if(!isEmptyObject(extra_fields))
+        {
+            formData.form['extra_vars'] = {
+                title:"Execute parameters",
+                format:'form',
+                form:extra_fields,
+            }
+        }
+
+        if(!isEmptyObject(execute_buttons))
+        {
+            formData.form['execute_buttons'] = {
+                format:'form',
+                form: execute_buttons,
             }
         }
 
@@ -216,3 +231,20 @@ tabSignal.connect("openapi.schema.schema", function(obj)
         obj.value.fields.data.hide_title = true;
     }
 })
+
+gui_community_template = {
+    getTitle: function () {
+        if (this.api.type == 'list')
+        {
+            return 'Community project samples'
+        }
+        else if(this.api.type == 'page')
+        {
+            return gui_page_object.getTitle.apply(this, arguments);
+        }
+        else
+        {
+            return gui_base_object.getTitle.apply(this, arguments);
+        }
+    }
+}

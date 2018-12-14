@@ -1,7 +1,7 @@
-window.qunitTestsArray['guiElements.form'] = {
+window.qunitTestsArray['guiElements.form_pm'] = {
     test:function()
     {
-        syncQUnit.addTest('guiElements.form', function ( assert )
+        syncQUnit.addTest('guiElements.form_pm', function ( assert )
         {
             let element;
             let formData;
@@ -14,7 +14,7 @@ window.qunitTestsArray['guiElements.form'] = {
             formData = {
                 title:"Deploy",
                 form:{
-                    'inventory' : {
+                    inventory : {
                         title:'inventory',
                         required:true,
                         format:'hybrid_autocomplete',
