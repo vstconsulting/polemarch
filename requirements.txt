@@ -1,16 +1,13 @@
 # Main
 vstutils[rpc,ldap,doc,prod]==1.3.7
 docutils==0.14
-markdown2==2.3.6
-
-# API
-jsonfield==2.0.2
+markdown2==2.3.7
 
 # Repo types
 gitpython==2.1.11
 
 # Hooks
-requests==2.20.0
+requests==2.21.0
 
 # Ansible required packages
 polemarch-ansible>=1.1.0,<1.2
