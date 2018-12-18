@@ -1124,7 +1124,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(project_data['revision'], 'ERROR')
         self.assertEqual(project_data['branch'], 'waiting...')
 
-    def test_complex(self):
+    def test_complex(self):  # update test for new yaml based inv generator
         bulk_data = self.get_complex_data()
         # additionaly test hooks
         self.hook_model.objects.all().delete()
