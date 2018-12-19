@@ -101,6 +101,11 @@ py27-install:
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
 
+py35-coverage:
+  <<: *branch_tests
+  variables:
+    TOX_ENVS: "$CI_BUILD_NAME"
+
 py36-install:
   <<: *branch_tests
   variables:
@@ -200,7 +205,7 @@ publish_pypi:
     variables:
       - $PYPI_UPLOAD_PASSWORD
   script:
-  - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
+  - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz dist/*.whl
 
 # DEPRECATED
 release_rpm:
