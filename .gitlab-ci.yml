@@ -112,7 +112,7 @@ py36-install:
   <<: *packing-test
   script:
    - cat /etc/hosts
-   - tox ${TOX_ARGS} -e rpm RELEASE=${CI_BUILD_ID}
+   - tox ${TOX_ARGS} -c tox_build.ini -e py27-rpm RELEASE=${CI_BUILD_ID}
    - sudo yum install dist/*.rpm -y -q
    - sudo cat test_settings.ini > /etc/polemarch/settings.ini
    - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
@@ -125,7 +125,7 @@ py36-install:
   image: onegreyonewhite/tox:ubuntu
   script:
    - cat /etc/hosts
-   - tox ${TOX_ARGS} -e deb RELEASE=${CI_BUILD_ID} RELOCATE_BIN=/usr/local/bin/venvctrl-relocate
+   - tox ${TOX_ARGS} -c tox_build.ini -e py27-deb RELEASE=${CI_BUILD_ID} RELOCATE_BIN=/usr/local/bin/venvctrl-relocate
    - echo "echo 'hello'" > /bin/systemctl
    - sudo apt update
    - sudo apt install ./dist/*.deb -y -q
@@ -211,7 +211,7 @@ release_rpm:
     variables:
     - $PYPI_UPLOAD_PASSWORD
   script:
-   - make test ENVS=rpm
+   - tox ${TOX_ARGS} -c tox_build.ini -e py27-rpm
   allow_failure: false
   artifacts:
     name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
@@ -228,7 +228,7 @@ release_deb:
     - $PYPI_UPLOAD_PASSWORD
   image: onegreyonewhite/tox:ubuntu
   script:
-   - make test ENVS=deb
+   - tox ${TOX_ARGS} -c tox_build.ini -e py27-deb
   allow_failure: false
   artifacts:
     name: "release-deb-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
