@@ -138,7 +138,7 @@ class Inventory(AbstractModel):
 
     _to_yaml_kwargs = dict(
         Dumper=InventoryDumper,
-        indent=4,
+        indent=2,
         explicit_start=True,
         default_flow_style=False,
         allow_unicode=True
