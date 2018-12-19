@@ -39,6 +39,7 @@ BUILD_DIR= $(TMPDIR)
 PREBUILD_DIR = $(BUILD_DIR)/$(INSTALL_DIR)
 PREBUILD_BINDIR = $(BUILD_DIR)/$(INSTALL_BINDIR)
 SOURCE_DIR = $(shell pwd)
+COMPILE_DIR = $(shell echo -n "$$(pwd)/dist")
 COMPOSE = docker-compose-testrun.yml
 COMPOSE_ARGS = --abort-on-container-exit
 COMPLEX_TESTS_COMPOSE = docker-compose-tests.yml
@@ -90,12 +91,17 @@ build: build-clean print_vars
 	-rm -rf dist
 	$(PY) setup.py sdist -v
 
-compile: build-clean print_vars
-	-rm -rf dist
+pre_compile: build-clean print_vars
 	find ./$(NAME) -name "*.c" -print0 | xargs -0 rm -rf
 	-rm -rf polemarch/doc/*
 	$(PIP) install -U $(VSTUTILS)
+
+compile: pre_compile
+	-rm -rf dist
 	$(PY) setup.py compile -v
+
+wheel: pre_compile
+	$(PY) setup.py bdist_wheel -v -d $(COMPILE_DIR)
 
 prebuild: print_vars
 	# Create virtualenv
