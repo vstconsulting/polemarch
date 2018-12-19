@@ -208,10 +208,13 @@ class AnsibleCommand(PMObject):
     def path_to_ansible(self):
         return self.pm_ansible(self.command_type)
 
+    def get_hidden_vars(self):
+        return self.inventory_object.hidden_vars
+
     def hide_passwords(self, raw):
         regex = r'|'.join((
-            r"(?<=" + hide + r"=).{1,}?(?=[\n\t\s])"
-            for hide in self.inventory_object.hidden_vars
+            r"(?<=" + hide + r":\s).{1,}?(?=[\n\t\s])"
+            for hide in self.get_hidden_vars()
         ))
         subst = "[~~ENCRYPTED~~]"
         raw = re.sub(regex, subst, raw, 0, re.MULTILINE)

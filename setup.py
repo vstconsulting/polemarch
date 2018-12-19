@@ -269,7 +269,6 @@ ext_list = [
     "polemarch.main.models.users",
     "polemarch.main.models.utils",
     "polemarch.main.models.vars",
-    "polemarch.main.templatetags.inventories",
     'polemarch.main.settings',
     'polemarch.main.hooks.base',
     'polemarch.main.hooks.http',
