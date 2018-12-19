@@ -2,9 +2,9 @@
 from __future__ import unicode_literals
 
 import logging
+import six
 from django.db.models import Q
 from vstutils.utils import get_render
-
 try:
     from yaml import dump as to_yaml, CDumper as Dumper
 except ImportError:
@@ -19,6 +19,12 @@ from ..validators import RegexValidator
 logger = logging.getLogger("polemarch")
 
 
+class InventoryDumper(Dumper):
+    """
+    Yaml Dumper class for PyYAML
+    """
+
+
 # Helpfull methods
 def _get_strings(objects, keys=None, strings=None):
     keys = keys if keys else list()
@@ -30,23 +36,20 @@ def _get_strings(objects, keys=None, strings=None):
         strings.append(string)
     return strings, keys
 
+
 def _get_dict(objects, keys=None, dicts=None):
     keys = keys if keys else list()
     dicts = dicts if dicts else dict()
     for obj in objects:
-        one_dict, obj_keys, name = obj.toDict()
+        one_dict, obj_keys = obj.toDict()
         if obj_keys:
             keys += obj_keys
         isGroup = isinstance(obj, Group)
-        if isGroup and obj.vars:
-            one_dict['vars'] = obj.vars
         one_dict = {obj.name: one_dict} if isGroup else one_dict
         dicts.update(one_dict)
 
     dicts = {'hosts': dicts} if not isGroup else {'children': dicts}
     return dicts, keys
-    # name = name if name else 'hosts'
-    # return {name: dicts}, keys
 
 
 # Helpfull exceptions
@@ -90,10 +93,10 @@ class Host(AbstractModel):
         hvars, key = self.get_generated_vars()
         key = [key] if key is not None else []
         if hvars:
-            data = {self.name: hvars}
+            data = {self.name: dict(hvars)}
         else:
             data = {self.name: None}
-        return data, key, None
+        return data, key
 
 
 class GroupQuerySet(AbstractVarsQuerySet):
@@ -153,11 +156,11 @@ class Group(AbstractModel):
         else:
             objs = self.hosts.all()
         groups_dict, obj_keys = _get_dict(list(objs), keys)
+        if self.vars:
+            groups_dict['vars'] = dict(hvars)
         if keys:
             keys += obj_keys
-        return groups_dict, keys, self.name
-
-        pass
+        return groups_dict, keys
 
 
 class Inventory(AbstractModel):
@@ -214,17 +217,24 @@ class Inventory(AbstractModel):
         groups_dicts, keys = _get_dict(list(groups), keys)
         inv['all']['hosts'] = hosts_dicts
         inv['all']['children'] = groups_dicts
-        inv['all']['vars'] = self.vars
-        Dumper.add_representer(
+        inv['all']['vars'] = dict(hvars)
+        InventoryDumper.add_representer(
             type(None),
             lambda dumper, value: dumper.represent_scalar(u'tag:yaml.org,2002:null', '')
         )
+
+        InventoryDumper.add_representer(
+            type(six.text_type),
+            lambda dumper, value: dumper.represent_scalar(u'tag:yaml.org,2002:str', value)
+        )
         to_yaml_kwargs = dict(
-            Dumper=Dumper, indent=4, explicit_start=True, default_flow_style=False
+            Dumper=InventoryDumper,
+            indent=4,
+            explicit_start=True,
+            default_flow_style=False,
         )
         inv_text = to_yaml(inv, **to_yaml_kwargs)
-        print(inv_text)
-        pass
+        return inv_text, keys
 
     @property
     def all_groups(self):
