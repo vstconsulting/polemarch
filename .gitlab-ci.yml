@@ -183,6 +183,7 @@ pages:
 
 release_pypi:
   stage: release
+  image: onegreyonewhite/tox:centos6
   only:
     refs:
     - tags
