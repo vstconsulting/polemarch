@@ -40,10 +40,6 @@ gui_project_template = {
                 data_field[value] = template_data[value];
                 delete template_data[value];
             }
-            else
-            {
-                data_field[value] = "";
-            }
         })
 
         if(!data_field.vars)
@@ -1646,6 +1642,7 @@ function OneTemplate_module_callback(fieldObj, newValue)
                 value_field:'name',
                 view_field:'path',
             },
+            required: true,
         };
     }
     else
@@ -1667,9 +1664,9 @@ function OneTemplate_playbook_callback(fieldObj, newValue)
                 list_obj:projPath + "/playbook/",
                 value_field:'playbook',
                 view_field:'playbook',
-            }
+            },
+            required: true,
         };
-        obj.required = true;
     }
     else
     {
@@ -1689,7 +1686,8 @@ tabSignal.connect("openapi.schema.definition.OneTemplate", function(obj) {
     properties.inventory = {
         name: 'inventory',
         title: 'Inventory',
-        required: true,
+        enable_button: true,
+        enable_button_tooltip: disabled_inv_text,
         type: 'string',
         format: 'hybrid_autocomplete',
         dynamic_properties: {
@@ -1721,6 +1719,7 @@ tabSignal.connect("openapi.schema.definition.OneTemplate", function(obj) {
         title: 'Module',
         type: 'string',
         format: 'dynamic',
+        minLength: 1,
         parent_field: 'kind',
         dynamic_properties: {
             __func__callback: 'OneTemplate_module_callback',
@@ -1743,6 +1742,7 @@ tabSignal.connect("openapi.schema.definition.OneTemplate", function(obj) {
         title: 'Playbook',
         type: 'string',
         format: 'dynamic',
+        minLength: 1,
         parent_field: 'kind',
         dynamic_properties: {
             __func__callback: 'OneTemplate_playbook_callback',

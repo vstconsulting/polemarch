@@ -869,25 +869,17 @@ class ProjectTestCase(BaseExecutionsTestCase):
         invalid_options_template['options'] = 'options'
         invalid_override_template = dict(**template_playbook)
         invalid_override_template['options'] = dict(test=dict(inventory='some_ovveride'))
-        invalid_template = dict(**template_playbook)
-        invalid_template['data'] = dict(**template_playbook['data'])
-        del invalid_template['data']['inventory']
         bulk_data = [
-            self.get_mod_bulk('project', pk, invalid_template, 'template'),
             self.get_mod_bulk('project', pk, invalid_type_template, 'template'),
             self.get_mod_bulk('project', pk, invalid_options_template, 'template'),
             self.get_mod_bulk('project', pk, invalid_override_template, 'template'),
         ]
         results = self.make_bulk(bulk_data, 'put')
         self.assertEqual(results[0]['status'], 400)
-        self.assertEqual(
-            results[0]['data']['detail']['inventory'], ["Inventory have to set."]
-        )
         self.assertEqual(results[1]['status'], 400)
         self.assertEqual(results[2]['status'], 400)
-        self.assertEqual(results[3]['status'], 400)
         self.assertEqual(
-            results[3]['data']['detail']['inventory'],
+            results[2]['data']['detail']['inventory'],
             ["Disallowed to override inventory."]
         )
 
