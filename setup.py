@@ -288,8 +288,7 @@ kwargs = dict(
     ext_modules_list=ext_list,
     install_requires=[
     ] +
-    load_requirements('requirements.txt', os.getcwd()) +
-    load_requirements('requirements-doc.txt', os.getcwd()),
+    load_requirements('requirements.txt', os.getcwd()),
     extras_require={
         'test': load_requirements('requirements-test.txt', os.getcwd()),
     },
