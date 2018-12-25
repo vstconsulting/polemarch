@@ -51,6 +51,7 @@ window.qunitTestsArray['guiPaths.project'] = {
             let fieldsData = {
                 name:{value:rundomString(6)},
                 kind:{value:"Module"},
+                module: {value: "ping"},
             }
 
             // @todo добавить проверку того что поля правильно меняются от значений других полей

@@ -160,19 +160,6 @@ def validate_template_keys(instance, **kwargs):  # nocv
 
 
 @receiver(signals.pre_save, sender=Template)
-def validate_template_executes(instance, **kwargs):
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
-        return
-    if instance.kind in ["Host", "Group"]:
-        return  # nocv
-    errors = {}
-    if "inventory" not in instance.data.keys():
-        errors["inventory"] = "Inventory have to set."
-    if errors:
-        raise ValidationError(errors)
-
-
-@receiver(signals.pre_save, sender=Template)
 def validate_template_args(instance, **kwargs):
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
