@@ -1,5 +1,6 @@
 PY = python2
 PIP = $(PY) -m pip
+PY_VERSION = $(shell $(PY) --version 2>&1 | tail -c +8)
 PYTHON_BIN = $(shell $(PY) -c 'import sys, os; print(os.path.dirname(sys.executable))')
 RELOCATE_BIN = $(PYTHON_BIN)/venvctrl-relocate
 LOC_TEST_ENVS = py27-install,py36-install,flake,pylint
@@ -46,6 +47,7 @@ COMPLEX_TESTS_COMPOSE = docker-compose-tests.yml
 COMPLEX_TESTS_COMPOSE_ARGS = '--abort-on-container-exit --build'
 define VARS_STR
 PY=$(PY)
+PY_VERSION=$(PY_VERSION)
 PIP=$(PIP)
 PYTHON_BIN=$(PYTHON_BIN)
 RELOCATE_BIN=$(RELOCATE_BIN)
@@ -101,7 +103,7 @@ compile: pre_compile
 	$(PY) setup.py compile -v
 
 wheel: pre_compile
-	$(PY) setup.py bdist_wheel -v -d $(COMPILE_DIR)
+	$(PY) setup.py bdist_wheel -v --dist-dir $(COMPILE_DIR) --bdist-dir /tmp/build_$(NAME)/$(PY_VERSION)/
 
 prebuild: print_vars
 	# Create virtualenv
