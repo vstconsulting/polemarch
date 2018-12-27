@@ -103,6 +103,7 @@ compile: pre_compile
 	$(PY) setup.py compile -v
 
 wheel: pre_compile
+	$(PY) setup.py compile_docs -v
 	$(PY) setup.py bdist_wheel -v --dist-dir $(COMPILE_DIR) --bdist-dir /tmp/build_$(NAME)/$(PY_VERSION)/
 
 prebuild: print_vars

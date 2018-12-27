@@ -15,6 +15,8 @@ Contact us on `any questions
 or `report bugs
 <https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in>`_.
 
+Official site: http://www.polemarch.org/
+
 We also help you via:
 
 `Twitter

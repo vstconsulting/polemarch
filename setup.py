@@ -27,6 +27,9 @@ except ImportError:
     has_sphinx = False
 
 
+is_help = any([a for a in ['-h', '--help'] if a in sys.argv])
+
+
 def get_discription(file_path='README.rst', folder=os.getcwd()):
     with open("{}/{}".format(folder, file_path)) as readme:
         return readme.read()
@@ -71,7 +74,8 @@ def make_extensions(extensions_list):
     if not isinstance(extensions_list, list):
         raise Exception("Extension list should be `list`.")
 
-    clear_old_extentions(extensions_list)
+    if not is_help:
+        clear_old_extentions(extensions_list)
 
     extensions_dict = {}
     for ext in extensions_list:
@@ -88,17 +92,19 @@ def make_extensions(extensions_list):
         if files:
             extensions_dict[module_name] = files
 
+    extra_compile_args = [
+        "-fno-strict-aliasing",
+        "-fno-var-tracking-assignments",
+        "-O2", "-pipe", "-std=c99"
+    ]
     ext_modules = list(
-        Extension(
-            m, f,
-            extra_compile_args=["-O1"]
-        )
+        Extension(m, f, extra_compile_args=extra_compile_args)
         for m, f in extensions_dict.items()
     )
     ext_count = len(ext_modules)
     nthreads = ext_count if ext_count < 10 else 10
 
-    if any([a for a in ['-h', '--help'] if a in sys.argv]):
+    if is_help:
         pass
     elif has_cython and ('compile' in sys.argv or 'bdist_wheel' in sys.argv):
         cy_kwargs = dict(
