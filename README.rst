@@ -44,6 +44,7 @@ Features
 * support of hosts groups and groups hierarchy;
 * support of multi user connection;
 * support of `hooks <https://polemarch.readthedocs.io/en/latest/gui.html#hooks>`_;
+* community `project samples <https://gitlab.com/vstconsulting/polemarch-community-repos>`_;
 * user friendly interface.
 
 Quickstart

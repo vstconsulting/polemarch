@@ -11,7 +11,7 @@ from yaml import dump
 from ._base import BaseTestCase, os
 from ..tasks import ScheduledTask
 from ..unittests.ansible import inventory_data, valid_inventory
-
+from yaml import load as from_yaml, Loader
 
 test_ansible_cfg = '''
 [defaults]
@@ -352,6 +352,16 @@ class BaseExecutionsTestCase(BaseTestCase):
     def get_access_deps(self):
         return self.get_complex_data(with_subs=True)
 
+    def is_equal_dict(self, origin, desc, stack=None):
+        stack = stack if stack else []
+        for k, v in origin.items():
+            stack.append(k)
+            if isinstance(v, dict):
+                self.is_equal_dict(v, desc[k], stack)
+            else:
+                msg = 'Difference in key {}'.format('.'.join(stack))
+                self.assertEqual(v, desc[k], msg)
+
     def generate_subs(self, bulk_results=None):
         # Create project and dependences
         if bulk_results is None:
@@ -380,13 +390,65 @@ class BaseExecutionsTestCase(BaseTestCase):
                     history['status'], "OK",
                     self.get_result('get', self.get_url('history', history['id'], 'raw'))
                 )
-                etalon = self._get_string_from_file('exemplary_complex_inventory')
-                etalon = etalon.replace('PATH', '[~~ENCRYPTED~~]')
-                etalon = etalon.replace('mypass', '[~~ENCRYPTED~~]')
-                self.assertEqual(
-                    list(map(str.strip, str(history['raw_inventory']).split("\n"))),
-                    list(map(str.strip, etalon.split("\n")))
-                )
+                yaml_inv = from_yaml(history['raw_inventory'], Loader)
+                gr3 = {
+                    'hosts1': {
+                        'hosts': {
+                            '127.0.1.1': None,
+                            'hostlocl': {
+                                'ansible_user': 'centos',
+                                'ansible_ssh_private_key_file': ['~~ENCRYPTED~~']
+                            }
+                        }
+                    },
+                    'hosts2': {
+                        'hosts': {
+                            '127.0.1.[3:4]': None,
+                            '127.0.1.[5:6]': None
+                        }
+                    }
+                }
+                etalon = {
+                    'all':
+                        {
+                            'hosts': {
+                                '127.0.1.1': None,
+                                '127.0.1.[3:4]': None,
+                                'hostlocl': {
+                                    'ansible_ssh_private_key_file': ['~~ENCRYPTED~~'],
+                                    'ansible_user': 'centos'
+                                }
+                            },
+                            'children': {
+                                'groups1': {
+                                    'children':
+                                        {
+                                            'groups2': {
+                                                'children': {
+                                                    'groups3': {
+                                                        'children': gr3
+                                                    }
+                                                }
+                                            },
+                                            'groups3': {
+                                                'children': gr3
+                                            }
+                                        },
+                                    'vars':
+                                        {
+                                            'ansible_user': 'ubuntu',
+                                            'ansible_ssh_pass': ['~~ENCRYPTED~~'],
+                                        },
+                                }
+                            },
+                            'vars':
+                                {
+                                    'ansible_ssh_private_key_file': ['~~ENCRYPTED~~'],
+                                    'custom_var1': 'hello_world'
+                                }
+                        }
+                }
+                self.is_equal_dict(yaml_inv, etalon)
                 objects[result['item']].append(history)
         return objects
 
@@ -807,25 +869,17 @@ class ProjectTestCase(BaseExecutionsTestCase):
         invalid_options_template['options'] = 'options'
         invalid_override_template = dict(**template_playbook)
         invalid_override_template['options'] = dict(test=dict(inventory='some_ovveride'))
-        invalid_template = dict(**template_playbook)
-        invalid_template['data'] = dict(**template_playbook['data'])
-        del invalid_template['data']['inventory']
         bulk_data = [
-            self.get_mod_bulk('project', pk, invalid_template, 'template'),
             self.get_mod_bulk('project', pk, invalid_type_template, 'template'),
             self.get_mod_bulk('project', pk, invalid_options_template, 'template'),
             self.get_mod_bulk('project', pk, invalid_override_template, 'template'),
         ]
         results = self.make_bulk(bulk_data, 'put')
         self.assertEqual(results[0]['status'], 400)
-        self.assertEqual(
-            results[0]['data']['detail']['inventory'], ["Inventory have to set."]
-        )
         self.assertEqual(results[1]['status'], 400)
         self.assertEqual(results[2]['status'], 400)
-        self.assertEqual(results[3]['status'], 400)
         self.assertEqual(
-            results[3]['data']['detail']['inventory'],
+            results[2]['data']['detail']['inventory'],
             ["Disallowed to override inventory."]
         )
 
@@ -992,7 +1046,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
             self.assertEqual(results[1]['status'], 200)
             return results[1]['data']
 
-        with open(project.path+"/readme.md", "w") as f:
+        with open(project.path + "/readme.md", "w") as f:
             f.write("# test README.md \n **bold** \n *italic* \n")
 
         self.assertEqual(
@@ -1000,7 +1054,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
             '<h1 id="test-readmemd">test README.md</h1>\n\n<p><strong>bold</strong>' +
             ' \n <em>italic</em> </p>\n'
         )
-        with open(project.path+"/readme.rst", "w") as f:
+        with open(project.path + "/readme.rst", "w") as f:
             f.write("test README.rst \n **bold** \n *italic* \n")
 
         self.assertEqual(
@@ -1124,7 +1178,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(project_data['revision'], 'ERROR')
         self.assertEqual(project_data['branch'], 'waiting...')
 
-    def test_complex(self):
+    def test_complex(self):  # update test for new yaml based inv generator
         bulk_data = self.get_complex_data()
         # additionaly test hooks
         self.hook_model.objects.all().delete()

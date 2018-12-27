@@ -2,9 +2,12 @@
 from __future__ import unicode_literals
 
 import logging
-
+import six
 from django.db.models import Q
-from vstutils.utils import get_render
+try:
+    from yaml import dump as to_yaml, CDumper as Dumper, ScalarNode
+except ImportError:  # nocv
+    from yaml import dump as to_yaml, Dumper, ScalarNode
 
 from .base import models
 from .base import ManyToManyFieldACL, ManyToManyFieldACLReverse
@@ -15,16 +18,27 @@ from ..validators import RegexValidator
 logger = logging.getLogger("polemarch")
 
 
+class InventoryDumper(Dumper):
+    """
+    Yaml Dumper class for PyYAML
+    """
+    yaml_representers = getattr(Dumper, 'yaml_representers', {}).copy()
+    yaml_representers[type(None)] = lambda dumper, value: (
+        ScalarNode(tag=u'tag:yaml.org,2002:null', value='')
+    )
+    yaml_representers[six.text_type] = lambda dumper, value: (
+        ScalarNode(tag=u'tag:yaml.org,2002:str', value=value)
+    )
+
+
 # Helpfull methods
-def _get_strings(objects, keys=None, strings=None):
+def _get_dict(objects, keys=None):
     keys = keys if keys else list()
-    strings = strings if strings else list()
+    result = dict()
     for obj in objects:
-        string, obj_keys = obj.toString()
-        if obj_keys:
-            keys += obj_keys
-        strings.append(string)
-    return strings, keys
+        result[obj.name], obj_keys = obj.toDict()
+        keys += obj_keys
+    return result, keys
 
 
 # Helpfull exceptions
@@ -59,10 +73,9 @@ class Host(AbstractModel):
     def __unicode__(self):
         return "{}".format(self.name)  # nocv
 
-    def toString(self, var_sep=" "):
-        hvars, key = self.get_generated_vars()
-        key = [key] if key is not None else []
-        return "{} {}".format(self.name, self.vars_string(hvars, var_sep)), key
+    def toDict(self):
+        hvars, keys = self.get_generated_vars()
+        return hvars or None, keys
 
 
 class GroupQuerySet(AbstractVarsQuerySet):
@@ -101,23 +114,35 @@ class Group(AbstractModel):
             ["children", "id"],
         ]
 
-    def toString(self, var_sep="\n"):
-        hvars, key = self.get_generated_vars()
-        keys = [key] if key is not None else []
+    def toDict(self):
+        result = dict()
+        hvars, keys = self.get_generated_vars()
         if self.children:
-            groups = self.groups.values_list("name", flat=True).order_by("name")
-            objects = "\n".join(groups)
+            objs = self.groups
+            key_name = 'children'
         else:
-            hosts = self.hosts.all().order_by("name")
-            hosts_strings, keys = _get_strings(hosts, keys)
-            objects = "\n".join(hosts_strings)
-        data = dict(vars=self.vars_string(hvars, var_sep), objects=objects, group=self)
-        return get_render("models/group", data), keys
+            objs = self.hosts
+            key_name = 'hosts'
+        objs_dict, obj_keys = _get_dict(objs.all(), keys)
+        if objs_dict:
+            result[key_name] = objs_dict
+        if self.vars:
+            result['vars'] = hvars
+        keys += obj_keys
+        return result, keys
 
 
 class Inventory(AbstractModel):
     hosts       = ManyToManyFieldACL(Host)
     groups      = ManyToManyFieldACL(Group)
+
+    _to_yaml_kwargs = dict(
+        Dumper=InventoryDumper,
+        indent=2,
+        explicit_start=True,
+        default_flow_style=False,
+        allow_unicode=True
+    )
 
     class Meta:
         default_related_name = "inventories"
@@ -145,19 +170,19 @@ class Inventory(AbstractModel):
         return self.hosts.all().order_by("name")
 
     def get_inventory(self):
-        hvars, key = self.get_generated_vars()
-        keys = [key] if key else list()
-        hosts_strings, keys = _get_strings(list(self.hosts_list), keys)
-        groups_strings, keys = _get_strings(list(self.groups_list), keys)
-        inv = get_render(
-            "models/inventory",
-            dict(
-                groups=groups_strings,
-                hosts=hosts_strings,
-                vars=self.vars_string(hvars, "\n")
-            )
-        )
-        return inv, keys
+        inv = dict(all=dict())
+        hvars, keys = self.get_generated_vars()
+        hosts = self.hosts.all().order_by("name")
+        groups = self.groups.all().order_by("name")
+        hosts_dicts, keys = _get_dict(hosts, keys)
+        groups_dicts, keys = _get_dict(groups, keys)
+        if hosts_dicts:
+            inv['all']['hosts'] = hosts_dicts
+        if groups_dicts:
+            inv['all']['children'] = groups_dicts
+        if hvars:
+            inv['all']['vars'] = hvars
+        return to_yaml(inv, **self._to_yaml_kwargs), keys
 
     @property
     def all_groups(self):

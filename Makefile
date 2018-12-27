@@ -1,5 +1,6 @@
 PY = python2
 PIP = $(PY) -m pip
+PY_VERSION = $(shell $(PY) --version 2>&1 | tail -c +8)
 PYTHON_BIN = $(shell $(PY) -c 'import sys, os; print(os.path.dirname(sys.executable))')
 RELOCATE_BIN = $(PYTHON_BIN)/venvctrl-relocate
 LOC_TEST_ENVS = py27-install,py36-install,flake,pylint
@@ -39,12 +40,14 @@ BUILD_DIR= $(TMPDIR)
 PREBUILD_DIR = $(BUILD_DIR)/$(INSTALL_DIR)
 PREBUILD_BINDIR = $(BUILD_DIR)/$(INSTALL_BINDIR)
 SOURCE_DIR = $(shell pwd)
+COMPILE_DIR = $(shell echo -n "$$(pwd)/dist")
 COMPOSE = docker-compose-testrun.yml
 COMPOSE_ARGS = --abort-on-container-exit
 COMPLEX_TESTS_COMPOSE = docker-compose-tests.yml
 COMPLEX_TESTS_COMPOSE_ARGS = '--abort-on-container-exit --build'
 define VARS_STR
 PY=$(PY)
+PY_VERSION=$(PY_VERSION)
 PIP=$(PIP)
 PYTHON_BIN=$(PYTHON_BIN)
 RELOCATE_BIN=$(RELOCATE_BIN)
@@ -90,12 +93,18 @@ build: build-clean print_vars
 	-rm -rf dist
 	$(PY) setup.py sdist -v
 
-compile: build-clean print_vars
-	-rm -rf dist
+pre_compile: build-clean print_vars
 	find ./$(NAME) -name "*.c" -print0 | xargs -0 rm -rf
 	-rm -rf polemarch/doc/*
 	$(PIP) install -U $(VSTUTILS)
+
+compile: pre_compile
+	-rm -rf dist
 	$(PY) setup.py compile -v
+
+wheel: pre_compile
+	$(PY) setup.py compile_docs -v
+	$(PY) setup.py bdist_wheel -v --dist-dir $(COMPILE_DIR) --bdist-dir /tmp/build_$(NAME)/$(PY_VERSION)/
 
 prebuild: print_vars
 	# Create virtualenv

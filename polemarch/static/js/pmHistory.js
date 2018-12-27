@@ -280,13 +280,13 @@ gui_history = {
             $('.sublink-btn-facts').addClass('hidden-true').removeClass('hidden-false');
         }
     },
-}
+};
 
-gui_project_history = gui_history
+gui_project_history = gui_history;
 
 tabSignal.connect("guiList.renderPage.history", function(params){
     params.guiObj.bindStdoutUpdates(params.guiObj.model.data.id);
-});
+})
 
 
 function format_history_time(opt)
@@ -324,16 +324,22 @@ function get_prefetch_history_executor_path(data_obj)
     return "/user/"
 }
 
+var history_global_items_list = {
+    'project': 'project'
+};
+
+var history_project_items_list = {
+    'template': 'template',
+    'scheduler': 'periodic_task',
+};
+
 function get_prefetch_history_initiator_path_1(data_obj)
 {
-    if (data_obj.initiator_type == 'project') {
-        return "/project/";
+    if (window.history_global_items_list[data_obj.initiator_type]){
+        return "/{0}/".format(window.history_global_items_list[data_obj.initiator_type]);
     }
-    else if (data_obj.initiator_type == 'template') {
-        return "/project/" + data_obj["project"] + "/template/";
-    }
-    else if (data_obj.initiator_type == 'scheduler') {
-        return "/project/" + data_obj["project"] + "/periodic_task/";
+    else if (window.history_project_items_list[data_obj.initiator_type]){
+        return "/project/{0}/{1}/".format(data_obj["project"], window.history_project_items_list[data_obj.initiator_type]);
     }
     else {
         return false;
@@ -342,16 +348,12 @@ function get_prefetch_history_initiator_path_1(data_obj)
 
 function get_prefetch_history_initiator_path_2(data_obj)
 {
-    if (data_obj.initiator_type == 'project') {
-        return "/project/";
+    if (window.history_global_items_list[data_obj.initiator_type]){
+        return "/{0}/".format(window.history_global_items_list[data_obj.initiator_type]);
     }
-    else if (data_obj.initiator_type == 'template') {
+    else if (window.history_project_items_list[data_obj.initiator_type]) {
         let project_id = spajs.urlInfo.data.reg.parent_id;
-        return "/project/" + project_id + "/template/";
-    }
-    else if (data_obj.initiator_type == 'scheduler') {
-        let project_id = spajs.urlInfo.data.reg.parent_id;
-        return "/project/" + project_id + "/periodic_task/";
+        return "/project/{0}/{1}/".format(project_id, window.history_project_items_list[data_obj.initiator_type]);
     }
     else {
         return false;

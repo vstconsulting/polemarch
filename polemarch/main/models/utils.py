@@ -8,7 +8,7 @@ from collections import namedtuple, OrderedDict
 from functools import reduce
 import six
 from django.utils import timezone
-from vstutils.utils import tmp_file, KVExchanger
+from vstutils.utils import tmp_file, KVExchanger, raise_context
 from .hosts import Inventory
 from ...main.utils import (
     CmdExecutor, CalledProcessError, AnsibleArgumentsReference, PMObject
@@ -86,8 +86,14 @@ class Executor(CmdExecutor):
 
     def execute(self, cmd, cwd):
         pm_ansible_path = ' '.join(self.pm_ansible())
-        self.history.raw_args = " ".join(cmd).replace(pm_ansible_path, '').lstrip()
-        return super(Executor, self).execute(cmd, cwd)
+        new_cmd = list()
+        for one_cmd in cmd:
+            if isinstance(one_cmd, six.string_types):
+                with raise_context():
+                    one_cmd = one_cmd.decode('utf-8')
+            new_cmd.append(one_cmd)
+        self.history.raw_args = " ".join(new_cmd).replace(pm_ansible_path, '').lstrip()
+        return super(Executor, self).execute(new_cmd, cwd)
 
 
 class AnsibleCommand(PMObject):
@@ -208,10 +214,13 @@ class AnsibleCommand(PMObject):
     def path_to_ansible(self):
         return self.pm_ansible(self.command_type)
 
+    def get_hidden_vars(self):
+        return self.inventory_object.hidden_vars
+
     def hide_passwords(self, raw):
         regex = r'|'.join((
-            r"(?<=" + hide + r"=).{1,}?(?=[\n\t\s])"
-            for hide in self.inventory_object.hidden_vars
+            r"(?<=" + hide + r":\s).{1,}?(?=[\n\t\s])"
+            for hide in self.get_hidden_vars()
         ))
         subst = "[~~ENCRYPTED~~]"
         raw = re.sub(regex, subst, raw, 0, re.MULTILINE)

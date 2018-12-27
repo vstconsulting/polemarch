@@ -991,8 +991,13 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                 k: v for k, v in serializer.to_internal_value(data).items()
                 if k in data.keys() or v
             }
+        target = data.pop(kind)
+        try:
+            target = str(target)
+        except UnicodeEncodeError:  # nocv
+            target = target.encode('utf-8')
         history_id = self.instance.execute(
-            kind, str(data.pop(kind)), inventory,
+            kind, str(target), inventory,
             initiator=obj_id, initiator_type=init_type, executor=user, **data
         )
         rdata = ExecuteResponseSerializer(data=dict(
