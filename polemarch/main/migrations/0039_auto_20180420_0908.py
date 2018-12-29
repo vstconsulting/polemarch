@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-import polemarch.main.models.base
+from ..models.base import first_staff_user
 
 
 class Migration(migrations.Migration):
@@ -23,6 +23,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='usergroup',
             name='owner',
-            field=models.ForeignKey(default=polemarch.main.models.base.first_staff_user, on_delete=django.db.models.deletion.CASCADE, related_name='polemarch_usergroup_set', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(default=first_staff_user, on_delete=django.db.models.deletion.CASCADE, related_name='polemarch_usergroup_set', to=settings.AUTH_USER_MODEL),
         ),
     ]

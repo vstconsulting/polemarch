@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import django.db.models.deletion
-import polemarch.main.models.base
+from ..models.base import ForeignKeyACL
 
 
 class Migration(migrations.Migration):
@@ -77,6 +77,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='template',
             name='project',
-            field=polemarch.main.models.base.ForeignKeyACL(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, to='main.Project'),
+            field=ForeignKeyACL(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, to='main.Project'),
         ),
     ]

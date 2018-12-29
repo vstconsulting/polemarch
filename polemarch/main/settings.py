@@ -10,13 +10,13 @@ os.makedirs(PROJECTS_DIR) if not os.path.exists(PROJECTS_DIR) else None
 
 # Polemarch apps
 INSTALLED_APPS += [
-    'polemarch.main',
-    'polemarch.api',
+    '{}.main'.format(VST_PROJECT_LIB),
+    '{}.api'.format(VST_PROJECT_LIB),
 ]
 
 # Additional middleware and auth
 MIDDLEWARE_CLASSES += [
-    'polemarch.main.middleware.PolemarchHeadersMiddleware',
+    '{}.main.middleware.PolemarchHeadersMiddleware'.format(VST_PROJECT_LIB),
 ]
 
 AUTH_PASSWORD_VALIDATORS += [
@@ -32,25 +32,25 @@ AUTH_PASSWORD_VALIDATORS += [
 VST_API_VERSION = 'v2'
 
 REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = [
-    "polemarch.api.{}.permissions.ModelPermission".format(VST_API_VERSION),
+    "{}.api.{}.permissions.ModelPermission".format(VST_PROJECT_LIB, VST_API_VERSION),
 ]
 
 API_URL = VST_API_URL
 DEFAULT_API_URL = "/{}/{}".format(API_URL, VST_API_VERSION)
 API = {
     VST_API_VERSION: OrderedDict(
-        project={'view': 'polemarch.api.v2.views.ProjectViewSet'},
-        community_template={'view': 'polemarch.api.v2.views.ProjectTemplateViewSet'},
-        inventory={'view': 'polemarch.api.v2.views.InventoryViewSet'},
-        group={'view': 'polemarch.api.v2.views.GroupViewSet'},
-        host={'view': 'polemarch.api.v2.views.HostViewSet'},
-        history={'view': 'polemarch.api.v2.views.HistoryViewSet', "op_types": ['get', 'del', 'mod']},
-        _bulk={'view': 'polemarch.api.v2.views.BulkViewSet', 'type': 'view'},
-        user={'view': 'polemarch.api.v2.views.UserViewSet'},
-        team={'view': 'polemarch.api.v2.views.TeamViewSet'},
-        token={'view': 'polemarch.api.v2.views.TokenView', 'type': 'view'},
-        hook={'view': 'polemarch.api.v2.views.HookViewSet'},
-        stats={'view': 'polemarch.api.v2.views.StatisticViewSet', 'op_types': ['get']})
+        project={'view': '{}.api.v2.views.ProjectViewSet'.format(VST_PROJECT_LIB)},
+        community_template={'view': '{}.api.v2.views.ProjectTemplateViewSet'.format(VST_PROJECT_LIB)},
+        inventory={'view': '{}.api.v2.views.InventoryViewSet'.format(VST_PROJECT_LIB)},
+        group={'view': '{}.api.v2.views.GroupViewSet'.format(VST_PROJECT_LIB)},
+        host={'view': '{}.api.v2.views.HostViewSet'.format(VST_PROJECT_LIB)},
+        history={'view': '{}.api.v2.views.HistoryViewSet'.format(VST_PROJECT_LIB), "op_types": ['get', 'del', 'mod']},
+        _bulk={'view': '{}.api.v2.views.BulkViewSet'.format(VST_PROJECT_LIB), 'type': 'view'},
+        user={'view': '{}.api.v2.views.UserViewSet'.format(VST_PROJECT_LIB)},
+        team={'view': '{}.api.v2.views.TeamViewSet'.format(VST_PROJECT_LIB)},
+        token={'view': '{}.api.v2.views.TokenView'.format(VST_PROJECT_LIB), 'type': 'view'},
+        hook={'view': '{}.api.v2.views.HookViewSet'.format(VST_PROJECT_LIB)},
+        stats={'view': '{}.api.v2.views.StatisticViewSet'.format(VST_PROJECT_LIB), 'op_types': ['get']})
 }
 
 PROJECT_GUI_MENU = [
@@ -104,7 +104,7 @@ PROJECT_GUI_MENU = [
     },
 ]
 
-SWAGGER_SETTINGS['DEFAULT_INFO'] = 'polemarch.api.v2.swagger.api_info'
+SWAGGER_SETTINGS['DEFAULT_INFO'] = '{}.api.v2.swagger.api_info'.format(VST_PROJECT_LIB)
 
 OPENAPI_EXTRA_LINKS = dict()
 OPENAPI_EXTRA_LINKS['Request'] = [
@@ -193,10 +193,10 @@ git = GitSectionConfig()
 
 REPO_BACKENDS = {
     "MANUAL": {
-        "BACKEND": "polemarch.main.repo.Manual",
+        "BACKEND": "{}.main.repo.Manual".format(VST_PROJECT_LIB),
     },
     "GIT": {
-        "BACKEND": "polemarch.main.repo.Git",
+        "BACKEND": "{}.main.repo.Git".format(VST_PROJECT_LIB),
         "OPTIONS": {
             "CLONE_KWARGS": git.get('CLONE', {}),
             "FETCH_KWARGS": git.get('FETCH', {}),
@@ -208,7 +208,7 @@ REPO_BACKENDS = {
         }
     },
     "TAR": {
-        "BACKEND": "polemarch.main.repo.Tar",
+        "BACKEND": "{}.main.repo.Tar".format(VST_PROJECT_LIB),
     },
 }
 
@@ -219,16 +219,16 @@ COMMUNITY_REPOS_URL = main.get('community_projects_url', fallback=DEFAULT_COMMUN
 # RPC tasks settings
 TASKS_HANDLERS = {
     "REPO": {
-        "BACKEND": "polemarch.main.tasks.tasks.RepoTask"
+        "BACKEND": "{}.main.tasks.tasks.RepoTask".format(VST_PROJECT_LIB)
     },
     "SCHEDUER": {
-        "BACKEND": "polemarch.main.tasks.tasks.ScheduledTask"
+        "BACKEND": "{}.main.tasks.tasks.ScheduledTask".format(VST_PROJECT_LIB)
     },
     "MODULE": {
-        "BACKEND": "polemarch.main.tasks.tasks.ExecuteAnsibleModule"
+        "BACKEND": "{}.main.tasks.tasks.ExecuteAnsibleModule".format(VST_PROJECT_LIB)
     },
     "PLAYBOOK": {
-        "BACKEND": "polemarch.main.tasks.tasks.ExecuteAnsiblePlaybook"
+        "BACKEND": "{}.main.tasks.tasks.ExecuteAnsiblePlaybook".format(VST_PROJECT_LIB)
     },
 }
 
@@ -237,17 +237,17 @@ CLONE_RETRY = rpc.getint('clone_retry_count', fallback=5)
 # ACL settings
 ACL = {
     "MODEL_HANDLERS": {
-        "Default": "polemarch.main.acl.handlers.Default"
+        "Default": "{}.main.acl.handlers.Default".format(VST_PROJECT_LIB)
     }
 }
 
 # Outgoing hooks settings
 HOOKS = {
     "HTTP": {
-        "BACKEND": 'polemarch.main.hooks.http.Backend'
+        "BACKEND": '{}.main.hooks.http.Backend'.format(VST_PROJECT_LIB)
     },
     "SCRIPT": {
-        "BACKEND": 'polemarch.main.hooks.script.Backend'
+        "BACKEND": '{}.main.hooks.script.Backend'.format(VST_PROJECT_LIB)
     },
 }
 

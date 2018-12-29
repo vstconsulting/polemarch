@@ -5,9 +5,11 @@ from __future__ import unicode_literals
 from django.conf import settings
 from django.db import migrations, models
 from django.contrib.auth.hashers import make_password
-import django.db.models.deletion
 import django.utils.timezone
-import polemarch.main.models.base
+from ..models.base import (
+    first_staff_user, ManyToManyFieldACL, ForeignKeyACL,
+    ManyToManyFieldACLReverse
+)
 import uuid
 
 
@@ -174,7 +176,7 @@ class Migration(migrations.Migration):
                  models.ManyToManyField(blank=True, null=True, related_name='hosts',
                                         to='main.ACLPermission')),
                 ('owner',
-                 models.ForeignKey(default=polemarch.main.models.base.first_staff_user,
+                 models.ForeignKey(default=first_staff_user,
                                    on_delete=django.db.models.deletion.CASCADE,
                                    related_name='polemarch_host_set',
                                    to=settings.AUTH_USER_MODEL)),
@@ -194,12 +196,12 @@ class Migration(migrations.Migration):
                 ('acl', models.ManyToManyField(blank=True, null=True,
                                                related_name='inventories',
                                                to='main.ACLPermission')),
-                ('groups', polemarch.main.models.base.ManyToManyFieldACL(
+                ('groups', ManyToManyFieldACL(
                     related_name='inventories', to='main.Group')),
-                ('hosts', polemarch.main.models.base.ManyToManyFieldACL(
+                ('hosts', ManyToManyFieldACL(
                     related_name='inventories', to='main.Host')),
                 ('owner',
-                 models.ForeignKey(default=polemarch.main.models.base.first_staff_user,
+                 models.ForeignKey(default=first_staff_user,
                                    on_delete=django.db.models.deletion.CASCADE,
                                    related_name='polemarch_inventory_set',
                                    to=settings.AUTH_USER_MODEL)),
@@ -236,7 +238,7 @@ class Migration(migrations.Migration):
                                                related_name='periodic_tasks',
                                                to='main.ACLPermission')),
                 ('owner',
-                 models.ForeignKey(default=polemarch.main.models.base.first_staff_user,
+                 models.ForeignKey(default=first_staff_user,
                                    on_delete=django.db.models.deletion.CASCADE,
                                    related_name='polemarch_periodictask_set',
                                    to=settings.AUTH_USER_MODEL)),
@@ -259,19 +261,19 @@ class Migration(migrations.Migration):
                  models.ManyToManyField(blank=True, null=True, related_name='projects',
                                         to='main.ACLPermission')),
                 ('groups',
-                 polemarch.main.models.base.ManyToManyFieldACL(blank=True, null=True,
-                                                               related_name='projects',
-                                                               to='main.Group')),
+                 ManyToManyFieldACL(blank=True, null=True,
+                                    related_name='projects',
+                                    to='main.Group')),
                 ('hosts',
-                 polemarch.main.models.base.ManyToManyFieldACL(blank=True, null=True,
-                                                               related_name='projects',
-                                                               to='main.Host')),
+                 ManyToManyFieldACL(blank=True, null=True,
+                                    related_name='projects',
+                                    to='main.Host')),
                 ('inventories',
-                 polemarch.main.models.base.ManyToManyFieldACL(blank=True, null=True,
-                                                               related_name='projects',
-                                                               to='main.Inventory')),
+                 ManyToManyFieldACL(blank=True, null=True,
+                                    related_name='projects',
+                                    to='main.Inventory')),
                 ('owner',
-                 models.ForeignKey(default=polemarch.main.models.base.first_staff_user,
+                 models.ForeignKey(default=first_staff_user,
                                    on_delete=django.db.models.deletion.CASCADE,
                                    related_name='polemarch_project_set',
                                    to=settings.AUTH_USER_MODEL)),
@@ -313,15 +315,15 @@ class Migration(migrations.Migration):
                 ('acl',
                  models.ManyToManyField(blank=True, null=True, to='main.ACLPermission')),
                 ('owner',
-                 models.ForeignKey(default=polemarch.main.models.base.first_staff_user,
+                 models.ForeignKey(default=first_staff_user,
                                    on_delete=django.db.models.deletion.CASCADE,
                                    related_name='polemarch_template_set',
                                    to=settings.AUTH_USER_MODEL)),
                 ('project',
-                 polemarch.main.models.base.ForeignKeyACL(blank=True, default=None,
-                                                          null=True,
-                                                          on_delete=django.db.models.deletion.SET_NULL,
-                                                          to='main.Project')),
+                 ForeignKeyACL(blank=True, default=None,
+                               null=True,
+                               on_delete=django.db.models.deletion.SET_NULL,
+                               to='main.Project')),
             ],
         ),
         migrations.CreateModel(
@@ -336,7 +338,7 @@ class Migration(migrations.Migration):
                 ('acl',
                  models.ManyToManyField(blank=True, null=True, to='main.ACLPermission')),
                 ('owner',
-                 models.ForeignKey(default=polemarch.main.models.base.first_staff_user,
+                 models.ForeignKey(default=first_staff_user,
                                    on_delete=django.db.models.deletion.CASCADE,
                                    related_name='polemarch_usergroup_set',
                                    to=settings.AUTH_USER_MODEL)),
@@ -416,14 +418,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='group',
             name='hosts',
-            field=polemarch.main.models.base.ManyToManyFieldACL(related_name='groups',
-                                                                related_query_name='groups',
-                                                                to='main.Host'),
+            field=ManyToManyFieldACL(related_name='groups',
+                                     related_query_name='groups',
+                                     to='main.Host'),
         ),
         migrations.AddField(
             model_name='group',
             name='owner',
-            field=models.ForeignKey(default=polemarch.main.models.base.first_staff_user,
+            field=models.ForeignKey(default=first_staff_user,
                                     on_delete=django.db.models.deletion.CASCADE,
                                     related_name='polemarch_group_set',
                                     to=settings.AUTH_USER_MODEL),
@@ -431,11 +433,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='group',
             name='parents',
-            field=polemarch.main.models.base.ManyToManyFieldACLReverse(blank=True,
-                                                                       null=True,
-                                                                       related_name='groups',
-                                                                       related_query_name='childrens',
-                                                                       to='main.Group'),
+            field=ManyToManyFieldACLReverse(blank=True,
+                                            null=True,
+                                            related_name='groups',
+                                            related_query_name='childrens',
+                                            to='main.Group'),
         ),
         migrations.AddField(
             model_name='aclpermission',

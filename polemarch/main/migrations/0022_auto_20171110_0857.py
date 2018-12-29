@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import django.db.models.deletion
-import polemarch.main.models.base
+from ..models.base import ManyToManyFieldACL
 
 
 class Migration(migrations.Migration):
@@ -22,16 +22,16 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='group',
             name='hosts',
-            field=polemarch.main.models.base.ManyToManyFieldACL(related_name='groups', related_query_name='groups', to='main.Host'),
+            field=ManyToManyFieldACL(related_name='groups', related_query_name='groups', to='main.Host'),
         ),
         migrations.AlterField(
             model_name='inventory',
             name='hosts',
-            field=polemarch.main.models.base.ManyToManyFieldACL(related_name='inventories', to='main.Host'),
+            field=ManyToManyFieldACL(related_name='inventories', to='main.Host'),
         ),
         migrations.AlterField(
             model_name='project',
             name='hosts',
-            field=polemarch.main.models.base.ManyToManyFieldACL(blank=True, null=True, related_name='projects', to='main.Host'),
+            field=ManyToManyFieldACL(blank=True, null=True, related_name='projects', to='main.Host'),
         ),
     ]

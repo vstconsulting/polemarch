@@ -3,8 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 from django.conf import settings
-import polemarch.main.models.users
-import polemarch.main.models.base
+from ..models.base import first_staff_user
 
 
 class Migration(migrations.Migration):
@@ -62,32 +61,32 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='group',
             name='owner',
-            field=models.ForeignKey(related_name='polemarch_group_set', default=polemarch.main.models.base.first_staff_user, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(related_name='polemarch_group_set', default=first_staff_user, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='host',
             name='owner',
-            field=models.ForeignKey(related_name='polemarch_host_set', default=polemarch.main.models.base.first_staff_user, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(related_name='polemarch_host_set', default=first_staff_user, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='inventory',
             name='owner',
-            field=models.ForeignKey(related_name='polemarch_inventory_set', default=polemarch.main.models.base.first_staff_user, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(related_name='polemarch_inventory_set', default=first_staff_user, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='periodictask',
             name='owner',
-            field=models.ForeignKey(related_name='polemarch_periodictask_set', default=polemarch.main.models.base.first_staff_user, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(related_name='polemarch_periodictask_set', default=first_staff_user, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='project',
             name='owner',
-            field=models.ForeignKey(related_name='polemarch_project_set', default=polemarch.main.models.base.first_staff_user, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(related_name='polemarch_project_set', default=first_staff_user, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='template',
             name='owner',
-            field=models.ForeignKey(related_name='polemarch_template_set', default=polemarch.main.models.base.first_staff_user, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(related_name='polemarch_template_set', default=first_staff_user, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterField(
             model_name='group',

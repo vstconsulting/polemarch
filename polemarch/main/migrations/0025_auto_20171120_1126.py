@@ -3,8 +3,8 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-import polemarch.main.models.base
 import uuid
+from ..models.base import ManyToManyFieldACLReverse, ManyToManyFieldACL
 
 
 class Migration(migrations.Migration):
@@ -30,21 +30,21 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='group',
             name='parents',
-            field=polemarch.main.models.base.ManyToManyFieldACLReverse(blank=True, null=True, related_name='groups', related_query_name='childrens', to='main.Group'),
+            field=ManyToManyFieldACLReverse(blank=True, null=True, related_name='groups', related_query_name='childrens', to='main.Group'),
         ),
         migrations.AlterField(
             model_name='inventory',
             name='groups',
-            field=polemarch.main.models.base.ManyToManyFieldACL(related_name='inventories', to='main.Group'),
+            field=ManyToManyFieldACL(related_name='inventories', to='main.Group'),
         ),
         migrations.AlterField(
             model_name='project',
             name='groups',
-            field=polemarch.main.models.base.ManyToManyFieldACL(blank=True, null=True, related_name='projects', to='main.Group'),
+            field=ManyToManyFieldACL(blank=True, null=True, related_name='projects', to='main.Group'),
         ),
         migrations.AlterField(
             model_name='project',
             name='inventories',
-            field=polemarch.main.models.base.ManyToManyFieldACL(blank=True, null=True, related_name='projects', to='main.Inventory'),
+            field=ManyToManyFieldACL(blank=True, null=True, related_name='projects', to='main.Inventory'),
         ),
     ]

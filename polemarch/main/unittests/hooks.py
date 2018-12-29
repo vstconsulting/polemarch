@@ -9,7 +9,7 @@ from django.conf import settings
 from django.core.validators import ValidationError
 from requests import Response
 from vstutils.utils import raise_context
-from polemarch.main.models import Hook
+from ..models import Hook
 
 
 class HooksTestCase(TestCase):

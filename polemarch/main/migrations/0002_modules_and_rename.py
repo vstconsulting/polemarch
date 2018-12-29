@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 import six
 from django.db import migrations, models
 import django.db.models.deletion
-import polemarch.main.models.base
-from polemarch.main.utils import AnsibleModules
+from ..models.base import ForeignKeyACL
+from ..utils import AnsibleModules
 
 
 def sync_modules(apps, schema_editor):
@@ -94,7 +94,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='template',
             name='project',
-            field=polemarch.main.models.base.ForeignKeyACL(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='template', to='main.Project'),
+            field=ForeignKeyACL(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='template', to='main.Project'),
         ),
         migrations.RunPython(
             code=sync_modules,
