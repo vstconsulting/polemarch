@@ -76,7 +76,7 @@ class CmdExecutor(PMObject):
         '''
         self.output = ''
         self._stdout = stdout
-        self._stderr = stderr if stderr != STDOUT else self._stdout
+        self._stderr = stderr
         self.env = {}
 
     def write_output(self, line):
