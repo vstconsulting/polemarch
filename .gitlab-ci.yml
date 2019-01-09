@@ -30,6 +30,7 @@ stages:
   except:
     refs:
       - GUI
+      - master
       - tags
       - issue_building
   only:
@@ -110,6 +111,15 @@ py36-install:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
+
+master_coverage:
+  <<: *branch_tests
+  variables:
+    TOX_ENVS: "py36-coverage"
+  except:
+  only:
+    refs:
+      - master
 
 ####################################################
 # DEPRECATED
@@ -209,37 +219,37 @@ publish_pypi:
   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz dist/*.whl
 
 # DEPRECATED
-release_rpm:
-  stage: release
-  only:
-    refs:
-    - tags
-    variables:
-    - $PYPI_UPLOAD_PASSWORD
-  script:
-   - tox ${TOX_ARGS} -c tox_build.ini -e py27-rpm
-  allow_failure: false
-  artifacts:
-    name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
-    paths:
-    - dist/
+#release_rpm:
+#  stage: release
+#  only:
+#    refs:
+#    - tags
+#    variables:
+#    - $PYPI_UPLOAD_PASSWORD
+#  script:
+#   - tox ${TOX_ARGS} -c tox_build.ini -e py27-rpm
+#  allow_failure: false
+#  artifacts:
+#    name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
+#    paths:
+#    - dist/
 
 # DEPRECATED
-release_deb:
-  stage: release
-  only:
-    refs:
-    - tags
-    variables:
-    - $PYPI_UPLOAD_PASSWORD
-  image: onegreyonewhite/tox:ubuntu
-  script:
-   - tox ${TOX_ARGS} -c tox_build.ini -e py27-deb
-  allow_failure: false
-  artifacts:
-    name: "release-deb-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
-    paths:
-    - dist/
+#release_deb:
+#  stage: release
+#  only:
+#    refs:
+#    - tags
+#    variables:
+#    - $PYPI_UPLOAD_PASSWORD
+#  image: onegreyonewhite/tox:ubuntu
+#  script:
+#   - tox ${TOX_ARGS} -c tox_build.ini -e py27-deb
+#  allow_failure: false
+#  artifacts:
+#    name: "release-deb-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
+#    paths:
+#    - dist/
 
 publish_release:
   stage: publish

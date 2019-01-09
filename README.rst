@@ -20,7 +20,7 @@ Polemarch
 Simple WEB gui for infrastructure management using ansible playbooks or ansible modules.
 
 Official site:
-http://about.polemarch.org
+http://polemarch.org
 
 For any questions you could use issues tracker:
 https://gitlab.com/vstconsulting/polemarch/issues
