@@ -63,7 +63,7 @@ class CmdExecutor(PMObject):
     '''
     Command executor with realtime output write
     '''
-    __slots__ = 'output', '_stdout', '_stderr'
+    __slots__ = 'output', '_stdout', '_stderr', 'env'
 
     CANCEL_PREFIX = "CANCEL_EXECUTE_"
     newlines = ['\n', '\r\n', '\r']
@@ -77,6 +77,7 @@ class CmdExecutor(PMObject):
         self.output = ''
         self._stdout = stdout
         self._stderr = stderr if stderr != STDOUT else self._stdout
+        self.env = {}
 
     def write_output(self, line):
         '''
@@ -135,9 +136,11 @@ class CmdExecutor(PMObject):
         :rtype: str
         '''
         self.output = ""
+        env = os.environ.copy()
+        env.update(self.env)
         proc = Popen(
             cmd, stdout=self._stdout, stderr=self._stderr,
-            bufsize=0, universal_newlines=True, cwd=cwd
+            bufsize=0, universal_newlines=True, cwd=cwd, env=env
         )
         for line in self._unbuffered(proc):
             if self.line_handler(proc, line):
