@@ -27,6 +27,7 @@ from . import __file__ as file
 
 
 logger = logging.getLogger('polemarch')
+ON_POSIX = 'posix' in sys.builtin_module_names
 
 
 def project_path():
@@ -90,10 +91,8 @@ class CmdExecutor(PMObject):
 
     def _enqueue_output(self, out, queue):
         try:
-            line = out.readline()
-            while len(line):
+            for line in iter(out.readline, ""):
                 queue.put(line)
-                line = out.readline()
         finally:
             out.close()
 
@@ -140,7 +139,9 @@ class CmdExecutor(PMObject):
         env.update(self.env)
         proc = Popen(
             cmd, stdout=self._stdout, stderr=self._stderr,
-            bufsize=0, universal_newlines=True, cwd=cwd, env=env
+            bufsize=0, universal_newlines=True,
+            cwd=cwd, env=env,
+            close_fds=ON_POSIX
         )
         for line in self._unbuffered(proc):
             if self.line_handler(proc, line):
