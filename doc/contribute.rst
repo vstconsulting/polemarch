@@ -21,27 +21,17 @@ Here is how to proceed:
       sudo apt-get install python-pip python-dev libffi-dev libssl-dev git sshpass libyaml-dev
 
    Note: Your patch must work at Python 2 and Python 3. For Python 3 you should
-   have at least Python 3.4.5, because older Python 3 may not work correctly
+   have at least Python 3.5, because older Python 3 may not work correctly
    with Polemarch.
 
-3. Make sure you have latest pip and virtualenv in your system. You can do it
+3. Make sure you have latest pip and tox in your system. You can do it
    with those commands:
 
    .. sourcecode:: bash
 
       sudo pip install --upgrade pip
-      sudo pip install --upgrade virtualenv
+      sudo pip install --upgrade tox==3.0.0
 
-4. Create virtualenv for Polemarch. It is only supported method to run
-   Polemarch. Don't try to install it system-wide or locally using
-   ``pip install --user``.
-
-   .. sourcecode:: bash
-
-      mkdir polemarch_project
-      cd polemarch_project
-      virtualenv venv
-      source venv/bin/activate
 
 5. Make fork of our repository and clone it to your local development
    machine.
@@ -55,20 +45,21 @@ Here is how to proceed:
    .. sourcecode:: bash
 
       cd polemarch
-      git checkout -b issue_1
+      git checkout -b issue/1
 
-7. Install python dependencies:
+7. Create and activate virtualenv:
 
    .. sourcecode:: bash
 
-      pip install -r requirements-git.txt -r requirements.txt -r requirements-doc.txt tox
+      tox -e contrib
+      source env/bin/activate
 
 8. Initialize empty database with all required stuff (tables and so on)
    for Polemarch:
 
    .. sourcecode:: bash
 
-      ./polemarchctl migrate
+      python -m polemarch migrate
 
 9. Enable debug in settings.ini. You can edit ``polemarch/main/settings.ini``
    but make sure that changes in that file does not goes to you commit. Or you
@@ -83,7 +74,7 @@ Here is how to proceed:
     .. sourcecode:: bash
 
        # run web-server
-       python polemarchctl webserver
+       python -m polemarch webserver
 
     This command also starts worker, if you have added worker options
     in ``/etc/polemarch/settings.ini``. More about worker section you can
@@ -105,10 +96,11 @@ Here is how to proceed:
 
     .. sourcecode:: bash
 
-       make test ENVS=flake,pylint
+       make test ENVS=flake,pylint,py27-install,py36-coverage
 
     This command do PEP8 check of codebase and static analyzing with
-    pylint and flake. Make sure that your code meets those checks.
+    pylint and flake and run main python tests.
+    Make sure that your code meets those checks.
 
 13. Reflect your changes in documentation (if needed). Build documentation,
     read what you have changed and make sure that all is right. To build documentation

@@ -8,6 +8,8 @@ variables:
   RESTORE_CACHE_ATTEMPTS: 3
   DJANGO_LOG_LEVEL: 'ERROR'
   TOX_ARGS: "--workdir /cache/.tox_polemarch_${CI_BUILD_REF_NAME}"
+  CCACHE_DIR: /cache/.ccache
+  CC: ccache gcc
 
 stages:
   - code_standarts
