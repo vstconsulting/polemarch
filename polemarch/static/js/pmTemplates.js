@@ -19,6 +19,16 @@ gui_project_template = {
             data_field = JSON.parse(template_data.data);
         }
 
+        if(this.model && this.model.data && this.model.data.data && this.model.data.data.vars)
+        {
+            data_field.vars = this.model.data.data.vars;
+        }
+
+        if(this.model && this.model.data && this.model.data.options)
+        {
+            template_data.options = this.model.data.options;
+        }
+
         if(template_data.kind && template_data.kind.toLowerCase() == 'module')
         {
             arr_data_fields = module_fields;
@@ -47,24 +57,29 @@ gui_project_template = {
             data_field.vars = {};
         }
 
-        // deletes fields from opposite kind and determine existence of changes
-        let kind_was_changed = false;
+        // deletes fields from opposite kind
         delete_data_fields.forEach(function(value)
         {
-            if(data_field[value])
+            if(template_data[value])
             {
-                delete data_field[value];
-                kind_was_changed = true;
+                delete template_data[value];
             }
         });
 
+        let kind_was_changed = false;
+        if(this.model && this.model.data && this.model.data.kind && template_data.kind)
+        {
+            kind_was_changed = !(this.model.data.kind.toLowerCase() == template_data.kind.toLowerCase())
+        }
         // if kind was changed, we delete all previous vars
         if(kind_was_changed)
         {
-            data_field['vars'] = {};
+            data_field.vars = {};
+            template_data.options = {};
         }
 
         template_data.data = JSON.stringify(data_field);
+        template_data.options = JSON.stringify(template_data.options);
 
         return template_data;
     },
@@ -796,13 +811,14 @@ gui_project_template_option_Schema = {
         "type": "string",
         "maxLength": 512,
         "minLength": 1,
+        "default": "all",
         "gui_links": [],
         "definition": {},
         "name": "group",
         "parent_name_format": "option_group",
         "format":"autocomplete",
         "dynamic_properties":{
-            "list_obj":projPath + "/group/",
+            "list_obj":[],
             "value_field":'name',
             "view_field":'name',
         },
@@ -1873,6 +1889,11 @@ function prepareOptionFields(template_data, schema)
             schema.fields['group'].dynamic_properties.list_obj = list_obj;
             schema.fields['group'].dynamic_properties.url_vars = additional_props;
         }
+        else
+        {
+            schema.fields['group'].dynamic_properties.list_obj = [];
+            schema.fields['group'].dynamic_properties.url_vars = [];
+        }
 
 
     }
@@ -1884,7 +1905,7 @@ function prepareOptionFields(template_data, schema)
 * */
 function questionChangeKindOrNot(args) {
     var answer;
-    var question = "Change of template's type will <b> delete </b> all existing <b> 'variables' </b> during saving. Do you really want to do it?";
+    var question = "Change of template's type will <b> delete </b> all existing <b> 'variables' </b> and <b>'options'</b> during saving. Do you really want to do it?";
     var answer_buttons = ["Yes", "No"];
 
     if(args.value && args.value != args.field.value)
