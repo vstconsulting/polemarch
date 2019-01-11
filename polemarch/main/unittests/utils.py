@@ -32,7 +32,7 @@ class ExecutorTestCase(BaseTestCase):
         KVExchanger(Executor.CANCEL_PREFIX + str(history.id)).send(True, 10)
         executor = Executor(history)
         with self.assertRaises(CalledProcessError):
-            executor.execute(['sleep', '5m'], '/')
+            executor.execute(['bash', '-c', '"exit 1"'], '/')
 
 
 class CMDExecutorTestCase(BaseTestCase):
