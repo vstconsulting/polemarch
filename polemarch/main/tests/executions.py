@@ -7,12 +7,14 @@ import git
 import requests
 from datetime import timedelta
 from django.utils.timezone import now
+from django.conf import settings
 from yaml import dump
 from ._base import BaseTestCase, os
 from ..tasks import ScheduledTask
 from ..unittests.ansible import inventory_data, valid_inventory
 from yaml import load as from_yaml, Loader
 
+pm_mod = settings.VST_PROJECT_LIB_NAME
 test_ansible_cfg = '''
 [defaults]
 library = lib:lib2
@@ -1018,7 +1020,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         # Just exec
         ScheduledTask.delay(results[0]['data']['id'])
         # Except on execution
-        with self.patch('polemarch.main.utils.CmdExecutor.execute') as _exec:
+        with self.patch('{}.main.utils.CmdExecutor.execute'.format(pm_mod)) as _exec:
             def _exec_error(*args, **kwargs):
                 raise Exception("It is not error. Just test execution.")
 
@@ -1028,7 +1030,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
             _exec.reset_mock()
 
         # No task
-        with self.patch('polemarch.main.utils.CmdExecutor.execute') as _exec:
+        with self.patch('{}.main.utils.CmdExecutor.execute'.format(pm_mod)) as _exec:
             ScheduledTask.delay(999)
             self.assertEquals(_exec.call_count, 0)
 
@@ -1073,12 +1075,12 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.project_workflow('MANUAL', execute=True)
 
     def test_project_tar(self):
-        with self.patch('polemarch.main.repo._base._ArchiveRepo._download') as download:
-            download.side_effect = [self.tests_path + '/test_repo.tar.gz'] * 10
+        with self.patch('{}.main.repo._base._ArchiveRepo._download'.format(pm_mod)) as d:
+            d.side_effect = [self.tests_path + '/test_repo.tar.gz'] * 10
             self.project_workflow(
                 'TAR', repository='http://localhost:8000/test_repo.tar.gz', execute=True
             )
-            download.reset_mock()
+            d.reset_mock()
 
             # try error
             def over_download(*args, **kwargs):
