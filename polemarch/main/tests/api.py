@@ -224,7 +224,7 @@ class ApiUsersTestCase(ApiBaseTestCase):
         self.result(client.post, self.get_url('user'), 409, data)
         self._logout(client)
 
-    @patch('pmlib.main.hooks.http.Backend.execute')
+    @patch('{}.main.hooks.http.Backend.execute'.format(settings.VST_PROJECT_LIB_NAME))
     def test_api_users_insert_and_delete(self, execute_method):
         self.sended = False
         hook_url = 'http://ex.com'
