@@ -365,3 +365,11 @@ body {
 .table_community_template .td_select_btn {
     display: none;
 }
+
+.table_project_module .td_select_btn {
+    display: none;
+}
+
+.table_project_playbook .td_select_btn {
+    display: none;
+}
