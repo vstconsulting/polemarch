@@ -98,17 +98,15 @@
         <% let line = opt.settings[i] %>
         <% if(line.name != 'all_tasks' && line.active) { %>
             <% let bool = false %>
-            <% let all = 0 %>
-            <% for(let j in opt.stats_data.jobs.year) { %>
-                <% let stats = opt.stats_data.jobs.year[j] %>
-                <% all = stats.all %>
+            <% for(let j in opt.stats_data) { %>
+                <% let stats = opt.stats_data[j] %>
                 <% if(stats.status.toLowerCase() == line.name) { %>
                     <% bool = true %>
                     <div class="progress-group">
                         <%- line.name %>
-                        <span class="float-right"><b> <%- stats.sum %> </b>/ <%- stats.all %> </span>
+                        <span class="float-right"><b> <%- stats.sum %> </b>/ <%- opt.all %> </span>
                          <div class="progress progress-sm">
-                            <div class="progress-bar" style="width: <%- stats.sum / stats.all * 100 %>%; background-color: <%- guiDashboard.getChartLineColor(line) %>!important;"></div>
+                            <div class="progress-bar" style="width: <%- stats.sum / opt.all * 100 %>%; background-color: <%- guiDashboard.getChartLineColor(line) %>!important;"></div>
                          </div>
                     </div>
                  <% } %>
@@ -116,7 +114,7 @@
             <% if(!bool) { %>
                <div class="progress-group">
                     <%- line.name %>
-                    <span class="float-right"><b> 0 </b>/ <%- all %> </span>
+                    <span class="float-right"><b> 0 </b>/ <%- opt.all %> </span>
                      <div class="progress progress-sm">
                         <div class="progress-bar" style="width: 0%; background-color: <%- guiDashboard.getChartLineColor(line) %>!important;"></div>
                      </div>
