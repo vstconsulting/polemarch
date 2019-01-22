@@ -1047,10 +1047,12 @@ guiDashboard.renderChartProgressBars = function()
     let el = $("#chart_progress_bars");
     if(el.length != 0)
     {
+        let d = guiDashboard.formChartProgressBarsData();
 
         let opt = {
             settings: guiDashboard.model.ChartLineSettings,
-            stats_data: guiDashboard.statsData,
+            stats_data: d.data,
+            all: d.all,
         }
 
         let html = spajs.just.render('chart_progress_bars', {opt: opt});
@@ -1058,6 +1060,47 @@ guiDashboard.renderChartProgressBars = function()
         $("#chart_progress_bars").html(html);
     }
 };
+
+/**
+ *  Function forms data object for dashboardChart progress bar
+ */
+guiDashboard.formChartProgressBarsData = function()
+{
+    let data = {};
+    let stats = {};
+    let all = 0;
+    if(guiDashboard.statsData && guiDashboard.statsData.jobs && guiDashboard.statsData.jobs.year)
+    {
+        stats = guiDashboard.statsData.jobs.year;
+        for(let i in stats)
+        {
+            let record = stats[i];
+            if(data[record.status])
+            {
+                data[record.status].all += record.all;
+                data[record.status].sum += record.sum;
+            }
+            else
+            {
+                data[record.status] = {
+                    all: record.all,
+                    sum: record.sum,
+                    status: record.status,
+                }
+            }
+            if(all < data[record.status].all)
+            {
+                all = data[record.status].all;
+            }
+        }
+        for(let i in data)
+        {
+            data[i].all = all;
+        }
+    }
+
+    return {all: all, data: data};
+}
 
 
 /**
