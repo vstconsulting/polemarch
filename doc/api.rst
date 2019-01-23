@@ -9,4 +9,4 @@ This is an example of api schema, but you can find actual schema on Polemarch ho
 ``/api/v2/openapi/``.
 
 
-.. openapi:: ./api_schema.yaml
+.. vst_openapi:: ./api_schema.yaml

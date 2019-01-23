@@ -577,7 +577,7 @@ class __ProjectHistoryViewSet(HistoryViewSet):
 @deco.nested_view('periodic_task', 'id', view=__PeriodicTaskViewSet)
 @deco.nested_view('history', 'id', manager_name='history', view=__ProjectHistoryViewSet)
 @deco.nested_view('variables', 'id', view=__ProjectVarsViewSet)
-class ProjectViewSet(_GroupMixin):
+class ProjectViewSet(OwnedView, _VariablesCopyMixin):
     '''
     retrieve:
         Return a project instance.
@@ -602,7 +602,7 @@ class ProjectViewSet(_GroupMixin):
     serializer_class_one = sers.OneProjectSerializer
     filter_class = filters.ProjectFilter
     POST_WHITE_LIST = ['sync', 'execute_playbook', 'execute_module']
-    copy_related = _GroupMixin.copy_related + ['inventories']
+    copy_related = ['inventories']
     action_serializers = {
         'create': sers.ProjectCreateMasterSerializer
     }
@@ -636,6 +636,13 @@ class ProjectViewSet(_GroupMixin):
 
 
 class ProjectTemplateViewSet(base.ReadOnlyModelViewSet):
+    '''
+    retrieve:
+        Return a community project template instance.
+
+    list:
+        List of community project templates.
+    '''
     model = sers.models.ProjectTemplate
     serializer_class = sers.ProjectTemplateSerializer
     serializer_class_one = sers.OneProjectTemplateSerializer
@@ -649,6 +656,9 @@ class ProjectTemplateViewSet(base.ReadOnlyModelViewSet):
         **default_action
     )
     def use_it(self, request, *args, **kwargs):
+        '''
+        Create project based on this template.
+        '''
         serializer = self.get_serializer(self.get_object(), data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()

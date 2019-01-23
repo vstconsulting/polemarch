@@ -48,7 +48,10 @@ class Git(_VCS):
         return git.Repo(self.path)
 
     def vsc_clone(self, *args, **kwargs):
-        return git.Repo.clone_from(*args, **kwargs)
+        repo = git.Repo.clone_from(*args, **kwargs)
+        with repo.git.custom_environment(**kwargs.get('env', {})):
+            self._update_submodules(repo)
+        return repo
 
     @raise_context()
     def _fetch_from_remote(self, repo, env):
@@ -57,7 +60,22 @@ class Git(_VCS):
             fetch_method = repo.git.fetch
             if not repo.head.is_detached:
                 fetch_method = repo.git.pull
-            return fetch_method(**kwargs)
+            result = fetch_method(**kwargs)
+            self._update_submodules(repo)
+            return result
+
+    def _update_submodules(self, repo):
+        for sm in repo.submodules:
+            # Calling git directly for own submodules
+            # since using relative path is not working in gitpython
+            # see https://github.com/gitpython-developers/GitPython/issues/730
+            with raise_context():
+                if sm.url[0:3] == '../':
+                    sm_path = sm.name
+                    repo.git.submodule('init', sm_path)
+                    repo.git.submodule('update', sm_path)
+                else:
+                    sm.update(init=True)
 
     def vcs_update(self, repo, env):
         fetch_result = self._fetch_from_remote(repo, env)

@@ -29,8 +29,8 @@ valid_inventory = {
             'groups': [],
             'hosts': ['test-host'],
             'vars': {
-                'ansible_user': 'ubuntu',
                 'ansible_ssh_private_key_file': 'example-key',
+                'ansible_user': 'ubuntu',
             },
         },
         'child-group': {
@@ -92,10 +92,11 @@ class AnsibleTestCase(TestCase):
                 list(valid_inventory['groups'][record['name']]['groups']),
                 list(record['groups'])
             )
-            self.assertEqual(
-                list(valid_inventory['groups'][record['name']]['vars'].keys()),
-                list(record['vars'].keys())
-            )
+            valid_list = list(valid_inventory['groups'][record['name']]['vars'].keys())
+            record_list = list(record['vars'].keys())
+            valid_list.sort()
+            record_list.sort()
+            self.assertEqual(valid_list, record_list)
             for key, value in valid_inventory['groups'][record['name']]['vars'].items():
                 self.assertEqual(record['vars'][key], value)
         for record in inv_json['hosts']:

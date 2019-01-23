@@ -21,7 +21,11 @@ behalf of my organization** CLA at
 http://polemarch.readthedocs.io/en/stable/cla.html
 
 Signature: ___
+
 Organization (if none, type "NA"): ___
+
 Email Address: ___
+
 City: ___
+
 Country: ___

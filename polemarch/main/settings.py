@@ -10,13 +10,13 @@ os.makedirs(PROJECTS_DIR) if not os.path.exists(PROJECTS_DIR) else None
 
 # Polemarch apps
 INSTALLED_APPS += [
-    '{}.main'.format(VST_PROJECT_LIB),
-    '{}.api'.format(VST_PROJECT_LIB),
+    '{}.main'.format(VST_PROJECT_LIB_NAME),
+    '{}.api'.format(VST_PROJECT_LIB_NAME),
 ]
 
 # Additional middleware and auth
 MIDDLEWARE_CLASSES += [
-    '{}.main.middleware.PolemarchHeadersMiddleware'.format(VST_PROJECT_LIB),
+    '{}.main.middleware.PolemarchHeadersMiddleware'.format(VST_PROJECT_LIB_NAME),
 ]
 
 AUTH_PASSWORD_VALIDATORS += [
@@ -32,25 +32,25 @@ AUTH_PASSWORD_VALIDATORS += [
 VST_API_VERSION = 'v2'
 
 REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = [
-    "{}.api.{}.permissions.ModelPermission".format(VST_PROJECT_LIB, VST_API_VERSION),
+    "{}.api.{}.permissions.ModelPermission".format(VST_PROJECT_LIB_NAME, VST_API_VERSION),
 ]
 
 API_URL = VST_API_URL
 DEFAULT_API_URL = "/{}/{}".format(API_URL, VST_API_VERSION)
 API = {
     VST_API_VERSION: OrderedDict(
-        project={'view': '{}.api.v2.views.ProjectViewSet'.format(VST_PROJECT_LIB)},
-        community_template={'view': '{}.api.v2.views.ProjectTemplateViewSet'.format(VST_PROJECT_LIB)},
-        inventory={'view': '{}.api.v2.views.InventoryViewSet'.format(VST_PROJECT_LIB)},
-        group={'view': '{}.api.v2.views.GroupViewSet'.format(VST_PROJECT_LIB)},
-        host={'view': '{}.api.v2.views.HostViewSet'.format(VST_PROJECT_LIB)},
-        history={'view': '{}.api.v2.views.HistoryViewSet'.format(VST_PROJECT_LIB), "op_types": ['get', 'del', 'mod']},
-        _bulk={'view': '{}.api.v2.views.BulkViewSet'.format(VST_PROJECT_LIB), 'type': 'view'},
-        user={'view': '{}.api.v2.views.UserViewSet'.format(VST_PROJECT_LIB)},
-        team={'view': '{}.api.v2.views.TeamViewSet'.format(VST_PROJECT_LIB)},
-        token={'view': '{}.api.v2.views.TokenView'.format(VST_PROJECT_LIB), 'type': 'view'},
-        hook={'view': '{}.api.v2.views.HookViewSet'.format(VST_PROJECT_LIB)},
-        stats={'view': '{}.api.v2.views.StatisticViewSet'.format(VST_PROJECT_LIB), 'op_types': ['get']})
+        project={'view': '{}.api.v2.views.ProjectViewSet'.format(VST_PROJECT_LIB_NAME)},
+        community_template={'view': '{}.api.v2.views.ProjectTemplateViewSet'.format(VST_PROJECT_LIB_NAME)},
+        inventory={'view': '{}.api.v2.views.InventoryViewSet'.format(VST_PROJECT_LIB_NAME)},
+        group={'view': '{}.api.v2.views.GroupViewSet'.format(VST_PROJECT_LIB_NAME)},
+        host={'view': '{}.api.v2.views.HostViewSet'.format(VST_PROJECT_LIB_NAME)},
+        history={'view': '{}.api.v2.views.HistoryViewSet'.format(VST_PROJECT_LIB_NAME), "op_types": ['get', 'del', 'mod']},
+        _bulk={'view': '{}.api.v2.views.BulkViewSet'.format(VST_PROJECT_LIB_NAME), 'type': 'view'},
+        user={'view': '{}.api.v2.views.UserViewSet'.format(VST_PROJECT_LIB_NAME)},
+        team={'view': '{}.api.v2.views.TeamViewSet'.format(VST_PROJECT_LIB_NAME)},
+        token={'view': '{}.api.v2.views.TokenView'.format(VST_PROJECT_LIB_NAME), 'type': 'view'},
+        hook={'view': '{}.api.v2.views.HookViewSet'.format(VST_PROJECT_LIB_NAME)},
+        stats={'view': '{}.api.v2.views.StatisticViewSet'.format(VST_PROJECT_LIB_NAME), 'op_types': ['get']})
 }
 
 PROJECT_GUI_MENU = [
@@ -104,7 +104,7 @@ PROJECT_GUI_MENU = [
     },
 ]
 
-SWAGGER_SETTINGS['DEFAULT_INFO'] = '{}.api.v2.swagger.api_info'.format(VST_PROJECT_LIB)
+SWAGGER_SETTINGS['DEFAULT_INFO'] = '{}.api.v2.swagger.api_info'.format(VST_PROJECT_LIB_NAME)
 
 OPENAPI_EXTRA_LINKS = dict()
 OPENAPI_EXTRA_LINKS['Request'] = [
@@ -193,10 +193,10 @@ git = GitSectionConfig()
 
 REPO_BACKENDS = {
     "MANUAL": {
-        "BACKEND": "{}.main.repo.Manual".format(VST_PROJECT_LIB),
+        "BACKEND": "{}.main.repo.Manual".format(VST_PROJECT_LIB_NAME),
     },
     "GIT": {
-        "BACKEND": "{}.main.repo.Git".format(VST_PROJECT_LIB),
+        "BACKEND": "{}.main.repo.Git".format(VST_PROJECT_LIB_NAME),
         "OPTIONS": {
             "CLONE_KWARGS": git.get('CLONE', {}),
             "FETCH_KWARGS": git.get('FETCH', {}),
@@ -208,7 +208,7 @@ REPO_BACKENDS = {
         }
     },
     "TAR": {
-        "BACKEND": "{}.main.repo.Tar".format(VST_PROJECT_LIB),
+        "BACKEND": "{}.main.repo.Tar".format(VST_PROJECT_LIB_NAME),
     },
 }
 
@@ -219,16 +219,16 @@ COMMUNITY_REPOS_URL = main.get('community_projects_url', fallback=DEFAULT_COMMUN
 # RPC tasks settings
 TASKS_HANDLERS = {
     "REPO": {
-        "BACKEND": "{}.main.tasks.tasks.RepoTask".format(VST_PROJECT_LIB)
+        "BACKEND": "{}.main.tasks.tasks.RepoTask".format(VST_PROJECT_LIB_NAME)
     },
     "SCHEDUER": {
-        "BACKEND": "{}.main.tasks.tasks.ScheduledTask".format(VST_PROJECT_LIB)
+        "BACKEND": "{}.main.tasks.tasks.ScheduledTask".format(VST_PROJECT_LIB_NAME)
     },
     "MODULE": {
-        "BACKEND": "{}.main.tasks.tasks.ExecuteAnsibleModule".format(VST_PROJECT_LIB)
+        "BACKEND": "{}.main.tasks.tasks.ExecuteAnsibleModule".format(VST_PROJECT_LIB_NAME)
     },
     "PLAYBOOK": {
-        "BACKEND": "{}.main.tasks.tasks.ExecuteAnsiblePlaybook".format(VST_PROJECT_LIB)
+        "BACKEND": "{}.main.tasks.tasks.ExecuteAnsiblePlaybook".format(VST_PROJECT_LIB_NAME)
     },
 }
 
@@ -237,17 +237,17 @@ CLONE_RETRY = rpc.getint('clone_retry_count', fallback=5)
 # ACL settings
 ACL = {
     "MODEL_HANDLERS": {
-        "Default": "{}.main.acl.handlers.Default".format(VST_PROJECT_LIB)
+        "Default": "{}.main.acl.handlers.Default".format(VST_PROJECT_LIB_NAME)
     }
 }
 
 # Outgoing hooks settings
 HOOKS = {
     "HTTP": {
-        "BACKEND": '{}.main.hooks.http.Backend'.format(VST_PROJECT_LIB)
+        "BACKEND": '{}.main.hooks.http.Backend'.format(VST_PROJECT_LIB_NAME)
     },
     "SCRIPT": {
-        "BACKEND": '{}.main.hooks.script.Backend'.format(VST_PROJECT_LIB)
+        "BACKEND": '{}.main.hooks.script.Backend'.format(VST_PROJECT_LIB_NAME)
     },
 }
 

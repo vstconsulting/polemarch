@@ -7,12 +7,14 @@ import git
 import requests
 from datetime import timedelta
 from django.utils.timezone import now
+from django.conf import settings
 from yaml import dump
 from ._base import BaseTestCase, os
 from ..tasks import ScheduledTask
 from ..unittests.ansible import inventory_data, valid_inventory
 from yaml import load as from_yaml, Loader
 
+pm_mod = settings.VST_PROJECT_LIB_NAME
 test_ansible_cfg = '''
 [defaults]
 library = lib:lib2
@@ -636,8 +638,12 @@ class ProjectTestCase(BaseExecutionsTestCase):
     def tearDown(self):
         super(ProjectTestCase, self).tearDown()
         repo_dir = getattr(self, 'repo_dir', None)
+        submodule_dir = getattr(self, 'submodule_dir', None)
         if repo_dir:
-            shutil.rmtree(repo_dir)
+            if os.path.exists(repo_dir):
+                shutil.rmtree(repo_dir)
+            if os.path.exists(submodule_dir):
+                shutil.rmtree(submodule_dir)
 
     def wip_manual(self, project_data):
         files = self.generate_playbook(self.get_project_dir(**project_data))
@@ -733,12 +739,13 @@ class ProjectTestCase(BaseExecutionsTestCase):
         proj = self.get_model_filter('Project', pk=project_data['id']).get()
         proj_config = getattr(proj, 'config', None)
         self.assertTrue(proj_config is not None)
-        # Check modules
+        # Check modules and git submodules sync
         proj_modules = proj.module.filter(path__startswith='polemarch.project.')
         self.assertEqual(proj_modules.count(), 1)
         proj_module = proj_modules.first()
         self.assertEqual(proj_module.name, 'test_module')
         self.assertEqual(proj_module.data['short_description'], 'Test module')
+        self.assertTrue(os.path.exists(os.path.join(proj.path, 'sm1', 'test_module.py')))
         return dict(playbook_count=len(self.revisions), execute=True)
 
     def make_test_templates(self, project_data):
@@ -1013,7 +1020,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         # Just exec
         ScheduledTask.delay(results[0]['data']['id'])
         # Except on execution
-        with self.patch('polemarch.main.utils.CmdExecutor.execute') as _exec:
+        with self.patch('{}.main.utils.CmdExecutor.execute'.format(pm_mod)) as _exec:
             def _exec_error(*args, **kwargs):
                 raise Exception("It is not error. Just test execution.")
 
@@ -1023,7 +1030,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
             _exec.reset_mock()
 
         # No task
-        with self.patch('polemarch.main.utils.CmdExecutor.execute') as _exec:
+        with self.patch('{}.main.utils.CmdExecutor.execute'.format(pm_mod)) as _exec:
             ScheduledTask.delay(999)
             self.assertEquals(_exec.call_count, 0)
 
@@ -1068,12 +1075,12 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.project_workflow('MANUAL', execute=True)
 
     def test_project_tar(self):
-        with self.patch('polemarch.main.repo._base._ArchiveRepo._download') as download:
-            download.side_effect = [self.tests_path + '/test_repo.tar.gz'] * 10
+        with self.patch('{}.main.repo._base._ArchiveRepo._download'.format(pm_mod)) as d:
+            d.side_effect = [self.tests_path + '/test_repo.tar.gz'] * 10
             self.project_workflow(
                 'TAR', repository='http://localhost:8000/test_repo.tar.gz', execute=True
             )
-            download.reset_mock()
+            d.reset_mock()
 
             # try error
             def over_download(*args, **kwargs):
@@ -1129,17 +1136,25 @@ class ProjectTestCase(BaseExecutionsTestCase):
         pm_yaml['view'] = test_yaml_view
         # Prepare repo
         self.repo_dir = tempfile.mkdtemp()
+        self.submodule_dir = "{}_submodule".format(self.repo_dir)
         self.generate_playbook(self.repo_dir, ['main.yml'])
         self.generate_playbook(self.repo_dir, ['.polemarch.yaml'], data=dump(pm_yaml))
         self.generate_playbook(self.repo_dir, ['ansible.cfg'], data=test_ansible_cfg)
-        lib_dir = self.repo_dir + '/lib'
+        lib_dir = self.submodule_dir
         if not os.path.exists(lib_dir):
             os.makedirs(lib_dir)
             self.generate_playbook(lib_dir, ['test_module.py'], data=test_module_content)
+        # Create submodule
+        submodule_repo = git.Repo.init(self.submodule_dir)
+        submodule_repo.index.add(['test_module.py'])
+        submodule_repo.index.commit("no message")
         repo = git.Repo.init(self.repo_dir)
-        repo.index.add([
-            "main.yml", ".polemarch.yaml", "ansible.cfg", lib_dir + '/test_module.py'
-        ])
+        # Add submodules
+        repo.git.submodule(
+            'add', '../{}/.git'.format(self.submodule_dir.split('/')[-1]), 'lib'
+        )
+        repo.git.submodule('add', '{}/.git'.format(self.submodule_dir), 'sm1')
+        repo.index.add(["main.yml", ".polemarch.yaml", "ansible.cfg"])
         repo.index.commit("no message")
         first_revision = repo.head.object.hexsha
         repo.create_head('new_branch')
