@@ -106,7 +106,33 @@ gui_project_template = {
         }
 
         return template_data;
-    }
+    },
+
+    updateFromServer : function ()
+    {
+        if(this.api.type != "page"){
+            return gui_list_object.updateFromServer.apply(this, arguments);
+        }
+
+        let res = this.load(this.model.filters);
+        let data_field = ['inventory'];
+
+        $.when(res).done(() =>
+        {
+            for(let i in this.model.guiFields)
+            {
+                if($.inArray(i, data_field) == -1) {
+                   this.model.guiFields[i].updateValue(this.model.data[i], this.model.data);
+                } else {
+                   this.model.guiFields[i].updateValue(this.model.data.data[i], this.model.data);
+                }
+            }
+
+            this.onUpdateFromServer();
+        })
+
+        return res;
+    },
 
 }
 
