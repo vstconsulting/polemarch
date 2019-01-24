@@ -15,11 +15,6 @@
         margin-right: 0px;
         margin-top: 10px;
     }
-
-    .pagination:first-child {
-        margin-right: -20px!important;
-        margin-top: 10px!important;
-    }
 }
 
 
@@ -144,7 +139,7 @@
     .td_hook_enable {
         display: none;
     }
-} 
+}
 
 body {
     --history-status-ok: #276900;
