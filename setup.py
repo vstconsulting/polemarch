@@ -56,7 +56,7 @@ def listfiles(folder):
 
 
 def clear_old_extentions(extensions_list):
-    for filename in listfiles('vstutils'):
+    for filename in listfiles('./'):
         _filename, _f_ext = os.path.splitext(filename)
         if os.path.isdir(_filename) or _f_ext not in ['.c', '.cpp']:
             continue
@@ -95,7 +95,7 @@ def make_extensions(extensions_list):
     extra_compile_args = [
         "-fno-strict-aliasing",
         "-fno-var-tracking-assignments",
-        "-O2", "-pipe", "-std=c99"
+        "-pipe", "-std=c99"
     ]
     ext_modules = list(
         Extension(m, f, extra_compile_args=extra_compile_args)
@@ -104,13 +104,16 @@ def make_extensions(extensions_list):
     ext_count = len(ext_modules)
     nthreads = ext_count if ext_count < 10 else 10
 
+    language_level = 2
+    if 'bdist_wheel' in sys.argv and sys.version_info.major == 3:
+        language_level = 3
     if is_help:
         pass
     elif has_cython and ('compile' in sys.argv or 'bdist_wheel' in sys.argv):
         cy_kwargs = dict(
             nthreads=nthreads,
             force=True,
-            language_level=2
+            language_level=language_level
         )
         return cythonize(ext_modules, **cy_kwargs), extensions_dict
     return ext_modules, extensions_dict
