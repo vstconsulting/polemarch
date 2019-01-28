@@ -2,160 +2,494 @@
 window.qunitTestsArray['guiPaths.project'] = {
     test:function()
     {
-        let path = '/project/'
-        let test_name = '/project/'
-        let env = {}
+        let env = {};
+        let pk_obj = {};
 
-        guiTests.openPage(path)
+        ////////////////////////////////////////////////////////
+        // Test path /project/ (list, new page, page, edit page)
+        ////////////////////////////////////////////////////////
 
-        // Проверка наличия элемента на странице
-        guiTests.hasCreateButton(1, path)
+        guiTests.testForPathInternalLevel("/project/",{
+            create:[
+                {
+                    is_valid:true,
+                    data:  {
+                        name:{value:rundomString(6)},
+                        type:{value: "MANUAL", do_not_compare:true,},
+                    },
+                },
+            ],
+            update:[
+                {
+                    is_valid:true,
+                    data: {
+                        name:{value:rundomString(6)},
+                    },
+                },
+            ]
+        }, env, pk_obj, true);
 
-        // Проверка возможности создания объекта
-        guiTests.openPage(path+"new")
 
+        ///////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/variables/ (list, new page, page, edit page)
+        ///////////////////////////////////////////////////////////////////////
 
-        let project = {
-            type:{
-                value: "MANUAL",
-                do_not_compare:true
-            },
-            name:{
-                value: "test-"+rundomString(6),
+        guiTests.testForPathInternalLevel("/project/{pk}/variables/",{
+            create:[
+                {
+                    is_valid:true,
+                    data:  {
+                        key:{value:"repo_sync_on_run"},
+                        value:{value: true},
+                    },
+                },
+            ],
+            update:[
+                {
+                    is_valid:true,
+                    data: {
+                        value:{value: false},
+                    },
+                },
+            ],
+            page: {
+                delete: true,
             }
-        }
+        }, env, pk_obj);
 
-        guiTests.setValuesAndCreate(test_name, project, (data) => {
-            env.objectId = data.id;
-        }, true)
-
-        guiTests.hasDeleteButton(true, test_name)
-        guiTests.hasCreateButton(false, test_name)
-        guiTests.hasAddButton(false, test_name)
-
-        guiTests.clickAndWaitRedirect(".btn-edit-one-entity")
-
-        guiTests.updateObject(test_name, {notes:{value:rundomString(6)}}, true)
+        guiTests.openPage("/project/{pk}/history/", env, (env) => {return vstMakeLocalApiUrl("/project/{pk}/history/", pk_obj)});
+        guiTests.openPage("/project/{pk}/module/", env, (env) => {return vstMakeLocalApiUrl("/project/{pk}/module/", pk_obj)});
+        guiTests.openPage("/project/{pk}/playbook/", env, (env) => {return vstMakeLocalApiUrl("/project/{pk}/playbook/", pk_obj)});
 
 
-        // ////////////////////////////////////////////////
-        //  Тест project/{pk}/template/***
-        // ////////////////////////////////////////////////
-        guiTests.openPage(test_name, env, (env) =>{ return vstMakeLocalApiUrl("project/{pk}/template/new", {api_pk:env.objectId}) })
+        ///////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/inventory/ (list, new page, page, edit page)
+        ///////////////////////////////////////////////////////////////////////
 
-        // Проверка того что страница с флагом api_obj.canCreate == true открывается
-        syncQUnit.addTest("guiPaths['project/{pk}/template/new'] create new template", function ( assert )
+        guiTests.testForPathInternalLevel("/project/{pk}/inventory/",{
+            create:[
+                {
+                    is_valid:true,
+                    data:  {
+                       name:{value:rundomString(6)},
+                    },
+                },
+            ],
+            update:[
+                {
+                    is_valid:true,
+                    data: {
+                        name:{value:rundomString(6)},
+                    },
+                },
+            ],
+            list: {
+                hasAddButton: true,
+            },
+            add_child: {
+                path: '/inventory/',
+                create:{
+                    is_valid:true,
+                    data: {
+                        name:{value:rundomString(6)},
+                    },
+                }
+            },
+        }, env, pk_obj);
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/inventory/{inventory_id}/variables/ (list, new page, page, edit page)
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+
+        guiTests.testForPathInternalLevel("/project/{pk}/inventory/{inventory_id}/variables/",{
+            create:[
+                {
+                    is_valid:true,
+                    data:  {
+                        key:{value:"ansible_user"},
+                        value:{value: "ubuntu"},
+                    },
+                },
+            ],
+            update:[
+                {
+                    is_valid:true,
+                    data: {
+                        value:{value: "centos"},
+                    },
+                },
+            ],
+            page: {
+                delete: true,
+            }
+        }, env, pk_obj);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/inventory/{inventory_id}/group/ (list, new page, page, edit page)
+        ////////////////////////////////////////////////////////////////////////////////////////////
+
+        guiTests.testForPathInternalLevel("/project/{pk}/inventory/{inventory_id}/group/",{
+            create:[
+                {
+                    is_valid:true,
+                    data:  {
+                       name:{value:rundomString(6)},
+                    },
+                },
+            ],
+            update:[
+                {
+                    is_valid:true,
+                    data: {
+                        name:{value:rundomString(6)},
+                    },
+                },
+            ],
+            list: {
+                hasAddButton: true,
+            },
+            add_child: {
+                path: '/group/',
+                create:{
+                    is_valid:true,
+                    data: {
+                        name:{value:rundomString(6)},
+                    },
+                }
+            },
+        }, env, pk_obj);
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/inventory/{inventory_id}/group/{group_id}/variables/ (list, new page, page, edit page)
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        guiTests.testForPathInternalLevel("/project/{pk}/inventory/{inventory_id}/group/{group_id}/variables/",{
+            create:[
+                {
+                    is_valid:true,
+                    data:  {
+                        key:{value:"ansible_user"},
+                        value:{value: "ubuntu"},
+                    },
+                },
+            ],
+            update:[
+                {
+                    is_valid:true,
+                    data: {
+                        value:{value: "centos"},
+                    },
+                },
+            ],
+            page: {
+                delete: true,
+            }
+        }, env, pk_obj);
+
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/inventory/{inventory_id}/host/ (list, new page, page, edit page)
+        ////////////////////////////////////////////////////////////////////////////////////////////
+
+        guiTests.testForPathInternalLevel("/project/{pk}/inventory/{inventory_id}/host/",{
+            create:[
+                {
+                    is_valid:true,
+                    data:  {
+                       name:{value:rundomString(6)},
+                    },
+                },
+            ],
+            update:[
+                {
+                    is_valid:true,
+                    data: {
+                        name:{value:rundomString(6)},
+                    },
+                },
+            ],
+            list: {
+                hasAddButton: true,
+            },
+            add_child: {
+                path: '/host/',
+                create:{
+                    is_valid:true,
+                    data: {
+                        name:{value:rundomString(6)},
+                    },
+                }
+            },
+        }, env, pk_obj);
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/inventory/{inventory_id}/host/{host_id}/variables/ (list, new page, page, edit page)
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        guiTests.testForPathInternalLevel("/project/{pk}/inventory/{inventory_id}/host/{host_id}/variables/",{
+            create:[
+                {
+                    is_valid:true,
+                    data:  {
+                        key:{value:"ansible_user"},
+                        value:{value: "ubuntu"},
+                    },
+                },
+            ],
+            update:[
+                {
+                    is_valid:true,
+                    data: {
+                        value:{value: "centos"},
+                    },
+                },
+            ],
+            page: {
+                delete: true,
+            }
+        }, env, pk_obj);
+
+
+        /////////////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/inventory/{inventory_id}/all_groups/ (list, page)
+        ////////////////////////////////////////////////////////////////////////////
+
+        guiTests.openPage("/project/{pk}/inventory/{inventory_id}/all_groups/", env, (env) => {
+            return vstMakeLocalApiUrl("/project/{pk}/inventory/{inventory_id}/all_groups/", pk_obj)
+        });
+        guiTests.openPage("/project/{pk}/inventory/{inventory_id}/all_groups/{all_groups_id}", env, (env) => {
+            return vstMakeLocalApiUrl("/project/{pk}/inventory/{inventory_id}/all_groups/{group_id}/", pk_obj)
+        });
+
+
+        ////////////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/inventory/{inventory_id}/all_hosts/ (list, page)
+        ///////////////////////////////////////////////////////////////////////////
+
+        guiTests.openPage("/project/{pk}/inventory/{inventory_id}/all_hosts/", env, (env) => {
+            return vstMakeLocalApiUrl("/project/{pk}/inventory/{inventory_id}/all_hosts/", pk_obj)
+        });
+        guiTests.openPage("/project/{pk}/inventory/{inventory_id}/all_groups/{all_hosts_id}", env, (env) => {
+            return vstMakeLocalApiUrl("/project/{pk}/inventory/{inventory_id}/all_hosts/{host_id}/", pk_obj)
+        });
+
+
+        // @todo добавить проверку того что поля правильно меняются от значений других полей
+        ///////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/template/ (list, new page, page, edit page)
+        ///////////////////////////////////////////////////////////////////////
+
+        guiTests.testForPathInternalLevel("/project/{pk}/template/",{
+            create:[
+                {
+                    is_valid:true,
+                    data:  {
+                        name:{value:rundomString(6)},
+                        kind:{value:"Module"},
+                        module: {value: "ping"},
+                    },
+                },
+            ],
+            update:[
+                {
+                    is_valid:true,
+                    data: {
+                        name:{value:rundomString(6)},
+                    },
+                },
+            ]
+        }, env, pk_obj);
+
+
+        // //////////////////////////////////////////////////////////////////////////////////////////////
+        // // Test path /project/{pk}/template/{template_id}/variables/ (list, new page, page, edit page)
+        // //////////////////////////////////////////////////////////////////////////////////////////////
+        //
+        // guiTests.testForPathInternalLevel("/project/{pk}/template/{template_id}/variables/",{
+        //     create:[
+        //         {
+        //             is_valid:true,
+        //             data:  {
+        //                 key:{value:"timeout"},
+        //                 value:{value: 10},
+        //             },
+        //         },
+        //     ],
+        //     update:[
+        //         {
+        //             is_valid:true,
+        //             data: {
+        //                 value:{value: 20},
+        //             },
+        //         },
+        //     ],
+        //     // page: {
+        //     //     delete: true,
+        //     // }
+        // }, env, pk_obj);
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/template/{template_id}/option/ (list, new page, page, edit page)
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        guiTests.testForPathInternalLevel("/project/{pk}/template/{template_id}/option/",{
+            create:[
+                {
+                    is_valid:true,
+                    data:  {
+                        module:{value:"shell"},
+                        args:{value:"uptime"},
+                        group:{value:"all"},
+                        name:{value:"test"},
+                    },
+                },
+            ],
+            update:[
+                {
+                    is_valid:true,
+                    data: {
+                        args:{value:"help"},
+                    },
+                },
+            ]
+        }, env, pk_obj);
+
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/template/{template_id}/option/{option_id}/variables/ (list, new page, page, edit page)
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        guiTests.testForPathInternalLevel("/project/{pk}/template/{template_id}/option/{option_id}/variables/",{
+            create:[
+                {
+                    is_valid:true,
+                    data:  {
+                        key:{value:"timeout"},
+                        value:{value:30},
+                    },
+                },
+            ],
+            update:[
+                {
+                    is_valid:true,
+                    data: {
+                        value:{value:60},
+                    },
+                },
+            ],
+            // page: {
+            //     delete: true,
+            // },
+        }, env, pk_obj);
+
+
+        ///////////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/periodic_task/ (list, new page, page, edit page)
+        ///////////////////////////////////////////////////////////////////////////
+
+        guiTests.testForPathInternalLevel("/project/{pk}/periodic_task/",{
+            create:[
+                {
+                    is_valid:true,
+                    data:  {
+                        name:{value:rundomString(6)},
+                        kind:{value: "MODULE"},
+                        mode: {value: "ping"},
+                        type: {value: "INTERVAL"},
+                        schedule:{value: "00:00:10", do_not_compare:true},
+                    },
+                },
+            ],
+            update:[
+                {
+                    is_valid:true,
+                    data: {
+                        name:{value:rundomString(6)},
+                    },
+                },
+            ]
+        }, env, pk_obj);
+
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/periodic_task/{periodic_task_id}/variables/ (list, new page, page, edit page)
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        guiTests.testForPathInternalLevel("/project/{pk}/periodic_task/{periodic_task_id}/variables/",{
+            create:[
+                {
+                    is_valid:true,
+                    data:  {
+                        key:{value:"forks"},
+                        value:{value:8},
+                    },
+                },
+            ],
+            update:[
+                {
+                    is_valid:true,
+                    data: {
+                        value:{value:10},
+                    },
+                },
+            ],
+            page: {
+                delete: true,
+            },
+        }, env, pk_obj);
+
+
+        // deletes remaining objects
+        [
+            "/project/{pk}/inventory/{inventory_id}/host/{host_id}/",
+            "/host/{host_id}/",
+            "/project/{pk}/inventory/{inventory_id}/group/{group_id}/",
+            "/group/{group_id}/",
+            "/project/{pk}/inventory/{inventory_id}/",
+            "/inventory/{inventory_id}/",
+            "/project/{pk}/template/{template_id}/option/{option_id}",
+            "/project/{pk}/template/{template_id}/",
+            "/project/{pk}/periodic_task/{periodic_task_id}/",
+            "/project/{pk}/",
+        ].forEach((path) => {
+            guiTests.deleteObjByPath(path, env, pk_obj);
+        })
+    }
+}
+
+
+
+window.qunitTestsArray['guiPaths.community_template'] = {
+    test: function () {
+        // test path /community_template/
+        let path = "/community_template/";
+        guiTests.openPage(path);
+
+        // test path /community_template/{pk}/
+        path += "1/";
+        guiTests.openPage(path);
+        guiTests.hasElement(true, ".sublink-btn-use_it", path);
+
+        // test path /community_template/{pk}/use_it/
+        path += "use_it/";
+        guiTests.testActionAndWaitRedirect(path, () => {
+            $(".sublink-btn-use_it").trigger('click');
+        })
+        guiTests.hasElement(true, ".btn_exec", path);
+        syncQUnit.addTest("guiPaths['"+path+"'] ", function ( assert )
         {
             let done = assert.async();
-
-            let fieldsData = {
-                name:{value:rundomString(6)},
-                kind:{value:"Module"},
-                module: {value: "ping"},
-            }
-
-            // @todo добавить проверку того что поля правильно меняются от значений других полей
-
-            let values = guiTests.setValues(assert, fieldsData)
-
-            // Создали объект с набором случайных данных
-            $.when(window.curentPageObject.createAndGoEdit()).done(() => { 
-                $.when(guiTests.actionAndWaitRedirect('project/{pk}/template/new', assert, () => { $(".btn-edit-one-entity").trigger('click') })).done(() => {
-
-                    guiTests.compareValues(assert, 'project/{pk}/template/new', fieldsData, values)
-                    env.template_id = window.curentPageObject.model.data.id;
-                    assert.ok(true, 'guiPaths["project/{pk}/template/new"] create new template ok');
-                    testdone(done)
-                }).fail((err) => {
-                    assert.ok(false, 'guiPaths["project/{pk}/template/new"] create new template fail');
-                    testdone(done)
-                })
-            }).fail((err) => {
-                assert.ok(false, 'guiPaths["project/{pk}/template/new"] create new template fail');
-                testdone(done)
+            let env = {};
+            let fieldsData = {name:{value:"community_test_project"}};
+            let values = guiTests.setValues(assert, fieldsData);
+            guiTests.testActionAndWaitRedirect(path, () => {
+                $(".btn_exec").trigger('click');
             })
-        })
-
-        test_name = "project/{pk}/template/{template_id}"
-        guiTests.openPage(test_name, env, (env) =>{ return vstMakeLocalApiUrl("project/{pk}/template/{template_id}/", {api_pk:env.objectId, api_template_id:env.template_id}) })
-
-
-        test_name = "project/{pk}/template/{template_id}/option"
-        guiTests.openPage(test_name, env, (env) =>{ return vstMakeLocalApiUrl("project/{pk}/template/{template_id}/option/", {api_pk:env.objectId, api_template_id:env.template_id}) })
-        guiTests.hasCreateButton(true, test_name)
-        guiTests.hasAddButton(false, test_name)
-
-        test_name = "project/{pk}/template/{template_id}/option/new"
-        guiTests.openPage(test_name, env, (env) =>{ return vstMakeLocalApiUrl("project/{pk}/template/{template_id}/option/new", {api_pk:env.objectId, api_template_id:env.template_id}) })
-
-
-        let option_data = {
-            module:{value:"shell"},
-            args:{value:"uptime1"},
-            group:{value:"all"},
-            name:{value:"testUptime"},
-        }
-
-        guiTests.setValuesAndCreate(test_name, option_data, (data) =>{}, true)
-
-        test_name = "project/{pk}/template/{template_id}/option/@testUptime"
-        guiTests.openPage(test_name, env, (env) =>{ return vstMakeLocalApiUrl("project/{pk}/template/{template_id}/option/@testUptime/edit", {api_pk:env.objectId, api_template_id:env.template_id}) })
-
-        test_name = "project/{pk}/template/{template_id}/option/@testUptime/edit"
-        guiTests.updateObject("project/{pk}/template/{template_id}/option/@testUptime", {args:{value:"uptime"}}, true);
-
-
-        test_name = "project/{pk}/template/{template_id}/option/@testUptime/variables"
-        guiTests.openPage(test_name, env, (env) =>{
-            return vstMakeLocalApiUrl("project/{pk}/template/{template_id}/option/@testUptime/variables", {api_pk:env.objectId, api_template_id:env.template_id})
-        })
-        guiTests.hasCreateButton(true, test_name)
-        guiTests.hasAddButton(false, test_name)
-
-        test_name = "project/{pk}/template/{template_id}/option/@testUptime/variables/new"
-        guiTests.openPage(test_name, env, (env) =>{
-            return vstMakeLocalApiUrl("project/{pk}/template/{template_id}/option/@testUptime/variables/new", {api_pk:env.objectId, api_template_id:env.template_id})
-        })
-
-        let variables_data = {
-            key:{value:"timeout"},
-            value:{value:"30"},
-        }
-
-        guiTests.setValuesAndCreate(test_name, variables_data, (data) =>{  }, true)
-
-        guiTests.deleteObject(test_name)
-
-        test_name = "project/{pk}/template/{template_id}/option/@testUptime/variables"
-        guiTests.openPage(test_name, env, (env) =>{
-            return vstMakeLocalApiUrl("project/{pk}/template/{template_id}/option/@testUptime/variables", {api_pk:env.objectId, api_template_id:env.template_id})
-        })
-
-        test_name = "project/{pk}/template/{template_id}/option/@testUptime"
-        guiTests.openPage(test_name, env, (env) =>{
-            return vstMakeLocalApiUrl("project/{pk}/template/{template_id}/option/@testUptime", {api_pk:env.objectId, api_template_id:env.template_id})
-        })
-
-        guiTests.deleteObject(test_name)
-
-        test_name = "project/{pk}/template/{template_id}/option"
-        guiTests.openPage(test_name, env, (env) =>{
-            return vstMakeLocalApiUrl("project/{pk}/template/{template_id}/option", {api_pk:env.objectId, api_template_id:env.template_id})
-        })
-
-        test_name = "project/{pk}/template/{template_id}"
-        guiTests.openPage(test_name, env, (env) =>{
-            return vstMakeLocalApiUrl("project/{pk}/template/{template_id}", {api_pk:env.objectId, api_template_id:env.template_id})
-        })
-
-        guiTests.deleteObject(test_name)
-
-        // Удалить проект
-        test_name = "project/{pk}"
-        guiTests.openPage(test_name, env, (env) =>{
-            return vstMakeLocalApiUrl("project/{pk}", {api_pk:env.objectId, api_template_id:env.template_id})
-        })
-
-        guiTests.deleteObject(test_name)
+            guiTests.compareValues(values, fieldsData);
+            guiTests.deleteObject();
+            assert.ok(true);
+            testdone(done)
+        });
     }
 }
