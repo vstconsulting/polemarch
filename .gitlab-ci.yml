@@ -36,6 +36,9 @@ stages:
       - tags
       - issue_building
   only:
+    refs:
+      - merge_requests
+      - web
     changes:
       - polemarch/main/**/*
       - polemarch/api/**/*
@@ -89,6 +92,9 @@ code_style:
       - tags
       - issue_building
   only:
+    refs:
+      - merge_requests
+      - web
     changes:
     - polemarch/main/**/*
     - polemarch/api/**/*
