@@ -302,32 +302,32 @@ window.qunitTestsArray['guiPaths.project'] = {
         }, env, pk_obj);
 
 
-        // //////////////////////////////////////////////////////////////////////////////////////////////
-        // // Test path /project/{pk}/template/{template_id}/variables/ (list, new page, page, edit page)
-        // //////////////////////////////////////////////////////////////////////////////////////////////
-        //
-        // guiTests.testForPathInternalLevel("/project/{pk}/template/{template_id}/variables/",{
-        //     create:[
-        //         {
-        //             is_valid:true,
-        //             data:  {
-        //                 key:{value:"timeout"},
-        //                 value:{value: 10},
-        //             },
-        //         },
-        //     ],
-        //     update:[
-        //         {
-        //             is_valid:true,
-        //             data: {
-        //                 value:{value: 20},
-        //             },
-        //         },
-        //     ],
-        //     // page: {
-        //     //     delete: true,
-        //     // }
-        // }, env, pk_obj);
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/template/{template_id}/variables/ (list, new page, page, edit page)
+        //////////////////////////////////////////////////////////////////////////////////////////////
+
+        guiTests.testForPathInternalLevel("/project/{pk}/template/{template_id}/variables/",{
+            create:[
+                {
+                    is_valid:true,
+                    data:  {
+                        key:{value:"timeout"},
+                        value:{value: 10},
+                    },
+                },
+            ],
+            update:[
+                {
+                    is_valid:true,
+                    data: {
+                        value:{value: 20},
+                    },
+                },
+            ],
+            page: {
+                delete: true,
+            }
+        }, env, pk_obj);
 
         ///////////////////////////////////////////////////////////////////////////////////////////
         // Test path /project/{pk}/template/{template_id}/option/ (list, new page, page, edit page)
@@ -378,9 +378,9 @@ window.qunitTestsArray['guiPaths.project'] = {
                     },
                 },
             ],
-            // page: {
-            //     delete: true,
-            // },
+            page: {
+                delete: true,
+            },
         }, env, pk_obj);
 
 
