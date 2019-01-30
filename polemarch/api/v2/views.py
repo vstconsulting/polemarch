@@ -1,5 +1,8 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
-from collections import OrderedDict
+try:
+    from ruamel.ordereddict import ordereddict as OrderedDict
+except ImportError:
+    from collections import OrderedDict
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from rest_framework import exceptions as excepts, status, permissions
@@ -712,15 +715,14 @@ class StatisticViewSet(base.ListNonModelViewSet):
 
     def list(self, request, *args, **kwargs):
         # pylint: disable=unused-argument
-        stats = OrderedDict(
-            projects=self._get_count_by_user(sers.models.Project),
-            templates=self._get_count_by_user(sers.models.Template),
-            inventories=self._get_count_by_user(sers.models.Inventory),
-            groups=self._get_count_by_user(sers.models.Group),
-            hosts=self._get_count_by_user(sers.models.Host),
-            teams=self._get_count_by_user(sers.models.UserGroup),
-            users=self._get_count_by_user(sers.User),
-        )
+        stats = OrderedDict()
+        stats['projects'] = self._get_count_by_user(sers.models.Project)
+        stats['templates'] = self._get_count_by_user(sers.models.Template)
+        stats['inventories'] = self._get_count_by_user(sers.models.Inventory)
+        stats['groups'] = self._get_count_by_user(sers.models.Group)
+        stats['hosts'] = self._get_count_by_user(sers.models.Host)
+        stats['teams'] = self._get_count_by_user(sers.models.UserGroup)
+        stats['users'] = self._get_count_by_user(sers.User)
         stats['jobs'] = self._get_history_stats(request)
         return base.Response(stats, status.HTTP_200_OK).resp
 

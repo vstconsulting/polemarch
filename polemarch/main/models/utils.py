@@ -4,7 +4,11 @@ from __future__ import unicode_literals
 import re
 import logging
 import traceback
-from collections import namedtuple, OrderedDict
+try:
+    from ruamel.ordereddict import ordereddict as OrderedDict
+    from collections import namedtuple  # nocv
+except ImportError:
+    from collections import namedtuple, OrderedDict
 from functools import reduce
 import six
 from django.utils import timezone
@@ -244,14 +248,16 @@ class AnsibleCommand(PMObject):
         self.executor = self.ExecutorClass(self.history)
 
     def _send_hook(self, when):
-        msg = OrderedDict(execution_type=self.history.kind, when=when)
+        msg = OrderedDict()
+        msg['execution_type'] = self.history.kind
+        msg['when'] = when
         inventory = self.history.inventory
         if isinstance(inventory, Inventory):
             inventory = inventory.get_hook_data(when)
-        msg['target'] = OrderedDict(
-            name=self.history.mode, inventory=inventory,
-            project=self.project.get_hook_data(when)
-        )
+        msg['target'] = OrderedDict()
+        msg['target']['name'] = self.history.mode
+        msg['target']['inventory'] = inventory
+        msg['target']['project'] = self.project.get_hook_data(when)
         msg['history'] = self.history.get_hook_data(when)
         self.project.hook(when, msg)
 
