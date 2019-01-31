@@ -5,6 +5,9 @@ window.qunitTestsArray['guiPaths.group'] = {
         let env = {};
         let pk_obj = {};
 
+        // creates user needed for some following tests
+        guiTests.createUser(env, pk_obj);
+
         ////////////////////////////////////////////////////////////////////////
         // Test path /group/ (list, new page, page, edit page) - group of hosts
         ///////////////////////////////////////////////////////////////////////
@@ -26,8 +29,36 @@ window.qunitTestsArray['guiPaths.group'] = {
                         notes:{value:rundomString(6)},
                     },
                 },
-            ]
+            ],
         }, env, pk_obj, true);
+
+
+        ////////////////////////////////////////////////////////////////////
+        // Test path /group/{pk}/copy/
+        ///////////////////////////////////////////////////////////////////
+
+        guiTests.copyObjectByPath("/group/{pk}/copy/", {
+            data:{
+                name:{value:rundomString(6)},
+            },
+            page:{
+                delete: true,
+            },
+        }, env, pk_obj);
+
+
+        ////////////////////////////////////////////////////////////////////
+        // Test path /group/{pk}/set_owner/
+        ///////////////////////////////////////////////////////////////////
+
+        guiTests.executeAction("/group/{pk}/set_owner/", {
+            data: function() { return {
+                user_id: {
+                    value: {id: env.user_id, text: env.user_name},
+                    do_not_compare:true,
+                }
+            }}
+        }, env, pk_obj);
 
 
         /////////////////////////////////////////////////////////////////////////
@@ -91,6 +122,20 @@ window.qunitTestsArray['guiPaths.group'] = {
                     },
                 }
             },
+        }, env, pk_obj);
+
+
+        ////////////////////////////////////////////////////////////////////
+        // Test path /group/{pk}/host/{host_id}/set_owner/
+        ///////////////////////////////////////////////////////////////////
+
+        guiTests.executeAction("/group/{pk}/host/{host_id}/set_owner/", {
+            data: function() { return {
+                user_id: {
+                    value: {id: env.user_id, text: env.user_name},
+                    do_not_compare:true,
+                }
+            }}
         }, env, pk_obj);
 
 
@@ -193,6 +238,20 @@ window.qunitTestsArray['guiPaths.group'] = {
             },
         }, env, pk_obj);
 
+
+        ////////////////////////////////////////////////////////////////////
+        // Test path /group/{pk}/group/{group_id}/set_owner/
+        ///////////////////////////////////////////////////////////////////
+
+        guiTests.executeAction("/group/{pk}/group/{group_id}/set_owner/", {
+            data: function() { return {
+                user_id: {
+                    value: {id: env.user_id, text: env.user_name},
+                    do_not_compare:true,
+                }
+            }}
+        }, env, pk_obj);
+
         //////////////////////////////////////////////////////////////////////////////////////////
         // Test path /group/{pk}/group/{group_id}/variables/ (list, new page, page, edit page)
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -226,6 +285,7 @@ window.qunitTestsArray['guiPaths.group'] = {
             "/group/{pk}/group/{group_id}/",
             "/group/{group_id}/",
             "/group/{pk}/",
+            "/user/{user_id}/",
         ].forEach((path) => {
             guiTests.deleteObjByPath(path, env, pk_obj);
         })

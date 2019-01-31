@@ -1,9 +1,11 @@
-
 window.qunitTestsArray['guiPaths.project'] = {
     test:function()
     {
         let env = {};
         let pk_obj = {};
+
+        // creates user needed for some following tests
+        guiTests.createUser(env, pk_obj);
 
         ////////////////////////////////////////////////////////
         // Test path /project/ (list, new page, page, edit page)
@@ -28,6 +30,34 @@ window.qunitTestsArray['guiPaths.project'] = {
                 },
             ]
         }, env, pk_obj, true);
+
+
+        ////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/copy/
+        ///////////////////////////////////////////////////////////////////
+
+        guiTests.copyObjectByPath("/project/{pk}/copy/", {
+            data:{
+                name:{value:rundomString(6)},
+            },
+            page:{
+                delete: true,
+            },
+        }, env, pk_obj);
+
+
+        ////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/set_owner/
+        ///////////////////////////////////////////////////////////////////
+
+        guiTests.executeAction("/project/{pk}/set_owner/", {
+            data: function() { return {
+                user_id: {
+                    value: {id: env.user_id, text: env.user_name},
+                    do_not_compare:true,
+                }
+            }}
+        }, env, pk_obj);
 
 
         ///////////////////////////////////////////////////////////////////////
@@ -97,6 +127,30 @@ window.qunitTestsArray['guiPaths.project'] = {
             },
         }, env, pk_obj);
 
+
+        ///////////////////////////////////////////////////////////
+        // Test path /project/{pk}/inventory/import_inventory/
+        ///////////////////////////////////////////////////////////
+        guiTests.importInventory("/project/{pk}/inventory/", {
+            page: {
+                delete: true,
+            }
+        }, env, pk_obj);
+
+
+        ////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/inventory/{inventory_id}/set_owner/
+        ///////////////////////////////////////////////////////////////////
+
+        guiTests.executeAction("/project/{pk}/inventory/{inventory_id}/set_owner/", {
+            data: function() { return {
+                user_id: {
+                    value: {id: env.user_id, text: env.user_name},
+                    do_not_compare:true,
+                }
+            }}
+        }, env, pk_obj);
+
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // Test path /project/{pk}/inventory/{inventory_id}/variables/ (list, new page, page, edit page)
         ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -159,6 +213,21 @@ window.qunitTestsArray['guiPaths.project'] = {
             },
         }, env, pk_obj);
 
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/inventory/{inventory_id}/group/{group_id}/set_owner/
+        ///////////////////////////////////////////////////////////////////////////////
+
+        guiTests.executeAction("/project/{pk}/inventory/{inventory_id}/group/{group_id}/set_owner/", {
+            data: function() { return {
+                user_id: {
+                    value: {id: env.user_id, text: env.user_name},
+                    do_not_compare:true,
+                }
+            }}
+        }, env, pk_obj);
+
+
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Test path /project/{pk}/inventory/{inventory_id}/group/{group_id}/variables/ (list, new page, page, edit page)
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -187,9 +256,9 @@ window.qunitTestsArray['guiPaths.project'] = {
         }, env, pk_obj);
 
 
-        ////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////
         // Test path /project/{pk}/inventory/{inventory_id}/host/ (list, new page, page, edit page)
-        ////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////
 
         guiTests.testForPathInternalLevel("/project/{pk}/inventory/{inventory_id}/host/",{
             create:[
@@ -220,6 +289,20 @@ window.qunitTestsArray['guiPaths.project'] = {
                     },
                 }
             },
+        }, env, pk_obj);
+
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Test path /project/{pk}/inventory/{inventory_id}/host/{host_id}/set_owner/
+        //////////////////////////////////////////////////////////////////////////////
+
+        guiTests.executeAction("/project/{pk}/inventory/{inventory_id}/host/{host_id}/set_owner/", {
+            data: function() { return {
+                user_id: {
+                    value: {id: env.user_id, text: env.user_name},
+                    do_not_compare:true,
+                }
+            }}
         }, env, pk_obj);
 
 
@@ -448,17 +531,17 @@ window.qunitTestsArray['guiPaths.project'] = {
             "/group/{group_id}/",
             "/project/{pk}/inventory/{inventory_id}/",
             "/inventory/{inventory_id}/",
+            "/inventory/{imported_inventory_id}/",
             "/project/{pk}/template/{template_id}/option/{option_id}",
             "/project/{pk}/template/{template_id}/",
             "/project/{pk}/periodic_task/{periodic_task_id}/",
             "/project/{pk}/",
+            "/user/{user_id}/",
         ].forEach((path) => {
             guiTests.deleteObjByPath(path, env, pk_obj);
         })
     }
 }
-
-
 
 window.qunitTestsArray['guiPaths.community_template'] = {
     test: function () {
@@ -477,19 +560,19 @@ window.qunitTestsArray['guiPaths.community_template'] = {
             $(".sublink-btn-use_it").trigger('click');
         })
         guiTests.hasElement(true, ".btn_exec", path);
+        let values;
+        let fieldsData = {name:{value:"community_test_project"}};
         syncQUnit.addTest("guiPaths['"+path+"'] ", function ( assert )
         {
             let done = assert.async();
-            let env = {};
-            let fieldsData = {name:{value:"community_test_project"}};
-            let values = guiTests.setValues(assert, fieldsData);
-            guiTests.testActionAndWaitRedirect(path, () => {
-                $(".btn_exec").trigger('click');
-            })
-            guiTests.compareValues(values, fieldsData);
-            guiTests.deleteObject();
+            values = guiTests.setValues(assert, fieldsData);
             assert.ok(true);
-            testdone(done)
+            testdone(done);
         });
+        guiTests.testActionAndWaitRedirect(path, () => {
+            $(".btn_exec").trigger('click');
+        });
+        guiTests.compareValues(values, fieldsData);
+        guiTests.deleteObject();
     }
 }
