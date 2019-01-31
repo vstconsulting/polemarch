@@ -159,6 +159,46 @@ ATTENTION! If you update something in your GIT repository, don't forget to run s
 Polemarch for pulling your changes.
 
 
+Project variables
+-----------------
+
+If you need to change some properties of your project (for example, branch, key or password of project),
+you can do it on the "variables" page of your project:
+
+.. image:: gui_screenshots/test_project_variables_1.png
+
+As you can see, now current project has only 2 variables:
+
+* **repo_branch** - branch of GIT repository;
+* **repo_type** - type of Polemarch project.
+
+Other available project variables, that you can add with clicking on "Create" button:
+
+* **repo_sync_on_run** - boolean, if true, Polemarch will sync project before every task execution;
+* **repo_password** - GIT repository password;
+* **repo_key** - GIT repository key.
+
+Let's edit **repo_branch** variable. To do it you need click on **repo_branch** item in list.
+Then you will see the following page:
+
+.. image:: gui_screenshots/test_project_variables_2.png
+
+After clicking on "edit" button you will see:
+
+.. image:: gui_screenshots/test_project_variables_3.png
+
+Then you need to change branch name of 'value' field and click on "save" button.
+
+NOTE! If your need to choose branch with tag name
+you should use following format of branch name "``tags/[tag_name]``".
+
+After changing of **repo_branch** variable you need to sync your Polemarch project
+to get files from selected branch.
+After successful project synchronization you will see selected branch name in 'branch' field:
+
+.. image:: gui_screenshots/test_project_variables_4.png
+
+
 Module execution
 ----------------
 
