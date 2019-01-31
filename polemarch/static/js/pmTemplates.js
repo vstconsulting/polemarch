@@ -763,6 +763,7 @@ gui_project_template_option_variables = {
                         ]
                     }
 
+
                     let option_data = this.parent_template.model.data.options[query.data_type[5]];
                     let limit =+ query.filters.match(/limit=([0-9]+)/)[1] ||  guiLocalSettings.get('page_size');
                     let offset =+ query.filters.match(/offset=([0-9]+)/)[1] || 0;
