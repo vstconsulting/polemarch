@@ -5,6 +5,9 @@ window.qunitTestsArray['guiPaths.host'] = {
         let env = {};
         let pk_obj = {};
 
+        // creates user needed for some following tests
+        guiTests.createUser(env, pk_obj);
+
         //////////////////////////////////////////////////////
         // Test path /host/ (list, new page, page, edit page)
         /////////////////////////////////////////////////////
@@ -28,6 +31,34 @@ window.qunitTestsArray['guiPaths.host'] = {
                 },
             ]
         }, env, pk_obj, true);
+
+
+        ////////////////////////////////////////////////////////////////////
+        // Test path /host/{pk}/copy/
+        ///////////////////////////////////////////////////////////////////
+
+        guiTests.copyObjectByPath("/host/{pk}/copy/", {
+            data:{
+                name:{value:rundomString(6)},
+            },
+            page:{
+                delete: true,
+            },
+        }, env, pk_obj);
+
+
+        ////////////////////////////////////////////////////////////////////
+        // Test path /host/{pk}/set_owner/
+        ///////////////////////////////////////////////////////////////////
+
+        guiTests.executeAction("/host/{pk}/set_owner/", {
+            data: function() { return {
+                user_id: {
+                    value: {id: env.user_id, text: env.user_name},
+                    do_not_compare:true,
+                }
+            }}
+        }, env, pk_obj);
 
 
         ////////////////////////////////////////////////////////////////////
@@ -58,6 +89,11 @@ window.qunitTestsArray['guiPaths.host'] = {
         }, env, pk_obj);
 
         // deletes host
-        guiTests.deleteObjByPath("/host/{pk}/", env, pk_obj);
+        [
+            "/host/{pk}/",
+            "/user/{user_id}/",
+        ].forEach((path) => {
+            guiTests.deleteObjByPath(path, env, pk_obj);
+        });
     }
 }

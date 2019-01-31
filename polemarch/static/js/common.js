@@ -12,6 +12,7 @@ if(guiLocalSettings.get('hideMenu'))
 
 // Add tests files to the common list of GUI tests
 /**/
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmPaths.js')
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmElements.js')
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmHook.js')
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/pmHosts.js')

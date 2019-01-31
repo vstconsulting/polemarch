@@ -1,0 +1,20 @@
+[
+{
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+        "password": "md5$2Vp70Ue6DqnK$13e84abc5307cd887ae0f4defa8163fa",
+        "last_login": "2018-11-11T23:39:35.131Z",
+        "is_superuser": true,
+        "username": "admin",
+        "first_name": "First",
+        "last_name": "Last",
+        "email": "admin@test.lan",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2018-05-29T06:07:58.277Z",
+        "groups": [],
+        "user_permissions": []
+    }
+}
+]

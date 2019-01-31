@@ -1,9 +1,12 @@
-
 window.qunitTestsArray['guiPaths.inventory'] = {
     test:function()
     {
         let env = {};
         let pk_obj = {};
+
+        // creates user needed for some following tests
+        guiTests.createUser(env, pk_obj);
+
 
         ///////////////////////////////////////////////////////////
         // Test path /inventory/ (list, new page, page, edit page)
@@ -28,6 +31,44 @@ window.qunitTestsArray['guiPaths.inventory'] = {
                 },
             ]
         }, env, pk_obj, true);
+
+
+        ////////////////////////////////////////////////////////////////////
+        // Test path /inventory/{pk}/copy/
+        ///////////////////////////////////////////////////////////////////
+
+        guiTests.copyObjectByPath("/inventory/{pk}/copy/", {
+            data:{
+                name:{value:rundomString(6)},
+            },
+            page:{
+                delete: true,
+            },
+        }, env, pk_obj);
+
+
+        ////////////////////////////////////////////////////////////////////
+        // Test path /inventory/{pk}/set_owner/
+        ///////////////////////////////////////////////////////////////////
+
+        guiTests.executeAction("/inventory/{pk}/set_owner/", {
+            data: function() { return {
+                user_id: {
+                    value: {id: env.user_id, text: env.user_name},
+                    do_not_compare:true,
+                }
+            }}
+        }, env, pk_obj);
+
+
+        ///////////////////////////////////////////////////////////
+        // Test path /inventory/import_inventory/
+        ///////////////////////////////////////////////////////////
+        guiTests.importInventory("/inventory/", {
+            page: {
+                delete: true,
+            }
+        }, env, pk_obj);
 
 
         /////////////////////////////////////////////////////////////////////////
@@ -67,7 +108,7 @@ window.qunitTestsArray['guiPaths.inventory'] = {
                 {
                     is_valid:true,
                     data:  {
-                       name:{value:rundomString(6)},
+                        name:{value:rundomString(6)},
                     },
                 },
             ],
@@ -91,6 +132,20 @@ window.qunitTestsArray['guiPaths.inventory'] = {
                     },
                 }
             },
+        }, env, pk_obj);
+
+
+        ////////////////////////////////////////////////////////////////////
+        // Test path /inventory/{pk}/group/{group_id}/set_owner/
+        ///////////////////////////////////////////////////////////////////
+
+        guiTests.executeAction("/inventory/{pk}/group/{group_id}/set_owner/", {
+            data: function() { return {
+                user_id: {
+                    value: {id: env.user_id, text: env.user_name},
+                    do_not_compare:true,
+                }
+            }}
         }, env, pk_obj);
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -130,7 +185,7 @@ window.qunitTestsArray['guiPaths.inventory'] = {
                 {
                     is_valid:true,
                     data:  {
-                       name:{value:rundomString(6)},
+                        name:{value:rundomString(6)},
                     },
                 },
             ],
@@ -154,6 +209,20 @@ window.qunitTestsArray['guiPaths.inventory'] = {
                     },
                 }
             },
+        }, env, pk_obj);
+
+
+        ////////////////////////////////////////////////////////////////////
+        // Test path /inventory/{pk}/host/{host_id}/set_owner/
+        ///////////////////////////////////////////////////////////////////
+
+        guiTests.executeAction("/inventory/{pk}/host/{host_id}/set_owner/", {
+            data: function() { return {
+                user_id: {
+                    value: {id: env.user_id, text: env.user_name},
+                    do_not_compare:true,
+                }
+            }}
         }, env, pk_obj);
 
 
@@ -216,6 +285,7 @@ window.qunitTestsArray['guiPaths.inventory'] = {
             "/inventory/{pk}/group/{group_id}/",
             "/group/{group_id}/",
             "/inventory/{pk}/",
+            "/user/{user_id}/",
         ].forEach((path) => {
             guiTests.deleteObjByPath(path, env, pk_obj);
         })
