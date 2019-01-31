@@ -1,3 +1,6 @@
 #indices-and-tables > h1 {
     font-size: 140%;
 }
+.post {
+    border-bottom: none;
+}
