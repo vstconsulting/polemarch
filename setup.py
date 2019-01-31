@@ -50,13 +50,17 @@ def get_file_ext(ext):
 
 
 def listfiles(folder):
-    for root, folders, files in os.walk(folder):
-        for filename in folders + files:
-            yield os.path.join(root, filename)
+    if not isinstance(folder, (list, tuple)):
+        folder = [folder]
+    folder = filter(lambda p: os.path.isdir(p), folder)
+    for one_folder in folder:
+        for root, folders, files in os.walk(one_folder):
+            for filename in folders + files:
+                yield os.path.join(root, filename)
 
 
-def clear_old_extentions(extensions_list):
-    for filename in listfiles('./'):
+def clear_old_extentions(extensions_list, packages):
+    for filename in listfiles(packages):
         _filename, _f_ext = os.path.splitext(filename)
         if os.path.isdir(_filename) or _f_ext not in ['.c', '.cpp']:
             continue
@@ -70,12 +74,12 @@ def clear_old_extentions(extensions_list):
             os.remove(filename)
 
 
-def make_extensions(extensions_list):
+def make_extensions(extensions_list, packages):
     if not isinstance(extensions_list, list):
         raise Exception("Extension list should be `list`.")
 
     if not is_help:
-        clear_old_extentions(extensions_list)
+        clear_old_extentions(extensions_list, packages)
 
     extensions_dict = {}
     for ext in extensions_list:
@@ -119,8 +123,46 @@ def make_extensions(extensions_list):
     return ext_modules, extensions_dict
 
 
+def minify_js_file(js_file, jsmin_func):
+    with open(js_file, 'r') as js_file_fd:
+        return jsmin_func(js_file_fd.read(), quote_chars="'\"`")
+
+
+def minify_css_file(css_file, cssmin_func):
+    with open(css_file, 'r') as js_file_fd:
+        return cssmin_func(js_file_fd.read())
+
+
+def minify_static_files(base_dir, files, exclude=None):
+    exclude = exclude or []
+    patterns = dict()
+    try:
+        from jsmin import jsmin as jsmin_func
+        patterns['*.js'] = (minify_js_file, jsmin_func)
+    except:
+        pass
+    try:
+        from csscompressor import compress as csscompressor_func
+        patterns['*.css'] = (minify_css_file, csscompressor_func)
+    except:
+        pass
+
+    for fnext, funcs in patterns.items():
+        for fext_file in filter(lambda f: fnmatch.fnmatch(f, fnext), files):
+            if any(filter(lambda fp: fext_file.endswith(fp), exclude)):
+                continue
+            fext_file = os.path.join(base_dir, fext_file)
+            if os.path.exists(fext_file):
+                func, subfunc = funcs
+                minified = func(fext_file, subfunc)
+                with open(fext_file, 'w') as js_file_fd:
+                    js_file_fd.write(minified)
+                print('Minfied file {}.'.format(fext_file))
+
+
 class _Compile(_sdist):
     extensions_dict = dict()
+    static_exclude = []
 
     def __filter_files(self, files):
         for _files in self.extensions_dict.values():
@@ -133,6 +175,7 @@ class _Compile(_sdist):
         if has_cython:
             files = self.__filter_files(files)
         _sdist.make_release_tree(self, base_dir, files)
+        minify_static_files(base_dir, files, self.static_exclude)
 
     def run(self):
         return _sdist.run(self)
@@ -211,6 +254,7 @@ class build_py(build_py_orig):
 
 class install_lib(_install_lib):
     exclude = []
+    static_exclude = []
 
     def _filter_files_with_ext(self, filename):
         _filename, _fext = os.path.splitext(filename)
@@ -227,6 +271,7 @@ class install_lib(_install_lib):
             if any(filter(lambda f: fnmatch.fnmatch(f, _source_name+"*.so"), so_extentions)):
                 print('Removing extention sources [{}].'.format(source))
                 os.remove(source)
+        minify_static_files('', files, self.static_exclude)
         return result
 
 
@@ -241,13 +286,17 @@ def make_setup(**opts):
     if 'packages' not in opts:
         opts['packages'] = find_packages()
     ext_modules_list = opts.pop('ext_modules_list', list())
-    ext_mod, ext_mod_dict = make_extensions(ext_modules_list)
+    ext_mod, ext_mod_dict = make_extensions(ext_modules_list, opts['packages'])
     opts['ext_modules'] = opts.get('ext_modules', list()) + ext_mod
     cmdclass = opts.get('cmdclass', dict())
+    static_exclude = opts.pop('static_exclude_min', list())
     if 'compile' not in cmdclass:
+        compile_class = get_compile_command(ext_mod_dict)
+        compile_class.static_exclude = static_exclude
         cmdclass.update({"compile": get_compile_command(ext_mod_dict)})
     if has_cython:
         build_py.exclude = ext_modules_list
+        install_lib.static_exclude = static_exclude
         cmdclass.update({
             'build_ext': _build_ext,
             'build_py': build_py,
