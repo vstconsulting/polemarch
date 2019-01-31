@@ -221,7 +221,7 @@ gui_project_template_variables = {
                         item: "project",
                         type: "mod",
                         data: {
-                            count: 1,
+                            count: 0,
                             next: null,
                             previous: null,
                             results: [ ]
@@ -235,16 +235,22 @@ gui_project_template_variables = {
                     }
 
                     let vars = this.parent_template.model.data.data['vars'];
-                    for(let i in vars)
-                    {
-                        let val = vars[i];
-                        res.data.results.push({
-                            id: i,
-                            key: i,
-                            value: vars[i],
-                        })
+                    let limit =+ query.filters.match(/limit=([0-9]+)/)[1] ||  guiLocalSettings.get('page_size');
+                    let offset =+ query.filters.match(/offset=([0-9]+)/)[1] || 0;
+                    if(vars && typeof vars == "object") {
+                        let vars_keys = Object.keys(vars);
+                        for(let i=offset; i<limit+offset; i++) {
+                            let key = vars_keys[i];
+                            if(key && vars[key] !== undefined) {
+                                res.data.results.push({
+                                    id: key,
+                                    key: key,
+                                    value: vars[key],
+                                })
+                            }
+                        }
+                        res.data.count = vars_keys.length;
                     }
-                    res.data.count = res.data.results.length;
                     return res;
                 }
 
@@ -503,7 +509,7 @@ gui_project_template_option = {
                         item: "project",
                         type: "mod",
                         data: {
-                            count: 1,
+                            count: 0,
                             next: null,
                             previous: null,
                             results: [ ]
@@ -513,18 +519,25 @@ gui_project_template_option = {
                             "template",
                             this.url_vars['api_template_id'],
                             "option",
-                        ],
+                        ]
                     }
 
-                    for(let i in this.parent_template.model.data.options)
-                    {
-                        let val = this.parent_template.model.data.options[i]
-                        res.data.results.push({
-                            "id": i,
-                            "name": val.name || i,
-                        })
+                    let limit =+ query.filters.match(/limit=([0-9]+)/)[1] ||  guiLocalSettings.get('page_size');
+                    let offset =+ query.filters.match(/offset=([0-9]+)/)[1] || 0;
+                    if(this.parent_template.model.data.options && typeof this.parent_template.model.data.options == "object") {
+                        let option_keys = Object.keys(this.parent_template.model.data.options);
+                        for (let i = offset; i < limit + offset; i++) {
+                            let key = option_keys[i];
+                            if (key && this.parent_template.model.data.options[key]) {
+                                let val = this.parent_template.model.data.options[key];
+                                res.data.results.push({
+                                    "id": key,
+                                    "name": val.name || key,
+                                })
+                            }
+                        }
+                        res.data.count = option_keys.length;
                     }
-                    res.data.count = res.data.results.length
                     return res;
                 }
 
@@ -586,7 +599,6 @@ gui_project_template_option = {
 
         this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/", this.url_vars)
         $.when(this.parent_template.load(query.data_type[3])).done(() =>{
-
             $.when(this.apiGetDataForQuery(query, option)).done((d) =>{
                 def.resolve(d)
             }).fail((e) =>{
@@ -736,7 +748,7 @@ gui_project_template_option_variables = {
                         item: "option",
                         type: "mod",
                         data: {
-                            count: 1,
+                            count: 0,
                             next: null,
                             previous: null,
                             results: [ ]
@@ -752,16 +764,22 @@ gui_project_template_option_variables = {
                     }
 
                     let option_data = this.parent_template.model.data.options[query.data_type[5]];
-                    for(let i in option_data.vars)
-                    {
-                        let val = option_data.vars[i]
-                        res.data.results.push({
-                            id: i,
-                            key: i,
-                            value: option_data.vars[i],
-                        })
+                    let limit =+ query.filters.match(/limit=([0-9]+)/)[1] ||  guiLocalSettings.get('page_size');
+                    let offset =+ query.filters.match(/offset=([0-9]+)/)[1] || 0;
+                    if(option_data.vars && typeof option_data.vars == "object") {
+                        let vars_keys = Object.keys(option_data.vars);
+                        for (let i = offset; i < limit + offset; i++) {
+                            let key = vars_keys[i];
+                            if (key && option_data.vars[key] !== undefined) {
+                                res.data.results.push({
+                                    id: key,
+                                    key: key,
+                                    value: option_data.vars[key],
+                                })
+                            }
+                        }
+                        res.data.count = vars_keys.length;
                     }
-                    res.data.count = res.data.results.length
                     return res;
                 }
 
