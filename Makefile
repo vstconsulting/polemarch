@@ -125,7 +125,7 @@ prebuild: print_vars
 	# Install settings
 	-install -Dm 755 $(NAME)/$(MAIN_APP)/settings.ini $(BUILD_DIR)/etc/$(USER)/settings.ini.template
 	# Install systemd services
-	-install -Dm 755 initbin/$(NAME)web.service  $(BUILD_DIR)/etc/systemd/system/$(NAME).service
+	-install -Dm 755 initbin/$(NAME).service  $(BUILD_DIR)/etc/systemd/system/$(NAME).service
 	# Install tmpdirs config
 	-install -Dm 755 initbin/$(NAMEBASE).conf  $(BUILD_DIR)/etc/tmpfiles.d/$(NAMEBASE).conf
 	# Create tmpdirs
