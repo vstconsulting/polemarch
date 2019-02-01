@@ -3,6 +3,7 @@
 import os
 import sys
 import fnmatch
+import codecs
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
@@ -31,12 +32,12 @@ is_help = any([a for a in ['-h', '--help'] if a in sys.argv])
 
 
 def get_discription(file_path='README.rst', folder=os.getcwd()):
-    with open("{}/{}".format(folder, file_path)) as readme:
+    with codecs.open("{}/{}".format(folder, file_path), 'r', encoding='utf-8') as readme:
         return readme.read()
 
 
 def load_requirements(file_name, folder=os.getcwd()):
-    with open(os.path.join(folder, file_name)) as req_file:
+    with codecs.open(os.path.join(folder, file_name), 'r', encoding='utf-8')as req_file:
         return req_file.read().strip().split('\n')
 
 
@@ -124,13 +125,11 @@ def make_extensions(extensions_list, packages):
 
 
 def minify_js_file(js_file, jsmin_func):
-    with open(js_file, 'r') as js_file_fd:
-        return jsmin_func(js_file_fd.read(), quote_chars="'\"`")
+    return jsmin_func(js_file, quote_chars="'\"`")
 
 
 def minify_css_file(css_file, cssmin_func):
-    with open(css_file, 'r') as js_file_fd:
-        return cssmin_func(js_file_fd.read())
+    return cssmin_func(css_file)
 
 
 def minify_static_files(base_dir, files, exclude=None):
@@ -149,14 +148,17 @@ def minify_static_files(base_dir, files, exclude=None):
 
     for fnext, funcs in patterns.items():
         for fext_file in filter(lambda f: fnmatch.fnmatch(f, fnext), files):
+            if fnmatch.fnmatch(fext_file, '*.min.*'):
+                continue
             if any(filter(lambda fp: fext_file.endswith(fp), exclude)):
                 continue
             fext_file = os.path.join(base_dir, fext_file)
             if os.path.exists(fext_file):
                 func, subfunc = funcs
-                minified = func(fext_file, subfunc)
-                with open(fext_file, 'w') as js_file_fd:
-                    js_file_fd.write(minified)
+                with codecs.open(fext_file, 'r', encoding='utf-8') as static_file_fd:
+                    minified = func(static_file_fd.read(), subfunc)
+                with codecs.open(fext_file, 'w', encoding='utf-8') as static_file_fd:
+                    static_file_fd.write(minified)
                 print('Minfied file {}.'.format(fext_file))
 
 
