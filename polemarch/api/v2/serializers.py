@@ -2,7 +2,10 @@
 from __future__ import unicode_literals
 import json
 import uuid
-from collections import OrderedDict
+try:
+    from ruamel.ordereddict import ordereddict as OrderedDict
+except ImportError:
+    from collections import OrderedDict
 import six
 from django.contrib.auth.models import User
 from django.utils.functional import cached_property

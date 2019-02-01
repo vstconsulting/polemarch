@@ -24,7 +24,7 @@ info:
   x-versions:
     application: 0.2.7
     library: 0.2.7
-    vstutils: 1.3.13
+    vstutils: 1.4.0
     django: 1.11.18
     ansible: 2.7.6
   version: v2

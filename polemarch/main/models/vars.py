@@ -5,7 +5,10 @@ import logging
 import uuid
 
 from functools import reduce
-from collections import OrderedDict
+try:
+    from ruamel.ordereddict import ordereddict as OrderedDict
+except ImportError:
+    from collections import OrderedDict
 from django.db import transaction
 from django.db.models import Case, When, Value
 from django.contrib.contenttypes.models import ContentType
@@ -121,7 +124,10 @@ class AbstractModel(ACLModel):
 
     def get_hook_data(self, when):
         # pylint: disable=unused-argument
-        return OrderedDict(id=self.id, name=self.name)
+        hook_data = OrderedDict()
+        hook_data['id'] = self.id
+        hook_data['name'] = self.name
+        return hook_data
 
     @transaction.atomic()
     def set_vars(self, variables):

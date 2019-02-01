@@ -31,6 +31,6 @@ default_settings = {
     "VST_ROOT_URLCONF": os.getenv("VST_ROOT_URLCONF", 'vstutils.urls'),
 }
 
-__version__ = "0.2.7"
+__version__ = "0.2.8"
 
 prepare_environment(**default_settings)

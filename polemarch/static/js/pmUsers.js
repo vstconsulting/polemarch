@@ -6,9 +6,17 @@ function addSettingsToChangePassword(obj)
     })
 }
 
-tabSignal.connect("openapi.completed", function()
-{
-    let user_settings = guiSchema.path['/user/{pk}/settings/'];
+/**
+ * Function adds settings to user_settings schema.
+ * Function is expected to be called from "openapi.completed" tabSignal.
+ * @param path {string} - path of schema object.
+ */
+function addSettingsToUserSettings(path){
+    let user_settings = guiSchema.path[path];
+    if(!user_settings)
+    {
+        return;
+    }
     user_settings.canEdit = true;
     user_settings.canEditInView = true;
     user_settings.methodEdit = 'post';
@@ -36,6 +44,37 @@ tabSignal.connect("openapi.completed", function()
         }
     }
     catch(e){}
+}
+
+/**
+ * Custom function for updating user_settings' data.
+ * Function is expected to be called from extension_object
+ * of user_settings page object. (For example, 'gui_user_settings').
+ */
+function gui_user_settings_update(){
+    let base_update = gui_page_object.update.apply(this, arguments);
+    return $.when(base_update).done(data => {
+        guiDashboard.setUserSettingsFromApiAnswer(data.data)
+    })
+}
+
+/**
+ * Custom function for getting data from user_settings' form.
+ * Function is expected to be called from extension_object
+ * of user_settings page object. (For example, 'gui_user_settings').
+ */
+function gui_user_settings_getDataFromForm() {
+    let base_data_from_form = gui_base_object.getDataFromForm.apply(this, arguments);
+
+    base_data_from_form['skinsSettings'] = $.extend(true, {}, guiDashboard.model.skinsSettings);
+    base_data_from_form['selectedSkin'] = guiDashboard.model.selectedSkin;
+
+    return base_data_from_form;
+}
+
+tabSignal.connect("openapi.completed", function()
+{
+    addSettingsToUserSettings('/user/{pk}/settings/');
 
     let user = guiSchema.path['/user/'];
     try{
@@ -50,19 +89,11 @@ tabSignal.connect("openapi.schema.definition.ChangePassword", addSettingsToChang
 gui_user_settings = {
     update: function()
     {
-        let base_update = gui_page_object.update.apply(this, arguments);
-        return $.when(base_update).done(data => {
-            guiDashboard.setUserSettingsFromApiAnswer(data.data)
-        })
+        return gui_user_settings_update.apply(this, arguments);
     },
 
     getDataFromForm: function()
     {
-        let base_data_from_form = gui_base_object.getDataFromForm.apply(this, arguments);
-
-        base_data_from_form['skinsSettings'] = $.extend(true, {}, guiDashboard.model.skinsSettings);
-        base_data_from_form['selectedSkin'] = guiDashboard.model.selectedSkin;
-
-        return base_data_from_form;
+        return gui_user_settings_getDataFromForm.apply(this, arguments);
     },
 }

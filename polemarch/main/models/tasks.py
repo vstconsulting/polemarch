@@ -2,7 +2,10 @@
 from __future__ import unicode_literals
 
 import logging
-from collections import OrderedDict
+try:
+    from ruamel.ordereddict import ordereddict as OrderedDict
+except ImportError:
+    from collections import OrderedDict
 from datetime import timedelta
 from functools import partial
 import json
@@ -316,11 +319,11 @@ class HistoryQuerySet(BQuerySet):
             month=dbfunc.TruncMonth('start_time'),
             year=dbfunc.TruncYear('start_time'),
         )
-        return OrderedDict(
-            day=self._get_history_stats_by(qs, 'day'),
-            month=self._get_history_stats_by(qs, 'month'),
-            year=self._get_history_stats_by(qs, 'year')
-        )
+        result = OrderedDict()
+        result['day'] = self._get_history_stats_by(qs, 'day')
+        result['month'] = self._get_history_stats_by(qs, 'month')
+        result['year'] = self._get_history_stats_by(qs, 'year')
+        return result
 
     def __check_ansible_args(self, command, ansible_args):
         AnsibleArgumentsReference().validate_args(command.lower(), dict(ansible_args))

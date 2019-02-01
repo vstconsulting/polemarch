@@ -37,7 +37,7 @@ Features
 * sharing of hosts, groups, inventories between projects;
 * history of tasks execution with all details;
 * easy configurable clustering for reliability and scalability:
-* import of Ansible projects from Git repository or tar archive;
+* import of Ansible projects from Git repository (with submodules) or tar archive;
 * import of `inventory file <https://polemarch.readthedocs.io/en/latest/gui.html#import-inventory>`_;
 * support of quick project deployment;
 * documentation: http://polemarch.readthedocs.io/en/latest/ ;

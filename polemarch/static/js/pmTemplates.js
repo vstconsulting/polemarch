@@ -106,22 +106,40 @@ gui_project_template = {
         }
 
         return template_data;
-    }
+    },
+
+    updateFromServer : function ()
+    {
+        if(this.api.type != "page"){
+            return gui_list_object.updateFromServer.apply(this, arguments);
+        }
+
+        let res = this.load(this.model.filters);
+        let data_field = ['inventory'];
+
+        $.when(res).done(() =>
+        {
+            for(let i in this.model.guiFields)
+            {
+                if($.inArray(i, data_field) == -1) {
+                    this.model.guiFields[i].updateValue(this.model.data[i], this.model.data);
+                } else {
+                    this.model.guiFields[i].updateValue(this.model.data.data[i], this.model.data);
+                }
+            }
+
+            this.onUpdateFromServer();
+        })
+
+        return res;
+    },
 
 }
 
 
 gui_project_template_variables = {
 
-    createAndGoEdit: function()
-    {
-        var def = this.create();
-        $.when(def).done((newObj) => {
-            vstGO(this.url_vars.baseURL("@"+newObj.data.key));
-        })
-
-        return def;
-    },
+    pkValuePriority: ["key"],
 
     apiGetDataForQuery : function (query, variable)
     {
@@ -130,21 +148,31 @@ gui_project_template_variables = {
             {
                 if(query.method == "get")
                 {
-                    let res =  {
-                        "status": 200,
-                        "item": "variables",
-                        "type": "mod",
-                        "data": {},
-                        "subitem": [
-                            "1",
-                            "template"
+                    let res = {
+                        status: 200,
+                        item: "project",
+                        type: "mod",
+                        data: {},
+                        subitem: [
+                            this.url_vars['api_pk'],
+                            "template",
+                            this.url_vars['api_template_id'],
+                            "variables",
+                            variable
                         ]
                     }
-
                     let val = this.parent_template.model.data.data['vars'];
-                    res.data = {
-                        "key": variable,
-                        "value": val[variable],
+                    if(val[variable] !== undefined)
+                    {
+                        res.data = {
+                            key: variable,
+                            value: val[variable],
+                        }
+                    }
+                    else
+                    {
+                        res.status = 404;
+                        res.data.detail = "No Variable matches the given query.";
                     }
 
                     return res;
@@ -166,10 +194,17 @@ gui_project_template_variables = {
                     var def = new $.Deferred();
                     $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
                         def.resolve({
-                            "status":200,
-                            "item":"project",
-                            "type":"mod",
-                            "data":query.data,
+                            status:200,
+                            item:"project",
+                            type:"mod",
+                            data:query.data,
+                            subitem: [
+                                this.url_vars['api_pk'],
+                                "template",
+                                this.url_vars['api_template_id'],
+                                "variables",
+                                variable,
+                            ]
                         })
                     }).fail((e) =>{
                         def.reject(e)
@@ -182,32 +217,40 @@ gui_project_template_variables = {
                 if(query.method == "get")
                 {
                     let res =  {
-                        "status": 200,
-                        "item": "variables",
-                        "type": "mod",
-                        "data": {
-                            "count": 1,
-                            "next": null,
-                            "previous": null,
-                            "results": [ ]
+                        status: 200,
+                        item: "project",
+                        type: "mod",
+                        data: {
+                            count: 0,
+                            next: null,
+                            previous: null,
+                            results: [ ]
                         },
-                        "subitem": [
-                            "1",
-                            "template"
+                        subitem: [
+                            this.url_vars['api_pk'],
+                            "template",
+                            this.url_vars['api_template_id'],
+                            "variables",
                         ]
                     }
 
                     let vars = this.parent_template.model.data.data['vars'];
-                    for(let i in vars)
-                    {
-                        let val = vars[i]
-                        res.data.results.push({
-                            "id": i,
-                            "key": i,
-                            "value": vars[i],
-                        })
+                    let limit =+ query.filters.match(/limit=([0-9]+)/)[1] ||  guiLocalSettings.get('page_size');
+                    let offset =+ query.filters.match(/offset=([0-9]+)/)[1] || 0;
+                    if(vars && typeof vars == "object") {
+                        let vars_keys = Object.keys(vars);
+                        for(let i=offset; i<limit+offset; i++) {
+                            let key = vars_keys[i];
+                            if(key && vars[key] !== undefined) {
+                                res.data.results.push({
+                                    id: key,
+                                    key: key,
+                                    value: vars[key],
+                                })
+                            }
+                        }
+                        res.data.count = vars_keys.length;
                     }
-                    res.data.count = res.data.results.length
                     return res;
                 }
 
@@ -227,10 +270,16 @@ gui_project_template_variables = {
                     var def = new $.Deferred();
                     $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
                         def.resolve({
-                            "status":200,
-                            "item":"project",
-                            "type":"mod",
-                            "data":query.data,
+                            status:201,
+                            item:"project",
+                            type:"mod",
+                            data:query.data,
+                            subitem: [
+                                this.url_vars['api_pk'],
+                                "template",
+                                this.url_vars['api_template_id'],
+                                "variables",
+                            ]
                         })
                     }).fail((e) =>{
                         def.reject(e)
@@ -261,7 +310,11 @@ gui_project_template_variables = {
         $.when(this.parent_template.load(query.data_type[3])).done(() =>{
 
             $.when(this.apiGetDataForQuery(query, variable)).done((d) =>{
-                def.resolve(d)
+                if(d.status >= 200 && d.status < 300) {
+                    def.resolve(d);
+                } else {
+                    def.reject(d);
+                }
             }).fail((e) =>{
                 def.reject(e);
             })
@@ -375,13 +428,16 @@ gui_project_template_option = {
                 if(query.method == "get")
                 {
                     let res =  {
-                        "status": 200,
-                        "item": "option",
-                        "type": "mod",
-                        "data": {},
-                        "subitem": [
-                            "1",
-                            "template"
+                        status: 200,
+                        item: "project",
+                        type: "mod",
+                        data: {},
+                        subitem: [
+                            this.url_vars['api_pk'],
+                            "template",
+                            this.url_vars['api_template_id'],
+                            "option",
+                            option,
                         ]
                     }
 
@@ -426,10 +482,17 @@ gui_project_template_option = {
                     var def = new $.Deferred();
                     $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
                         def.resolve({
-                            "status":200,
-                            "item":"project",
-                            "type":"mod",
-                            "data":query.data,
+                            status:200,
+                            item:"project",
+                            type:"mod",
+                            data:query.data,
+                            subitem: [
+                                this.url_vars['api_pk'],
+                                "template",
+                                this.url_vars['api_template_id'],
+                                "option",
+                                option,
+                            ]
                         })
                     }).fail((e) =>{
                         def.reject(e)
@@ -442,30 +505,39 @@ gui_project_template_option = {
                 if(query.method == "get")
                 {
                     let res =  {
-                        "status": 200,
-                        "item": "option",
-                        "type": "mod",
-                        "data": {
-                            "count": 1,
-                            "next": null,
-                            "previous": null,
-                            "results": [ ]
+                        status: 200,
+                        item: "project",
+                        type: "mod",
+                        data: {
+                            count: 0,
+                            next: null,
+                            previous: null,
+                            results: [ ]
                         },
-                        "subitem": [
-                            "1",
-                            "template"
+                        subitem: [
+                            this.url_vars['api_pk'],
+                            "template",
+                            this.url_vars['api_template_id'],
+                            "option",
                         ]
                     }
 
-                    for(let i in this.parent_template.model.data.options)
-                    {
-                        let val = this.parent_template.model.data.options[i]
-                        res.data.results.push({
-                            "id": i,
-                            "name": val.name || i,
-                        })
+                    let limit =+ query.filters.match(/limit=([0-9]+)/)[1] ||  guiLocalSettings.get('page_size');
+                    let offset =+ query.filters.match(/offset=([0-9]+)/)[1] || 0;
+                    if(this.parent_template.model.data.options && typeof this.parent_template.model.data.options == "object") {
+                        let option_keys = Object.keys(this.parent_template.model.data.options);
+                        for (let i = offset; i < limit + offset; i++) {
+                            let key = option_keys[i];
+                            if (key && this.parent_template.model.data.options[key]) {
+                                let val = this.parent_template.model.data.options[key];
+                                res.data.results.push({
+                                    "id": key,
+                                    "name": val.name || key,
+                                })
+                            }
+                        }
+                        res.data.count = option_keys.length;
                     }
-                    res.data.count = res.data.results.length
                     return res;
                 }
 
@@ -488,10 +560,16 @@ gui_project_template_option = {
                     var def = new $.Deferred();
                     $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
                         def.resolve({
-                            "status":200,
-                            "item":"project",
-                            "type":"mod",
-                            "data":query.data,
+                            status:201,
+                            item:"project",
+                            type:"mod",
+                            data:query.data,
+                            subitem: [
+                                this.url_vars['api_pk'],
+                                "template",
+                                this.url_vars['api_template_id'],
+                                "option",
+                            ],
                         })
                     }).fail((e) =>{
                         def.reject(e)
@@ -521,14 +599,7 @@ gui_project_template_option = {
 
         this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/", this.url_vars)
         $.when(this.parent_template.load(query.data_type[3])).done(() =>{
-
             $.when(this.apiGetDataForQuery(query, option)).done((d) =>{
-
-                // if branch for correct redirect after new option creation
-                if(query.method == 'post' && query.data.name)
-                {
-                    d.data.id = '@' + query.data.name;
-                }
                 def.resolve(d)
             }).fail((e) =>{
                 def.reject(e);
@@ -590,6 +661,8 @@ gui_project_template_option = {
 
 gui_project_template_option_variables = {
 
+    pkValuePriority: ["key"],
+
     apiGetDataForQuery : function (query, variable)
     {
         try{
@@ -597,21 +670,34 @@ gui_project_template_option_variables = {
             {
                 if(query.method == "get")
                 {
-                    let res =  {
-                        "status": 200,
-                        "item": "option",
-                        "type": "mod",
-                        "data": {},
-                        "subitem": [
-                            "1",
-                            "template"
+                    let res = {
+                        status: 200,
+                        item: "project",
+                        type: "mod",
+                        data: {},
+                        subitem: [
+                            this.url_vars['api_pk'],
+                            "template",
+                            this.url_vars['api_template_id'],
+                            "option",
+                            this.url_vars['api_option_id'],
+                            "variables",
+                            variable,
                         ]
                     }
 
                     let val = this.parent_template.model.data.options[query.data_type[5]];
-                    res.data = {
-                        "key": variable,
-                        "value": val.vars[variable],
+                    if(val.vars && val.vars[variable] !== undefined)
+                    {
+                        res.data = {
+                            key: variable,
+                            value: val.vars[variable],
+                        }
+                    }
+                    else
+                    {
+                        res.status = 404;
+                        res.data.detail = "No Variable matches the given query.";
                     }
 
                     return res;
@@ -633,10 +719,19 @@ gui_project_template_option_variables = {
                     var def = new $.Deferred();
                     $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
                         def.resolve({
-                            "status":200,
-                            "item":"project",
-                            "type":"mod",
-                            "data":query.data,
+                            status:200,
+                            item:"project",
+                            type:"mod",
+                            data:query.data,
+                            subitem: [
+                                this.url_vars['api_pk'],
+                                "template",
+                                this.url_vars['api_template_id'],
+                                "option",
+                                this.url_vars['api_option_id'],
+                                "variables",
+                                variable,
+                            ]
                         })
                     }).fail((e) =>{
                         def.reject(e)
@@ -649,32 +744,43 @@ gui_project_template_option_variables = {
                 if(query.method == "get")
                 {
                     let res =  {
-                        "status": 200,
-                        "item": "option",
-                        "type": "mod",
-                        "data": {
-                            "count": 1,
-                            "next": null,
-                            "previous": null,
-                            "results": [ ]
+                        status: 200,
+                        item: "option",
+                        type: "mod",
+                        data: {
+                            count: 0,
+                            next: null,
+                            previous: null,
+                            results: [ ]
                         },
-                        "subitem": [
-                            "1",
-                            "template"
+                        subitem: [
+                            this.url_vars['api_pk'],
+                            "template",
+                            this.url_vars['api_template_id'],
+                            "option",
+                            this.url_vars['api_option_id'],
+                            "variables",
                         ]
                     }
 
+
                     let option_data = this.parent_template.model.data.options[query.data_type[5]];
-                    for(let i in option_data.vars)
-                    {
-                        let val = option_data.vars[i]
-                        res.data.results.push({
-                            "id": i,
-                            "key": i,
-                            "value": option_data.vars[i],
-                        })
+                    let limit =+ query.filters.match(/limit=([0-9]+)/)[1] ||  guiLocalSettings.get('page_size');
+                    let offset =+ query.filters.match(/offset=([0-9]+)/)[1] || 0;
+                    if(option_data.vars && typeof option_data.vars == "object") {
+                        let vars_keys = Object.keys(option_data.vars);
+                        for (let i = offset; i < limit + offset; i++) {
+                            let key = vars_keys[i];
+                            if (key && option_data.vars[key] !== undefined) {
+                                res.data.results.push({
+                                    id: key,
+                                    key: key,
+                                    value: option_data.vars[key],
+                                })
+                            }
+                        }
+                        res.data.count = vars_keys.length;
                     }
-                    res.data.count = res.data.results.length
                     return res;
                 }
 
@@ -694,10 +800,18 @@ gui_project_template_option_variables = {
                     var def = new $.Deferred();
                     $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
                         def.resolve({
-                            "status":200,
-                            "item":"project",
-                            "type":"mod",
-                            "data":query.data,
+                            status:201,
+                            item:"project",
+                            type:"mod",
+                            data:query.data,
+                            subitem: [
+                                this.url_vars['api_pk'],
+                                "template",
+                                this.url_vars['api_template_id'],
+                                "option",
+                                this.url_vars['api_option_id'],
+                                "variables",
+                            ]
                         })
                     }).fail((e) =>{
                         def.reject(e)
@@ -728,14 +842,13 @@ gui_project_template_option_variables = {
         $.when(this.parent_template.load(query.data_type[3])).done(() =>{
 
             $.when(this.apiGetDataForQuery(query, variable)).done((d) =>{
-
-                // if branch for correct redirect after new option's variable creation
-                if(query.method == 'post' && query.data.key)
+                if(d.status >= 200 && d.status < 300)
                 {
-                    d.data.id = '@' + query.data.key;
+                    def.resolve(d);
+                } else {
+                    def.reject(d);
                 }
 
-                def.resolve(d)
             }).fail((e) =>{
                 def.reject(e);
             })
