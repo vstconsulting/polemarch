@@ -545,7 +545,7 @@ gui_project_template_option_variables = {
     },
 };
 
-gui_project_template_option_variables = $.extend(true, {}, gui_project_template_variables);
+gui_project_template_option_variables = $.extend(true, {}, gui_project_template_variables, gui_project_template_option_variables);
 
 
 /**
