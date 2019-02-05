@@ -471,6 +471,7 @@ class BaseExecutionsTestCase(BaseTestCase):
         result = self.mass_create_bulk('project', [
             dict(
                 name=name, repository=kwargs.pop('repository', repo_type),
+                branch=kwargs.pop('branch', None),
                 variables=dict(repo_type=repo_type, **kwargs)
             )
         ])

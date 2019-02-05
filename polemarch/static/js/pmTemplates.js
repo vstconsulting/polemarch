@@ -1,5 +1,12 @@
-window.projPath = "/project/{pk}"
+window.projPath = "/project/{pk}";
+var delete_success_message = "Object of '{0}' type was successfully deleted";
+var deleteArray_success_message = "Objects of '{0}' type were successfully deleted";
 
+/**
+ * Extension class for:
+ * - /project/{pk}/template/;
+ * - /project/{pk}/template/{template_id}.
+ */
 gui_project_template = {
 
     getValue : function (hideReadOnly)
@@ -50,7 +57,7 @@ gui_project_template = {
                 data_field[value] = template_data[value];
                 delete template_data[value];
             }
-        })
+        });
 
         if(!data_field.vars)
         {
@@ -129,187 +136,176 @@ gui_project_template = {
             }
 
             this.onUpdateFromServer();
-        })
+        });
 
         return res;
     },
 
-}
+};
 
 
-gui_project_template_variables = {
+/**
+ * Base extension class for template children objects' extension classes:
+ *  - gui_project_template_variables
+ *  - gui_project_template_option
+ *  - gui_project_template_option_variables
+ */
+base_gui_project_template_extension = {
+    _getBaseResponseSubitems: function(){
+        if(this.api && this.api.path && this.url_vars) {
+            return makeUrlForApiKeys(this.api.path.replace(/^\/|\/$/g, '')).format(this.url_vars).split("/");
+        }
+    },
 
-    pkValuePriority: ["key"],
+    _getBaseResponse: function(opt={}){
+        let res = {
+            status: 200,
+            item: "project",
+            type: "mod",
+            data: {},
+            subitem: this._getBaseResponseSubitems(),
+        };
 
-    apiGetDataForQuery : function (query, variable)
+        for(let item in opt){
+            res[item] = opt[item];
+        }
+
+        return res;
+    },
+
+    _getObjList: function(query) {
+        let data = this.parent_template.model.data.data;
+        if(!data.vars){
+            data.vars = {};
+        }
+        return data.vars;
+    },
+
+    _prepareDataForQuery_get: function(res, val, obj_id) {
+        if(val[obj_id] !== undefined) {
+            res.data = {
+                key: obj_id,
+                value: val[obj_id],
+            }
+        } else {
+            res.status = 404;
+            res.data.detail = "No Variable matches the given query.";
+        }
+        return res;
+    },
+
+    _prepareDataForQuery_put: function(query, obj_id){
+        let vars = this._getObjList(query);
+        vars[query.data.key] = query.data.value;
+    },
+
+    _prepareDataForQuery_list: function(res, key, obj_list) {
+        res.data.results.push({
+            id: key,
+            key: key,
+            value: obj_list[key],
+        });
+    },
+
+    apiGetDataForQuery_get: function(query, obj_id) {
+        let res = this._getBaseResponse();
+        let vars = this._getObjList(query);
+        return this._prepareDataForQuery_get(res, vars, obj_id);
+    },
+
+    apiGetDataForQuery_put: function(query, obj_id, is_post) {
+        let def = new $.Deferred();
+        this._prepareDataForQuery_put(query, obj_id);
+
+        $.when(this.parent_template.sendToApi("patch", undefined, undefined, this.parent_template.model.data)).done(() => {
+            def.resolve(this._getBaseResponse({data:query.data, status: is_post ? 201 : 200}));
+        }).fail((e) =>{
+            def.reject(e);
+        });
+
+        return def.promise();
+    },
+
+    apiGetDataForQuery_list: function(query, obj_id) {
+        let res = this._getBaseResponse({
+            data: {
+                count: 0,
+                next: null,
+                previous: null,
+                results: [ ],
+            }
+        });
+        let obj_list = this._getObjList(query);
+        let limit =+ query.filters.match(/limit=([0-9]+)/)[1] || guiLocalSettings.get('page_size');
+        let offset =+ query.filters.match(/offset=([0-9]+)/)[1] || 0;
+        if(obj_list && typeof obj_list == "object") {
+            let obj_list_keys = Object.keys(obj_list);
+            for(let i=offset; i<limit+offset; i++) {
+                let key = obj_list_keys[i];
+                if(key && obj_list[key] !== undefined) {
+                    this._prepareDataForQuery_list(res, key, obj_list);
+                }
+            }
+            res.data.count = obj_list_keys.length;
+            res.data.offset = offset;
+        }
+        return res;
+    },
+
+    apiGetDataForQuery_post: function(query, obj_id) {
+        return this.apiGetDataForQuery_put(query, obj_id, true);
+    },
+
+    apiGetDataForQuery : function (query, obj_id)
     {
         try{
-            if(variable)
+            if(obj_id)
             {
                 if(query.method == "get")
                 {
-                    let res = {
-                        status: 200,
-                        item: "project",
-                        type: "mod",
-                        data: {},
-                        subitem: [
-                            this.url_vars['api_pk'],
-                            "template",
-                            this.url_vars['api_template_id'],
-                            "variables",
-                            variable
-                        ]
-                    }
-                    let val = this.parent_template.model.data.data['vars'];
-                    if(val[variable] !== undefined)
-                    {
-                        res.data = {
-                            key: variable,
-                            value: val[variable],
-                        }
-                    }
-                    else
-                    {
-                        res.status = 404;
-                        res.data.detail = "No Variable matches the given query.";
-                    }
-
-                    return res;
+                    return this.apiGetDataForQuery_get(query, obj_id);
                 }
 
                 if(query.method == "put")
                 {
-                    let template_data = this.parent_template.model.data
-
-                    let vars = template_data.data['vars'];
-
-                    if(!vars)
-                    {
-                        vars = {};
-                    }
-
-                    vars[query.data.key] = query.data.value;
-
-                    var def = new $.Deferred();
-                    $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
-                        def.resolve({
-                            status:200,
-                            item:"project",
-                            type:"mod",
-                            data:query.data,
-                            subitem: [
-                                this.url_vars['api_pk'],
-                                "template",
-                                this.url_vars['api_template_id'],
-                                "variables",
-                                variable,
-                            ]
-                        })
-                    }).fail((e) =>{
-                        def.reject(e)
-                    })
-                    return  def.promise()
+                    return this.apiGetDataForQuery_put(query, obj_id);
                 }
             }
             else
             {
                 if(query.method == "get")
                 {
-                    let res =  {
-                        status: 200,
-                        item: "project",
-                        type: "mod",
-                        data: {
-                            count: 0,
-                            next: null,
-                            previous: null,
-                            results: [ ]
-                        },
-                        subitem: [
-                            this.url_vars['api_pk'],
-                            "template",
-                            this.url_vars['api_template_id'],
-                            "variables",
-                        ]
-                    }
-
-                    let vars = this.parent_template.model.data.data['vars'];
-                    let limit =+ query.filters.match(/limit=([0-9]+)/)[1] ||  guiLocalSettings.get('page_size');
-                    let offset =+ query.filters.match(/offset=([0-9]+)/)[1] || 0;
-                    if(vars && typeof vars == "object") {
-                        let vars_keys = Object.keys(vars);
-                        for(let i=offset; i<limit+offset; i++) {
-                            let key = vars_keys[i];
-                            if(key && vars[key] !== undefined) {
-                                res.data.results.push({
-                                    id: key,
-                                    key: key,
-                                    value: vars[key],
-                                })
-                            }
-                        }
-                        res.data.count = vars_keys.length;
-                    }
-                    return res;
+                    return this.apiGetDataForQuery_list(query, obj_id);
                 }
 
                 if(query.method == "post")
                 {
-                    let template_data = this.parent_template.model.data
-
-                    let vars = template_data.data['vars'];
-
-                    if(!vars)
-                    {
-                        vars = {};
-                    }
-
-                    vars[query.data.key] = query.data.value;
-
-                    var def = new $.Deferred();
-                    $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
-                        def.resolve({
-                            status:201,
-                            item:"project",
-                            type:"mod",
-                            data:query.data,
-                            subitem: [
-                                this.url_vars['api_pk'],
-                                "template",
-                                this.url_vars['api_template_id'],
-                                "variables",
-                            ]
-                        })
-                    }).fail((e) =>{
-                        def.reject(e)
-                    })
-                    return  def.promise()
+                    return this.apiGetDataForQuery_post(query, obj_id);
                 }
             }
         }catch (exception) {
-            var def = new $.Deferred();
+            let def = new $.Deferred();
             def.reject({
                 status:404,
-                data:{detail:"Option not found"}
-            })
-            return def.promise()
+                data:{detail: capitalizeString(this.api.bulk_name) + " was not found"}
+            });
+            return def.promise();
         }
     },
 
     apiQuery : function (query)
     {
-        let variable;
-        if(query.data_type[query.data_type.length-1] != 'variables')
+        let obj;
+        if(query.data_type[query.data_type.length-1] != this.api.bulk_name)
         {
-            variable = query.data_type[query.data_type.length-1];
+            obj = query.data_type[query.data_type.length-1];
         }
         let def = new $.Deferred();
 
         this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/")
         $.when(this.parent_template.load(query.data_type[3])).done(() =>{
 
-            $.when(this.apiGetDataForQuery(query, variable)).done((d) =>{
+            $.when(this.apiGetDataForQuery(query, obj)).done((d) =>{
                 if(d.status >= 200 && d.status < 300) {
                     def.resolve(d);
                 } else {
@@ -326,17 +322,14 @@ gui_project_template_variables = {
         return def.promise();
     },
 
-    delete: function()
-    {
-        let url_info = this.url_vars;
-        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/", this.url_vars);
-
+    _loadTemplateAndSendToApi: function(success_callback, opt={}){
         let def = new $.Deferred();
+        let url_info = this.url_vars;
+        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/", url_info);
 
         $.when(this.parent_template.load(url_info.api_template_id)).done((data) =>{
-            let template_data = data.data;
-            delete template_data.data.vars[url_info.api_variables_id]
-            def.resolve(this.parent_template.sendToApi("patch", undefined, undefined, template_data))
+            success_callback.apply(this, [data.data, opt]);
+            def.resolve(this.parent_template.sendToApi("patch", undefined, undefined, data.data))
         }).fail((e) =>{
             def.reject(e);
         })
@@ -344,39 +337,53 @@ gui_project_template_variables = {
         return def.promise();
     },
 
-    deleteArray : function (ids)
-    {
-        let url_info = this.url_vars;
-        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/", this.url_vars);
-
-        let def = new $.Deferred();
-
-        $.when(this.parent_template.load(url_info.api_template_id)).done((data) =>{
-            let template_data = data.data;
-            for(let i in ids)
-            {
-                let id = ids[i];
-                delete template_data.data.vars[id];
-            }
-            guiPopUp.success("Objects of '"+this.api.bulk_name+"' type were successfully deleted");
-            def.resolve(this.parent_template.sendToApi("patch", undefined, undefined, template_data))
-        }).fail((e) =>{
-            def.reject(e);
-        })
-
-        return def.promise();
+    _delete_callback: function(data, opt) {
+        delete data.data.vars[this.url_vars.api_variables_id];
     },
 
-    search: function(filters)
-    {
+    delete: function() {
+        return this._loadTemplateAndSendToApi((data, opt) => {
+            this._delete_callback(data, opt);
+            guiPopUp.success(delete_success_message.format(this.api.bulk_name));
+        });
+    },
+
+    _deleteArray_callback: function(data, opt) {
+        for(let i in opt.ids) {
+            let id = opt.ids[i];
+            delete data.data.vars[id];
+        }
+    },
+
+    deleteArray : function (ids) {
+        return this._loadTemplateAndSendToApi((data, opt) => {
+            this._deleteArray_callback(data, opt);
+            guiPopUp.success(deleteArray_success_message.format(this.api.bulk_name));
+        }, {ids: ids});
+    },
+
+    search: function(filters) {
         return customTemplateInnerObjectsSearch.apply(this, arguments);
     },
-}
+};
 
+
+/**
+ * Extension class for:
+ * - /project/{pk}/template/{template_id}/variables/ ;
+ * - /project/{pk}/template/{template_id}/variables/{variables_id}/.
+ */
+gui_project_template_variables = $.extend(true, {}, base_gui_project_template_extension);
+gui_project_template_variables.pkValuePriority = ["key"];
+
+
+/**
+ * Extension class for:
+ * - /project/{pk}/template/{template_id}/option/ ;
+ * - /project/{pk}/template/{template_id}/option/{option_id}/.
+ */
 gui_project_template_option = {
-
-    load: function(filters)
-    {
+    load:  function(filters) {
         if(this.api.type == 'page')
         {
             let def = new $.Deferred();
@@ -398,13 +405,12 @@ gui_project_template_option = {
         }
         else
         {
-            return gui_list_object.load.apply(this, arguments)
+            return gui_list_object.load.apply(this, arguments);
         }
 
     },
 
-    renderAsNewPage : function (render_options = {})
-    {
+    renderAsNewPage:  function (render_options = {}) {
         let def = new $.Deferred();
 
         this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/");
@@ -419,494 +425,132 @@ gui_project_template_option = {
         return def.promise();
     },
 
-    apiGetDataForQuery : function (query, option)
-    {
-        try{
-
-            if(option)
-            {
-                if(query.method == "get")
-                {
-                    let res =  {
-                        status: 200,
-                        item: "project",
-                        type: "mod",
-                        data: {},
-                        subitem: [
-                            this.url_vars['api_pk'],
-                            "template",
-                            this.url_vars['api_template_id'],
-                            "option",
-                            option,
-                        ]
-                    }
-
-                    let val = this.parent_template.model.data.options[option];
-
-                    res.data = { }
-                    for(let i in gui_project_template_option_Schema)
-                    {
-                        res.data[i] = val[i]
-
-                        if(i == 'name' && val[i] == undefined)
-                        {
-                            res.data[i] = option;
-                        }
-                    }
-
-                    return res;
-                }
-
-                if(query.method == "put")
-                {
-                    let template_data = this.parent_template.model.data
-
-                    if(query.data.name)
-                    {
-                        query.data.name = query.data.name.replace(/[\s\/\-]+/g,'_');
-                    }
-
-                    if(option != query.data.name)
-                    {
-                        template_data.options[query.data.name] = template_data.options[option];
-                        delete template_data.options[option];
-                    }
-
-                    for(let field in query.data)
-                    {
-                        template_data.options[query.data.name][field] = query.data[field];
-                    }
-
-                    delete template_data.options[query.data.name].name
-
-                    var def = new $.Deferred();
-                    $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
-                        def.resolve({
-                            status:200,
-                            item:"project",
-                            type:"mod",
-                            data:query.data,
-                            subitem: [
-                                this.url_vars['api_pk'],
-                                "template",
-                                this.url_vars['api_template_id'],
-                                "option",
-                                option,
-                            ]
-                        })
-                    }).fail((e) =>{
-                        def.reject(e)
-                    })
-                    return  def.promise()
-                }
-            }
-            else
-            {
-                if(query.method == "get")
-                {
-                    let res =  {
-                        status: 200,
-                        item: "project",
-                        type: "mod",
-                        data: {
-                            count: 0,
-                            next: null,
-                            previous: null,
-                            results: [ ]
-                        },
-                        subitem: [
-                            this.url_vars['api_pk'],
-                            "template",
-                            this.url_vars['api_template_id'],
-                            "option",
-                        ]
-                    }
-
-                    let limit =+ query.filters.match(/limit=([0-9]+)/)[1] ||  guiLocalSettings.get('page_size');
-                    let offset =+ query.filters.match(/offset=([0-9]+)/)[1] || 0;
-                    if(this.parent_template.model.data.options && typeof this.parent_template.model.data.options == "object") {
-                        let option_keys = Object.keys(this.parent_template.model.data.options);
-                        for (let i = offset; i < limit + offset; i++) {
-                            let key = option_keys[i];
-                            if (key && this.parent_template.model.data.options[key]) {
-                                let val = this.parent_template.model.data.options[key];
-                                res.data.results.push({
-                                    "id": key,
-                                    "name": val.name || key,
-                                })
-                            }
-                        }
-                        res.data.count = option_keys.length;
-                    }
-                    return res;
-                }
-
-                if(query.method == "post")
-                {
-                    let template_data = this.parent_template.model.data
-                    if(query.data.name)
-                    {
-                        query.data.name = query.data.name.replace(/[\s\/\-]+/g,'_');
-                    }
-                    if(template_data.options[query.data.name])
-                    {
-                        guiPopUp.error('Option with "' + query.data.name + '" name exists already');
-                        return undefined;
-                    }
-
-                    template_data.options[query.data.name] = $.extend(true, {}, query.data)
-                    delete template_data.options[query.data.name].name
-
-                    var def = new $.Deferred();
-                    $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
-                        def.resolve({
-                            status:201,
-                            item:"project",
-                            type:"mod",
-                            data:query.data,
-                            subitem: [
-                                this.url_vars['api_pk'],
-                                "template",
-                                this.url_vars['api_template_id'],
-                                "option",
-                            ],
-                        })
-                    }).fail((e) =>{
-                        def.reject(e)
-                    })
-                    return  def.promise()
-                }
-            }
-        }catch (exception) {
-            var def = new $.Deferred();
-
-            def.reject({
-                status:404,
-                data:{detail:"Option not found"}
-            })
-            return def.promise()
-        }
+    _getObjList: function(query) {
+        return this.parent_template.model.data.options;
     },
 
-    apiQuery : function (query)
-    {
-        let option;
-        if(query.data_type[query.data_type.length-1] != 'option' && query.data_type.length == 6)
+    _prepareDataForQuery_get:  function(res, val, obj_id) {
+        let option = val[obj_id];
+        if(!option) {
+            res.status = 404;
+            res.data.detail = "No Option matches the given query.";
+            return res;
+        }
+
+        res.data = {}
+        for(let i in gui_project_template_option_Schema)
         {
-            option = query.data_type[query.data_type.length-1];
-        }
-        let def = new $.Deferred();
+            res.data[i] = option[i]
 
-        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/", this.url_vars)
-        $.when(this.parent_template.load(query.data_type[3])).done(() =>{
-            $.when(this.apiGetDataForQuery(query, option)).done((d) =>{
-                def.resolve(d)
-            }).fail((e) =>{
-                def.reject(e);
-            })
-
-        }).fail((e) =>{
-            def.reject(e);
-        })
-
-        return def.promise();
-    },
-
-    delete: function()
-    {
-        let url_info = this.url_vars;
-        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/", this.url_vars);
-
-        let def = new $.Deferred();
-
-        $.when(this.parent_template.load(url_info.api_template_id)).done((data) =>{
-            let template_data = data.data;
-            delete template_data.options[url_info.api_option_id]
-            def.resolve(this.parent_template.sendToApi("patch", undefined, undefined, template_data))
-        }).fail((e) =>{
-            def.reject(e);
-        })
-
-        return def.promise();
-    },
-
-    deleteArray : function (ids)
-    {
-        let url_info = this.url_vars;
-        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/", this.url_vars);
-
-        let def = new $.Deferred();
-
-        $.when(this.parent_template.load(url_info.api_template_id)).done((data) =>{
-            let template_data = data.data;
-            for(let i in ids)
+            if(i == 'name' && option[i] == undefined)
             {
-                let id = ids[i];
-                delete template_data.options[id];
+                res.data[i] = obj_id;
             }
-            guiPopUp.success("Objects of '"+this.api.bulk_name+"' type were successfully deleted");
-            def.resolve(this.parent_template.sendToApi("patch", undefined, undefined, template_data))
-        }).fail((e) =>{
-            def.reject(e);
+        }
+        return res;
+    },
+
+    _prepareDataForQuery_put:  function(query, obj_id){
+        let template_data = this.parent_template.model.data;
+
+        if(query.data.name)
+        {
+            query.data.name = query.data.name.replace(/[\s\/\-]+/g,'_');
+        }
+
+        if(obj_id != query.data.name)
+        {
+            template_data.options[query.data.name] = template_data.options[obj_id];
+            delete template_data.options[obj_id];
+        }
+
+        for(let field in query.data)
+        {
+            template_data.options[query.data.name][field] = query.data[field];
+        }
+
+        delete template_data.options[query.data.name].name
+    },
+
+    _prepareDataForQuery_list:  function(res, key, obj_list) {
+        let val = obj_list[key];
+        res.data.results.push({
+            "id": key,
+            "name": val.name || key,
         })
-
-        return def.promise();
     },
 
-    search: function(filters)
-    {
-        return customTemplateInnerObjectsSearch.apply(this, arguments);
-    },
-}
+    apiGetDataForQuery_post: function(query, obj_id, is_post) {
+        let template_data = this.parent_template.model.data;
+        if(query.data.name)
+        {
+            query.data.name = query.data.name.replace(/[\s\/\-]+/g,'_');
+        }
+        if(template_data.options[query.data.name])
+        {
+            guiPopUp.error('Option with "' + query.data.name + '" name exists already');
+            return undefined;
+        }
 
+        template_data.options[query.data.name] = $.extend(true, {}, query.data)
+        delete template_data.options[query.data.name].name;
+
+        var def = new $.Deferred();
+        $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
+            def.resolve(this._getBaseResponse({data:query.data, status: is_post ? 201 : 200}));
+        }).fail((e) =>{
+            def.reject(e)
+        })
+        return  def.promise()
+    },
+
+    _delete_callback:  function(data, opt) {
+        delete data.options[this.url_vars.api_option_id];
+    },
+
+    _deleteArray_callback:  function(data, opt) {
+        for(let i in opt.ids) {
+            let id = opt.ids[i];
+            delete data.options[id];
+        }
+    },
+};
+
+gui_project_template_option = $.extend(true, {}, base_gui_project_template_extension, gui_project_template_option);
+
+
+/**
+ * Extension class for:
+ * - /project/{pk}/template/{template_id}/option/variables/ ;
+ * - /project/{pk}/template/{template_id}/option/{option_id}/variables/{variables_id}/.
+ */
 gui_project_template_option_variables = {
+    _getObjList: function(query) {
+        let option = this.parent_template.model.data.options[query.data_type[5]];
+        if(!option.vars) {
+            option.vars = {};
+        }
+        return option.vars;
+    },
 
-    pkValuePriority: ["key"],
+    _delete_callback:  function(data, opt) {
+        delete data.options[this.url_vars.api_option_id].vars[this.url_vars.api_variables_id];
+    },
 
-    apiGetDataForQuery : function (query, variable)
-    {
-        try{
-            if(variable)
-            {
-                if(query.method == "get")
-                {
-                    let res = {
-                        status: 200,
-                        item: "project",
-                        type: "mod",
-                        data: {},
-                        subitem: [
-                            this.url_vars['api_pk'],
-                            "template",
-                            this.url_vars['api_template_id'],
-                            "option",
-                            this.url_vars['api_option_id'],
-                            "variables",
-                            variable,
-                        ]
-                    }
-
-                    let val = this.parent_template.model.data.options[query.data_type[5]];
-                    if(val.vars && val.vars[variable] !== undefined)
-                    {
-                        res.data = {
-                            key: variable,
-                            value: val.vars[variable],
-                        }
-                    }
-                    else
-                    {
-                        res.status = 404;
-                        res.data.detail = "No Variable matches the given query.";
-                    }
-
-                    return res;
-                }
-
-                if(query.method == "put")
-                {
-                    let template_data = this.parent_template.model.data
-
-                    let option_data = template_data.options[query.data_type[5]];
-
-                    if(!option_data.vars)
-                    {
-                        option_data.vars = {};
-                    }
-
-                    option_data.vars[query.data.key] = query.data.value;
-
-                    var def = new $.Deferred();
-                    $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
-                        def.resolve({
-                            status:200,
-                            item:"project",
-                            type:"mod",
-                            data:query.data,
-                            subitem: [
-                                this.url_vars['api_pk'],
-                                "template",
-                                this.url_vars['api_template_id'],
-                                "option",
-                                this.url_vars['api_option_id'],
-                                "variables",
-                                variable,
-                            ]
-                        })
-                    }).fail((e) =>{
-                        def.reject(e)
-                    })
-                    return  def.promise()
-                }
-            }
-            else
-            {
-                if(query.method == "get")
-                {
-                    let res =  {
-                        status: 200,
-                        item: "option",
-                        type: "mod",
-                        data: {
-                            count: 0,
-                            next: null,
-                            previous: null,
-                            results: [ ]
-                        },
-                        subitem: [
-                            this.url_vars['api_pk'],
-                            "template",
-                            this.url_vars['api_template_id'],
-                            "option",
-                            this.url_vars['api_option_id'],
-                            "variables",
-                        ]
-                    }
-
-
-                    let option_data = this.parent_template.model.data.options[query.data_type[5]];
-                    let limit =+ query.filters.match(/limit=([0-9]+)/)[1] ||  guiLocalSettings.get('page_size');
-                    let offset =+ query.filters.match(/offset=([0-9]+)/)[1] || 0;
-                    if(option_data.vars && typeof option_data.vars == "object") {
-                        let vars_keys = Object.keys(option_data.vars);
-                        for (let i = offset; i < limit + offset; i++) {
-                            let key = vars_keys[i];
-                            if (key && option_data.vars[key] !== undefined) {
-                                res.data.results.push({
-                                    id: key,
-                                    key: key,
-                                    value: option_data.vars[key],
-                                })
-                            }
-                        }
-                        res.data.count = vars_keys.length;
-                    }
-                    return res;
-                }
-
-                if(query.method == "post")
-                {
-                    let template_data = this.parent_template.model.data
-
-                    let option_data = template_data.options[query.data_type[5]];
-
-                    if(!option_data.vars)
-                    {
-                        option_data.vars = {};
-                    }
-
-                    option_data.vars[query.data.key] = query.data.value;
-
-                    var def = new $.Deferred();
-                    $.when(this.parent_template.sendToApi("patch", undefined, undefined, template_data)).done(() =>{
-                        def.resolve({
-                            status:201,
-                            item:"project",
-                            type:"mod",
-                            data:query.data,
-                            subitem: [
-                                this.url_vars['api_pk'],
-                                "template",
-                                this.url_vars['api_template_id'],
-                                "option",
-                                this.url_vars['api_option_id'],
-                                "variables",
-                            ]
-                        })
-                    }).fail((e) =>{
-                        def.reject(e)
-                    })
-                    return  def.promise()
-                }
-            }
-        }catch (exception) {
-            var def = new $.Deferred();
-            def.reject({
-                status:404,
-                data:{detail:"Option not found"}
-            })
-            return def.promise()
+    _deleteArray_callback:  function(data, opt) {
+        for(let i in opt.ids) {
+            let id = opt.ids[i];
+            delete data.options[this.url_vars.api_option_id].vars[id];
         }
     },
+};
 
-    apiQuery : function (query)
-    {
-        let variable;
-        if(query.data_type[query.data_type.length-1] != 'variables')
-        {
-            variable = query.data_type[query.data_type.length-1];
-        }
-        let def = new $.Deferred();
+gui_project_template_option_variables = $.extend(true, {}, gui_project_template_variables, gui_project_template_option_variables);
 
-        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/", this.url_vars)
-        $.when(this.parent_template.load(query.data_type[3])).done(() =>{
 
-            $.when(this.apiGetDataForQuery(query, variable)).done((d) =>{
-                if(d.status >= 200 && d.status < 300)
-                {
-                    def.resolve(d);
-                } else {
-                    def.reject(d);
-                }
-
-            }).fail((e) =>{
-                def.reject(e);
-            })
-
-        }).fail((e) =>{
-            def.reject(e);
-        })
-
-        return def.promise();
-    },
-
-    delete: function()
-    {
-        let url_info = this.url_vars;
-        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/", this.url_vars);
-
-        let def = new $.Deferred();
-
-        $.when(this.parent_template.load(url_info.api_template_id)).done((data) =>{
-            let template_data = data.data;
-            delete template_data.options[url_info.api_option_id].vars[url_info.api_variables_id]
-            def.resolve(this.parent_template.sendToApi("patch", undefined, undefined, template_data))
-        }).fail((e) =>{
-            def.reject(e);
-        })
-
-        return def.promise();
-    },
-
-    deleteArray : function (ids)
-    {
-        let url_info = this.url_vars;
-        this.parent_template = new guiObjectFactory("/project/{pk}/template/{template_id}/", this.url_vars);
-
-        let def = new $.Deferred();
-
-        $.when(this.parent_template.load(url_info.api_template_id)).done((data) =>{
-            let template_data = data.data;
-            for(let i in ids)
-            {
-                let id = ids[i];
-                delete template_data.options[url_info.api_option_id].vars[id];
-            }
-            guiPopUp.success("Objects of '"+this.api.bulk_name+"' type were successfully deleted");
-            def.resolve(this.parent_template.sendToApi("patch", undefined, undefined, template_data))
-        }).fail((e) =>{
-            def.reject(e);
-        })
-
-        return def.promise();
-    },
-
-    search: function(filters)
-    {
-        return customTemplateInnerObjectsSearch.apply(this, arguments);
-    },
-}
-
+/**
+ * Object with schema properties of /project/{pk}/template/{template_id}/option/ path.
+ */
 gui_project_template_option_Schema = {
     "name": {
         "title": "Name",
@@ -978,8 +622,12 @@ gui_project_template_option_Schema = {
         },
         "parent_name_format": "option_playbook"
     },
-}
+};
 
+
+/**
+ * Object with schema properties of /project/{pk}/template/{template_id}/option/{option_id}/variables/ path.
+ */
 gui_project_template_option_variables_fields_Schema = {
     "key": {
         "title": "Key",
@@ -1004,7 +652,7 @@ gui_project_template_option_variables_fields_Schema = {
         "parent_name_format": "variables_value",
         "parent_field":"key"
     }
-}
+};
 
 let api_error_responses = {
     "400": {
@@ -1682,7 +1330,7 @@ tabSignal.connect("openapi.schema", function(obj) {
         "parent_path": "/project/{pk}/template/{template_id}/option/{option_id}/variables/"
     };
 
-})
+});
 
 function OneTemplate_args_callback(fieldObj, newValue)
 {
@@ -1776,9 +1424,9 @@ function OneTemplate_module_callback(fieldObj, newValue)
     }
     else
     {
-        obj.type = "hidden"
+        obj.type = "hidden";
     }
-    return obj
+    return obj;
 }
 
 function OneTemplate_playbook_callback(fieldObj, newValue)
@@ -1799,9 +1447,9 @@ function OneTemplate_playbook_callback(fieldObj, newValue)
     }
     else
     {
-        obj.type = "hidden"
+        obj.type = "hidden";
     }
-    return obj
+    return obj;
 }
 
 tabSignal.connect("openapi.schema.definition.OneTemplate", function(obj) {
@@ -1904,25 +1552,25 @@ function TemplateVariable_key_onInit(opt = {}, value, parent_object)
     let template = new guiObjectFactory("/project/{pk}/template/{template_id}/", parent_object.url_vars);
 
     $.when(template.load()).done(function(){
-        let fields = {}
+        let fields = {};
         if(template.model.data.kind.toLowerCase() == "task")
         {
-            fields = window.guiSchema.path["/project/{pk}/execute_playbook/"].schema.exec.fields
-            delete fields.playbook
+            fields = window.guiSchema.path["/project/{pk}/execute_playbook/"].schema.exec.fields;
+            delete fields.playbook;
         }
         if(template.model.data.kind.toLowerCase() == "module")
         {
-            fields = window.guiSchema.path["/project/{pk}/execute_module/"].schema.exec.fields
-            delete fields.module
+            fields = window.guiSchema.path["/project/{pk}/execute_module/"].schema.exec.fields;
+            delete fields.module;
         }
 
-        delete fields.inventory
+        delete fields.inventory;
         thisObj.setType("enum", {
             enum:Object.keys(fields),
         });
-        thisObj.opt.all_fields = fields
+        thisObj.opt.all_fields = fields;
 
-        thisObj._callAllonChangeCallback()
+        thisObj._callAllonChangeCallback();
     })
 }
 
@@ -1943,23 +1591,23 @@ function TemplateVariable_value_callback(fieldObj, newValue)
         return;
     }
 
-    let field = newValue.opt.all_fields[newValue.value]
+    let field = newValue.opt.all_fields[newValue.value];
 
-    field.format = getFieldType(field)
+    field.format = getFieldType(field);
 
-    return field
+    return field;
 }
 
 guiElements.template_data = function(opt = {})
 {
-    this.name = 'template_data'
-    guiElements.base.apply(this, arguments)
+    this.name = 'template_data';
+    guiElements.base.apply(this, arguments);
 }
 
 guiElements.template_options = function(opt = {})
 {
-    this.name = 'template_data'
-    guiElements.base.apply(this, arguments)
+    this.name = 'template_data';
+    guiElements.base.apply(this, arguments);
 }
 
 /*
@@ -1988,7 +1636,7 @@ function prepareOptionFields(template_data, schema)
 
         if(template_data.data && template_data.data.inventory && !isNaN(template_data.data.inventory))
         {
-            let inventory_path = '/inventory/{inventory_id}'
+            let inventory_path = '/inventory/{inventory_id}';
 
             let list_obj = [
                 projPath + inventory_path + '/all_groups/',
@@ -2065,7 +1713,6 @@ function customTemplateInnerObjectsSearch(filters)
     return def.promise();
 }
 
-
 tabSignal.connect('openapi.schema', function(obj){
     let path = obj.schema.path[projPath + '/template/{template_id}/execute/']
     let options_field = path.schema.exec.fields.option
@@ -2079,4 +1726,4 @@ tabSignal.connect('openapi.schema', function(obj){
             text: 'None'
         }
     }
-})
+});
