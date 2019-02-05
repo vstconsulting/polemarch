@@ -368,12 +368,12 @@ class OApiTestCase(BaseTestCase):
         )
         self.check_fields(
             objName, projectCreateMaster['properties']['repo_auth'],
-            type='string', default='NONE', enum=['NONE', 'KEY', 'PASSWORD']
-
+            type='string', format='dynamic', default='NONE',
+            additionalProperties={}
         )
         additional_properties = dict(
             field='repo_auth', choices={},
-            types=dict(KEY='secretfile', PASSWORD='password', NONE='disabled')
+            types=dict(KEY='secretfile', PASSWORD='password', NONE='hidden')
         )
 
         self.check_fields(

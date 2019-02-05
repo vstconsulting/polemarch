@@ -801,15 +801,19 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
 
 class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
     types = models.list_to_choices(models.Project.repo_handlers.keys())
-    auth_types = models.list_to_choices(['NONE', 'KEY', 'PASSWORD'])
+    auth_types = ['NONE', 'KEY', 'PASSWORD']
+    branch_types = {t: "hidden" for t in models.Project.repo_handlers.keys()}
+    branch_types['GIT'] = 'string'
 
     status = vst_fields.VSTCharField(read_only=True)
     type = serializers.ChoiceField(choices=types, default='MANUAL', label='Repo type')
     repository = vst_fields.VSTCharField(default='MANUAL', label='Repo url')
-    repo_auth = serializers.ChoiceField(choices=auth_types,
-                                        default='NONE',
-                                        label='Repo auth type',
-                                        write_only=True)
+    repo_auth = vst_fields.DependEnumField(default='NONE',
+                                           field='type',
+                                           choices={"GIT": auth_types},
+                                           types=branch_types,
+                                           label='Repo auth type',
+                                           write_only=True)
     auth_data = vst_fields.DependEnumField(allow_blank=True,
                                            write_only=True,
                                            default='',
@@ -818,8 +822,14 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
                                            types={
                                                'KEY': 'secretfile',
                                                'PASSWORD': 'password',
-                                               'NONE': 'disabled'
+                                               'NONE': 'hidden'
                                            })
+    branch = vst_fields.DependEnumField(allow_blank=True,
+                                        required=False,
+                                        allow_null=True,
+                                        label='GIT branch/tag/SHA',
+                                        field='type',
+                                        types=branch_types)
 
     class Meta:
         model = models.Project
@@ -831,6 +841,7 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
             'repository',
             'repo_auth',
             'auth_data',
+            'branch',
         )
         extra_kwargs = {
             'name': {'required': True}
@@ -840,12 +851,15 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
         repo_type = validated_data.pop('type')
         repo_auth_type = validated_data.pop('repo_auth')
         repo_auth_data = validated_data.pop('auth_data')
+        repo_branch = validated_data.pop('branch', None)
 
         instance = super(ProjectCreateMasterSerializer, self).create(validated_data)
         instance.variables.create(key='repo_type', value=repo_type)
         if repo_auth_type != 'NONE':  # nocv
             key = 'repo_{}'.format(repo_auth_type.lower())
             instance.variables.create(key=key, value=repo_auth_data)
+        if repo_branch:  # nocv
+            instance.variables.create(key='repo_branch', value=repo_branch)
         return instance
 
 
