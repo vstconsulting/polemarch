@@ -1,5 +1,6 @@
 # pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
+import errno
 from ._base import _Base, os
 
 
@@ -8,7 +9,7 @@ class Manual(_Base):
         try:
             os.mkdir(self.path)
         except OSError as oserror:
-            if oserror.errno == os.errno.EEXIST:
+            if oserror.errno == errno.EEXIST:
                 return None, None
             raise  # nocv
         return None, None
