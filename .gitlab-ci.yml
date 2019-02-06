@@ -26,6 +26,8 @@ stages:
   image: onegreyonewhite/tox:tox
   variables:
     TOX_ENVS: ""
+  before_script:
+    - if [ "${CI_BUILD_REF_NAME}" != "master" -a "${CI_BUILD_REF_NAME}" != "developer" ]; then export TOX_ARGS="--workdir /tmp/.tox_polemarchplus_${CI_BUILD_REF_NAME}"; fi
   script:
    - make test ENVS=$TOX_ENVS
    - make build-clean
