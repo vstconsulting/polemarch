@@ -11,7 +11,7 @@ Install from PyPI
 
    .. sourcecode:: bash
 
-   	   sudo apt-get install python-virtualenv python3.6-dev gcc libffi-dev libkrb5-dev libffi6 libssl-dev libyaml-dev libsasl2-dev libldap2-dev sshpass git
+   	   sudo apt-get install python-virtualenv python3.6 python3.6-dev gcc libffi-dev libkrb5-dev libffi6 libssl-dev libyaml-dev libsasl2-dev libldap2-dev sshpass git
 
    Required packages on Red Hat/CentOS:
 
@@ -145,7 +145,7 @@ If you need to restart Polemarch use following command:
 
     .. sourcecode:: bash
 
-           polemarchctl webserver reload=/opt/polemarch/pid/web.pid
+           polemarchctl webserver reload=/opt/polemarch/pid/polemarch.pid
 
 If you use another directory for storing Polemarch pid file, use path to this file.
 
