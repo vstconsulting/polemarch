@@ -378,7 +378,8 @@ class History(BModel):
     initiator      = models.IntegerField(default=0)
     # Initiator type should be always as in urls for api
     initiator_type = models.CharField(max_length=50, default="project")
-    executor       = models.ForeignKey(User, blank=True, null=True, default=None)
+    executor       = models.ForeignKey(User, blank=True, null=True, default=None,
+                                       on_delete=models.SET_NULL)
     json_options   = models.TextField(default="{}")
 
     working_statuses = ['DELAY', 'RUN']
