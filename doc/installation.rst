@@ -13,11 +13,13 @@ Install from PyPI
 
    	   sudo apt-get install -y python-pip python-virtualenv python3.6-dev gcc libffi-dev libkrb5-dev libffi6 libssl-dev libyaml-dev libsasl2-dev libldap2-dev sshpass git
 
-   Required packages on Red Hat/CentOS :
+   Required packages on Red Hat/CentOS:
 
    .. sourcecode:: bash
 
-   	   sudo yum install -y python3.6 openssl-devel libyaml-devel python-virtualenv krb5-devel krb5-libs openldap-devel git
+   	   sudo yum install epel-release
+   	   sudo yum install https://$(rpm -E '%{?centos:centos}%{!?centos:rhel}%{rhel}').iuscommunity.org/ius-release.rpm
+   	   sudo yum install python3.6u python3.6u-pip python3.6u-devel openssl-devel libyaml-devel python-virtualenv krb5-devel krb5-libs openldap-devel git sshpass
 
 #. Create virtualenv and activate it:
 
@@ -143,7 +145,7 @@ If you need to restart Polemarch use following command:
 
     .. sourcecode:: bash
 
-           polemarchctl webserver reload=/var/run/polemarch/web.pid
+           polemarchctl webserver reload=/opt/polemarch/pid/web.pid
 
 If you use another directory for storing Polemarch pid file, use path to this file.
 
@@ -152,7 +154,7 @@ If you need to stop Polemarch use following command:
 
     .. sourcecode:: bash
 
-           polemarchctl webserver stop=/run/polemarch.pid
+           polemarchctl webserver stop=/opt/polemarch/pid/polemarch.pid
 
 If you use another directory for storing Polemarch pid file, use path to this file.
 
