@@ -25,7 +25,7 @@ Install from PyPI
 
    .. sourcecode:: bash
 
-       virtualenv polemarch
+       virtualenv --python=python3.6 polemarch
        cd polemarch
        source bin/activate
 
