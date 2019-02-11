@@ -381,6 +381,14 @@ window.qunitTestsArray['guiPaths.project'] = {
                         name:{value:rundomString(6)},
                     },
                 },
+                {
+                    is_valid:false,
+                    data: {
+                        kind:{value:"Task"},
+                        module: {value: "ping"}
+                    }
+                }
+
             ]
         }, env, pk_obj);
 
@@ -477,10 +485,9 @@ window.qunitTestsArray['guiPaths.project'] = {
                     is_valid:true,
                     data:  {
                         name:{value:rundomString(6)},
-                        kind:{value: "MODULE"},
-                        mode: {value: "ping"},
-                        type: {value: "INTERVAL"},
-                        schedule:{value: "00:00:10", do_not_compare:true},
+                        kind:{value: "PLAYBOOK"},
+                        schedule:{value: "00:00:14", do_not_compare:true},
+
                     },
                 },
             ],
@@ -491,7 +498,29 @@ window.qunitTestsArray['guiPaths.project'] = {
                         name:{value:rundomString(6)},
                     },
                 },
-            ]
+                {
+                    is_valid:true,
+                    data: function() { return {
+                        template: {
+                            value: {id: env.template_id, text: env.template_name},
+                        },
+                        kind: {value: "TEMPLATE"},
+                        schedule:{value: "00:00:12", do_not_compare:true},}}
+                },
+                {
+                    is_valid:true,
+                    data: {
+                        kind:{value: "MODULE"},
+                        mode: {value: "ping"},
+                        type: {value: "INTERVAL"},
+                        schedule:{value: "00:00:10", do_not_compare:true},
+                    }
+                }
+            ],
+            page:{
+                wait:true,
+            }
+
         }, env, pk_obj);
 
 
