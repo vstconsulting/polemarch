@@ -18,7 +18,7 @@ Here is how to proceed:
 
    .. sourcecode:: bash
 
-      sudo apt-get install python-pip python-dev libffi-dev libssl-dev git sshpass libyaml-dev
+        sudo apt-get install python-pip python-dev libffi-dev libssl-dev git sshpass libyaml-dev
 
    Note: Your patch must work at Python 2 and Python 3. For Python 3 you should
    have at least Python 3.5, because older Python 3 may not work correctly
