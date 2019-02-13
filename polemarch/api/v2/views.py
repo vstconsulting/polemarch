@@ -1,7 +1,7 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
 try:
     from ruamel.ordereddict import ordereddict as OrderedDict
-except ImportError:
+except ImportError:  # nocv
     from collections import OrderedDict
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
