@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import logging
 try:
     from ruamel.ordereddict import ordereddict as OrderedDict
-except ImportError:
+except ImportError:  # nocv
     from collections import OrderedDict
 from datetime import timedelta
 from functools import partial

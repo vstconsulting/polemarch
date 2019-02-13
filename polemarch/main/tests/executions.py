@@ -596,7 +596,8 @@ class BaseExecutionsTestCase(BaseTestCase):
     def playbook_tests(self, prj, playbook_count=1, execute=None, inventory="localhost"):
         _exec = dict(
             connection="local", limit="docker",
-            playbook="<1[data][results][0][playbook]>", inventory=inventory
+            playbook="<1[data][results][0][playbook]>", inventory=inventory,
+            private_key='BEGIN RSA PRIVATE KEY'
         )
         bulk_data = self.project_bulk_sync_and_playbooks(prj['id'])
         bulk_data += [
@@ -657,6 +658,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.make_test_templates(project_data)
         self.make_test_periodic_task(project_data)
         self.make_test_readme(project_data)
+        self.make_test_restrict_sync(project_data)
         return dict(playbook_count=len(files), execute=True)
 
     def wip_git(self, project_data):
@@ -1072,6 +1074,26 @@ class ProjectTestCase(BaseExecutionsTestCase):
             '<em>italic</em></dd>\n</dl>\n</div>\n'
         )
 
+    def make_test_restrict_sync(self, project_data):
+        self.get_model_filter('Project', pk=project_data['id']).get().set_status('NEW')
+        data = dict(
+            connection="local", inventory="<9[data][id]>",
+            module="ping", group="127.0.1.1", args="", forks=1, verbose=4
+        )
+        result = self.make_bulk([
+            self.get_mod_bulk(
+                'project', project_data["id"], data, 'execute_module',
+            ),
+        ], 'put')[0]
+        self.assertEqual(result['status'], 400)
+
+        result = self.make_bulk([
+            self.get_mod_bulk(
+                'project', project_data["id"], data, 'execute_module',
+            ),
+        ], 'put')[0]
+        self.assertEqual(result['status'], 400)
+
     def test_project_manual(self):
         self.project_workflow('MANUAL', execute=True)
 
@@ -1095,6 +1117,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 )
             ])
             project_data = result[0]['data']
+            self.sync_project(project_data['id'])
             self.project_execute(project_data)
 
             with self.patch('tarfile.open') as extract:
@@ -1111,19 +1134,19 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 pk = project_data['id']
                 results = self.make_bulk([
                     self.get_bulk('project', {}, 'get', pk=pk),
-                    self.get_mod_bulk('project', pk, {}, 'sync'),
-                    self.get_bulk('project', {}, 'get', pk=project_data['id']),
                     self.get_mod_bulk('project', pk, _ex_module, 'execute_module'),
                     self.get_mod_bulk('project', pk, unsync, 'variables'),
                     self.get_mod_bulk('project', pk, _ex_playbook, 'execute_playbook'),
+                    self.get_bulk('project', {}, 'get', pk=pk),
                     self.get_mod_bulk(
                         'project', pk, {}, 'history', method='get', filters='limit=2'
                     ),
                 ], 'put')
-                project_data = results[2]['data']
+                project_data = results[-2]['data']
                 self.assertEqual(project_data['status'], 'ERROR')
-                self.assertEqual(results[-1]['data']['results'][-1]['status'], 'ERROR')
+                self.assertEqual(results[-1]['data']['results'][-1]['status'], 'OK')
                 self.assertEqual(results[-1]['data']['results'][-2]['status'], 'ERROR')
+                self.assertEqual(results[-1]['data']['count'], 2)
 
     def test_project_git(self):
         # Prepare .polemarch.yaml
