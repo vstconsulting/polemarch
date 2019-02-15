@@ -7,7 +7,7 @@ import traceback
 try:
     from ruamel.ordereddict import ordereddict as OrderedDict
     from collections import namedtuple  # nocv
-except ImportError:
+except ImportError:  # nocv
     from collections import namedtuple, OrderedDict
 from functools import reduce
 import six

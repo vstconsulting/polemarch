@@ -412,11 +412,11 @@ function addHistoryPrefetchProjectHistory(obj)
 function addSettingsToHistoryListsFields(obj)
 {
     let properties = obj.definition.properties;
-    properties['options'].hidden = true;
-    properties['initiator_type'].hidden = true;
-    properties['start_time'].__func__value = 'format_history_time';
-    properties['stop_time'].__func__value = 'format_history_time';
-    properties['executor'].__func__value = 'format_executor';
+    if (properties['options']) properties['options'].hidden = true;
+    if (properties['initiator_type']) properties['initiator_type'].hidden = true;
+    if (properties['start_time']) properties['start_time'].__func__value = 'format_history_time';
+    if (properties['stop_time']) properties['stop_time'].__func__value = 'format_history_time';
+    if (properties['executor']) properties['executor'].__func__value = 'format_executor';
     if(properties['revision'])
     {
         properties['revision'].__func__value = 'format_revision';

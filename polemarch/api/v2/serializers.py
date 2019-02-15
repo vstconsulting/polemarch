@@ -4,7 +4,7 @@ import json
 import uuid
 try:
     from ruamel.ordereddict import ordereddict as OrderedDict
-except ImportError:
+except ImportError:  # nocv
     from collections import OrderedDict
 import six
 from django.contrib.auth.models import User

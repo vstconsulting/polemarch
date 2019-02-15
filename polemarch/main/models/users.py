@@ -15,9 +15,10 @@ logger = logging.getLogger("polemarch")
 
 class ACLPermission(BModel):
     role    = models.CharField(max_length=10)
-    uagroup = models.ForeignKey('main.UserGroup', on_delete=None, blank=True, null=True)
-    user    = models.ForeignKey(get_user_model(), on_delete=None,
-                                blank=True, null=True)
+    uagroup = models.ForeignKey('main.UserGroup',
+                                on_delete=models.CASCADE, blank=True, null=True)
+    user    = models.ForeignKey(get_user_model(),
+                                on_delete=models.CASCADE, blank=True, null=True)
 
     @property
     def member(self):  # noce
@@ -45,7 +46,7 @@ class ACLPermission(BModel):
 
 class UserGroup(BaseGroup, ACLModel):
     objects = BQuerySet.as_manager()
-    parent = models.OneToOneField(BaseGroup, on_delete=None, parent_link=True)
+    parent = models.OneToOneField(BaseGroup, on_delete=models.CASCADE, parent_link=True)
     users = BaseGroup.user_set
 
     def __unicode__(self):  # nocv
@@ -54,7 +55,7 @@ class UserGroup(BaseGroup, ACLModel):
 
 class UserSettings(BModel):
     settings = models.TextField(default="{}")
-    user     = models.OneToOneField(BaseUser, on_delete=None,
+    user     = models.OneToOneField(BaseUser, on_delete=models.CASCADE,
                                     related_query_name="settings",
                                     related_name="settings")
 

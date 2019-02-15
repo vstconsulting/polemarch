@@ -7,7 +7,7 @@ import uuid
 from functools import reduce
 try:
     from ruamel.ordereddict import ordereddict as OrderedDict
-except ImportError:
+except ImportError:  # nocv
     from collections import OrderedDict
 from django.db import transaction
 from django.db.models import Case, When, Value

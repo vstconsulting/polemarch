@@ -186,10 +186,10 @@ class Inventory(AbstractModel):
 
     @property
     def all_groups(self):
-        return self.groups_list
+        return self.groups_list.distinct()
 
     @property
     def all_hosts(self):
         return Host.objects.filter(
             Q(groups__in=self.groups_list) | Q(pk__in=self.hosts_list)
-        )
+        ).distinct()

@@ -78,7 +78,10 @@ class BModel(BaseModel):
 
 
 class BGroupedModel(BModel):
-    parent     = models.ForeignKey('self', blank=True, null=True)
+    parent     = models.ForeignKey('self',
+                                   blank=True,
+                                   null=True,
+                                   on_delete=models.CASCADE)
     group      = models.BooleanField(default=False)
 
     class Meta:
@@ -114,7 +117,7 @@ class ForeignKeyACLReverse(models.ForeignKey,
 class ACLModel(BModel):
     notes = models.TextField(default="")
     acl   = models.ManyToManyField("main.ACLPermission", blank=True, null=True)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=None,
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
                               default=first_staff_user,
                               related_name="polemarch_%(class)s_set")
 

@@ -268,9 +268,11 @@ class Project(AbstractModel):
             raise self.SyncError("ERROR on Sync operation: " + str(exc))
 
     def execute(self, kind, *args, **extra):
+        sync = extra.pop("sync", False)
+        if self.status != "OK" and not sync:
+            raise self.SyncError("ERROR project not synchronized")
         kind = kind.upper()
         task_class = self.task_handlers.backend(kind)
-        sync = extra.pop("sync", False)
 
         kwargs = self._prepare_kw(kind, *args, **extra)
         history = kwargs['history']
