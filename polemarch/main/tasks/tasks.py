@@ -23,7 +23,7 @@ class RepoTask(BaseTask):
         _default_message = "Unknown operation {}."
 
     def __init__(self, app, project, operation="sync", *args, **kwargs):
-        super(self.__class__, self).__init__(app, *args, **kwargs)
+        super(RepoTask.task_class, self).__init__(app, *args, **kwargs)
         self.project, self.operation = project, operation
         if self.operation not in self.accepted_operations:
             raise self.task_class.UnknownRepoOperation(self.operation)
@@ -41,7 +41,7 @@ class ScheduledTask(BaseTask):
     __slots__ = 'job_id',
 
     def __init__(self, app, job_id, *args, **kwargs):
-        super(self.__class__, self).__init__(app, *args, **kwargs)
+        super(ScheduledTask.task_class, self).__init__(app, *args, **kwargs)
         self.job_id = job_id
 
     def run(self):
