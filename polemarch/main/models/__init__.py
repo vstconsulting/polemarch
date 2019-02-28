@@ -143,8 +143,8 @@ def validate_type_and_name(instance, **kwargs):
 
 
 @receiver(signals.pre_save, sender=Template)
-def validate_template_keys(instance, **kwargs):  # nocv
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+def validate_template_keys(instance, **kwargs):
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
         return
     # Deprecated, because moved to serializers
     if instance.kind not in instance.template_fields.keys():
@@ -161,7 +161,7 @@ def validate_template_keys(instance, **kwargs):  # nocv
 
 @receiver(signals.pre_save, sender=Template)
 def validate_template_args(instance, **kwargs):
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
         return
     if instance.kind in ["Host", "Group"]:
         return  # nocv
@@ -184,7 +184,7 @@ def clean_dirs(instance, **kwargs):
 
 @receiver(signals.post_save, sender=PeriodicTask)
 def save_to_beat(instance, **kwargs):
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
         return
     task = settings.TASKS_HANDLERS["SCHEDUER"]["BACKEND"]
     manager = django_celery_beat.models.PeriodicTask.objects
@@ -211,7 +211,7 @@ def save_to_beat(instance, **kwargs):
 
 @receiver(signals.post_delete, sender=PeriodicTask)
 def delete_from_beat(instance, **kwargs):
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
         return
     manager = django_celery_beat.models.PeriodicTask.objects
     celery_tasks = manager.filter(name=str(instance.id))
@@ -232,7 +232,7 @@ def delete_from_beat(instance, **kwargs):
 
 @receiver(signals.m2m_changed, sender=Project.inventories.through)
 def check_if_inventory_linked(instance, action, **kwargs):
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
         return
     if action != "pre_remove":
         return
@@ -254,7 +254,7 @@ def check_if_inventory_linked(instance, action, **kwargs):
 @receiver(signals.pre_delete, sender=Inventory)
 def check_if_inventory_linked_project(instance, **kwargs):
     # pylint: disable=invalid-name
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
         return
     if instance.projects.exists():
         raise_linked_error(
@@ -264,7 +264,7 @@ def check_if_inventory_linked_project(instance, **kwargs):
 
 @receiver(signals.pre_save, sender=Hook)
 def check_hook(instance, **kwargs):
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
         return
     errors = instance.handlers.validate(instance)
     if errors:
@@ -274,7 +274,7 @@ def check_hook(instance, **kwargs):
 @receiver([signals.post_save, signals.post_delete], sender=BaseUser,
           dispatch_uid='user_add_hook')
 def user_add_hook(instance, **kwargs):
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
         return
     created = kwargs.get('created', None)
     when = None
@@ -295,7 +295,7 @@ def user_add_hook(instance, **kwargs):
 @receiver([signals.post_save, signals.post_delete], sender=Group)
 @receiver([signals.post_save, signals.post_delete], sender=Host)
 def polemarch_hook(instance, **kwargs):
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
         return
     created = kwargs.get('created', None)
     when = "on_object_add"
@@ -313,13 +313,13 @@ def polemarch_hook(instance, **kwargs):
 
 @receiver(signals.post_save, sender=BaseUser)
 def create_settings_for_user(instance, **kwargs):
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
         return
     UserSettings.objects.get_or_create(user=instance)
 
 
 @receiver(signals.pre_save, sender=Template)
 def update_ptasks_with_templates(instance, **kwargs):
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
         return
     instance.periodic_task.all().update(project=instance.project)

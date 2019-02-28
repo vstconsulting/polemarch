@@ -78,6 +78,19 @@ class InventoryDependEnumField(vst_fields.DependEnumField):
         return super(InventoryDependEnumField, self).to_representation(value)
 
 
+class InventoryAutoCompletionField(vst_fields.AutoCompletionField):
+
+    def to_internal_value(self, data):
+        inventory = super(InventoryAutoCompletionField, self).to_internal_value(data)
+        try:
+            inventory = Inventory.objects.get(id=int(inventory))
+            user = self.context['request'].user
+            if not inventory.acl_handler.viewable_by(user):
+                raise PermissionDenied("You don't have permission to inventory.")  # noce
+        except (ValueError, KeyError):
+            pass
+        return inventory
+
 def with_signals(func):
     '''
     Decorator for send api_pre_save and api_post_save signals from serializers.
@@ -969,24 +982,9 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         serializer.is_valid(True)
         return Response(serializer.data, status.HTTP_200_OK)
 
-    def _get_execution_inventory(self, template, inventory, user):
-        if template or inventory is None:
-            return inventory
-        try:
-            inventory = Inventory.objects.get(id=int(inventory))
-            if not inventory.acl_handler.viewable_by(user):  # nocv
-                raise PermissionDenied(
-                    "You don't have permission to inventory."
-                )
-        except ValueError:
-            pass
-        return inventory
-
     def _execution(self, kind, data, user, **kwargs):
         template = kwargs.pop("template", None)
-        inventory = self._get_execution_inventory(
-            template, data.pop("inventory", None), user
-        )
+        inventory = data.get("inventory", None)
         msg = "Started in the inventory {}.".format(
             inventory if inventory else 'specified in the project configuration.'
         )
@@ -999,9 +997,9 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
             init_type = "project"
             obj_id = self.instance.id
             if kind.lower() == 'module':
-                serializer = AnsibleModuleSerializer()
+                serializer = AnsibleModuleSerializer(context=self.context)
             elif kind.lower() == 'playbook':
-                serializer = AnsiblePlaybookSerializer()
+                serializer = AnsiblePlaybookSerializer(context=self.context)
             else:  # nocv
                 raise Exception('Unknown kind')
             data = {
@@ -1014,7 +1012,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         except UnicodeEncodeError:  # nocv
             target = target.encode('utf-8')
         history_id = self.instance.execute(
-            kind, str(target), inventory,
+            kind, str(target),
             initiator=obj_id, initiator_type=init_type, executor=user, **data
         )
         rdata = ExecuteResponseSerializer(data=dict(
@@ -1062,7 +1060,7 @@ def generate_fileds(ansible_type):
             field = vst_fields.SecretFileInString
         if ref == 'inventory':
             kwargs['autocomplete'] = 'Inventory'
-            field = vst_fields.AutoCompletionField
+            field = InventoryAutoCompletionField
 
         if field is None:  # nocv
             continue
