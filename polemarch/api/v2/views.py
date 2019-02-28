@@ -563,7 +563,7 @@ class __TemplateViewSet(base.ModelViewSetSet):
         Execute template with option.
         '''
         obj = self.get_object()
-        return self.get_serializer(obj).execute(request).resp
+        return self.get_serializer(obj).execute(request)
 
 
 class __ProjectHistoryViewSet(HistoryViewSet):

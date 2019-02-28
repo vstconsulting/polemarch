@@ -88,8 +88,14 @@ class InventoryAutoCompletionField(vst_fields.AutoCompletionField):
             if not inventory.acl_handler.viewable_by(user):
                 raise PermissionDenied("You don't have permission to inventory.")  # noce
         except (ValueError, KeyError):
-            pass
+            self.check_path(inventory)
         return inventory
+
+    def check_path(self, inventory):
+        if not hasattr(self.root, 'project'):  # noce
+            return
+        self.root.project.check_path(inventory)
+
 
 def with_signals(func):
     '''
@@ -737,10 +743,7 @@ class OneTemplateSerializer(TemplateSerializer):
         )
 
     def execute(self, request):
-        serializer = OneProjectSerializer(self.instance.project)
-        return self.instance.execute(
-            serializer, request.user, request.data.get('option', None)
-        )
+        return self.instance.execute(request.user, request.data.get('option', None))
 
 
 class TemplateExecSerializer(DataSerializer):
@@ -982,8 +985,18 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         serializer.is_valid(True)
         return Response(serializer.data, status.HTTP_200_OK)
 
+    def _get_ansible_serializer(self, kind):
+        view = self.context['view']
+        exec_method = getattr(view, 'execute_{}'.format(kind), None)
+        if exec_method is None:  # nocv
+            raise Exception('Unknown kind')
+        serializer_class = exec_method.kwargs['serializer_class']
+        serializer = serializer_class(context=self.context)
+        serializer.project = self.instance
+        return serializer
+
     def _execution(self, kind, data, user, **kwargs):
-        template = kwargs.pop("template", None)
+        template = data.pop("template", None)
         inventory = data.get("inventory", None)
         msg = "Started in the inventory {}.".format(
             inventory if inventory else 'specified in the project configuration.'
@@ -991,17 +1004,11 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         if template is not None:
             init_type = "template"
             obj_id = template
-            data['template_option'] = kwargs.get('template_option', None)
             msg = 'Start template [id={}].'.format(template)
         else:
             init_type = "project"
             obj_id = self.instance.id
-            if kind.lower() == 'module':
-                serializer = AnsibleModuleSerializer(context=self.context)
-            elif kind.lower() == 'playbook':
-                serializer = AnsiblePlaybookSerializer(context=self.context)
-            else:  # nocv
-                raise Exception('Unknown kind')
+            serializer = self._get_ansible_serializer(kind.lower())
             data = {
                 k: v for k, v in serializer.to_internal_value(data).items()
                 if k in data.keys() or v
@@ -1029,12 +1036,9 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         return self._execution("module", dict(request.data), request.user)
 
 
-ansible_reference = AnsibleArgumentsReference()
-
-
-def generate_fileds(ansible_type):
+def generate_fileds(ansible_reference, ansible_type):
     if ansible_type is None:
-        return OrderedDict()
+        return OrderedDict()  # nocv
 
     fields = OrderedDict()
 
@@ -1079,26 +1083,33 @@ class AnsibleSerializerMetaclass(serializers.SerializerMetaclass):
     # pylint: disable=super-on-old-class
     @staticmethod
     def __new__(cls, name, bases, attrs):
-        ansible_type = None
-        if isinstance(attrs.get('playbook', None), serializers.CharField):
-            ansible_type = 'playbook'
-        elif isinstance(attrs.get('module', None), serializers.CharField):
-            ansible_type = 'module'
-        attrs.update(generate_fileds(ansible_type))
+        ansible_reference = attrs.get('ansible_reference', None)
+        if ansible_reference and name != '_AnsibleSerializer':
+            ansible_type = None
+            if isinstance(attrs.get('playbook', None), serializers.CharField):
+                ansible_type = 'playbook'
+            elif isinstance(attrs.get('module', None), serializers.CharField):
+                ansible_type = 'module'
+            attrs.update(generate_fileds(attrs['ansible_reference'], ansible_type))
         return super(AnsibleSerializerMetaclass, cls).__new__(cls, name, bases, attrs)
 
 
 @six.add_metaclass(AnsibleSerializerMetaclass)
 class _AnsibleSerializer(serializers.Serializer):
+    # pylint: disable=abstract-method
     pass
 
 
 class AnsiblePlaybookSerializer(_AnsibleSerializer):
+    # pylint: disable=abstract-method
+    ansible_reference = AnsibleArgumentsReference()
     playbook = vst_fields.AutoCompletionField(required=True, autocomplete='Playbook',
                                               autocomplete_property='playbook')
 
 
 class AnsibleModuleSerializer(_AnsibleSerializer):
+    # pylint: disable=abstract-method
+    ansible_reference = AnsibleArgumentsReference()
     module = vst_fields.AutoCompletionField(required=True, autocomplete='Module',
                                             autocomplete_property='name',
                                             autocomplete_represent='path')
