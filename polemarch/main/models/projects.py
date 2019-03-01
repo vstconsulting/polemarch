@@ -235,7 +235,7 @@ class Project(AbstractModel):
         return view_data
 
     def check_path(self, inventory):
-        if not isinstance(inventory, (six.string_types, six.text_type)):
+        if not isinstance(inventory, (six.string_types, six.text_type)):  # nocv
             return
         path = "{}/{}".format(self.path, inventory)
         path = os.path.abspath(os.path.expanduser(path))
@@ -243,7 +243,6 @@ class Project(AbstractModel):
             raise ValidationError(dict(inventory="Inventory should be in project dir."))
 
     def _prepare_kw(self, kind, mod_name, inventory, **extra):
-        self.check_path(inventory)
         if not mod_name:  # nocv
             raise PMException("Empty playbook/module name.")
         history, extra = self.history.all().start(

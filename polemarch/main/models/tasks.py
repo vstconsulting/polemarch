@@ -20,9 +20,10 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.db.models import functions as dbfunc, Count
 from django.utils.timezone import now
+from django.test import Client
+from django.conf import settings
 from rest_framework.exceptions import UnsupportedMediaType
 
-from ..utils import AnsibleArgumentsReference
 from . import Inventory
 from ..exceptions import DataNotReady, NotApplicable
 from .base import ForeignKeyACL, BModel, ACLModel, BQuerySet, models
@@ -93,15 +94,25 @@ class Template(ACLModel):
         data.update(extra)
         return data
 
-    def execute(self, serializer, user, option=None, **extra):
+    def execute(self, user, option=None, **extra):
         # pylint: disable=protected-access
         tp = self._exec_types.get(self.kind, None)
         if tp is None:
             raise UnsupportedMediaType(media_type=self.kind)  # nocv
-        return serializer._execution(
-            tp, self.get_data_with_options(option, **extra), user,
-            template=self.id, template_option=option
+        client = Client(SERVER_NAME='TEMPLATE')
+        client.force_login(user)
+        url = "/{}/{}/project/{}/execute_{}/".format(
+            getattr(settings, 'API_URL'), getattr(settings, 'VST_API_VERSION'),
+            self.project.id, tp
         )
+        data = dict(
+            template=self.id, template_option=option,
+            **self.get_data_with_options(option, **extra)
+        )
+        response = client.post(
+            url, data=json.dumps(data), content_type="application/json"
+        )
+        return response
 
     def _convert_to_data(self, value):
         if isinstance(value, (six.string_types, six.text_type)):
@@ -325,9 +336,6 @@ class HistoryQuerySet(BQuerySet):
         result['year'] = self._get_history_stats_by(qs, 'year')
         return result
 
-    def __check_ansible_args(self, command, ansible_args):
-        AnsibleArgumentsReference().validate_args(command.lower(), dict(ansible_args))
-
     def __get_extra_options(self, extra, options):
         return {opt: extra.pop(opt, options[opt]) for opt in options}
 
@@ -339,7 +347,6 @@ class HistoryQuerySet(BQuerySet):
 
     def start(self, project, kind, mod_name, inventory, **extra):
         extra_options = self.__get_extra_options(extra, project.EXTRA_OPTIONS)
-        self.__check_ansible_args(kind, extra)
         if not extra_options['save_result']:
             return None, extra
         history_kwargs = dict(

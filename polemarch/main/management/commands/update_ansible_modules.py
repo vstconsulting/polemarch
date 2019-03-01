@@ -19,6 +19,7 @@ class Command(ServiceCommand):
             Module.objects.bulk_create([
                 Module(path=module, project=None) for module in modules_list
             ])
+        # pylint: disable=try-except-raise
         except:  # nocv
             raise
         else:

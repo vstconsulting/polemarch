@@ -29,7 +29,7 @@ class ACLPermission(BModel):
             return self.uagroup.id
 
     @member.setter
-    def member(self, value):  # noce
+    def member(self, value):  # nocv
         pass
 
     @property
@@ -40,7 +40,7 @@ class ACLPermission(BModel):
             return "team"
 
     @member_type.setter
-    def member_type(self, value):  # noce
+    def member_type(self, value):  # nocv
         pass
 
 
