@@ -106,6 +106,7 @@ class AnsibleCommand(PMObject):
         'ansible': 'module',
     }
     command_type = None
+    ansible_ref_class = AnsibleArgumentsReference
 
     status_codes = {
         4: "OFFLINE",
@@ -167,7 +168,7 @@ class AnsibleCommand(PMObject):
         self.kwargs = kwargs
         self.__will_raise_exception = False
         self.ref_type = self.ref_types[self.command_type]
-        self.ansible_ref = AnsibleArgumentsReference().raw_dict[self.ref_type]
+        self.ansible_ref = self.ansible_ref_class().raw_dict[self.ref_type]
 
     def __generate_arg_file(self, value):
         file = tmp_file(value)
@@ -230,8 +231,10 @@ class AnsibleCommand(PMObject):
         raw = re.sub(regex, subst, raw, 0, re.MULTILINE)
         return raw
 
+    def get_execution_revision(self, project):  # nocv
+        return project.revision
+
     def prepare(self, target, inventory, history, project):
-        project.check_path(inventory) if inventory else None
         self.target, self.project = target, project
         self.history = history if history else DummyHistory()
         self.history.status = "RUN"
@@ -243,7 +246,7 @@ class AnsibleCommand(PMObject):
             )
         else:  # nocv
             self.inventory_object = None
-        self.history.revision = project.revision
+        self.history.revision = self.get_execution_revision(project)
         self.history.save()
         self.executor = self.ExecutorClass(self.history)
 
@@ -275,6 +278,10 @@ class AnsibleCommand(PMObject):
             extra_args
         )
 
+    def get_kwargs(self, target, extra_args):
+        # pylint: disable=unused-argument
+        return dict(cwd=self.workdir)
+
     def error_handler(self, exception):
         default_code = self.status_codes["other"]
         if isinstance(exception, CalledProcessError):  # nocv
@@ -295,7 +302,7 @@ class AnsibleCommand(PMObject):
             self.history.status = "OK"
             extra = self.__parse_extra_args(**extra_args)
             args = self.get_args(self.target, extra.args)
-            self.executor.execute(args, self.workdir)
+            self.executor.execute(args, **self.get_kwargs(self.target, extra.args))
         except Exception as exception:
             logger.error(traceback.format_exc())
             self.error_handler(exception)

@@ -86,6 +86,8 @@ class Git(_VCS):
         reponame = "waiting..."
         with raise_context():
             repo = self.get_repo()
+            with raise_context():
+                reponame = repo.head.object.hexsha
             repo_branch = self.target_branch or 'ERROR'
             if repo.head.is_detached and repo_branch.replace('tags/', '') in repo.tags:
                 return repo_branch
