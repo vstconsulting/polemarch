@@ -92,7 +92,7 @@ class InventoryAutoCompletionField(vst_fields.AutoCompletionField):
         return inventory
 
     def check_path(self, inventory):
-        if not hasattr(self.root, 'project'):  # noce
+        if not hasattr(self.root, 'project'):  # nocv
             return
         self.root.project.check_path(inventory)
 

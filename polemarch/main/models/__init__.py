@@ -215,7 +215,7 @@ def save_to_beat(instance, **kwargs):
 
 @receiver(signals.post_delete, sender=PeriodicTask)
 def delete_from_beat(instance, **kwargs):
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     manager = django_celery_beat.models.PeriodicTask.objects
     celery_tasks = manager.filter(name=str(instance.id))
@@ -236,7 +236,7 @@ def delete_from_beat(instance, **kwargs):
 
 @receiver(signals.m2m_changed, sender=Project.inventories.through)
 def check_if_inventory_linked(instance, action, **kwargs):
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     if action != "pre_remove":
         return
@@ -258,7 +258,7 @@ def check_if_inventory_linked(instance, action, **kwargs):
 @receiver(signals.pre_delete, sender=Inventory)
 def check_if_inventory_linked_project(instance, **kwargs):
     # pylint: disable=invalid-name
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     if instance.projects.exists():
         raise_linked_error(
