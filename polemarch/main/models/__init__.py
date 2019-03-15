@@ -83,6 +83,10 @@ def check_variables_values(instance, *args, **kwargs):
     elif isinstance(content_object, Host):
         if instance.key == 'ansible_host':
             validate_hostname(instance.value)
+    elif isinstance(content_object, Project):
+        if 'env_' != instance.key[0:4] and instance.key not in Project.VARS_KEY:
+            msg = 'Unknown variable key \'{}\'. Key must be in {} or starts from \'env_\''
+            raise ValidationError(msg.format(instance.key, Project.VARS_KEY))
 
 
 @receiver(signals.pre_save, sender=Group)
