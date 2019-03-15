@@ -1057,9 +1057,10 @@ class OApiTestCase(BaseTestCase):
             'repo_type', 'repo_sync_on_run', 'repo_branch',
             'repo_password', 'repo_key'
         ]
-        self.check_fields(objName, projectVariable['properties']['key'],
-                          type='string', enum=key_list
-                          )
+        self.check_fields(
+            objName, projectVariable['properties']['key'],
+            type='string', format='autocomplete', enum=key_list
+        )
         additional_properties = dict(
             field='key',
             types=dict(repo_password='password', repo_key='secretfile'),

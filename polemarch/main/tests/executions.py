@@ -1113,10 +1113,26 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 dict(
                     name=str(uuid.uuid1()),
                     repository='http://localhost:8000/test_repo.tar.gz',
-                    variables=dict(repo_type="TAR", repo_sync_on_run=True)
+                    variables=dict(
+                        repo_type="TAR", repo_sync_on_run=True
+                    )
                 )
             ])
             project_data = result[0]['data']
+            correct_add = self.make_bulk([
+                dict(
+                    data_type=['project', project_data['id'], 'variables'],
+                    data=dict(key='env_test_var', value="TestVar"), method='post'
+                ),
+            ], 'put')
+            self.assertEqual(correct_add[0]['status'], 201)
+            error = self.make_bulk([
+                dict(
+                    data_type=['project', project_data['id'], 'variables'],
+                    data=dict(key='err_key', value="error"), method='post'
+                ),
+            ], 'put')
+            self.assertEqual(error[0]['status'], 400)
             self.sync_project(project_data['id'])
             self.project_execute(project_data)
 

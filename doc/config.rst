@@ -362,6 +362,19 @@ Here placed settings related to web-server used by Polemarch in production
 More settings in `uWSGI docs
 <http://uwsgi-docs.readthedocs.io/en/latest/Configuration.html>`_.
 
+Configuration options
+-----------------------------
+
+This section contains additional information for configure additional elements.
+
+#. If you need set ``https`` for your web settings, you can do it using HAProxy, Nginx or configure it in ``settings.ini``.
+
+   	.. sourcecode:: ini
+
+   		[uwsgi]
+   		https = 0.0.0.0:8443,foobar.crt,foobar.key
+   		addrport = 127.0.0.1:8080
+
 Installation of additional packages to Polemarch
 ------------------------------------------------
 If you want to install some additional package to Polemarch from rpm or dep,
