@@ -460,14 +460,10 @@ class PeriodicTaskVariableSerializer(VariableSerializer):
 
 
 class ProjectVariableSerializer(VariableSerializer):
-    project_keys = (
-        ('repo_type', 'Types of repo. Default="MANUAL".'),
-        ('repo_sync_on_run', "Sync project by every execution."),
-        ('repo_branch', "[Only for GIT repos] Checkout branch on sync."),
-        ('repo_password', "[Only for GIT repos] Password to fetch access."),
-        ('repo_key', "[Only for GIT repos] Key to fetch access."),
+    key = vst_fields.AutoCompletionField(
+        required=True,
+        autocomplete=models.Project.VARS_KEY
     )
-    key = serializers.ChoiceField(choices=project_keys)
     value = vst_fields.DependEnumField(allow_blank=True, field='key', choices={
         'repo_type': list(models.Project.repo_handlers.keys()),
         'repo_sync_on_run': [True, False]

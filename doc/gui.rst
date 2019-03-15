@@ -69,6 +69,16 @@ As you can see, the form of new project creation consists of 5 fields:
 
 * **repo auth data** - key or password value.
 
+Before continue we tell about structure of our project, we used `ansible best practice <https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html#directory-layout>`_ and run playbooks from project.
+
+    * ``ansible.cfg`` - used to setup settings. For detailed information about configuration file read `settings reference <https://docs.ansible.com/ansible/latest/reference_appendices/config.html#ansible-configuration-settings-locations>`_.
+
+        If you setup modules directory, we import all modules from this directory and set name ``polemarch.project.[module_name]``.
+
+    * Playbook - import all files with ``.yml`` extention from root directory of the **Project**
+
+    * If you need set variables global, not only for run, you can use ``group_vars`` and ``host_vars`` in root directory of project
+
 After project creation you will see the next page:
 
 .. image:: gui_screenshots/test_project_1.png
@@ -177,6 +187,7 @@ Other available project variables, that you can add with clicking on "Create" bu
 * **repo_sync_on_run** - boolean, if true, Polemarch will sync project before every task execution;
 * **repo_password** - GIT repository password;
 * **repo_key** - GIT repository key.
+* Environment variables, with key starting from **env_**. For example **env_test_var** would create environment variable ``test_var`` on run tasks from this project.
 
 Let's edit **repo_branch** variable. To do it you need click on **repo_branch** item in list.
 Then you will see the following page:

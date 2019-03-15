@@ -67,6 +67,10 @@ class Executor(CmdExecutor):
         self.history = history
         self.counter = 0
         self.exchanger = KVExchanger(self.CANCEL_PREFIX + str(self.history.id))
+        env_vars = {}
+        if self.history.project is not None:
+            env_vars = self.history.project.env_vars
+        self.env = env_vars
 
     @property
     def output(self):

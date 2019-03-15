@@ -455,7 +455,7 @@ class APITestCase(ApiUsersTestCase, InventoriesTestCase, ProjectTestCase, OApiTe
         bulk_data = [
             {'type': "add", 'item': "token", 'data': data}
         ]
-        self.get_result("post", self.get_url('_bulk'), 415, data=json.dumps(bulk_data))
+        self.get_result("post", self.get_url('_bulk'), 404, data=json.dumps(bulk_data))
         self.get_result("put", self.get_url('_bulk'), 200, data=json.dumps(bulk_data))
 
         result = self.get_result("get", self.get_url('_bulk'))
