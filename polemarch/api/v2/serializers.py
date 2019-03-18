@@ -128,6 +128,7 @@ class ExecuteResponseSerializer(ActionResponseSerializer):
 
 
 class SetOwnerSerializer(DataSerializer):
+    perms_msg = 'Permission denied. Only owner can change owner.'
     user_id = vst_fields.Select2Field(required=True, select='User',
                                       label='New owner',
                                       autocomplete_represent='username')
