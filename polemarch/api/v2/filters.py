@@ -127,10 +127,10 @@ class HistoryFilter(_BaseFilter):
     status = CharFilter(help_text='Status of execution.')
     mode = CharFilter(help_text='Module or playbook name.')
     kind = CharFilter(help_text='Kind of execution.')
-    older = IsoDateTimeFilter(name="start_time",
+    older = IsoDateTimeFilter(field_name="start_time",
                               lookup_expr=('lt'),
                               help_text='Older then this time')
-    newer = IsoDateTimeFilter(name="start_time",
+    newer = IsoDateTimeFilter(field_name="start_time",
                               lookup_expr=('gt'),
                               help_text='Newer then this time')
 
@@ -159,8 +159,8 @@ class PeriodicTaskFilter(_TypedFilter):
 
 
 class HistoryLinesFilter(filters.FilterSet):
-    after  = NumberFilter(name="line_gnumber", lookup_expr=('gt'))
-    before = NumberFilter(name="line_gnumber", lookup_expr=('lt'))
+    after  = NumberFilter(field_name="line_gnumber", lookup_expr=('gt'))
+    before = NumberFilter(field_name="line_gnumber", lookup_expr=('lt'))
 
     class Meta:
         model = models.HistoryLines

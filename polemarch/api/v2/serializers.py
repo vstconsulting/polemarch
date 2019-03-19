@@ -92,7 +92,7 @@ class InventoryAutoCompletionField(vst_fields.AutoCompletionField):
         return inventory
 
     def check_path(self, inventory):
-        if not hasattr(self.root, 'project'):  # noce
+        if not hasattr(self.root, 'project'):  # nocv
             return
         self.root.project.check_path(inventory)
 
@@ -128,6 +128,7 @@ class ExecuteResponseSerializer(ActionResponseSerializer):
 
 
 class SetOwnerSerializer(DataSerializer):
+    perms_msg = 'Permission denied. Only owner can change owner.'
     user_id = vst_fields.Select2Field(required=True, select='User',
                                       label='New owner',
                                       autocomplete_represent='username')
@@ -460,14 +461,10 @@ class PeriodicTaskVariableSerializer(VariableSerializer):
 
 
 class ProjectVariableSerializer(VariableSerializer):
-    project_keys = (
-        ('repo_type', 'Types of repo. Default="MANUAL".'),
-        ('repo_sync_on_run', "Sync project by every execution."),
-        ('repo_branch', "[Only for GIT repos] Checkout branch on sync."),
-        ('repo_password', "[Only for GIT repos] Password to fetch access."),
-        ('repo_key', "[Only for GIT repos] Key to fetch access."),
+    key = vst_fields.AutoCompletionField(
+        required=True,
+        autocomplete=models.Project.VARS_KEY
     )
-    key = serializers.ChoiceField(choices=project_keys)
     value = vst_fields.DependEnumField(allow_blank=True, field='key', choices={
         'repo_type': list(models.Project.repo_handlers.keys()),
         'repo_sync_on_run': [True, False]

@@ -83,6 +83,10 @@ def check_variables_values(instance, *args, **kwargs):
     elif isinstance(content_object, Host):
         if instance.key == 'ansible_host':
             validate_hostname(instance.value)
+    elif isinstance(content_object, Project):
+        if 'env_' != instance.key[0:4] and instance.key not in Project.VARS_KEY:
+            msg = 'Unknown variable key \'{}\'. Key must be in {} or starts from \'env_\''
+            raise ValidationError(msg.format(instance.key, Project.VARS_KEY))
 
 
 @receiver(signals.pre_save, sender=Group)
@@ -211,7 +215,7 @@ def save_to_beat(instance, **kwargs):
 
 @receiver(signals.post_delete, sender=PeriodicTask)
 def delete_from_beat(instance, **kwargs):
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     manager = django_celery_beat.models.PeriodicTask.objects
     celery_tasks = manager.filter(name=str(instance.id))
@@ -232,7 +236,7 @@ def delete_from_beat(instance, **kwargs):
 
 @receiver(signals.m2m_changed, sender=Project.inventories.through)
 def check_if_inventory_linked(instance, action, **kwargs):
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     if action != "pre_remove":
         return
@@ -254,7 +258,7 @@ def check_if_inventory_linked(instance, action, **kwargs):
 @receiver(signals.pre_delete, sender=Inventory)
 def check_if_inventory_linked_project(instance, **kwargs):
     # pylint: disable=invalid-name
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     if instance.projects.exists():
         raise_linked_error(

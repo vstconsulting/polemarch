@@ -67,6 +67,10 @@ class Executor(CmdExecutor):
         self.history = history
         self.counter = 0
         self.exchanger = KVExchanger(self.CANCEL_PREFIX + str(self.history.id))
+        env_vars = {}
+        if self.history.project is not None:
+            env_vars = self.history.project.env_vars
+        self.env = env_vars
 
     @property
     def output(self):
@@ -77,7 +81,7 @@ class Executor(CmdExecutor):
         pass  # nocv
 
     def working_handler(self, proc):
-        if proc.poll() is None and self.exchanger.get() is not None:
+        if proc.poll() is None and self.exchanger.get() is not None:  # nocv
             self.write_output("\n[ERROR]: User interrupted execution")
             self.exchanger.delete()
             proc.kill()

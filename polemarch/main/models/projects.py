@@ -110,6 +110,14 @@ class Project(AbstractModel):
         'repo_sync_on_run'
     ]
 
+    VARS_KEY = [
+        'repo_type',
+        'repo_sync_on_run',
+        'repo_branch',
+        'repo_password',
+        'repo_key'
+    ]
+
     EXTRA_OPTIONS = {
         'initiator': 0,
         'initiator_type': 'project',
@@ -156,6 +164,13 @@ class Project(AbstractModel):
     def repo_class(self):
         repo_type = self.vars.get("repo_type", "MANUAL")
         return self.repo_handlers(repo_type, self)
+
+    @property
+    def env_vars(self):
+        env_var_list = dict()
+        for var_obj in self.variables.filter(key__startswith='env_'):
+            env_var_list[var_obj.key[4:]] = var_obj.value
+        return env_var_list
 
     @property
     def type(self):
