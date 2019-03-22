@@ -374,6 +374,7 @@ class AnsibleModules(PMAnsible):
 
     def get_args(self):  # nocv
         cmd = super(AnsibleModules, self).get_args()
+        cmd += ['--cachedir', 'NoCache']
         if self.detailed:
             cmd += ['--detail']
         if self.key:

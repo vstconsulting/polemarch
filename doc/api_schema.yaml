@@ -8,25 +8,54 @@ info:
   contact:
     name: System Administrator
   x-links:
-    Documentation:
-      url: http://polemarch.readthedocs.io/
-      name: Official documentation
     Request:
-      - url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%201.1.0
+      - url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%201.1.3
         name: Question
-      - url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%201.1.0
+      - url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%201.1.3
         name: Bug report
       - url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Feature%20request&issue%5Btitle%5D=
         name: Feature request
+    Documentation:
+      url: http://polemarch.readthedocs.io/
+      name: Official documentation
     Repository:
       url: https://gitlab.com/vstconsulting/polemarch.git
       name: Official repository
+  x-menu:
+    - name: Projects
+      url: /project
+      span_class: fa fa-fort-awesome
+    - name: Community
+      url: /community_template
+      span_class: fa fa-cloud
+    - name: Inventories
+      url: /inventory
+      span_class: fa fa-folder
+      sublinks:
+        - name: Groups
+          url: /group
+          span_class: fa fa-tasks
+        - name: Hosts
+          url: /host
+          span_class: fa fa-codepen
+    - name: History
+      url: /history
+      span_class: fa fa-calendar
+    - name: System
+      span_class: fa fa-cog
+      sublinks:
+        - name: Users
+          url: /user
+          span_class: fa fa-user
+        - name: Hooks
+          url: /hook
+          span_class: fa fa-plug
   x-versions:
-    application: 1.1.0
-    library: 1.1.0
-    vstutils: 1.5.0
-    django: 1.11.18
-    ansible: 2.7.6
+    application: 1.1.3
+    library: 1.1.3
+    vstutils: 1.6.5
+    django: 1.11.20
+    ansible: 2.7.9
   version: v2
 host: localhost:8080
 schemes:
@@ -10788,10 +10817,10 @@ definitions:
         type: integer
         format: select2
         additionalProperties:
-          view_field: username
-          value_field: id
           model:
             $ref: '#/definitions/User'
+          value_field: id
+          view_field: username
   InventoryVariable:
     required:
       - key
@@ -10836,13 +10865,13 @@ definitions:
         format: dynamic
         additionalProperties:
           field: key
-          types:
-            ansible_become: boolean
-            ansible_become_pass: password
-            ansible_ssh_private_key_file: secretfile
-            ansible_port: integer
-            ansible_ssh_pass: password
           choices: {}
+          types:
+            ansible_ssh_pass: password
+            ansible_ssh_private_key_file: secretfile
+            ansible_become: boolean
+            ansible_port: integer
+            ansible_become_pass: password
   Host:
     type: object
     properties:
@@ -10859,8 +10888,8 @@ definitions:
         title: Type
         type: string
         enum:
-          - RANGE
           - HOST
+          - RANGE
         default: HOST
   OneHost:
     type: object
@@ -10882,8 +10911,8 @@ definitions:
         title: Type
         type: string
         enum:
-          - RANGE
           - HOST
+          - RANGE
         default: HOST
       owner:
         $ref: '#/definitions/User'
@@ -11182,8 +11211,8 @@ definitions:
         title: Repo type
         type: string
         enum:
-          - GIT
           - MANUAL
+          - GIT
           - TAR
         default: MANUAL
       repository:
@@ -11198,15 +11227,15 @@ definitions:
         default: NONE
         additionalProperties:
           field: type
-          types:
-            GIT: string
-            MANUAL: hidden
-            TAR: hidden
           choices:
             GIT:
               - NONE
               - KEY
               - PASSWORD
+          types:
+            MANUAL: hidden
+            GIT: string
+            TAR: hidden
       auth_data:
         title: Repo auth data
         type: string
@@ -11214,22 +11243,22 @@ definitions:
         default: ''
         additionalProperties:
           field: repo_auth
-          types:
-            NONE: hidden
-            PASSWORD: password
-            KEY: secretfile
           choices: {}
+          types:
+            KEY: secretfile
+            PASSWORD: password
+            NONE: hidden
       branch:
         title: GIT branch/tag/SHA
         type: string
         format: dynamic
         additionalProperties:
           field: type
-          types:
-            GIT: string
-            MANUAL: hidden
-            TAR: hidden
           choices: {}
+          types:
+            MANUAL: hidden
+            GIT: string
+            TAR: hidden
   OneProject:
     type: object
     properties:
@@ -11288,74 +11317,23 @@ definitions:
         type: string
         format: autocomplete
         additionalProperties:
-          view_field: path
-          value_field: name
           model:
             $ref: '#/definitions/Module'
-      extra_vars:
-        title: Extra vars
-        description: set additional variables as key=value or YAML/JSON, if filename
-          prepend with @
+          value_field: name
+          view_field: path
+      args:
+        title: Args
+        description: module arguments
         type: string
-      syntax_check:
-        title: Syntax check
-        description: perform a syntax check on the playbook, but do not execute it
-        type: boolean
-        default: false
-      sudo:
-        title: Sudo
-        description: run operations with sudo (nopasswd) (deprecated, use become)
-        type: boolean
-        default: false
-      ssh_extra_args:
-        title: Ssh extra args
-        description: specify extra arguments to pass to ssh only (e.g. -R)
-        type: string
-      sudo_user:
-        title: Sudo user
-        description: desired sudo user (default=root) (deprecated, use become)
-        type: string
-      key_file:
-        title: Key file
-        description: use this file to authenticate the connection
-        type: string
-        format: secretfile
-      diff:
-        title: Diff
-        description: when changing (small) files and templates, show the differences
-          in those files; works great with --check
-        type: boolean
-        default: false
-      playbook_dir:
-        title: Playbook dir
-        description: Since this tool does not use playbooks, use this as a subsitute
-          playbook directory.This sets the relative path for many features including
-          roles/ group_vars/ etc.
-        type: string
-      check:
-        title: Check
-        description: don't make any changes; instead, try to predict some of the changes
-          that may occur
-        type: boolean
-        default: false
-      verbose:
-        title: Verbose
-        description: verbose mode (-vvv for more, -vvvv to enable connection debugging)
+      background:
+        title: Background
+        description: run asynchronously, failing after X seconds (default=N/A)
         type: integer
-        default: 0
-        maximum: 4
-      poll:
-        title: Poll
-        description: set the poll interval if using -B (default=15)
-        type: integer
-      group:
-        title: Group
-        type: string
-        default: all
-      scp_extra_args:
-        title: Scp extra args
-        description: specify extra arguments to pass to scp only (e.g. -l)
-        type: string
+      become:
+        title: Become
+        description: run operations with become (does not imply password prompting)
+        type: boolean
+        default: false
       become_method:
         title: Become method
         description: 'privilege escalation method to use (default=sudo), valid choices:
@@ -11366,15 +11344,31 @@ definitions:
         title: Become user
         description: run operations as this user (default=root)
         type: string
+      check:
+        title: Check
+        description: don't make any changes; instead, try to predict some of the changes
+          that may occur
+        type: boolean
+        default: false
       connection:
         title: Connection
         description: connection type to use (default=smart)
         type: string
-      one_line:
-        title: One line
-        description: condense output
+      diff:
+        title: Diff
+        description: when changing (small) files and templates, show the differences
+          in those files; works great with --check
         type: boolean
         default: false
+      extra_vars:
+        title: Extra vars
+        description: set additional variables as key=value or YAML/JSON, if filename
+          prepend with @
+        type: string
+      forks:
+        title: Forks
+        description: specify number of parallel processes to use (default=5)
+        type: integer
       inventory:
         title: Inventory
         description: specify inventory host path or comma separated host list. --inventory-file
@@ -11382,78 +11376,68 @@ definitions:
         type: string
         format: autocomplete
         additionalProperties:
-          view_field: name
-          value_field: id
           model:
             $ref: '#/definitions/Inventory'
-      forks:
-        title: Forks
-        description: specify number of parallel processes to use (default=5)
-        type: integer
-      vault_id:
-        title: Vault id
-        description: the vault identity to use
-        type: string
-      list_hosts:
-        title: List hosts
-        description: outputs a list of matching hosts; does not execute anything else
-        type: boolean
-        default: false
-      private_key:
-        title: Private key
+          value_field: id
+          view_field: name
+      key_file:
+        title: Key file
         description: use this file to authenticate the connection
-        type: string
-        format: secretfile
-      args:
-        title: Args
-        description: module arguments
-        type: string
-      sftp_extra_args:
-        title: Sftp extra args
-        description: specify extra arguments to pass to sftp only (e.g. -f, -l)
-        type: string
-      user:
-        title: User
-        description: connect as this user (default=None)
-        type: string
-      background:
-        title: Background
-        description: run asynchronously, failing after X seconds (default=N/A)
-        type: integer
-      module_path:
-        title: Module path
-        description: prepend colon-separated path(s) to module library (default=[u'/home/grey/.ansible/plugins/modules',
-          u'/usr/share/ansible/plugins/modules'])
-        type: string
-      tree:
-        title: Tree
-        description: log output to this directory
-        type: string
-      ssh_common_args:
-        title: Ssh common args
-        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
-        type: string
-      su:
-        title: Su
-        description: run operations with su (deprecated, use become)
-        type: boolean
-        default: false
-      vault_password_file:
-        title: Vault password file
-        description: vault password file
         type: string
         format: secretfile
       limit:
         title: Limit
         description: further limit selected hosts to an additional pattern
         type: string
-      timeout:
-        title: Timeout
-        description: override the connection timeout in seconds (default=10)
+      list_hosts:
+        title: List hosts
+        description: outputs a list of matching hosts; does not execute anything else
+        type: boolean
+        default: false
+      module_path:
+        title: Module path
+        description: prepend colon-separated path(s) to module library (default=['/home/grey/.ansible/plugins/modules',
+          '/usr/share/ansible/plugins/modules'])
+        type: string
+      one_line:
+        title: One line
+        description: condense output
+        type: boolean
+        default: false
+      playbook_dir:
+        title: Playbook dir
+        description: Since this tool does not use playbooks, use this as a subsitute
+          playbook directory.This sets the relative path for many features including
+          roles/ group_vars/ etc.
+        type: string
+      poll:
+        title: Poll
+        description: set the poll interval if using -B (default=15)
         type: integer
-      become:
-        title: Become
-        description: run operations with become (does not imply password prompting)
+      private_key:
+        title: Private key
+        description: use this file to authenticate the connection
+        type: string
+        format: secretfile
+      scp_extra_args:
+        title: Scp extra args
+        description: specify extra arguments to pass to scp only (e.g. -l)
+        type: string
+      sftp_extra_args:
+        title: Sftp extra args
+        description: specify extra arguments to pass to sftp only (e.g. -f, -l)
+        type: string
+      ssh_common_args:
+        title: Ssh common args
+        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
+        type: string
+      ssh_extra_args:
+        title: Ssh extra args
+        description: specify extra arguments to pass to ssh only (e.g. -R)
+        type: string
+      su:
+        title: Su
+        description: run operations with su (deprecated, use become)
         type: boolean
         default: false
       su_user:
@@ -11461,6 +11445,51 @@ definitions:
         description: run operations with su as this user (default=None) (deprecated,
           use become)
         type: string
+      sudo:
+        title: Sudo
+        description: run operations with sudo (nopasswd) (deprecated, use become)
+        type: boolean
+        default: false
+      sudo_user:
+        title: Sudo user
+        description: desired sudo user (default=root) (deprecated, use become)
+        type: string
+      syntax_check:
+        title: Syntax check
+        description: perform a syntax check on the playbook, but do not execute it
+        type: boolean
+        default: false
+      timeout:
+        title: Timeout
+        description: override the connection timeout in seconds (default=10)
+        type: integer
+      tree:
+        title: Tree
+        description: log output to this directory
+        type: string
+      user:
+        title: User
+        description: connect as this user (default=None)
+        type: string
+      vault_id:
+        title: Vault id
+        description: the vault identity to use
+        type: string
+      vault_password_file:
+        title: Vault password file
+        description: vault password file
+        type: string
+        format: secretfile
+      verbose:
+        title: Verbose
+        description: verbose mode (-vvv for more, -vvvv to enable connection debugging)
+        type: integer
+        default: 0
+        maximum: 4
+      group:
+        title: Group
+        type: string
+        default: all
   ExecuteResponse:
     required:
       - detail
@@ -11488,79 +11517,15 @@ definitions:
         type: string
         format: autocomplete
         additionalProperties:
-          view_field: name
-          value_field: playbook
           model:
             $ref: '#/definitions/Playbook'
-      flush_cache:
-        title: Flush cache
-        description: clear the fact cache for every host in inventory
+          value_field: playbook
+          view_field: name
+      become:
+        title: Become
+        description: run operations with become (does not imply password prompting)
         type: boolean
         default: false
-      ssh_extra_args:
-        title: Ssh extra args
-        description: specify extra arguments to pass to ssh only (e.g. -R)
-        type: string
-      extra_vars:
-        title: Extra vars
-        description: set additional variables as key=value or YAML/JSON, if filename
-          prepend with @
-        type: string
-      syntax_check:
-        title: Syntax check
-        description: perform a syntax check on the playbook, but do not execute it
-        type: boolean
-        default: false
-      sudo:
-        title: Sudo
-        description: run operations with sudo (nopasswd) (deprecated, use become)
-        type: boolean
-        default: false
-      list_tags:
-        title: List tags
-        description: list all available tags
-        type: boolean
-        default: false
-      module_path:
-        title: Module path
-        description: prepend colon-separated path(s) to module library (default=[u'/home/grey/.ansible/plugins/modules',
-          u'/usr/share/ansible/plugins/modules'])
-        type: string
-      sudo_user:
-        title: Sudo user
-        description: desired sudo user (default=root) (deprecated, use become)
-        type: string
-      skip_tags:
-        title: Skip tags
-        description: only run plays and tasks whose tags do not match these values
-        type: string
-      key_file:
-        title: Key file
-        description: use this file to authenticate the connection
-        type: string
-        format: secretfile
-      diff:
-        title: Diff
-        description: when changing (small) files and templates, show the differences
-          in those files; works great with --check
-        type: boolean
-        default: false
-      check:
-        title: Check
-        description: don't make any changes; instead, try to predict some of the changes
-          that may occur
-        type: boolean
-        default: false
-      verbose:
-        title: Verbose
-        description: verbose mode (-vvv for more, -vvvv to enable connection debugging)
-        type: integer
-        default: 0
-        maximum: 4
-      scp_extra_args:
-        title: Scp extra args
-        description: specify extra arguments to pass to scp only (e.g. -l)
-        type: string
       become_method:
         title: Become method
         description: 'privilege escalation method to use (default=sudo), valid choices:
@@ -11571,15 +11536,41 @@ definitions:
         title: Become user
         description: run operations as this user (default=root)
         type: string
+      check:
+        title: Check
+        description: don't make any changes; instead, try to predict some of the changes
+          that may occur
+        type: boolean
+        default: false
       connection:
         title: Connection
         description: connection type to use (default=smart)
         type: string
-      list_tasks:
-        title: List tasks
-        description: list all tasks that would be executed
+      diff:
+        title: Diff
+        description: when changing (small) files and templates, show the differences
+          in those files; works great with --check
         type: boolean
         default: false
+      extra_vars:
+        title: Extra vars
+        description: set additional variables as key=value or YAML/JSON, if filename
+          prepend with @
+        type: string
+      flush_cache:
+        title: Flush cache
+        description: clear the fact cache for every host in inventory
+        type: boolean
+        default: false
+      force_handlers:
+        title: Force handlers
+        description: run handlers even if a task fails
+        type: boolean
+        default: false
+      forks:
+        title: Forks
+        description: specify number of parallel processes to use (default=5)
+        type: integer
       inventory:
         title: Inventory
         description: specify inventory host path or comma separated host list. --inventory-file
@@ -11587,79 +11578,76 @@ definitions:
         type: string
         format: autocomplete
         additionalProperties:
-          view_field: name
-          value_field: id
           model:
             $ref: '#/definitions/Inventory'
-      forks:
-        title: Forks
-        description: specify number of parallel processes to use (default=5)
-        type: integer
-      vault_id:
-        title: Vault id
-        description: the vault identity to use
-        type: string
-      list_hosts:
-        title: List hosts
-        description: outputs a list of matching hosts; does not execute anything else
-        type: boolean
-        default: false
-      tags:
-        title: Tags
-        description: only run plays and tasks tagged with these values
-        type: string
-      private_key:
-        title: Private key
+          value_field: id
+          view_field: name
+      key_file:
+        title: Key file
         description: use this file to authenticate the connection
-        type: string
-        format: secretfile
-      step:
-        title: Step
-        description: 'one-step-at-a-time: confirm each task before running'
-        type: boolean
-        default: false
-      sftp_extra_args:
-        title: Sftp extra args
-        description: specify extra arguments to pass to sftp only (e.g. -f, -l)
-        type: string
-      user:
-        title: User
-        description: connect as this user (default=None)
-        type: string
-      force_handlers:
-        title: Force handlers
-        description: run handlers even if a task fails
-        type: boolean
-        default: false
-      start_at_task:
-        title: Start at task
-        description: start the playbook at the task matching this name
-        type: string
-      ssh_common_args:
-        title: Ssh common args
-        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
-        type: string
-      su:
-        title: Su
-        description: run operations with su (deprecated, use become)
-        type: boolean
-        default: false
-      vault_password_file:
-        title: Vault password file
-        description: vault password file
         type: string
         format: secretfile
       limit:
         title: Limit
         description: further limit selected hosts to an additional pattern
         type: string
-      timeout:
-        title: Timeout
-        description: override the connection timeout in seconds (default=10)
-        type: integer
-      become:
-        title: Become
-        description: run operations with become (does not imply password prompting)
+      list_hosts:
+        title: List hosts
+        description: outputs a list of matching hosts; does not execute anything else
+        type: boolean
+        default: false
+      list_tags:
+        title: List tags
+        description: list all available tags
+        type: boolean
+        default: false
+      list_tasks:
+        title: List tasks
+        description: list all tasks that would be executed
+        type: boolean
+        default: false
+      module_path:
+        title: Module path
+        description: prepend colon-separated path(s) to module library (default=['/home/grey/.ansible/plugins/modules',
+          '/usr/share/ansible/plugins/modules'])
+        type: string
+      private_key:
+        title: Private key
+        description: use this file to authenticate the connection
+        type: string
+        format: secretfile
+      scp_extra_args:
+        title: Scp extra args
+        description: specify extra arguments to pass to scp only (e.g. -l)
+        type: string
+      sftp_extra_args:
+        title: Sftp extra args
+        description: specify extra arguments to pass to sftp only (e.g. -f, -l)
+        type: string
+      skip_tags:
+        title: Skip tags
+        description: only run plays and tasks whose tags do not match these values
+        type: string
+      ssh_common_args:
+        title: Ssh common args
+        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
+        type: string
+      ssh_extra_args:
+        title: Ssh extra args
+        description: specify extra arguments to pass to ssh only (e.g. -R)
+        type: string
+      start_at_task:
+        title: Start at task
+        description: start the playbook at the task matching this name
+        type: string
+      step:
+        title: Step
+        description: 'one-step-at-a-time: confirm each task before running'
+        type: boolean
+        default: false
+      su:
+        title: Su
+        description: run operations with su (deprecated, use become)
         type: boolean
         default: false
       su_user:
@@ -11667,6 +11655,47 @@ definitions:
         description: run operations with su as this user (default=None) (deprecated,
           use become)
         type: string
+      sudo:
+        title: Sudo
+        description: run operations with sudo (nopasswd) (deprecated, use become)
+        type: boolean
+        default: false
+      sudo_user:
+        title: Sudo user
+        description: desired sudo user (default=root) (deprecated, use become)
+        type: string
+      syntax_check:
+        title: Syntax check
+        description: perform a syntax check on the playbook, but do not execute it
+        type: boolean
+        default: false
+      tags:
+        title: Tags
+        description: only run plays and tasks tagged with these values
+        type: string
+      timeout:
+        title: Timeout
+        description: override the connection timeout in seconds (default=10)
+        type: integer
+      user:
+        title: User
+        description: connect as this user (default=None)
+        type: string
+      vault_id:
+        title: Vault id
+        description: the vault identity to use
+        type: string
+      vault_password_file:
+        title: Vault password file
+        description: vault password file
+        type: string
+        format: secretfile
+      verbose:
+        title: Verbose
+        description: verbose mode (-vvv for more, -vvvv to enable connection debugging)
+        type: integer
+        default: 0
+        maximum: 4
   ProjectHistory:
     required:
       - mode
@@ -11793,22 +11822,22 @@ definitions:
         format: dynamic
         additionalProperties:
           field: kind
-          types:
-            MODULE: autocomplete
-            PLAYBOOK: autocomplete
-            TEMPLATE: hidden
           choices: {}
+          types:
+            PLAYBOOK: autocomplete
+            MODULE: autocomplete
+            TEMPLATE: hidden
       inventory:
         title: Inventory
         type: string
         format: dynamic
         additionalProperties:
           field: kind
-          types:
-            MODULE: select2
-            PLAYBOOK: select2
-            TEMPLATE: hidden
           choices: {}
+          types:
+            PLAYBOOK: select2
+            MODULE: select2
+            TEMPLATE: hidden
       save_result:
         title: Save result
         type: boolean
@@ -11821,11 +11850,11 @@ definitions:
         format: dynamic
         additionalProperties:
           field: kind
-          types:
-            MODULE: hidden
-            PLAYBOOK: hidden
-            TEMPLATE: autocomplete
           choices: {}
+          types:
+            PLAYBOOK: hidden
+            MODULE: hidden
+            TEMPLATE: autocomplete
       enabled:
         title: Enabled
         type: boolean
@@ -11842,10 +11871,10 @@ definitions:
         format: dynamic
         additionalProperties:
           field: type
-          types:
-            INTERVAL: integer
-            CRONTAB: crontab
           choices: {}
+          types:
+            CRONTAB: crontab
+            INTERVAL: integer
   OnePeriodictask:
     required:
       - schedule
@@ -11874,22 +11903,22 @@ definitions:
         format: dynamic
         additionalProperties:
           field: kind
-          types:
-            MODULE: autocomplete
-            PLAYBOOK: autocomplete
-            TEMPLATE: hidden
           choices: {}
+          types:
+            PLAYBOOK: autocomplete
+            MODULE: autocomplete
+            TEMPLATE: hidden
       inventory:
         title: Inventory
         type: string
         format: dynamic
         additionalProperties:
           field: kind
-          types:
-            MODULE: select2
-            PLAYBOOK: select2
-            TEMPLATE: hidden
           choices: {}
+          types:
+            PLAYBOOK: select2
+            MODULE: select2
+            TEMPLATE: hidden
       save_result:
         title: Save result
         type: boolean
@@ -11902,11 +11931,11 @@ definitions:
         format: dynamic
         additionalProperties:
           field: kind
-          types:
-            MODULE: hidden
-            PLAYBOOK: hidden
-            TEMPLATE: autocomplete
           choices: {}
+          types:
+            PLAYBOOK: hidden
+            MODULE: hidden
+            TEMPLATE: autocomplete
       enabled:
         title: Enabled
         type: boolean
@@ -11923,10 +11952,10 @@ definitions:
         format: dynamic
         additionalProperties:
           field: type
-          types:
-            INTERVAL: integer
-            CRONTAB: crontab
           choices: {}
+          types:
+            CRONTAB: crontab
+            INTERVAL: integer
       notes:
         title: Notes
         type: string
@@ -12073,6 +12102,7 @@ definitions:
       key:
         title: Key
         type: string
+        format: autocomplete
         enum:
           - repo_type
           - repo_sync_on_run
@@ -12085,17 +12115,17 @@ definitions:
         format: dynamic
         additionalProperties:
           field: key
-          types:
-            repo_key: secretfile
-            repo_password: password
           choices:
             repo_type:
-              - GIT
               - MANUAL
+              - GIT
               - TAR
             repo_sync_on_run:
               - true
               - false
+          types:
+            repo_password: password
+            repo_key: secretfile
   Team:
     required:
       - name
