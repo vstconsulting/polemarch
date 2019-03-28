@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 from datetime import timedelta
-from django.conf import settings
 from django.test import Client
 from django.contrib.auth.hashers import make_password
 from django.utils.timezone import now
@@ -64,7 +63,7 @@ class ApiUsersTestCase(ApiBaseTestCase):
 
     def test_is_active(self):
         client = self._login()
-        AUTH_PASSWORD_VALIDATORS = settings.AUTH_PASSWORD_VALIDATORS
+        AUTH_PASSWORD_VALIDATORS = self.settings_obj.AUTH_PASSWORD_VALIDATORS
         AUTH_PASSWORD_VALIDATORS[1]["OPTIONS"]["min_length"] = 5
         with self.settings(AUTH_PASSWORD_VALIDATORS=AUTH_PASSWORD_VALIDATORS):
             userdata = {"passwords": "ab",
@@ -224,8 +223,14 @@ class ApiUsersTestCase(ApiBaseTestCase):
         self.result(client.post, self.get_url('user'), 409, data)
         self._logout(client)
 
-    @patch('{}.main.hooks.http.Backend.execute'.format(settings.VST_PROJECT_LIB_NAME))
-    def test_api_users_insert_and_delete(self, execute_method):
+    def test_api_users_insert_and_delete(self):
+        patch_obj_pth = '{}.main.hooks.http.Backend.execute'.format(
+            self.settings_obj.VST_PROJECT_LIB_NAME
+        )
+        with patch(patch_obj_pth) as execute_method:
+            return self._test_api_users_insert_and_delete(execute_method)
+
+    def _test_api_users_insert_and_delete(self, execute_method):
         self.sended = False
         hook_url = 'http://ex.com'
         hook_data = dict(

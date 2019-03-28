@@ -13,7 +13,7 @@ from django.conf import settings
 from django.db.models import Q
 from django.core.validators import ValidationError
 from django.core.cache import caches
-from vstutils.utils import ModelHandlers, raise_context
+from vstutils.utils import ModelHandlers, raise_context, classproperty
 # pylint: disable=no-name-in-module
 from vstutils import custom_model
 from yaml import load
@@ -48,7 +48,6 @@ class ProjectQuerySet(AbstractVarsQuerySet):
 
 class Project(AbstractModel):
     # pylint: disable=too-many-public-methods
-    PROJECTS_DIR = getattr(settings, "PROJECTS_DIR")
     objects       = ProjectQuerySet.as_manager()
     repo_handlers = objects._queryset_class.repo_handlers
     task_handlers = objects._queryset_class.task_handlers
@@ -141,6 +140,10 @@ class Project(AbstractModel):
         'ERROR',
         'OK',
     ]
+
+    @classproperty
+    def PROJECTS_DIR(cls):
+        return getattr(settings, 'PROJECTS_DIR')
 
     def __unicode__(self):
         return str(self.name)  # pragma: no cover
@@ -257,7 +260,7 @@ class Project(AbstractModel):
         if self.path not in path:  # nocv
             raise ValidationError(dict(inventory="Inventory should be in project dir."))
 
-    def _prepare_kw(self, kind, mod_name, inventory, **extra):
+    def _prepare_kw(self, kind, mod_name, inventory=None, **extra):
         if not mod_name:  # nocv
             raise PMException("Empty playbook/module name.")
         history, extra = self.history.all().start(
