@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
+import os
 import re
+import time
+import signal
 import logging
 import traceback
 try:
@@ -14,9 +16,7 @@ import six
 from django.utils import timezone
 from vstutils.utils import tmp_file, KVExchanger, raise_context
 from .hosts import Inventory
-from ...main.utils import (
-    CmdExecutor, CalledProcessError, AnsibleArgumentsReference, PMObject
-)
+from ...main.utils import CmdExecutor, AnsibleArgumentsReference, PMObject
 
 
 logger = logging.getLogger("polemarch")
@@ -51,7 +51,7 @@ class DummyHistory(object):
     def get_hook_data(self, when):
         return None
 
-    def write_line(self, value, number, endl=''):
+    def write_line(self, value, number, endl=''):  # nocv
         # pylint: disable=unused-argument
         logger.info(value)
 
@@ -84,6 +84,14 @@ class Executor(CmdExecutor):
         if proc.poll() is None and self.exchanger.get() is not None:  # nocv
             self.write_output("\n[ERROR]: User interrupted execution")
             self.exchanger.delete()
+            for _ in range(5):
+                try:
+                    os.kill(proc.pid, signal.SIGINT)
+                except Exception:  # nocv
+                    break
+                proc.send_signal(signal.SIGINT)
+                time.sleep(5)
+            proc.terminate()
             proc.kill()
             proc.wait()
         super(Executor, self).working_handler(proc)
@@ -115,6 +123,7 @@ class AnsibleCommand(PMObject):
     status_codes = {
         4: "OFFLINE",
         -9: "INTERRUPTED",
+        -15: "INTERRUPTED",
         "other": "ERROR"
     }
 
@@ -288,7 +297,7 @@ class AnsibleCommand(PMObject):
 
     def error_handler(self, exception):
         default_code = self.status_codes["other"]
-        if isinstance(exception, CalledProcessError):  # nocv
+        if isinstance(exception, self.ExecutorClass.CalledProcessError):  # nocv
             self.history.raw_stdout = "{}".format(exception.output)
             self.history.status = self.status_codes.get(
                 exception.returncode, default_code
