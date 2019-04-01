@@ -221,9 +221,17 @@ class Project(AbstractModel):
             )
         return parsed_data
 
+    @property
+    def yaml_path(self):
+        return '/'.join([self.path, '.polemarch.yaml']).replace('//', '/')
+
+    @property
+    def yaml_path_exists(self):
+        return os.path.exists(self.yaml_path) and os.path.isfile(self.yaml_path)
+
     def get_yaml(self):
-        yaml_path = '/'.join([self.path, '.polemarch.yaml']).replace('//', '/')
-        if not (os.path.exists(yaml_path) and os.path.isfile(yaml_path)):
+        yaml_path = self.yaml_path
+        if not self.yaml_path_exists:
             return
         cache = self.get_yaml_subcache()
         cache_data = cache.get() or None
@@ -243,7 +251,7 @@ class Project(AbstractModel):
     @raise_context()
     def execute_view_data(self):
         cached_view_data = self.get_yaml_subcache('view').get()
-        if cached_view_data:
+        if cached_view_data and self.yaml_path_exists:
             return cached_view_data
         yaml_data = self.get_yaml() or {}
         view_data = yaml_data.get('view', None)
