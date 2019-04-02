@@ -142,9 +142,13 @@ If you want to use LDAP protocol, you should create next settings in section ``[
 
     ldap-server = ldap://server-ip-or-host:port
     ldap-default-domain = domain.name
+    ldap-auth_format = cn=<username>,ou=your-group-name,<domain>
 
 ldap-default-domain is an optional argument, that is aimed to make user authorization easier
 (without input of domain name).
+
+ldap-auth_format is an optional argument, that is aimed to customize LDAP authorization.
+Default value: cn=<username>,<domain>
 
 So in this case authorization logic will be the following:
 
