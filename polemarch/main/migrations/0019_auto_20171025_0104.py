@@ -61,32 +61,32 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='group',
             name='owner',
-            field=models.ForeignKey(related_name='polemarch_group_set', default=first_staff_user, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(related_name='polemarch_group_set', default=first_staff_user, to=settings.AUTH_USER_MODEL, on_delete=models.SET_DEFAULT),
         ),
         migrations.AddField(
             model_name='host',
             name='owner',
-            field=models.ForeignKey(related_name='polemarch_host_set', default=first_staff_user, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(related_name='polemarch_host_set', default=first_staff_user, to=settings.AUTH_USER_MODEL, on_delete=models.SET_DEFAULT),
         ),
         migrations.AddField(
             model_name='inventory',
             name='owner',
-            field=models.ForeignKey(related_name='polemarch_inventory_set', default=first_staff_user, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(related_name='polemarch_inventory_set', default=first_staff_user, to=settings.AUTH_USER_MODEL, on_delete=models.SET_DEFAULT),
         ),
         migrations.AddField(
             model_name='periodictask',
             name='owner',
-            field=models.ForeignKey(related_name='polemarch_periodictask_set', default=first_staff_user, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(related_name='polemarch_periodictask_set', default=first_staff_user, to=settings.AUTH_USER_MODEL, on_delete=models.SET_DEFAULT),
         ),
         migrations.AddField(
             model_name='project',
             name='owner',
-            field=models.ForeignKey(related_name='polemarch_project_set', default=first_staff_user, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(related_name='polemarch_project_set', default=first_staff_user, to=settings.AUTH_USER_MODEL, on_delete=models.SET_DEFAULT),
         ),
         migrations.AddField(
             model_name='template',
             name='owner',
-            field=models.ForeignKey(related_name='polemarch_template_set', default=first_staff_user, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(related_name='polemarch_template_set', default=first_staff_user, to=settings.AUTH_USER_MODEL, on_delete=models.SET_DEFAULT),
         ),
         migrations.AlterField(
             model_name='group',
@@ -101,17 +101,17 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='history',
             name='inventory',
-            field=models.ForeignKey(related_query_name='history', default=None, blank=True, to='main.Inventory', null=True),
+            field=models.ForeignKey(related_query_name='history', default=None, blank=True, to='main.Inventory', null=True, on_delete=models.SET_NULL),
         ),
         migrations.AlterField(
             model_name='history',
             name='project',
-            field=models.ForeignKey(related_query_name='history', to='main.Project', null=True),
+            field=models.ForeignKey(related_query_name='history', to='main.Project', null=True, on_delete=models.CASCADE),
         ),
         migrations.AlterField(
             model_name='historylines',
             name='history',
-            field=models.ForeignKey(related_query_name='raw_history_line', to='main.History'),
+            field=models.ForeignKey(related_query_name='raw_history_line', to='main.History', on_delete=models.CASCADE),
         ),
         migrations.AlterField(
             model_name='inventory',
@@ -126,12 +126,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='periodictask',
             name='inventory',
-            field=models.ForeignKey(related_query_name='periodic_tasks', to='main.Inventory'),
+            field=models.ForeignKey(related_query_name='periodic_tasks', to='main.Inventory', on_delete=models.SET_NULL),
         ),
         migrations.AlterField(
             model_name='periodictask',
             name='project',
-            field=models.ForeignKey(related_query_name='periodic_tasks', blank=True, to='main.Project', null=True),
+            field=models.ForeignKey(related_query_name='periodic_tasks', blank=True, to='main.Project', null=True, on_delete=models.CASCADE),
         ),
         migrations.AlterField(
             model_name='project',
@@ -151,7 +151,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='task',
             name='project',
-            field=models.ForeignKey(related_query_name='tasks', to='main.Project'),
+            field=models.ForeignKey(related_query_name='tasks', to='main.Project', on_delete=models.CASCADE),
         ),
         migrations.DeleteModel(
             name='TypesPermissions',
@@ -159,12 +159,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='aclpermission',
             name='uagroup',
-            field=models.ForeignKey(blank=True, to='auth.Group', null=True),
+            field=models.ForeignKey(blank=True, to='auth.Group', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='aclpermission',
             name='user',
-            field=models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='group',
