@@ -23,7 +23,7 @@ stages:
 ###########################################
 .branch_tests_template: &branch_tests
   stage: test
-  image: onegreyonewhite/tox:tox
+  image: onegreyonewhite/tox:ubuntu
   variables:
     TOX_ENVS: ""
   before_script:
