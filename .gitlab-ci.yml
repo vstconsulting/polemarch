@@ -107,10 +107,14 @@ code_style:
     - .pep8
   retry: 2
 
+# DEPRECATED! Will removed in next release.
 py27-install:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
+  only:
+    refs:
+      - master
 
 py36-coverage:
   <<: *branch_tests

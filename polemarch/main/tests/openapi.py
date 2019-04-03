@@ -1,8 +1,11 @@
+import six
 from unittest import skipUnless
 from django.conf import settings
 from ._base import BaseTestCase
 from ... import __version__
 import re
+
+skip_it = (settings.VST_PROJECT == 'polemarch' or six.PY2)
 
 
 class OApiTestCase(BaseTestCase):
@@ -22,7 +25,7 @@ class OApiTestCase(BaseTestCase):
         dict(name='offset', description=True, required=False, type='integer'),
     ]
 
-    @skipUnless(settings.VST_PROJECT == 'polemarch', 'Check only on CE.')
+    @skipUnless(skip_it, 'Check only on CE.')
     def test_openapi_schema(self):
         api_version = self._settings('VST_API_VERSION')
         api_path = self._settings('API_URL')
