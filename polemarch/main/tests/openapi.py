@@ -1082,7 +1082,8 @@ class OApiTestCase(BaseTestCase):
         self.check_fields(objName, team['required'], 'name')
         self.check_fields(objName, team['properties']['id'], **id_value)
         self.check_fields(
-            objName, team['properties']['name'], type='string', maxLength=80, minLength=1
+            objName, team['properties']['name'],
+            type='string', maxLength=150, minLength=1
         )
         del team
 
@@ -1093,7 +1094,7 @@ class OApiTestCase(BaseTestCase):
         self.check_fields(objName, oneTeam['properties']['id'], **id_value)
         self.check_fields(
             objName, oneTeam['properties']['name'],
-            type='string', minLength=1, maxLength=80
+            type='string', minLength=1, maxLength=150
         )
         self.check_fields(objName, oneTeam['properties']['notes'], **notes_value)
         ref = '#/definitions/User'
@@ -1119,7 +1120,7 @@ class OApiTestCase(BaseTestCase):
             objName, createUser['properties']['first_name'], type='string', maxLength=30
         )
         self.check_fields(
-            objName, createUser['properties']['last_name'], type='string', maxLength=30
+            objName, createUser['properties']['last_name'], type='string', maxLength=150
         )
         self.check_fields(
             objName, createUser['properties']['email'],
@@ -1153,7 +1154,7 @@ class OApiTestCase(BaseTestCase):
             objName, oneUser['properties']['first_name'], type='string', maxLength=30
         )
         self.check_fields(
-            objName, oneUser['properties']['last_name'], type='string', maxLength=30
+            objName, oneUser['properties']['last_name'], type='string', maxLength=150
         )
         self.check_fields(
             objName, oneUser['properties']['email'],
