@@ -55,31 +55,6 @@ stages:
       - .gitlab-ci.yml
   retry: 2
 
-.pack_tamplate: &packing-test
-  stage: packaging-test
-  image: onegreyonewhite/tox:tox
-  variables:
-    MYSQL_ROOT_PASSWORD: 'polemarch'
-    MYSQL_DATABASE: 'polemarch'
-    MYSQL_USER: 'polemarch'
-    MYSQL_PASSWORD: 'polemarch'
-  services:
-    - name: 'mariadb:latest'
-      alias: 'db-server'
-    - name: 'redis'
-      alias: 'redis-server'
-  artifacts:
-    name: "package($CI_BUILD_NAME)"
-    expire_in: 1 hour
-    paths:
-    - dist/
-  allow_failure: false
-  only:
-    - master
-    - issue_building
-  retry: 2
-
-
 # Branch tests
 ###########################################
 code_style:
@@ -135,62 +110,6 @@ master_coverage:
     refs:
       - master
 
-####################################################
-# DEPRECATED
-.rpm_tests_tamplate: &packing-test-rpm_tests
-  <<: *packing-test
-  image: onegreyonewhite/tox:centos
-  script:
-   - cat /etc/hosts
-   - tox ${TOX_ARGS} -c tox_build.ini -e py27-rpm RELEASE=${CI_BUILD_ID}
-   - sudo yum install dist/*.rpm -y -q
-   - sudo cat test_settings.ini > /etc/polemarch/settings.ini
-   - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
-   - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
-   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests --failfast
-
-
-.deb_tests_tamplate: &packing-test-deb_tests
-  <<: *packing-test
-  image: onegreyonewhite/tox:ubuntu
-  script:
-   - cat /etc/hosts
-   - tox ${TOX_ARGS} -c tox_build.ini -e py27-deb RELEASE=${CI_BUILD_ID} RELOCATE_BIN=/usr/local/bin/venvctrl-relocate
-   - echo "echo 'hello'" > /bin/systemctl
-   - sudo apt update
-   - sudo apt install ./dist/*.deb -y -q
-   - sudo cat test_settings.ini > /etc/polemarch/settings.ini
-   - sudo chown polemarch:polemarch /etc/polemarch/settings.ini
-   - sudo -H -u polemarch /opt/polemarch/bin/pip install -r requirements-test.txt
-   - sudo -H -u polemarch /opt/polemarch/bin/polemarchctl test -v2 polemarch.main.tests --failfast
-
-
-default_rpm_tests:
-  <<: *packing-test-rpm_tests
-
-
-default_deb_tests:
-  <<: *packing-test-deb_tests
-
-
-developer_rpm_tests:
-  <<: *packing-test-rpm_tests
-  stage: release
-  only:
-    refs:
-    - developer
-  when: manual
-  allow_failure: true
-
-developer_deb_tests:
-  <<: *packing-test-deb_tests
-  stage: release
-  only:
-    refs:
-    - developer
-  when: manual
-  allow_failure: true
-
 # Realese
 ###########################################
 pages:
@@ -233,38 +152,6 @@ publish_pypi:
   script:
   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz dist/*.whl
 
-# DEPRECATED
-#release_rpm:
-#  stage: release
-#  only:
-#    refs:
-#    - tags
-#    variables:
-#    - $PYPI_UPLOAD_PASSWORD
-#  script:
-#   - tox ${TOX_ARGS} -c tox_build.ini -e py27-rpm
-#  allow_failure: false
-#  artifacts:
-#    name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
-#    paths:
-#    - dist/
-
-# DEPRECATED
-#release_deb:
-#  stage: release
-#  only:
-#    refs:
-#    - tags
-#    variables:
-#    - $PYPI_UPLOAD_PASSWORD
-#  image: onegreyonewhite/tox:ubuntu
-#  script:
-#   - tox ${TOX_ARGS} -c tox_build.ini -e py27-deb
-#  allow_failure: false
-#  artifacts:
-#    name: "release-deb-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
-#    paths:
-#    - dist/
 
 publish_release:
   stage: publish

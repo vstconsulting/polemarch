@@ -1,5 +1,5 @@
 from .ansible import AnsibleTestCase
-from .utils import ExecutorTestCase, CMDExecutorTestCase, tmp_fileTestCase, ModelHandlerTestCase, TemplateCreateTestCase
+from .utils import TemplateCreateTestCase
 from .api import UsersTestCase
 from .hooks import HooksTestCase
 from .tasks import TasksTestCase, TestTaskError, TestRepoTask
