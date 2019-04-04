@@ -13,7 +13,7 @@ from django.conf import settings
 from django.db.models import Q
 from django.core.validators import ValidationError
 from django.core.cache import caches
-from vstutils.utils import ModelHandlers, raise_context
+from vstutils.utils import ModelHandlers, raise_context, classproperty
 # pylint: disable=no-name-in-module
 from vstutils import custom_model
 from yaml import load
@@ -48,7 +48,6 @@ class ProjectQuerySet(AbstractVarsQuerySet):
 
 class Project(AbstractModel):
     # pylint: disable=too-many-public-methods
-    PROJECTS_DIR = getattr(settings, "PROJECTS_DIR")
     objects       = ProjectQuerySet.as_manager()
     repo_handlers = objects._queryset_class.repo_handlers
     task_handlers = objects._queryset_class.task_handlers
@@ -142,6 +141,10 @@ class Project(AbstractModel):
         'OK',
     ]
 
+    @classproperty
+    def PROJECTS_DIR(cls):
+        return getattr(settings, 'PROJECTS_DIR')
+
     def __unicode__(self):
         return str(self.name)  # pragma: no cover
 
@@ -218,9 +221,17 @@ class Project(AbstractModel):
             )
         return parsed_data
 
+    @property
+    def yaml_path(self):
+        return '/'.join([self.path, '.polemarch.yaml']).replace('//', '/')
+
+    @property
+    def yaml_path_exists(self):
+        return os.path.exists(self.yaml_path) and os.path.isfile(self.yaml_path)
+
     def get_yaml(self):
-        yaml_path = '/'.join([self.path, '.polemarch.yaml']).replace('//', '/')
-        if not (os.path.exists(yaml_path) and os.path.isfile(yaml_path)):
+        yaml_path = self.yaml_path
+        if not self.yaml_path_exists:
             return
         cache = self.get_yaml_subcache()
         cache_data = cache.get() or None
@@ -240,7 +251,7 @@ class Project(AbstractModel):
     @raise_context()
     def execute_view_data(self):
         cached_view_data = self.get_yaml_subcache('view').get()
-        if cached_view_data:
+        if cached_view_data and self.yaml_path_exists:
             return cached_view_data
         yaml_data = self.get_yaml() or {}
         view_data = yaml_data.get('view', None)
@@ -257,7 +268,7 @@ class Project(AbstractModel):
         if self.path not in path:  # nocv
             raise ValidationError(dict(inventory="Inventory should be in project dir."))
 
-    def _prepare_kw(self, kind, mod_name, inventory, **extra):
+    def _prepare_kw(self, kind, mod_name, inventory=None, **extra):
         if not mod_name:  # nocv
             raise PMException("Empty playbook/module name.")
         history, extra = self.history.all().start(

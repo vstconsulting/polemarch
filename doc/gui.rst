@@ -165,8 +165,9 @@ to get all needed data from your GIT project.
 
 After your project's status has been changed into "OK" you can confidently start working with Polemarch.
 
-ATTENTION! If you update something in your GIT repository, don't forget to run sync in
-Polemarch for pulling your changes.
+.. warning::
+    If you update something in your GIT repository, don't forget to run sync in
+    Polemarch for pulling your changes.
 
 
 Project variables
@@ -200,8 +201,9 @@ After clicking on "edit" button you will see:
 
 Then you need to change branch name of 'value' field and click on "save" button.
 
-NOTE! If your need to choose branch with tag name
-you should use following format of branch name "``tags/[tag_name]``".
+.. note::
+    If your need to choose branch with tag name
+    you should use following format of branch name "``tags/[tag_name]``".
 
 After changing of **repo_branch** variable you need to sync your Polemarch project
 to get files from selected branch.
@@ -457,8 +459,9 @@ If you don't want to use 'inventory' as just list of hosts separated by ",",
 or do not have inventory file in you GIT project ("./inventory", for example),
 you need to create it in Polemarch.
 
-ATTENTION! Do not forget to add you inventory to project after it's creation.
-To do it click on "inventory" button on project page.
+.. warning::
+    Do not forget to add you inventory to project after it's creation.
+    To do it click on "inventory" button on project page.
 
 By inventory’s creation, in this case, we understand creation of inventory,
 which includes at least one group, which, in it’s turn, includes at least one host.

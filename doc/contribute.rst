@@ -116,7 +116,8 @@ Here is how to proceed:
 
 15. Create pull request and refer it in issue.
 
-**ATTENTION**: You must agree to :doc:`our contributor agreement </cla>` to
-prevent any license problems to project in future with your contribution.
+.. ATTENTION::
+    You must agree to :doc:`our contributor agreement </cla>` to
+    prevent any license problems to project in future with your contribution.
 
 That's it. Thank you for your contribution.

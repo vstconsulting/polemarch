@@ -44,56 +44,26 @@ to maintain reliability of your admin-panel and 4 servers with workers to
 prevent denial for service because of overloading. Then briefly (it is mostly
 example than general howto) you must do such steps:
 
-#. Install Polemarch from PyPI at every server with worker and web-server.
+#. Install Polemarch from PyPI at every server with worker and web-server by
+   :doc:`installation instructions </quickstart>`. We recommend to install virtual
+   environment in ``/opt/polemarch`` and set as owner user ``polemarch``
+   (need to be created).
 
-   .. sourcecode:: bash
-
-        pip install polemarch
-
-#. Setup DB-server. MariaDB for example. For all nodes edit :ref:`database`
-   and provide credential for you database. Like this:
-
-   .. sourcecode:: ini
-
-      [database]
-      engine = django.db.backends.mysql
-      name = mydatabase
-      user = root
-      password = mypassword
-      host = 127.0.0.1
-      port = 3306
-
-#. Setup cache-server. Redis, for example. Specify his credentials in
-   :ref:`locks` and :ref:`cache` for all nodes. Like this:
-
-   .. sourcecode:: ini
-
-      [cache]
-      backend = django_redis.cache.RedisCache
-      location = redis://redis_hostname_or_ip:6379/1
-
-      [locks]
-      backend = django_redis.cache.RedisCache
-      location = redis://redis_hostname_or_ip:6379/2
-
-#. Setup some network filesystem. NFS, for example. Mount it in the same directory
+#. Setup some network filesystem (NFS, Samba, GlusterFS, Ceph).
+   NFS, for example. Mount it in the same directory
    of all worker-intended nodes. Write this directory in :ref:`main`.
    Example:
 
    .. sourcecode:: ini
 
       [main]
-      projects_dir = /mnt/mynfs
+      projects_dir = /mnt/mystorage/projects
+      hooks_dir = /mnt/mystorage/hooks
 
 #. Setup some http-balancer. HAProxy, for example. Point it to web-intended
    nodes.
 
-#. Prepare default database structure (tables and so on) in your MySQL
-   database. Polemarch can do it for you with following command:
-
-   .. sourcecode:: bash
-
-      sudo -u polemarch /opt/bin/polemarchctl migrate
+    .. hint:: You can setup ssl for Polemarch endpoints in this step.
 
 #. Create polemarch systemd service:
 
@@ -107,20 +77,21 @@ example than general howto) you must do such steps:
 
            [Service]
            Type=forking
-           ExecStart=/opt/polemarch3/bin/polemarchctl webserver
-           ExecReload=/opt/polemarch3/bin/polemarchctl webserver reload=/var/run/polemarch/web.pid
-           ExecStop=/opt/polemarch3/bin/polemarchctl webserver stop=/var/run/polemarch/web.pid
-           PIDFile=/var/run/polemarch/web.pid
+           ExecStart=/opt/polemarch/bin/polemarchctl webserver
+           ExecReload=/opt/polemarch/bin/polemarchctl webserver reload=/opt/polemarch/run/polemarch/web.pid
+           ExecStop=/opt/polemarch/bin/polemarchctl webserver stop=/opt/polemarch/run/polemarch/web.pid
+           PIDFile=/opt/polemarch/run/polemarch/web.pid
            User=polemarch
            Group=polemarch
            KillSignal=SIGCONT
            Restart=always
 
            [Install]
-            WantedBy=multi-user.target
+           WantedBy=multi-user.target
 
-       Notice, that user and group 'polemarch' should exist in your system.
-       If they don't exist, create them.
+       .. note::
+            Notice, that user and group 'polemarch' should exist in your system.
+            If they don't exist, create them.
 
    #. Reload systemctl daemon:
 
@@ -140,6 +111,15 @@ example than general howto) you must do such steps:
        .. sourcecode:: bash
 
            systemctl start polemarch.service
+
+   #. Repeat all steps in other nodes and connect them to one DB, cache, MQ and storage.
+
+        .. note::
+            You don't need migrate database on each node. This need only once when
+            you install/update first node in cluster.
+
+        .. warning::
+            Don't forget to stop all Polemarch services when update polemarch package.
 
 That's it.
 
@@ -162,9 +142,13 @@ If you want to use LDAP protocol, you should create next settings in section ``[
 
     ldap-server = ldap://server-ip-or-host:port
     ldap-default-domain = domain.name
+    ldap-auth_format = cn=<username>,ou=your-group-name,<domain>
 
 ldap-default-domain is an optional argument, that is aimed to make user authorization easier
 (without input of domain name).
+
+ldap-auth_format is an optional argument, that is aimed to customize LDAP authorization.
+Default value: cn=<username>,<domain>
 
 So in this case authorization logic will be the following:
 
@@ -369,15 +353,23 @@ This section contains additional information for configure additional elements.
 
 #. If you need set ``https`` for your web settings, you can do it using HAProxy, Nginx or configure it in ``settings.ini``.
 
-   	.. sourcecode:: ini
+    .. sourcecode:: ini
 
-   		[uwsgi]
-   		https = 0.0.0.0:8443,foobar.crt,foobar.key
-   		addrport = 127.0.0.1:8080
+        [uwsgi]
+        https = 0.0.0.0:8443,foobar.crt,foobar.key
+        addrport = 127.0.0.1:8080
+
+#. We strictly do not recommend running the web server from root. Use HTTP proxy to run on privileged ports.
+
+
 
 Installation of additional packages to Polemarch
 ------------------------------------------------
-If you want to install some additional package to Polemarch from rpm or dep,
+
+.. warning::
+    .rpm or .dep installation methods are depracated.
+
+If you want to install some additional package to Polemarch from .rpm or .dep,
 you should run next command:
 
 .. sourcecode:: bash

@@ -1,19 +1,22 @@
-from collections import OrderedDict
-import tempfile
 import shutil
 import uuid
-import six
+import tempfile
+import logging
+from collections import OrderedDict
+from datetime import timedelta
+
 import git
 import requests
-from datetime import timedelta
-from django.utils.timezone import now
+import six
 from django.conf import settings
-from yaml import dump
+from django.utils.timezone import now
+from yaml import dump, load as from_yaml, Loader
+
 from ._base import BaseTestCase, os
 from ..tasks import ScheduledTask
 from ..unittests.ansible import inventory_data, valid_inventory
-from yaml import load as from_yaml, Loader
 
+logger = logging.getLogger('polemarch')
 pm_mod = settings.VST_PROJECT_LIB_NAME
 test_ansible_cfg = '''
 [defaults]

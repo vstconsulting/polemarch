@@ -4,7 +4,8 @@ from __future__ import unicode_literals
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User as BaseUser
-from vstutils.utils import import_class, classproperty
+from django.utils.module_loading import import_string
+from vstutils.utils import classproperty
 from vstutils.models import BQuerySet as _BQSet, BaseModel as _BM, Manager as _BManager
 
 
@@ -56,7 +57,7 @@ class BaseModel(_BM):
         handler_class_name = settings.ACL['MODEL_HANDLERS'].get(
             cls.__name__, settings.ACL['MODEL_HANDLERS'].get("Default")
         )
-        return import_class(handler_class_name)(cls, obj)
+        return import_string(handler_class_name)(cls, obj)
 
     @classproperty
     def acl_handler(self):
@@ -117,7 +118,7 @@ class ForeignKeyACLReverse(models.ForeignKey,
 class ACLModel(BModel):
     notes = models.TextField(default="")
     acl   = models.ManyToManyField("main.ACLPermission", blank=True, null=True)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_DEFAULT,
                               default=first_staff_user,
                               related_name="polemarch_%(class)s_set")
 

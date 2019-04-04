@@ -107,12 +107,16 @@ code_style:
     - .pep8
   retry: 2
 
+# DEPRECATED! Will removed in next release.
 py27-install:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
+  only:
+    refs:
+      - master
 
-py35-coverage:
+py36-coverage:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
@@ -135,6 +139,7 @@ master_coverage:
 # DEPRECATED
 .rpm_tests_tamplate: &packing-test-rpm_tests
   <<: *packing-test
+  image: onegreyonewhite/tox:centos
   script:
    - cat /etc/hosts
    - tox ${TOX_ARGS} -c tox_build.ini -e py27-rpm RELEASE=${CI_BUILD_ID}
@@ -219,7 +224,7 @@ release_pypi:
 
 publish_pypi:
   stage: publish
-  image: onegreyonewhite/tox:ubuntu
+  image: onegreyonewhite/tox:tox
   only:
     refs:
       - tags

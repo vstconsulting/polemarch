@@ -2,26 +2,23 @@
 from __future__ import unicode_literals
 
 import logging
-from subprocess import CalledProcessError, Popen, PIPE, STDOUT
-from threading import Thread
 
 import sys
-import os
 import re
 import json
 from os.path import dirname
-try:
-    from Queue import Queue
-except ImportError:  # nocv
-    from queue import Queue
 
 try:
     from yaml import CLoader as Loader, CDumper as Dumper, load, dump
 except ImportError:  # nocv
     from yaml import Loader, Dumper, load, dump
 
-from vstutils.utils import raise_context
-from vstutils.utils import tmp_file_context
+from vstutils.utils import (
+    tmp_file_context,
+    BaseVstObject,
+    Executor,
+    UnhandledExecutor
+)
 
 from . import __file__ as file
 
@@ -31,17 +28,16 @@ ON_POSIX = 'posix' in sys.builtin_module_names
 
 
 def project_path():
-    '''
+    """
     Get full system path to polemarch project
 
     :return: -- string with full system path
     :rtype: str
-    '''
+    """
     return dirname(dirname(file))  # nocv
 
 
-class PMObject(object):
-    __slots__ = '__pm_ansible__', '__django_settings__'
+class PMObject(BaseVstObject):
 
     def pm_ansible(self, *args):
         # pylint: disable=access-member-before-definition
@@ -50,111 +46,16 @@ class PMObject(object):
         self.__pm_ansible__ = self.get_django_settings('EXECUTOR')
         return self.pm_ansible(*args)
 
-    def get_django_settings(self, name, default=None):
-        # pylint: disable=access-member-before-definition
-        if hasattr(self, '__django_settings__'):
-            return getattr(self.__django_settings__, name, default)
-        from django.conf import settings
-        self.__django_settings__ = settings
-        return self.get_django_settings(name)
 
-
-class CmdExecutor(PMObject):
+class CmdExecutor(Executor, PMObject):
     # pylint: disable=no-member
-    '''
+    """
     Command executor with realtime output write
-    '''
-    __slots__ = 'output', '_stdout', '_stderr', 'env'
-
-    CANCEL_PREFIX = "CANCEL_EXECUTE_"
-    newlines = ['\n', '\r\n', '\r']
-
-    def __init__(self, stdout=PIPE, stderr=STDOUT):
-        '''
-
-        :type stdout: BinaryIO,int
-        :type stderr: BinaryIO,int
-        '''
-        self.output = ''
-        self._stdout = stdout
-        self._stderr = stderr
-        self.env = {}
-
-    def write_output(self, line):
-        '''
-        :param line: -- line from command output
-        :type line: str
-        :return: None
-        :rtype: None
-        '''
-        self.output += str(line)
-
-    def _enqueue_output(self, out, queue):
-        try:
-            for line in iter(out.readline, ""):
-                queue.put(line)
-        finally:
-            out.close()
-
-    def working_handler(self, proc):
-        # pylint: disable=unused-argument
-        '''
-        Additional handler for executions.
-
-        :type proc: subprocess.Popen
-        '''
-
-    def _unbuffered(self, proc, stream='stdout'):
-        stream = getattr(proc, stream)
-        queue = Queue()
-        t = Thread(target=self._enqueue_output, args=(stream, queue))
-        t.start()
-        while True:
-            try:
-                self.working_handler(proc)
-                yield queue.get(timeout=0.001).rstrip()
-            except:
-                if queue.empty() and stream.closed:
-                    break
-
-    def line_handler(self, proc, line):
-        # pylint: disable=unused-argument
-        if line is not None:
-            with raise_context():
-                self.write_output(line)
-
-    def execute(self, cmd, cwd):
-        '''
-        Execute commands and output this
-
-        :param cmd: -- list of cmd command and arguments
-        :type cmd: list
-        :param cwd: -- workdir for executions
-        :type cwd: str
-        :return: -- string with full output
-        :rtype: str
-        '''
-        self.output = ""
-        env = os.environ.copy()
-        env.update(self.env)
-        proc = Popen(
-            cmd, stdout=self._stdout, stderr=self._stderr,
-            bufsize=0, universal_newlines=True,
-            cwd=cwd, env=env,
-            close_fds=ON_POSIX
-        )
-        for line in self._unbuffered(proc):
-            if self.line_handler(proc, line):
-                break  # nocv
-        return_code = proc.poll()
-        if return_code:
-            logger.error(self.output)
-            raise CalledProcessError(return_code, cmd, output=self.output)
-        return self.output
+    """
 
 
 class task(object):
-    ''' Decorator for Celery task classes
+    """ Decorator for Celery task classes
 
     **Examples**:
 
@@ -171,7 +72,7 @@ class task(object):
                 class SomeTask2(BaseTask):
                     def run(self):
                         return "Result of task"
-    '''
+    """
     __slots__ = 'app', 'args', 'kwargs'
 
     def __init__(self, app, *args, **kwargs):
@@ -203,12 +104,12 @@ class BaseTask(PMObject):
     __slots__ = 'app', 'args', 'kwargs', 'task_class'
 
     def __init__(self, app, *args, **kwargs):
-        '''
+        """
         :param app: -- CeleryApp object
         :type app: celery.Celery
         :param args: -- any args for tasks
         :param kwargs: -- any kwargs for tasks
-        '''
+        """
         super(BaseTask, self).__init__()
         self.app = app
         self.args, self.kwargs = args, kwargs
@@ -229,13 +130,9 @@ class SubCacheInterface(PMObject):
     cache_name = "subcache"
 
     def __init__(self, prefix, timeout=86400*7):
-        from django.core.cache import caches, InvalidCacheBackendError
         self.prefix = prefix
         self.timeout = timeout
-        try:
-            self.cache = caches[self.cache_name]
-        except InvalidCacheBackendError:
-            self.cache = caches["default"]
+        self.cache = self.get_django_cache(self.cache_name)
 
     @property
     def key(self):
@@ -287,10 +184,9 @@ class PMAnsible(PMObject):
         cache = self.get_ansible_cache()
         result = cache.get()
         if result is None:
-            with open(os.devnull, 'wb') as DEVNULL:
-                cmd = CmdExecutor(stderr=DEVNULL)
-                cmd_command = self.get_args()
-                cmd.execute(cmd_command, self.execute_path)
+            cmd = UnhandledExecutor(stderr=UnhandledExecutor.DEVNULL)
+            cmd_command = self.get_args()
+            cmd.execute(cmd_command, self.execute_path)
             result = self._get_only_json(cmd.output)
             cache.set(result)
         return result
@@ -374,6 +270,7 @@ class AnsibleModules(PMAnsible):
 
     def get_args(self):  # nocv
         cmd = super(AnsibleModules, self).get_args()
+        cmd += ['--cachedir', 'NoCache']
         if self.detailed:
             cmd += ['--detail']
         if self.key:
