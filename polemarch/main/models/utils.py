@@ -191,8 +191,7 @@ class AnsibleCommand(PMObject):
         # pylint: disable=unused-argument,
         if "BEGIN RSA PRIVATE KEY" in value:
             return self.__generate_arg_file(value)
-        else:
-            return "{}/{}".format(self.workdir, value), []
+        return "{}/{}".format(self.workdir, value), []
 
     def __convert_arg(self, ansible_extra, item):
         extra_args, files = ansible_extra
@@ -296,6 +295,7 @@ class AnsibleCommand(PMObject):
         return dict(cwd=self.workdir)
 
     def error_handler(self, exception):
+        # pylint: disable=no-else-return
         default_code = self.status_codes["other"]
         if isinstance(exception, self.ExecutorClass.CalledProcessError):  # nocv
             self.history.raw_stdout = "{}".format(exception.output)

@@ -1,5 +1,6 @@
 # pylint: disable=no-member,unused-argument,too-many-lines
 from __future__ import unicode_literals
+from typing import Dict, List
 import json
 import uuid
 try:
@@ -45,10 +46,7 @@ class DictField(serializers.CharField):
     def to_internal_value(self, data):  # nocv
         return (
             data
-            if (
-                    isinstance(data, (six.string_types, six.text_type)) or
-                    isinstance(data, (dict, list))
-            )
+            if isinstance(data, (six.string_types, six.text_type, dict, list))
             else self.fail("Unknown type.")
         )
 
@@ -140,16 +138,16 @@ class SetOwnerSerializer(DataSerializer):
         self.instance.acl_handler.set_owner(user)
         return user
 
-    def get_user(self, validated_data):
+    def get_user(self, validated_data: dict):
         return User.objects.get(**validated_data)
 
-    def current_user(self):
+    def current_user(self) -> User:
         return self.context['request'].user
 
-    def to_representation(self, value):
+    def to_representation(self, value: User):
         return dict(user_id=value.id)
 
-    def to_internal_value(self, data):
+    def to_internal_value(self, data: dict):
         return dict(pk=data['user_id'])
 
 
@@ -167,7 +165,7 @@ class ChangePasswordSerializer(DataSerializer):
         instance.save()
         return instance
 
-    def to_representation(self, value):
+    def to_representation(self, value) -> Dict[str, str]:
         return dict(
             old_password='***',
             password='***',
@@ -177,7 +175,7 @@ class ChangePasswordSerializer(DataSerializer):
 
 class _SignalSerializer(serializers.ModelSerializer):
     @cached_property
-    def _writable_fields(self):
+    def _writable_fields(self) -> List:
         writable_fields = super(_SignalSerializer, self)._writable_fields
         fields = []
         attrs = [
@@ -214,7 +212,7 @@ class _WithPermissionsSerializer(_SignalSerializer):
             )
         return result
 
-    def current_user(self):
+    def current_user(self) -> User:
         return self.context['request'].user  # nocv
 
 
@@ -247,7 +245,7 @@ class CreateUserSerializer(OneUserSerializer):
     class Meta(OneUserSerializer.Meta):
         fields = list(OneUserSerializer.Meta.fields) + ['password', 'password2']
 
-    def run_validation(self, data=serializers.empty):
+    def run_validation(self, data=serializers.empty) -> Dict:
         validated_data = super(CreateUserSerializer, self).run_validation(data)
         if validated_data['password'] != validated_data.pop('password2', None):
             raise exceptions.ValidationError('Passwords do not match.')
@@ -438,7 +436,7 @@ class VariableSerializer(_SignalSerializer):
         if instance.key in getattr(instance.content_object, 'HIDDEN_VARS', []):
             result['value'] = "[~~ENCRYPTED~~]"
         elif instance.key in getattr(instance.content_object, 'BOOLEAN_VARS', []):
-            result['value'] = True if instance.value == 'True' else False
+            result['value'] = instance.value == 'True'
         return result
 
 
@@ -657,7 +655,7 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
                   'schedule',
                   'notes',)
 
-    def execute(self):
+    def execute(self) -> Response:
         inventory = self.instance.inventory
         rdata = ExecuteResponseSerializer(data=dict(
             detail="Started at inventory {}.".format(inventory),
@@ -710,7 +708,7 @@ class TemplateSerializer(_WithVariablesSerializer):
         for name, rep in data.get('options', {}).items():
             data['options'][name] = self.set_opts_vars(rep, hv)
 
-    def to_representation(self, instance):
+    def to_representation(self, instance, hidden_vars=None) -> OrderedDict:
         data = OrderedDict()
         if instance.kind in ["Task", "Module"]:
             hidden_vars = models.PeriodicTask.HIDDEN_VARS
@@ -1077,7 +1075,6 @@ def generate_fileds(ansible_reference, ansible_type):
 
 
 class AnsibleSerializerMetaclass(serializers.SerializerMetaclass):
-    # pylint: disable=super-on-old-class
     @staticmethod
     def __new__(cls, name, bases, attrs):
         ansible_reference = attrs.get('ansible_reference', None)
@@ -1167,7 +1164,7 @@ class InventoryImportSerializer(DataSerializer):
             created_hosts[inv_host.name] = inv_host
 
         for group in inv_json['groups']:
-            children = False if len(group['groups']) == 0 else True
+            children = not len(group['groups']) == 0
             inv_group = inventory.groups.create(name=group['name'], children=children)
             inv_group.vars = group['vars']
             created_groups[inv_group.name] = inv_group

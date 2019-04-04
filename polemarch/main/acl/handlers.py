@@ -1,6 +1,6 @@
 
 
-class Default(object):
+class Default:
     # pylint: disable=unused-argument
     qs_methods = []
 

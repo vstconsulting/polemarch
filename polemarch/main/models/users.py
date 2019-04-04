@@ -25,8 +25,7 @@ class ACLPermission(BModel):
         # pylint: disable=no-member
         if self.user is not None:
             return self.user.id
-        else:
-            return self.uagroup.id
+        return self.uagroup.id
 
     @member.setter
     def member(self, value):  # nocv
@@ -36,8 +35,7 @@ class ACLPermission(BModel):
     def member_type(self):  # noce
         if self.user is not None:
             return "user"
-        else:
-            return "team"
+        return "team"
 
     @member_type.setter
     def member_type(self, value):  # nocv
@@ -48,9 +46,6 @@ class UserGroup(BaseGroup, ACLModel):
     objects = BQuerySet.as_manager()
     parent = models.OneToOneField(BaseGroup, on_delete=models.CASCADE, parent_link=True)
     users = BaseGroup.user_set
-
-    def __unicode__(self):  # nocv
-        return super(UserGroup, self).__unicode__()
 
 
 class UserSettings(BModel):

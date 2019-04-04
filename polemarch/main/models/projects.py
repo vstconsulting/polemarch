@@ -143,6 +143,7 @@ class Project(AbstractModel):
 
     @classproperty
     def PROJECTS_DIR(cls):
+        # pylint: disable=invalid-name
         return getattr(settings, 'PROJECTS_DIR')
 
     def __unicode__(self):
@@ -232,7 +233,7 @@ class Project(AbstractModel):
     def get_yaml(self):
         yaml_path = self.yaml_path
         if not self.yaml_path_exists:
-            return
+            return None
         cache = self.get_yaml_subcache()
         cache_data = cache.get() or None
         if cache_data:

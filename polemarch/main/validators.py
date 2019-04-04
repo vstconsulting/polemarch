@@ -13,7 +13,7 @@ class URLValidator(OldURLValidator):
 
 
 class DomainNameValidator(RegexValidator):
-    message = _('Ivalid domain name value.')
+    message = _('Invalid domain name value.')
     surl = URLValidator.ul
     ipv4_re = URLValidator.ipv4_re
     ipv6_re = URLValidator.ipv6_re

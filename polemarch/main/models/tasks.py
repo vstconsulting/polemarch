@@ -119,8 +119,7 @@ class Template(ACLModel):
             return json.loads(value)  # nocv
         elif isinstance(value, (dict, OrderedDict, list)):
             return value
-        else:
-            raise ValueError("Unknown data type set.")  # nocv
+        raise ValueError("Unknown data type set.")  # nocv
 
     def __encrypt(self, new_vars, data_name='data'):
         old_vars = getattr(self, data_name).get('vars', {})
@@ -434,8 +433,7 @@ class History(BModel):
     def execution_time(self):
         if self.stop_time is None:
             return self._get_seconds_from_time(now() - self.start_time)  # nocv
-        else:
-            return self._get_seconds_from_time(self.stop_time - self.start_time)
+        return self._get_seconds_from_time(self.stop_time - self.start_time)
 
     @property
     def execute_args(self):
@@ -470,8 +468,7 @@ class History(BModel):
             return PeriodicTask.objects.get(id=self.initiator)
         elif self.initiator_type == "template" and self.initiator:
             return Template.objects.get(id=self.initiator)
-        else:
-            return None
+        return None
 
     @property
     def facts(self):

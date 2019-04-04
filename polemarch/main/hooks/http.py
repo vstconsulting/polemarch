@@ -8,7 +8,7 @@ logger = logging.getLogger("polemarch")
 
 
 class Backend(BaseHook):
-    def execute(self, url, when, message):
+    def execute(self, url, when, message) -> str:
         data = dict(type=when, payload=message)
         try:
             response = requests.post(url, data=data)

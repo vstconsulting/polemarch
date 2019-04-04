@@ -109,9 +109,7 @@ def make_extensions(extensions_list, packages):
     ext_count = len(ext_modules)
     nthreads = ext_count if ext_count < 10 else 10
 
-    language_level = 2
-    if 'bdist_wheel' in sys.argv and sys.version_info.major == 3:
-        language_level = 3
+    language_level = 3
     if is_help:
         pass
     elif has_cython and ('compile' in sys.argv or 'bdist_wheel' in sys.argv):
@@ -356,7 +354,8 @@ kwargs = dict(
     ] + load_requirements('requirements-git.txt', os.getcwd()),
     project_urls={
         "Issue Tracker": "https://gitlab.com/vstconsulting/polemarch/issues",
-        "Documentation": "http://polemarch.readthedocs.io/",
+        "Documentation": "http://about.polemarch.org/",
+        "Web site": "https://about.polemarch.org/",
         "Source Code": "https://gitlab.com/vstconsulting/polemarch",
         "Releases": "https://github.com/vstconsulting/polemarch/releases",
         "Docker": "https://hub.docker.com/r/vstconsulting/polemarch/",
