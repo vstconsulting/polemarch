@@ -1,6 +1,7 @@
 from typing import Type
 from django.db.models import Model
 
+
 class Default:
     # pylint: disable=unused-argument
     qs_methods = []
