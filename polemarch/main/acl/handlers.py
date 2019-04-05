@@ -1,4 +1,5 @@
-
+from typing import Type
+from django.db.models import Model
 
 class Default:
     # pylint: disable=unused-argument
@@ -6,7 +7,7 @@ class Default:
 
     def __init__(self, model=None, instance=None):
         self.instance = instance
-        self.model = model
+        self.model = model  # type: Type[Model]
 
     def set_owner(self, user):
         '''
