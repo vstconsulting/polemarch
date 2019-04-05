@@ -9,7 +9,7 @@ except:  # nocv
     warnings.warn("Git is not installed or have problems.")
 from ._base import _Base, os
 
-ENV_VARS_TYPE =  Dict[Text, Union[Text, bool]]
+ENV_VARS_TYPE =  Dict[Text, Union[Text, bool]]  # pylint: disable=invalid-name
 
 
 class _VCS(_Base):  # nocv

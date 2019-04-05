@@ -87,7 +87,7 @@ py36-coverage:
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
 
-py36-install:
+py35-install:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
