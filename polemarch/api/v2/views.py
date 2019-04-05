@@ -1,8 +1,5 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
-try:
-    from ruamel.ordereddict import ordereddict as OrderedDict
-except ImportError:  # nocv
-    from collections import OrderedDict
+from collections import OrderedDict
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from rest_framework import exceptions as excepts, status, permissions
@@ -390,12 +387,8 @@ class _BaseGroupViewSet(OwnedView, base.ModelViewSetSet):
     }
 
 
-@deco.nested_view(
-    'host', 'id', manager_name='hosts', allow_append=yes, view=HostViewSet
-)
-@deco.nested_view(
-    'group', 'id', manager_name='groups', allow_append=yes, view=_BaseGroupViewSet
-)
+@deco.nested_view('host', 'id', manager_name='hosts', allow_append=yes, view=HostViewSet)
+@deco.nested_view('group', 'id', manager_name='groups', allow_append=yes, view=_BaseGroupViewSet)
 class _GroupMixin(OwnedView, _VariablesCopyMixin):
     '''
     Instance with groups and hosts.
@@ -570,10 +563,7 @@ class __ProjectHistoryViewSet(HistoryViewSet):
     serializer_class = sers.ProjectHistorySerializer
 
 
-@deco.nested_view(
-    'inventory', 'id', manager_name='inventories',
-    allow_append=yes, view=InventoryViewSet
-)
+@deco.nested_view('inventory', 'id', manager_name='inventories', allow_append=yes, view=InventoryViewSet)
 @deco.nested_view('playbook', 'id', view=__PlaybookViewSet, methods=['get'])
 @deco.nested_view('module', 'id', view=__ModuleViewSet, methods=['get'])
 @deco.nested_view('template', 'id', manager_name='template', view=__TemplateViewSet)
@@ -728,4 +718,4 @@ class StatisticViewSet(base.ListNonModelViewSet):
 
 
 class BulkViewSet(views.BulkViewSet):
-    pass
+    __doc__ = views.BulkViewSet.__doc__

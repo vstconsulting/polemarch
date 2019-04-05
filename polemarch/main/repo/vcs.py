@@ -1,6 +1,6 @@
 # pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Text, Union, Any
 import warnings
 from vstutils.utils import tmp_file_context, raise_context
 try:
@@ -8,6 +8,8 @@ try:
 except:  # nocv
     warnings.warn("Git is not installed or have problems.")
 from ._base import _Base, os
+
+ENV_VARS_TYPE =  Dict[Text, Union[Text, bool]]
 
 
 class _VCS(_Base):  # nocv
@@ -55,7 +57,7 @@ class Git(_VCS):
         return repo
 
     @raise_context()
-    def _fetch_from_remote(self, repo: git.Repo, env: Dict):
+    def _fetch_from_remote(self, repo: git.Repo, env: ENV_VARS_TYPE):
         with repo.git.custom_environment(**env):
             kwargs = self.options.get("FETCH_KWARGS", dict())
             fetch_method = repo.git.fetch
@@ -78,7 +80,7 @@ class Git(_VCS):
                 else:
                     sm.update(init=True)
 
-    def vcs_update(self, repo: git.Repo, env: Dict):
+    def vcs_update(self, repo: git.Repo, env: ENV_VARS_TYPE):
         fetch_result = self._fetch_from_remote(repo, env)
         return fetch_result
 
@@ -95,7 +97,7 @@ class Git(_VCS):
             reponame = repo.active_branch.name
         return reponame
 
-    def make_clone(self, env: Dict) -> Tuple[git.Repo, None]:
+    def make_clone(self, env: ENV_VARS_TYPE) -> Tuple[git.Repo, None]:
         kw = dict(**self.options.get("CLONE_KWARGS", dict()))
         if self.target_branch:
             kw['branch'] = self.target_branch.replace('tags/', '')
@@ -106,7 +108,7 @@ class Git(_VCS):
             )
         return repo, None
 
-    def _get_or_create_repo(self, env: Dict) -> git.Repo:
+    def _get_or_create_repo(self, env: ENV_VARS_TYPE) -> git.Repo:
         try:
             repo = self.get_repo()
             branch = self.target_branch
@@ -120,7 +122,7 @@ class Git(_VCS):
             repo = self.make_clone(env)[0]
         return repo
 
-    def make_update(self, env: Dict) -> Tuple[git.Repo, object]:
+    def make_update(self, env: ENV_VARS_TYPE) -> Tuple[git.Repo, Any]:
         repo = self._get_or_create_repo(env)
         results = repo, self.vcs_update(repo, env)
         with raise_context():
@@ -134,7 +136,7 @@ class Git(_VCS):
         repo = self.get_repo()
         return repo.head.object.hexsha
 
-    def _with_password(self, tmp, env_vars: Dict):
+    def _with_password(self, tmp, env_vars: ENV_VARS_TYPE) -> ENV_VARS_TYPE:
         env_vars.update(self.env.get("PASSWORD", dict()))
         tmp.write("echo '{}'".format(self.proj.vars["repo_password"]))
         os.chmod(tmp.name, 0o700)
@@ -142,7 +144,7 @@ class Git(_VCS):
         tmp.close()
         return env_vars
 
-    def _with_key(self, tmp, env_vars: Dict):
+    def _with_key(self, tmp, env_vars: Dict) -> ENV_VARS_TYPE:
         env_vars.update(self.env.get("KEY", dict()))
         tmp.write(self.proj.vars["repo_key"])
         tmp.close()
@@ -170,7 +172,7 @@ class Git(_VCS):
             for res in super(Git, self).get()[1]
         }
 
-    def revision(self):
+    def revision(self) -> Text:
         try:
             return self._operate(self.get_revision)
         except git.GitError:

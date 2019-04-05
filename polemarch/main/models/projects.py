@@ -1,7 +1,7 @@
 # pylint: disable=protected-access,no-member,unused-argument
 from __future__ import unicode_literals
 
-from typing import Any, Dict, List, Tuple, Iterable, NoReturn, TypeVar
+from typing import Any, Dict, List, Tuple, Iterable, NoReturn, TypeVar, Text
 import os
 import logging
 import traceback
@@ -149,21 +149,21 @@ class Project(AbstractModel):
     ]
 
     @classproperty
-    def PROJECTS_DIR(cls) -> str:
+    def PROJECTS_DIR(cls) -> Text:
         # pylint: disable=invalid-name
         return getattr(settings, 'PROJECTS_DIR')
 
     def __unicode__(self):
         return str(self.name)  # pragma: no cover
 
-    def get_hook_data(self, when: str) -> Dict:
+    def get_hook_data(self, when: Text) -> Dict:
         data = super(Project, self).get_hook_data(when)
         data['type'] = self.type
         data['repository'] = self.repository
         return data
 
     @property
-    def path(self) -> str:
+    def path(self) -> Text:
         project_dir = (
             self.PROJECTS_DIR
             if not self.hidden
@@ -177,21 +177,21 @@ class Project(AbstractModel):
         return self.repo_handlers(repo_type, self)
 
     @property
-    def env_vars(self) -> Dict[str, Any]:
+    def env_vars(self) -> Dict[Text, Any]:
         env_var_list = dict()
         for var_obj in self.variables.filter(key__startswith='env_'):
             env_var_list[var_obj.key[4:]] = var_obj.value
         return env_var_list
 
     @property
-    def type(self) -> str:
+    def type(self) -> Text:
         try:
             return self.variables.get(key="repo_type").value
         except self.variables.model.DoesNotExist:  # nocv
             return 'MANUAL'
 
     @property
-    def config(self) -> Dict[str, Any]:
+    def config(self) -> Dict[Text, Any]:
         return self.get_ansible_config_parser().get_data()
 
     def get_ansible_config_parser(self) -> AnsibleConfigParser:
@@ -199,10 +199,10 @@ class Project(AbstractModel):
             self.config_parser = AnsibleConfigParser(self.path)
         return self.config_parser
 
-    def get_yaml_subcache(self, suffix: str = '') -> SubCacheInterface:
+    def get_yaml_subcache(self, suffix: Text = '') -> SubCacheInterface:
         return SubCacheInterface(''.join(['project', str(self.id), suffix]))
 
-    def __parse_yaml_view(self, data: Dict[str, Any]) -> Dict[str, Dict]:
+    def __parse_yaml_view(self, data: Dict[Text, Any]) -> Dict[Text, Dict]:
         valid_formats = self.PM_YAML_FORMATS
         parsed_data = dict(fields=dict(), playbooks=dict())
         # Parse fields
@@ -230,14 +230,14 @@ class Project(AbstractModel):
         return parsed_data
 
     @property
-    def yaml_path(self) -> str:
+    def yaml_path(self) -> Text:
         return '/'.join([self.path, '.polemarch.yaml']).replace('//', '/')
 
     @property
     def yaml_path_exists(self) -> bool:
         return os.path.exists(self.yaml_path) and os.path.isfile(self.yaml_path)
 
-    def get_yaml(self) -> Dict[str, Any]:
+    def get_yaml(self) -> Dict[Text, Any]:
         yaml_path = self.yaml_path
         if not self.yaml_path_exists:
             return {}

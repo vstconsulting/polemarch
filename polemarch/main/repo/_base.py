@@ -1,6 +1,6 @@
 # pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
-
+from typing import Any, Text, Dict, List, Tuple, Union, Iterable, Callable, TypeVar, NoReturn
 import os
 import re
 import shutil
@@ -11,8 +11,11 @@ from six.moves.urllib.request import urlretrieve
 from django.db import transaction
 from vstutils.utils import raise_context
 from ..utils import AnsibleModules
+from ..models.projects import Project
+from ..models.tasks import Template
 
 logger = logging.getLogger("polemarch")
+FILENAME = TypeVar('FILENAME', Text, str)
 
 
 class _Base(object):
@@ -20,16 +23,16 @@ class _Base(object):
 
     regex = r"(^[\w\d\.\-_]{1,})\.yml"
 
-    def __init__(self, project, **options):
+    def __init__(self, project: Project, **options):
         self.options = options
         self.proj = project
         self.path = self.proj.path
 
-    def _set_status(self, status):
+    def _set_status(self, status) -> NoReturn:
         self.proj.set_status(status)
 
     @raise_context()
-    def _load_yaml(self):
+    def _load_yaml(self) -> Dict[Text, Any]:
         '''
         Loading `.polemarch.yaml` data.
 
@@ -39,18 +42,18 @@ class _Base(object):
         self.proj.get_yaml_subcache().clear()
         return self.proj.get_yaml()
 
-    def _path_exists(self, path):
+    def _path_exists(self, path: Text) -> bool:
         return os.path.exists(path)
 
-    def _dir_exists(self, path_dir):
+    def _dir_exists(self, path_dir: Text) -> bool:
         return self._path_exists(path_dir) and os.path.isdir(path_dir)
 
-    def message(self, message, level='debug'):
+    def message(self, message: Any, level: Text = 'debug') -> NoReturn:
         getattr(logger, level.lower(), logger.debug)(
             'Syncing project [{}] - {}'.format(self.proj.id, message)
         )
 
-    def pm_handle_sync_on_run(self, feature, data):
+    def pm_handle_sync_on_run(self, feature: Text, data: bool) -> NoReturn:
         '''
         Set sync_on_run if it is setted in `.polemarch.yaml`.
 
@@ -66,7 +69,7 @@ class _Base(object):
         )
 
     @raise_context()
-    def __create_template(self, template_name, template_data):
+    def __create_template(self, template_name: Text, template_data: Dict) -> Template:
         '''
         Creates one template from `.polemarch.yaml`.
 
@@ -77,7 +80,7 @@ class _Base(object):
         self.message('Loading template[{}] into the project.'.format(template_name))
         return self.proj.template.create(name=template_name, **template_data)
 
-    def pm_handle_templates(self, feature, data):
+    def pm_handle_templates(self, feature: Text, data: Dict) -> NoReturn:
         '''
         Get and create (if is not existed) templates from `.polemarch.yaml`.
 
@@ -94,7 +97,7 @@ class _Base(object):
                 continue
             self.__create_template(template_name, template_data)
 
-    def pm_handle_view(self, feature, data):
+    def pm_handle_view(self, feature: Text, data: Dict) -> NoReturn:
         '''
         Clear view data from cache
 
@@ -105,14 +108,14 @@ class _Base(object):
         self.proj.get_yaml_subcache('view').clear()
         self.message(self.proj.execute_view_data, 'debug')
 
-    def pm_handle_unknown(self, feature, data):  # nocv
+    def pm_handle_unknown(self, feature: Text, data: Any) -> NoReturn:  # nocv
         '''
         Logging unknowing data from `.polemarch.yaml`.
         '''
         self.message('{} - this feature is not realised yet.'.format(feature), 'info')
         logger.debug(str(data))
 
-    def _handle_yaml(self, data):
+    def _handle_yaml(self, data: Union[Dict, None]) -> NoReturn:
         """
         Loads and returns data from `.polemarch.yaml` file
 
@@ -125,7 +128,7 @@ class _Base(object):
             feature_name = 'pm_handle_{}'.format(feature)
             getattr(self, feature_name, self.pm_handle_unknown)(feature, data)
 
-    def _set_tasks_list(self, playbooks_names):
+    def _set_tasks_list(self, playbooks_names: Iterable[Text]) -> NoReturn:
         """
         Updates playbooks in project.
 
@@ -145,7 +148,7 @@ class _Base(object):
         )
         PlaybookModel.objects.bulk_create(playbook_objects) if playbook_objects else None
 
-    def __get_project_modules(self, module_path):
+    def __get_project_modules(self, module_path: Iterable[Text]) -> List[Union[Text, Dict]]:
         valid_paths = tuple(filter(self._dir_exists, module_path))
         if not valid_paths:
             return []
@@ -156,7 +159,7 @@ class _Base(object):
         return modules_list
 
     @raise_context()
-    def _set_project_modules(self):
+    def _set_project_modules(self) -> None:
         '''
         Update project modules
         '''
@@ -172,7 +175,7 @@ class _Base(object):
             ModuleClass(path=path, project=project) for path in modules
         ])
 
-    def _update_tasks(self, files):
+    def _update_tasks(self, files: List[Text]) -> NoReturn:
         '''
         Find and update playbooks in project.
         :param files: list of filenames.
@@ -183,7 +186,7 @@ class _Base(object):
         playbooks = filter(reg.match, files)
         self._set_tasks_list(playbooks)
 
-    def _get_files(self, repo=None):
+    def _get_files(self, repo: Any = None) -> List:
         '''
         Get all files, where playbooks should be.
         :param repo: Repo object
@@ -194,10 +197,10 @@ class _Base(object):
         # pylint: disable=unused-argument
         return os.listdir(self.path)
 
-    def _operate(self, operation, **kwargs):
+    def _operate(self, operation: Callable, **kwargs) -> Any:
         return operation(kwargs)
 
-    def _make_operations(self, operation):
+    def _make_operations(self, operation: Callable) -> Any:
         '''
         Handle VCS operations and sync data from project.
 
@@ -236,14 +239,14 @@ class _Base(object):
         '''
         raise NotImplementedError
 
-    def get_revision(self, *args, **kwargs):
+    def get_revision(self, *args, **kwargs) -> Text:
         # pylint: disable=unused-argument
         return "NO VCS"
 
-    def get_branch_name(self):
+    def get_branch_name(self) -> Text:
         return "NO VCS"
 
-    def delete(self):
+    def delete(self) -> Text:
         '''
         Handler, which removes project data directory.
 
@@ -257,7 +260,7 @@ class _Base(object):
             return "Repository removed!"
         return "Repository does not exists."  # nocv
 
-    def clone(self):
+    def clone(self) -> Text:
         # pylint: disable=broad-except
         attempt = 2
         for __ in range(attempt):
@@ -268,7 +271,7 @@ class _Base(object):
                 self.delete()
         raise Exception("Clone didn't perform by {} attempts.".format(attempt))
 
-    def get(self):
+    def get(self) -> Any:
         # pylint: disable=broad-except
         attempt = 2
         for __ in range(attempt):
@@ -281,12 +284,12 @@ class _Base(object):
     def check(self):
         pass  # nocv
 
-    def revision(self):
+    def revision(self) -> Text:
         return self._operate(self.get_revision)
 
 
 class _ArchiveRepo(_Base):
-    def make_clone(self, options):
+    def make_clone(self, options) -> Tuple[None, None]:
         if os.path.exists(self.path):
             shutil.rmtree(self.path)
         os.mkdir(self.path)
@@ -294,12 +297,12 @@ class _ArchiveRepo(_Base):
         self._extract(archive, self.path, options)
         return None, None
 
-    def make_update(self, options):
+    def make_update(self, options) -> Tuple[None, None]:
         archive = self._download(self.proj.repository, options)
         self._extract(archive, self.path, options)
         return None, None
 
-    def _download(self, url, options):
+    def _download(self, url: Text, options) -> FILENAME:
         # pylint: disable=unused-argument
         return urlretrieve(url)[0]  # nocv
 

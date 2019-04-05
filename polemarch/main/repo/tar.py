@@ -1,11 +1,12 @@
 # pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
+from typing import Text, NoReturn
 import tarfile
-from ._base import _ArchiveRepo, shutil
+from ._base import _ArchiveRepo, shutil, FILENAME
 
 
 class Tar(_ArchiveRepo):
-    def _extract(self, archive, path, options):
+    def _extract(self, archive: FILENAME, path: Text, options) -> NoReturn:
         # pylint: disable=broad-except
         moved = False
         try:
