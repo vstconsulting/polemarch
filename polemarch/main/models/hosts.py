@@ -1,6 +1,6 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
-
+from typing import Any, List, Tuple, Dict, Text
 import logging
 import six
 from django.db.models import Q
@@ -32,7 +32,7 @@ class InventoryDumper(Dumper):
 
 
 # Helpfull methods
-def _get_dict(objects, keys=None):
+def _get_dict(objects: AbstractVarsQuerySet, keys: List = None) -> Tuple[Dict, List]:
     keys = keys if keys else list()
     result = dict()
     for obj in objects:
@@ -45,7 +45,7 @@ def _get_dict(objects, keys=None):
 class CiclicDependencyError(ex.PMException):
     _def_message = "A cyclic dependence was found. {}"
 
-    def __init__(self, tp=""):
+    def __init__(self, tp: Text = ""):
         msg = self._def_message.format(tp)
         super(CiclicDependencyError, self).__init__(msg)
 
@@ -73,7 +73,7 @@ class Host(AbstractModel):
     def __unicode__(self):
         return "{}".format(self.name)  # nocv
 
-    def toDict(self):
+    def toDict(self) -> Tuple[Any, List]:
         hvars, keys = self.get_generated_vars()
         return hvars or None, keys
 
@@ -81,7 +81,7 @@ class Host(AbstractModel):
 class GroupQuerySet(AbstractVarsQuerySet):
     # pylint: disable=no-member
 
-    def get_subgroups_id(self, accumulated=None, tp="parents"):
+    def get_subgroups_id(self, accumulated: AbstractVarsQuerySet = None, tp: str = "parents") -> AbstractVarsQuerySet:
         accumulated = accumulated if accumulated else self.none()
         list_id = self.exclude(id__in=accumulated).values_list("id", flat=True)
         accumulated = (accumulated | list_id)
@@ -92,10 +92,10 @@ class GroupQuerySet(AbstractVarsQuerySet):
             accumulated = (accumulated | subs.get_subgroups_id(accumulated, tp))
         return accumulated
 
-    def get_subgroups(self):
+    def get_subgroups(self) -> AbstractVarsQuerySet:
         return self.model.objects.filter(id__in=self.get_subgroups_id(tp="parents"))
 
-    def get_parents(self):
+    def get_parents(self) -> AbstractVarsQuerySet:
         return self.model.objects.filter(id__in=self.get_subgroups_id(tp="childrens"))
 
 
@@ -114,7 +114,7 @@ class Group(AbstractModel):
             ["children", "id"],
         ]
 
-    def toDict(self):
+    def toDict(self) -> Tuple[Dict, List]:
         result = dict()
         hvars, keys = self.get_generated_vars()
         if self.children:
@@ -151,7 +151,7 @@ class Inventory(AbstractModel):
         return str(self.id)  # pragma: no cover
 
     @property
-    def groups_list(self):
+    def groups_list(self) -> GroupQuerySet:
         '''
         :return:GroupQuerySet: Mixed queryset with all groups
         '''
@@ -163,13 +163,13 @@ class Inventory(AbstractModel):
         return groups_list.order_by("-children", "id")
 
     @property
-    def hosts_list(self):
+    def hosts_list(self) -> HostQuerySet:
         '''
         :return:HostQuerySet: Mixed queryset with all hosts
         '''
         return self.hosts.all().order_by("name")
 
-    def get_inventory(self):
+    def get_inventory(self) -> Tuple[Text, List]:
         inv = dict(all=dict())
         hvars, keys = self.get_generated_vars()
         hosts = self.hosts.all().order_by("name")
@@ -185,11 +185,11 @@ class Inventory(AbstractModel):
         return to_yaml(inv, **self._to_yaml_kwargs), keys
 
     @property
-    def all_groups(self):
+    def all_groups(self) -> GroupQuerySet:
         return self.groups_list.distinct()
 
     @property
-    def all_hosts(self):
+    def all_hosts(self) -> HostQuerySet:
         return Host.objects.filter(
             Q(groups__in=self.groups_list) | Q(pk__in=self.hosts_list)
         ).distinct()

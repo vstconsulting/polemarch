@@ -1,7 +1,7 @@
 # pylint: disable=protected-access,no-member,unused-argument
 from __future__ import unicode_literals
 
-from typing import Any, Dict, List, Tuple, Iterable, NoReturn
+from typing import Any, Dict, List, Tuple, Iterable, NoReturn, TypeVar
 import os
 import logging
 import traceback
@@ -32,6 +32,7 @@ from ..utils import AnsibleModules, AnsibleConfigParser, SubCacheInterface
 
 
 logger = logging.getLogger("polemarch")
+HISTORY_ID = TypeVar('HISTORY_ID', int, None)  # pylint: disable=C0103
 
 
 def list_to_choices(items_list: Iterable) -> List[Tuple[str, str]]:
@@ -299,7 +300,7 @@ class Project(AbstractModel):
         except Exception as exc:  # nocv
             raise self.SyncError("ERROR on Sync operation: " + str(exc))
 
-    def execute(self, kind: str, *args, **extra) -> Any:
+    def execute(self, kind: str, *args, **extra) -> HISTORY_ID:
         sync = extra.pop("sync", False)
         if self.status != "OK" and not sync:
             raise self.SyncError("ERROR project not synchronized")

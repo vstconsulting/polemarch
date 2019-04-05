@@ -1,6 +1,6 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
-
+from typing import NoReturn, Dict
 import logging
 import json
 
@@ -21,24 +21,24 @@ class ACLPermission(BModel):
                                 on_delete=models.CASCADE, blank=True, null=True)
 
     @property
-    def member(self):  # noce
+    def member(self) -> int:  # noce
         # pylint: disable=no-member
         if self.user is not None:
             return self.user.id
         return self.uagroup.id
 
     @member.setter
-    def member(self, value):  # nocv
+    def member(self, value) -> NoReturn:  # nocv
         pass
 
     @property
-    def member_type(self):  # noce
+    def member_type(self) -> str:  # noce
         if self.user is not None:
             return "user"
         return "team"
 
     @member_type.setter
-    def member_type(self, value):  # nocv
+    def member_type(self, value) -> NoReturn:  # nocv
         pass
 
 
@@ -54,17 +54,17 @@ class UserSettings(BModel):
                                     related_query_name="settings",
                                     related_name="settings")
 
-    def get_settings_copy(self):
+    def get_settings_copy(self) -> Dict:
         return self.data
 
     @property
-    def data(self):
+    def data(self) -> Dict:
         return json.loads(self.settings)
 
     @data.setter
-    def data(self, value):
+    def data(self, value) -> NoReturn:
         self.settings = json.dumps(value)
 
     @data.deleter
-    def data(self):
+    def data(self) -> NoReturn:
         self.settings = '{}'
