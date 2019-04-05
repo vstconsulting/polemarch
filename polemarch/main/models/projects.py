@@ -1,6 +1,7 @@
 # pylint: disable=protected-access,no-member,unused-argument
 from __future__ import unicode_literals
 
+from typing import Any, Dict, List, Tuple, Iterable, NoReturn
 import os
 import logging
 import traceback
@@ -33,11 +34,46 @@ from ..utils import AnsibleModules, AnsibleConfigParser, SubCacheInterface
 logger = logging.getLogger("polemarch")
 
 
-def list_to_choices(items_list):
-    def handler(item):
-        return (item, item)
+def list_to_choices(items_list: Iterable) -> List[Tuple[str, str]]:
+    def handler(item: str) -> Tuple[str, str]:
+        return item, item
 
     return list(map(handler, items_list))
+
+
+class ReadMe:
+    __slots__ = ('path', 'ext', 'content', 'file_name')
+
+    def __init__(self, project):
+        self.path = project.path
+        self.ext = None
+        self.content = self.set_readme()
+
+    def _make_ext(self, file_name) -> NoReturn:
+        self.ext = os.path.splitext(file_name)[1]
+        self.file_name = self.path + '/' + file_name
+
+    def _read(self, file) -> str:
+        return file.read()
+
+    def _make_rst(self, file):
+        return rst_gen(self._read(file), writer_name='html')['html_body']
+
+    def _make_md(self, file):
+        return Markdown(extras=['tables', 'header-ids']).convert(self._read(file))
+
+    def set_readme(self):
+        if not os.path.exists(self.path):
+            return
+        for file in os.listdir(self.path):
+            if file.lower() == 'readme.md' and self.ext is None:
+                self._make_ext(file)
+            if file.lower() == 'readme.rst':
+                self._make_ext(file)
+                break
+        if self.ext is not None:
+            with open(self.file_name, encoding='utf-8') as fd:
+                return getattr(self, '_make_{}'.format(str(self.ext)[1:]), str)(fd)
 
 
 class ProjectQuerySet(AbstractVarsQuerySet):
@@ -61,44 +97,14 @@ class Project(AbstractModel):
         default_related_name = "projects"
 
     class SyncError(PMException):
-        pass
+        """
+        Exception class for sync operations.
+        """
 
-    class ReadMe(object):
-        __slots__ = 'path', 'ext', 'content', 'file_name'
-
-        def __init__(self, project):
-            self.path = project.path
-            self.ext = None
-            self.content = self.set_readme()
-
-        def _make_ext(self, file_name):
-            self.ext = os.path.splitext(file_name)[1]
-            self.file_name = self.path + '/' + file_name
-
-        def _read(self, file):
-            data = file.read()
-            with raise_context():
-                data = data.decode('utf-8')
-            return data
-
-        def _make_rst(self, file):
-            return rst_gen(self._read(file), writer_name='html')['html_body']
-
-        def _make_md(self, file):
-            return Markdown(extras=['tables', 'header-ids']).convert(self._read(file))
-
-        def set_readme(self):
-            if not os.path.exists(self.path):
-                return
-            for file in os.listdir(self.path):
-                if file.lower() == 'readme.md' and self.ext is None:
-                    self._make_ext(file)
-                if file.lower() == 'readme.rst':
-                    self._make_ext(file)
-                    break
-            if self.ext is not None:
-                with open(self.file_name) as fd:
-                    return getattr(self, '_make_{}'.format(str(self.ext)[1:]), str)(fd)
+    class ReadMe(ReadMe):
+        """
+        Object for getting readme with different extention.
+        """
 
     HIDDEN_VARS = [
         'repo_password',
@@ -142,21 +148,21 @@ class Project(AbstractModel):
     ]
 
     @classproperty
-    def PROJECTS_DIR(cls):
+    def PROJECTS_DIR(cls) -> str:
         # pylint: disable=invalid-name
         return getattr(settings, 'PROJECTS_DIR')
 
     def __unicode__(self):
         return str(self.name)  # pragma: no cover
 
-    def get_hook_data(self, when):
+    def get_hook_data(self, when: str) -> Dict:
         data = super(Project, self).get_hook_data(when)
         data['type'] = self.type
         data['repository'] = self.repository
         return data
 
     @property
-    def path(self):
+    def path(self) -> str:
         project_dir = (
             self.PROJECTS_DIR
             if not self.hidden
@@ -170,32 +176,32 @@ class Project(AbstractModel):
         return self.repo_handlers(repo_type, self)
 
     @property
-    def env_vars(self):
+    def env_vars(self) -> Dict[str, Any]:
         env_var_list = dict()
         for var_obj in self.variables.filter(key__startswith='env_'):
             env_var_list[var_obj.key[4:]] = var_obj.value
         return env_var_list
 
     @property
-    def type(self):
+    def type(self) -> str:
         try:
             return self.variables.get(key="repo_type").value
         except self.variables.model.DoesNotExist:  # nocv
             return 'MANUAL'
 
     @property
-    def config(self):
+    def config(self) -> Dict[str, Any]:
         return self.get_ansible_config_parser().get_data()
 
-    def get_ansible_config_parser(self):
+    def get_ansible_config_parser(self) -> AnsibleConfigParser:
         if not hasattr(self, 'config_parser'):
             self.config_parser = AnsibleConfigParser(self.path)
         return self.config_parser
 
-    def get_yaml_subcache(self, suffix=''):
+    def get_yaml_subcache(self, suffix: str = '') -> SubCacheInterface:
         return SubCacheInterface(''.join(['project', str(self.id), suffix]))
 
-    def __parse_yaml_view(self, data):
+    def __parse_yaml_view(self, data: Dict[str, Any]) -> Dict[str, Dict]:
         valid_formats = self.PM_YAML_FORMATS
         parsed_data = dict(fields=dict(), playbooks=dict())
         # Parse fields
@@ -223,17 +229,17 @@ class Project(AbstractModel):
         return parsed_data
 
     @property
-    def yaml_path(self):
+    def yaml_path(self) -> str:
         return '/'.join([self.path, '.polemarch.yaml']).replace('//', '/')
 
     @property
-    def yaml_path_exists(self):
+    def yaml_path_exists(self) -> bool:
         return os.path.exists(self.yaml_path) and os.path.isfile(self.yaml_path)
 
-    def get_yaml(self):
+    def get_yaml(self) -> Dict[str, Any]:
         yaml_path = self.yaml_path
         if not self.yaml_path_exists:
-            return None
+            return {}
         cache = self.get_yaml_subcache()
         cache_data = cache.get() or None
         if cache_data:
@@ -250,7 +256,7 @@ class Project(AbstractModel):
 
     @property
     @raise_context()
-    def execute_view_data(self):
+    def execute_view_data(self) -> Dict[str, Dict[str, Dict]]:
         cached_view_data = self.get_yaml_subcache('view').get()
         if cached_view_data and self.yaml_path_exists:
             return cached_view_data
@@ -261,7 +267,7 @@ class Project(AbstractModel):
         self.get_yaml_subcache('view').set(view_data)
         return view_data
 
-    def check_path(self, inventory):
+    def check_path(self, inventory) -> NoReturn:
         if not isinstance(inventory, (six.string_types, six.text_type)):  # nocv
             return
         path = "{}/{}".format(self.path, inventory)
@@ -269,7 +275,7 @@ class Project(AbstractModel):
         if self.path not in path:  # nocv
             raise ValidationError(dict(inventory="Inventory should be in project dir."))
 
-    def _prepare_kw(self, kind, mod_name, inventory=None, **extra):
+    def _prepare_kw(self, kind: str, mod_name: str, inventory=None, **extra) -> Dict:
         if not mod_name:  # nocv
             raise PMException("Empty playbook/module name.")
         history, extra = self.history.all().start(
@@ -282,10 +288,10 @@ class Project(AbstractModel):
         kwargs.update(extra)
         return kwargs
 
-    def hook(self, when, msg):
+    def hook(self, when, msg) -> NoReturn:
         Hook.objects.all().execute(when, msg)
 
-    def sync_on_execution_handler(self, history):
+    def sync_on_execution_handler(self, history: BModel) -> NoReturn:
         if not self.vars.get('repo_sync_on_run', False):
             return
         try:
@@ -293,7 +299,7 @@ class Project(AbstractModel):
         except Exception as exc:  # nocv
             raise self.SyncError("ERROR on Sync operation: " + str(exc))
 
-    def execute(self, kind, *args, **extra):
+    def execute(self, kind: str, *args, **extra) -> Any:
         sync = extra.pop("sync", False)
         if self.status != "OK" and not sync:
             raise self.SyncError("ERROR project not synchronized")
@@ -308,7 +314,7 @@ class Project(AbstractModel):
             task_class.delay(**kwargs)
         return history.id if history is not None else history
 
-    def set_status(self, status):
+    def set_status(self, status) -> NoReturn:
         self.status = status
         self.save()
 
@@ -318,28 +324,28 @@ class Project(AbstractModel):
         self.set_status("WAIT_SYNC")
         return self.task_handlers.backend("REPO").delay(self, operation)
 
-    def sync(self, *args, **kwargs):
+    def sync(self, *args, **kwargs) -> Any:
         return self.repo_class.get()
 
-    def clone(self, *args, **kwargs):
+    def clone(self, *args, **kwargs) -> Any:
         return self.repo_class.clone()
 
     @property
     @raise_context()
-    def revision(self):
+    def revision(self) -> str:
         return self.repo_class.revision()
 
     @property
     @raise_context()
-    def branch(self):
+    def branch(self) -> str:
         return self.repo_class.get_branch_name()
 
     @property
-    def module(self):
+    def module(self) -> BQuerySet:
         return Module.objects.filter(Q(project=self) | Q(project=None))
 
     @raise_context()
-    def __get_readme(self):
+    def __get_readme(self) -> ReadMe:
         if not hasattr(self, 'readme'):
             self.readme = self.ReadMe(self)
         return self.readme
@@ -391,10 +397,10 @@ class Module(BModel):
         return str(self.name)  # nocv
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.path.split('.')[-1]
 
-    def _load_data(self, data):
+    def _load_data(self, data) -> Dict:
         return load(data, Loader=Loader) if data and data != '{}' else {}
 
     def _get_module_data_from_cli(self):
@@ -440,7 +446,7 @@ class ProjectTemplate(custom_model.FileModel):
         managed = False
 
     @classmethod
-    def load_file_data(cls):
+    def load_file_data(cls) -> List[Dict[str, Any]]:
         cache = caches["default"]
         cache_key = 'community_projects_data'
         data = cache.get(cache_key) or []

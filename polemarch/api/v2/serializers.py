@@ -28,19 +28,6 @@ from ..signals import api_post_save, api_pre_save
 # nothing
 #
 # Serializers field for usability
-class ModelRelatedField(serializers.PrimaryKeyRelatedField):
-    def __init__(self, **kwargs):  # nocv
-        model = kwargs.pop("model", None)
-        assert not ((model is not None or self.queryset is not None) and
-                    kwargs.get('read_only', None)), (
-            'Relational fields should not provide a `queryset` or `model`'
-            ' argument, when setting read_only=`True`.'
-        )
-        if model is not None:
-            kwargs["queryset"] = model.objects.all()
-        super(ModelRelatedField, self).__init__(**kwargs)
-
-
 class DictField(serializers.CharField):
 
     def to_internal_value(self, data):  # nocv
@@ -220,11 +207,11 @@ class UserSerializer(vst_serializers.UserSerializer):
     is_staff = serializers.HiddenField(default=True, label='Staff')
 
     @with_signals
-    def create(self, data):
-        return super(UserSerializer, self).create(data)
+    def create(self, validated_data: Dict):
+        return super(UserSerializer, self).create(validated_data)
 
     @with_signals
-    def update(self, instance, validated_data):
+    def update(self, instance: User, validated_data: Dict):
         return super(UserSerializer, self).update(instance, validated_data)
 
 
@@ -381,10 +368,10 @@ class OneHistorySerializer(_SignalSerializer):
                   "raw_stdout",
                   "raw_inventory",)
 
-    def get_raw(self, request):
+    def get_raw(self, request) -> str:
         return self.instance.get_raw(request.query_params.get("color", "no") == "yes")
 
-    def get_raw_stdout(self, obj):
+    def get_raw_stdout(self, obj: models.History):
         return self.context.get('request').build_absolute_uri("raw/")
 
     def get_facts(self, request):
@@ -431,7 +418,7 @@ class VariableSerializer(_SignalSerializer):
             'value',
         )
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: models.Variable):
         result = super(VariableSerializer, self).to_representation(instance)
         if instance.key in getattr(instance.content_object, 'HIDDEN_VARS', []):
             result['value'] = "[~~ENCRYPTED~~]"
@@ -474,24 +461,24 @@ class ProjectVariableSerializer(VariableSerializer):
 
 class _WithVariablesSerializer(_WithPermissionsSerializer):
     @transaction.atomic
-    def _do_with_vars(self, method_name, *args, **kwargs):
+    def _do_with_vars(self, method_name: str, *args, **kwargs):
         method = getattr(super(_WithVariablesSerializer, self), method_name)
         instance = method(*args, **kwargs)
         return instance
 
-    def create(self, validated_data):
+    def create(self, validated_data: Dict):
         return self._do_with_vars("create", validated_data=validated_data)
 
-    def update(self, instance, validated_data):
+    def update(self, instance, validated_data: Dict):
         return self._do_with_vars("update", instance, validated_data=validated_data)
 
     def get_vars(self, representation):
         return representation.get('vars', None)
 
-    def to_representation(self, instance, hidden_vars=None):
+    def to_representation(self, instance, hidden_vars: List[str] = None):
         rep = super(_WithVariablesSerializer, self).to_representation(instance)
         hv = hidden_vars
-        hv = getattr(instance, 'HIDDEN_VARS', []) if hv is None else hv
+        hv = getattr(instance, 'HIDDEN_VARS', []) if hidden_vars is None else hidden_vars
         vars = self.get_vars(rep)
         if vars is not None:
             for mask_key in hv:
@@ -693,7 +680,7 @@ class TemplateSerializer(_WithVariablesSerializer):
         except KeyError:  # nocv
             return None
 
-    def set_opts_vars(self, rep, hidden_vars):
+    def set_opts_vars(self, rep, hidden_vars: List[str]):
         if not rep.get('vars', None):
             return rep
         var = rep['vars']
@@ -702,13 +689,13 @@ class TemplateSerializer(_WithVariablesSerializer):
                 var[mask_key] = "[~~ENCRYPTED~~]"
         return rep
 
-    def repr_options(self, instance, data, hidden_vars):
+    def repr_options(self, instance: models.Template, data: Dict, hidden_vars: List):
         hv = hidden_vars
         hv = instance.HIDDEN_VARS if hv is None else hv
         for name, rep in data.get('options', {}).items():
             data['options'][name] = self.set_opts_vars(rep, hv)
 
-    def to_representation(self, instance, hidden_vars=None) -> OrderedDict:
+    def to_representation(self, instance, hidden_vars: List[str] = None) -> OrderedDict:
         data = OrderedDict()
         if instance.kind in ["Task", "Module"]:
             hidden_vars = models.PeriodicTask.HIDDEN_VARS
@@ -858,7 +845,7 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
             'name': {'required': True}
         }
 
-    def create(self, validated_data):
+    def create(self, validated_data: Dict) -> models.Project:
         repo_type = validated_data.pop('type')
         repo_auth_type = validated_data.pop('repo_auth')
         repo_auth_data = validated_data.pop('auth_data')
@@ -911,7 +898,7 @@ class ProjectTemplateCreateSerializer(vst_serializers.VSTSerializer):
             'name',
         )
 
-    def update(self, instance, validated_data):
+    def update(self, instance: models.ProjectTemplate, validated_data) -> models.Project:
         validated_data['name'] = validated_data.get(
             'name', '{} {}'.format(instance.name, uuid.uuid1())
         )
@@ -927,7 +914,7 @@ class ProjectTemplateCreateSerializer(vst_serializers.VSTSerializer):
         serializer.save()
         return serializer.instance
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: models.Project) -> Dict:
         return {
             'name': instance.name,
             'project_id': instance.id
@@ -972,7 +959,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'execute_view_data',)
 
     @transaction.atomic()
-    def sync(self):
+    def sync(self) -> Response:
         self.instance.start_repo_task("sync")
         serializer = ActionResponseSerializer(
             data=dict(detail="Sync with {}.".format(self.instance.repository))
@@ -980,7 +967,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         serializer.is_valid(True)
         return Response(serializer.data, status.HTTP_200_OK)
 
-    def _get_ansible_serializer(self, kind):
+    def _get_ansible_serializer(self, kind: str) -> serializers.Serializer:
         view = self.context['view']
         exec_method = getattr(view, 'execute_{}'.format(kind), None)
         if exec_method is None:  # nocv
@@ -990,7 +977,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         serializer.project = self.instance
         return serializer
 
-    def _execution(self, kind, data, user, **kwargs):
+    def _execution(self, kind: str, data: Dict, user: User, **kwargs) -> Response:
         template = data.pop("template", None)
         inventory = data.get("inventory", None)
         msg = "Started in the inventory {}.".format(
@@ -1024,14 +1011,14 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         rdata.is_valid(raise_exception=True)
         return Response(rdata.data, status.HTTP_201_CREATED)
 
-    def execute_playbook(self, request):
+    def execute_playbook(self, request) -> Response:
         return self._execution("playbook", dict(request.data), request.user)
 
-    def execute_module(self, request):
+    def execute_module(self, request) -> Response:
         return self._execution("module", dict(request.data), request.user)
 
 
-def generate_fileds(ansible_reference, ansible_type):
+def generate_fileds(ansible_reference: AnsibleArgumentsReference, ansible_type: str) -> OrderedDict:
     if ansible_type is None:
         return OrderedDict()  # nocv
 
@@ -1150,7 +1137,7 @@ class InventoryImportSerializer(DataSerializer):
     raw_data = vst_fields.VSTCharField()
 
     @transaction.atomic()
-    def create(self, validated_data):
+    def create(self, validated_data: Dict) -> Dict:
         parser = AnsibleInventoryParser()
         inv_json = parser.get_inventory_data(validated_data['raw_data'])
 

@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+from typing import NoReturn
 import logging
 import collections
 import uuid
@@ -37,10 +38,10 @@ class HookHandlers(ModelHandlers):
 class HooksQuerySet(BQuerySet):
     use_for_related_fields = True
 
-    def when(self, when):
+    def when(self, when) -> BQuerySet:
         return self.filter(enable=True).filter(models.Q(when=when) | models.Q(when=None))
 
-    def execute(self, when, message):
+    def execute(self, when, message) -> NoReturn:
         for hook in self.when(when):
             with raise_context():
                 hook.run(when, message)
