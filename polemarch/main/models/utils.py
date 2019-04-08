@@ -86,7 +86,7 @@ class Executor(CmdExecutor):
             self.exchanger.delete()
             for _ in range(5):
                 try:
-                    os.kill(proc.pid, signal.SIGINT)
+                    os.kill(-proc.pid, signal.SIGTERM)
                 except Exception:  # nocv
                     break
                 proc.send_signal(signal.SIGINT)

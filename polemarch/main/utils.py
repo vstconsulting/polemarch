@@ -52,6 +52,7 @@ class CmdExecutor(Executor, PMObject):
     """
     Command executor with realtime output write
     """
+    __slots__ = ()
 
 
 class task(object):
