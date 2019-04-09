@@ -98,6 +98,7 @@ def make_extensions(extensions_list, packages):
             extensions_dict[module_name] = files
 
     extra_compile_args = [
+        '-g0', '-ggdb1',
         "-fno-strict-aliasing",
         "-fno-var-tracking-assignments",
         "-pipe", "-std=c99"
