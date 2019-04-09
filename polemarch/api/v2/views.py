@@ -193,10 +193,8 @@ class UserViewSet(views.UserViewSet, base.CopyMixin):
     '''
     serializer_class = sers.UserSerializer
     serializer_class_one = sers.OneUserSerializer
-    action_serializers = {
-        'create': sers.CreateUserSerializer,
-        'change_password': sers.ChangePasswordSerializer
-    }
+    serializer_class_create = sers.CreateUserSerializer
+    serializer_class_change_password = sers.ChangePasswordSerializer  # pylint: disable=invalid-name
 
     copy_related = ['groups']
     copy_field_name = 'username'
@@ -222,13 +220,6 @@ class UserViewSet(views.UserViewSet, base.CopyMixin):
             obj.settings.data = request.data if method == "POST" else {}
             obj.settings.save()
         return base.Response(obj.settings.data, status.HTTP_200_OK).resp
-
-    @deco.action(["post"], detail=yes, permission_classes=(permissions.IsAuthenticated,))
-    def change_password(self, request, *args, **kwargs):
-        serializer = self.get_serializer(self.get_object(), data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return base.Response(serializer.data, status.HTTP_201_CREATED).resp
 
 
 @deco.nested_view('user', 'id', allow_append=yes, manager_name='users', view=UserViewSet)
@@ -381,10 +372,8 @@ class _BaseGroupViewSet(OwnedView, base.ModelViewSetSet):
     model = sers.models.Group
     serializer_class = sers.GroupSerializer
     serializer_class_one = sers.OneGroupSerializer
+    serializer_class_create = sers.GroupCreateMasterSerializer
     filter_class = filters.GroupFilter
-    action_serializers = {
-        'create': sers.GroupCreateMasterSerializer
-    }
 
 
 @deco.nested_view('host', 'id', manager_name='hosts', allow_append=yes, view=HostViewSet)
@@ -433,15 +422,13 @@ class InventoryViewSet(_GroupMixin):
     model = sers.models.Inventory
     serializer_class = sers.InventorySerializer
     serializer_class_one = sers.OneInventorySerializer
+    serializer_class_import_inventory = sers.InventoryImportSerializer  # pylint: disable=invalid-name
     filter_class = filters.InventoryFilter
     copy_related = ['hosts', 'groups']
-    action_serializers = {
-        'import_inventory': sers.InventoryImportSerializer
-    }
 
     @deco.action(methods=["post"], detail=no)
     def import_inventory(self, request, **kwargs):
-        serializer = sers.InventoryImportSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(True)
         serializer.save()
         if hasattr(self, 'nested_manager'):
@@ -593,12 +580,10 @@ class ProjectViewSet(OwnedView, _VariablesCopyMixin):
     model = sers.models.Project
     serializer_class = sers.ProjectSerializer
     serializer_class_one = sers.OneProjectSerializer
+    serializer_class_create = sers.ProjectCreateMasterSerializer
     filter_class = filters.ProjectFilter
     POST_WHITE_LIST = ['sync', 'execute_playbook', 'execute_module']
     copy_related = ['inventories']
-    action_serializers = {
-        'create': sers.ProjectCreateMasterSerializer
-    }
 
     def copy_instance(self, instance):
         instance.status = instance.__class__._meta.get_field('status').default
@@ -639,9 +624,7 @@ class ProjectTemplateViewSet(base.ReadOnlyModelViewSet):
     model = sers.models.ProjectTemplate
     serializer_class = sers.ProjectTemplateSerializer
     serializer_class_one = sers.OneProjectTemplateSerializer
-    action_serializers = {
-        'use_it': sers.ProjectTemplateCreateSerializer
-    }
+    serializer_class_use_it = sers.ProjectTemplateCreateSerializer
 
     @deco.subaction(
         serializer_class=sers.ProjectTemplateCreateSerializer,

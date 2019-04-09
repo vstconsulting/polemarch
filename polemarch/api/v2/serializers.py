@@ -138,28 +138,6 @@ class SetOwnerSerializer(DataSerializer):
         return dict(pk=data['user_id'])
 
 
-class ChangePasswordSerializer(DataSerializer):
-    old_password = serializers.CharField(required=True)
-    password = serializers.CharField(required=True, label='New password')
-    password2 = serializers.CharField(required=True, label='Confirm new password')
-
-    def update(self, instance, validated_data):
-        if not instance.check_password(validated_data['old_password']):
-            raise exceptions.PermissionDenied('Password is not correct.')
-        if validated_data['password'] != validated_data['password2']:
-            raise exceptions.ValidationError("New passwords' values are not equal.")
-        instance.set_password(validated_data['password'])
-        instance.save()
-        return instance
-
-    def to_representation(self, value) -> Dict[str, str]:
-        return dict(
-            old_password='***',
-            password='***',
-            password2='***',
-        )
-
-
 class _SignalSerializer(serializers.ModelSerializer):
     @cached_property
     def _writable_fields(self) -> List:
@@ -207,36 +185,29 @@ class UserSerializer(vst_serializers.UserSerializer):
     is_staff = serializers.HiddenField(default=True, label='Staff')
 
     @with_signals
-    def create(self, validated_data: Dict):
-        return super(UserSerializer, self).create(validated_data)
-
-    @with_signals
     def update(self, instance: User, validated_data: Dict):
         return super(UserSerializer, self).update(instance, validated_data)
+
+
+class CreateUserSerializer(vst_serializers.CreateUserSerializer):
+
+    @with_signals
+    def create(self, validated_data: Dict) -> User:
+        return super().create(validated_data)
+
+
+class ChangePasswordSerializer(vst_serializers.ChangePasswordSerializer):
+
+    @with_signals
+    def update(self, instance: User, validated_data: Dict) -> User:
+        return super(ChangePasswordSerializer, self).update(instance, validated_data)
 
 
 class OneUserSerializer(UserSerializer):
     email = serializers.EmailField(required=False)
 
     class Meta(vst_serializers.OneUserSerializer.Meta):
-        fields = tuple(
-            field for field in vst_serializers.OneUserSerializer.Meta.fields
-            if field not in ['password']
-        )
-
-
-class CreateUserSerializer(OneUserSerializer):
-    password = vst_fields.VSTCharField(write_only=True)
-    password2 = vst_fields.VSTCharField(write_only=True, label='Repeat password')
-
-    class Meta(OneUserSerializer.Meta):
-        fields = list(OneUserSerializer.Meta.fields) + ['password', 'password2']
-
-    def run_validation(self, data=serializers.empty) -> Dict:
-        validated_data = super(CreateUserSerializer, self).run_validation(data)
-        if validated_data['password'] != validated_data.pop('password2', None):
-            raise exceptions.ValidationError('Passwords do not match.')
-        return validated_data
+        pass
 
 
 class ChartLineSettingSerializer(vst_serializers.JsonObjectSerializer):
