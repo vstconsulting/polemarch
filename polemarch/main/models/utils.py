@@ -5,7 +5,9 @@ import os
 import re
 import time
 import signal
+import shutil
 import logging
+import tempfile
 import traceback
 from collections import namedtuple, OrderedDict
 from subprocess import Popen
@@ -135,8 +137,9 @@ class AnsibleCommand(PMObject):
     class Inventory(object):
         hidden_vars = Inventory.HIDDEN_VARS
 
-        def __init__(self, inventory: Union[Inventory, int, Text], cwd="/tmp"):
+        def __init__(self, inventory: Union[Inventory, int, Text], cwd: Text = "/tmp", tmpdir: Text = '/tmp'):
             self.cwd = cwd
+            self.tmpdir = tmpdir
             self._file = None
             self.is_file = True
             if isinstance(inventory, (six.string_types, six.text_type)):
@@ -150,9 +153,12 @@ class AnsibleCommand(PMObject):
             return inventory.get_inventory()
 
         def get_from_file(self, inventory: Text) -> InventoryDataType:
-            self._file = "{}/{}".format(self.cwd, inventory)
+            _file = "{}/{}".format(self.cwd, inventory)
             try:
-                with open(self._file, 'r') as file:
+                new_filename = os.path.join(self.tmpdir, 'inventory')
+                shutil.copyfile(_file, new_filename)
+                with open(new_filename, 'r') as file:
+                    self._file = new_filename
                     return file.read(), []
             except IOError:
                 self._file = inventory
@@ -161,7 +167,7 @@ class AnsibleCommand(PMObject):
 
         @property
         def file(self) -> Union[tmp_file, Text]:
-            self._file = self._file or tmp_file(self.raw)
+            self._file = self._file or tmp_file(self.raw, dir=self.tmpdir)
             return self._file
 
         @property
@@ -183,9 +189,18 @@ class AnsibleCommand(PMObject):
         self.__will_raise_exception = False
         self.ref_type = self.ref_types[self.command_type]
         self.ansible_ref = self.ansible_ref_class().raw_dict[self.ref_type]
+        self.verbose = kwargs.get('verbose', 0)
+        self.cwd = tempfile.mkdtemp()
+        self.env = dict()
+
+    def _verbose_output(self, value: Text, level: int = 3) -> NoReturn:
+        if self.verbose >= level:
+            if hasattr(self, 'executor'):
+                self.executor.write_output(value)
+            logger.debug(value)
 
     def __generate_arg_file(self, value: Text) -> Tuple[Text, List[tmp_file]]:
-        file = tmp_file(value)
+        file = tmp_file(value, dir=self.cwd)
         return file.name, [file]
 
     def __parse_key(self, key: Text, value: Text) -> Tuple[Text, List]:
@@ -253,7 +268,7 @@ class AnsibleCommand(PMObject):
         self.history.status = "RUN"
         self.project.sync_on_execution_handler(self.history)
         if inventory:
-            self.inventory_object = self.Inventory(inventory, cwd=self.workdir)
+            self.inventory_object = self.Inventory(inventory, cwd=self.workdir, tmpdir=self.cwd)
             self.history.raw_inventory = self.hide_passwords(
                 self.inventory_object.raw
             )
@@ -297,6 +312,9 @@ class AnsibleCommand(PMObject):
 
     def error_handler(self, exception: BaseException) -> NoReturn:
         # pylint: disable=no-else-return
+        if os.path.exists(self.cwd):
+            shutil.rmtree(self.cwd, ignore_errors=True)
+            self._verbose_output('Tmpdir "{}" was cleared.'.format(self.cwd))
         default_code = self.status_codes["other"]
         if isinstance(exception, self.ExecutorClass.CalledProcessError):  # nocv
             self.history.raw_stdout = "{}".format(exception.output)
@@ -324,7 +342,8 @@ class AnsibleCommand(PMObject):
                 raise
         finally:
             inventory_object = getattr(self, "inventory_object", None)
-            inventory_object and inventory_object.close()
+            if inventory_object is not None:
+                inventory_object.close()
             self.history.stop_time = timezone.now()
             self.history.save()
             self._send_hook('after_execution')

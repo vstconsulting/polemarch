@@ -32,11 +32,11 @@ class InventoryDumper(Dumper):
 
 
 # Helpfull methods
-def _get_dict(objects: AbstractVarsQuerySet, keys: List = None) -> Tuple[Dict, List]:
+def _get_dict(objects: AbstractVarsQuerySet, keys: List = None, tmp_dir: Text = '/tmp') -> Tuple[Dict, List]:
     keys = keys if keys else list()
     result = dict()
     for obj in objects:
-        result[obj.name], obj_keys = obj.toDict()
+        result[obj.name], obj_keys = obj.toDict(tmp_dir)
         keys += obj_keys
     return result, keys
 
@@ -73,8 +73,8 @@ class Host(AbstractModel):
     def __unicode__(self):
         return "{}".format(self.name)  # nocv
 
-    def toDict(self) -> Tuple[Any, List]:
-        hvars, keys = self.get_generated_vars()
+    def toDict(self, tmp_dir: Text = '/tmp') -> Tuple[Any, List]:
+        hvars, keys = self.get_generated_vars(tmp_dir)
         return hvars or None, keys
 
 
@@ -114,16 +114,16 @@ class Group(AbstractModel):
             ["children", "id"],
         ]
 
-    def toDict(self) -> Tuple[Dict, List]:
+    def toDict(self, tmp_dir: Text = '/tmp') -> Tuple[Dict, List]:
         result = dict()
-        hvars, keys = self.get_generated_vars()
+        hvars, keys = self.get_generated_vars(tmp_dir)
         if self.children:
             objs = self.groups
             key_name = 'children'
         else:
             objs = self.hosts
             key_name = 'hosts'
-        objs_dict, obj_keys = _get_dict(objs.all(), keys)
+        objs_dict, obj_keys = _get_dict(objs.all(), keys, tmp_dir)
         if objs_dict:
             result[key_name] = objs_dict
         if self.vars:
@@ -169,13 +169,13 @@ class Inventory(AbstractModel):
         '''
         return self.hosts.all().order_by("name")
 
-    def get_inventory(self) -> Tuple[Text, List]:
+    def get_inventory(self, tmp_dir='/tmp/') -> Tuple[Text, List]:
         inv = dict(all=dict())
-        hvars, keys = self.get_generated_vars()
+        hvars, keys = self.get_generated_vars(tmp_dir)
         hosts = self.hosts.all().order_by("name")
         groups = self.groups.all().order_by("name")
-        hosts_dicts, keys = _get_dict(hosts, keys)
-        groups_dicts, keys = _get_dict(groups, keys)
+        hosts_dicts, keys = _get_dict(hosts, keys, tmp_dir)
+        groups_dicts, keys = _get_dict(groups, keys, tmp_dir)
         if hosts_dicts:
             inv['all']['hosts'] = hosts_dicts
         if groups_dicts:

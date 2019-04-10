@@ -140,11 +140,11 @@ class AbstractModel(ACLModel):
         qs = self.variables.all().sort_by_key().values_list('key', 'value')
         return reduce(update_boolean, self.BOOLEAN_VARS, OrderedDict(qs))
 
-    def get_generated_vars(self) -> Tuple[Dict, List]:
+    def get_generated_vars(self, tmp_dir='/tmp') -> Tuple[Dict, List]:
         files = []
         obj_vars = self.get_vars()
         if "ansible_ssh_private_key_file" in obj_vars:
-            tmp = tmp_file()
+            tmp = tmp_file(dir=tmp_dir)
             tmp.write(obj_vars["ansible_ssh_private_key_file"])
             obj_vars["ansible_ssh_private_key_file"] = tmp.name
             files.append(tmp)
