@@ -191,6 +191,7 @@ class AnsibleCommand(PMObject):
         self.ansible_ref = self.ansible_ref_class().raw_dict[self.ref_type]
         self.verbose = kwargs.get('verbose', 0)
         self.cwd = tempfile.mkdtemp()
+        self._verbose_output('Execution tmpdir created - [{}].'.format(self.cwd), 0)
         self.env = dict()
 
     def _verbose_output(self, value: Text, level: int = 3) -> NoReturn:
@@ -250,7 +251,7 @@ class AnsibleCommand(PMObject):
     def get_hidden_vars(self) -> List[Text]:
         return self.inventory_object.hidden_vars
 
-    def hide_passwords(self, raw) -> Text:
+    def hide_passwords(self, raw: Text) -> Text:
         regex = r'|'.join((
             r"(?<=" + hide + r":\s).{1,}?(?=[\n\t\s])"
             for hide in self.get_hidden_vars()
@@ -259,7 +260,7 @@ class AnsibleCommand(PMObject):
         raw = re.sub(regex, subst, raw, 0, re.MULTILINE)
         return raw
 
-    def get_execution_revision(self, project):  # nocv
+    def get_execution_revision(self, project: Project):  # nocv
         return project.revision
 
     def prepare(self, target: Text, inventory: Any, history: History, project: Project) -> NoReturn:
@@ -268,7 +269,7 @@ class AnsibleCommand(PMObject):
         self.history.status = "RUN"
         self.project.sync_on_execution_handler(self.history)
         if inventory:
-            self.inventory_object = self.Inventory(inventory, cwd=self.workdir, tmpdir=self.cwd)
+            self.inventory_object = self.Inventory(inventory, cwd=self.project.path, tmpdir=self.cwd)
             self.history.raw_inventory = self.hide_passwords(
                 self.inventory_object.raw
             )
@@ -312,9 +313,6 @@ class AnsibleCommand(PMObject):
 
     def error_handler(self, exception: BaseException) -> NoReturn:
         # pylint: disable=no-else-return
-        if os.path.exists(self.cwd):
-            shutil.rmtree(self.cwd, ignore_errors=True)
-            self._verbose_output('Tmpdir "{}" was cleared.'.format(self.cwd))
         default_code = self.status_codes["other"]
         if isinstance(exception, self.ExecutorClass.CalledProcessError):  # nocv
             self.history.raw_stdout = "{}".format(exception.output)
@@ -347,6 +345,7 @@ class AnsibleCommand(PMObject):
             self.history.stop_time = timezone.now()
             self.history.save()
             self._send_hook('after_execution')
+            self.__del__()
 
     def run(self):
         try:
@@ -354,6 +353,11 @@ class AnsibleCommand(PMObject):
         except Exception:  # nocv
             logger.error(traceback.format_exc())
             raise
+
+    def __del__(self):
+        if hasattr(self, 'cwd') and os.path.exists(self.cwd):
+            self._verbose_output('Tmpdir "{}" was cleared.'.format(self.cwd))
+            shutil.rmtree(self.cwd, ignore_errors=True)
 
 
 class AnsiblePlaybook(AnsibleCommand):
