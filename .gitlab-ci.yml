@@ -96,7 +96,7 @@ py36-install:
 master_coverage:
   <<: *branch_tests
   variables:
-    TOX_ENVS: "py36-coverage"
+    TOX_ENVS: "py37-coverage"
   except:
   only:
     refs:

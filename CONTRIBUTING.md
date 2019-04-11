@@ -1,3 +1,3 @@
 See docs
 
-https://polemarch.readthedocs.io/en/stable/contribute.html
+https://about.polemarch.org/en/stable/contribute.html
