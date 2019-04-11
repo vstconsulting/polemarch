@@ -355,8 +355,8 @@ kwargs = dict(
     ] + load_requirements('requirements-git.txt', os.getcwd()),
     project_urls={
         "Issue Tracker": "https://gitlab.com/vstconsulting/polemarch/issues",
-        "Documentation": "http://about.polemarch.org/",
-        "Web site": "https://about.polemarch.org/",
+        "Documentation": "https://about.polemarch.org/",
+        "Web site": "https://polemarch.org/",
         "Source Code": "https://gitlab.com/vstconsulting/polemarch",
         "Releases": "https://github.com/vstconsulting/polemarch/releases",
         "Docker": "https://hub.docker.com/r/vstconsulting/polemarch/",
