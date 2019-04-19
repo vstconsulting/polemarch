@@ -12,7 +12,7 @@ from django.dispatch import receiver
 from django.db.models.functions import Cast
 from django.core.validators import ValidationError
 from django.conf import settings
-from vstutils.utils import raise_context
+from vstutils.utils import raise_context, KVExchanger
 
 from .vars import Variable
 from .hosts import Host, Group, Inventory
@@ -22,7 +22,7 @@ from .tasks import PeriodicTask, History, HistoryLines, Template
 from .hooks import Hook
 from ..validators import RegexValidator, validate_hostname
 from ..exceptions import UnknownTypeException
-from ..utils import AnsibleArgumentsReference
+from ..utils import AnsibleArgumentsReference, CmdExecutor
 
 
 logger = logging.getLogger('polemarch')
@@ -328,3 +328,9 @@ def update_ptasks_with_templates(instance: Template, **kwargs) -> NoReturn:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
         return
     instance.periodic_task.all().update(project=instance.project)
+
+
+@receiver(signals.pre_delete, sender=History)
+def cancel_task_on_delete_history(instance: History, **kwargs) -> NoReturn:
+    exchange = KVExchanger(CmdExecutor.CANCEL_PREFIX + str(instance.id))
+    exchange.send(True, 60) if instance.working else None

@@ -1,0 +1,13 @@
+---
+- hosts: all
+  gather_facts: False
+  tasks:
+    - name: Python check
+      raw: /usr/bin/python -c 'import sys'
+      register: py_interpreter
+      become: no
+      ignore_errors: yes
+    - name: Install python
+      raw: bash -c 'if [ "`cat /etc/issue | grep "Ubuntu\|Debian" | wc -l`" == "1" ]; then apt-get update && apt-get install python-minimal -y; else yum install python -y; fi'
+      register: distribution
+      when: py_interpreter is failed
