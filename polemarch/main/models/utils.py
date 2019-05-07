@@ -15,6 +15,7 @@ from functools import reduce
 import six
 from django.utils import timezone
 from vstutils.utils import tmp_file, KVExchanger, raise_context
+from vstutils.tools import get_file_value
 from .hosts import Inventory
 from .tasks import History, Project
 from ...main.utils import CmdExecutor, AnsibleArgumentsReference, PMObject
@@ -44,7 +45,7 @@ class DummyHistory:
 
     @property
     def raw_stdout(self) -> Text:
-        return ""
+        return ""  # nocv
 
     @raw_stdout.setter
     def raw_stdout(self, value: Text) -> NoReturn:
@@ -76,7 +77,8 @@ class Executor(CmdExecutor):
 
     @property
     def output(self) -> Text:
-        return self.history.raw_stdout
+        # Optimize for better performance.
+        return ''
 
     @output.setter
     def output(self, value) -> NoReturn:
@@ -157,9 +159,10 @@ class AnsibleCommand(PMObject):
             try:
                 new_filename = os.path.join(self.tmpdir, 'inventory')
                 shutil.copyfile(_file, new_filename)
-                with open(new_filename, 'r') as file:
-                    self._file = new_filename
-                    return file.read(), []
+                if not os.path.exists(new_filename):
+                    raise IOError  # nocv
+                self._file = new_filename
+                return get_file_value(new_filename, ''), []
             except IOError:
                 self._file = inventory
                 self.is_file = False
