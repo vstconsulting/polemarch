@@ -352,7 +352,7 @@ class ApiUsersTestCase(ApiBaseTestCase):
         self.assertCount(self.get_result("get", settings_url), 0)
 
 
-class APITestCase(ApiUsersTestCase, InventoriesTestCase, ProjectTestCase, OApiTestCase):
+class APITestCase(ProjectTestCase, OApiTestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
 
