@@ -771,8 +771,10 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
 class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
     types = models.list_to_choices(models.Project.repo_handlers.keys())
     auth_types = ['NONE', 'KEY', 'PASSWORD']
-    branch_types = {t: "hidden" for t in models.Project.repo_handlers.keys()}
-    branch_types['GIT'] = 'string'
+    branch_auth_types = {t: "hidden" for t in models.Project.repo_handlers.keys()}
+    branch_auth_types['GIT'] = 'string'
+    branch_types = dict(**branch_auth_types)
+    branch_types['TAR'] = 'string'
 
     status = vst_fields.VSTCharField(read_only=True)
     type = serializers.ChoiceField(choices=types, default='MANUAL', label='Repo type')
@@ -780,7 +782,7 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
     repo_auth = vst_fields.DependEnumField(default='NONE',
                                            field='type',
                                            choices={"GIT": auth_types},
-                                           types=branch_types,
+                                           types=branch_auth_types,
                                            label='Repo auth type',
                                            write_only=True)
     auth_data = vst_fields.DependEnumField(allow_blank=True,
@@ -796,7 +798,7 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
     branch = vst_fields.DependEnumField(allow_blank=True,
                                         required=False,
                                         allow_null=True,
-                                        label='GIT branch/tag/SHA',
+                                        label='Branch for GIT(branch/tag/SHA) or TAR(subdir)',
                                         field='type',
                                         types=branch_types)
 
