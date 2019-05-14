@@ -32,7 +32,7 @@ unsafe-load-any-extension=no
 # A comma-separated list of package or module names from where C extensions may
 # be loaded. Extensions are loading into the active Python interpreter and may
 # run arbitrary code
-extension-pkg-whitelist=vstutils.custom_model,vstutils.api.fields,
+extension-pkg-whitelist=vstutils.custom_model,vstutils.api.fields,vstutils.tools
 
 # Allow optimization of some AST trees. This will activate a peephole AST
 # optimizer, which will apply various small optimizations. For instance, it can
@@ -65,7 +65,7 @@ confidence=
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
-disable=useless-super-delegation,len-as-condition,super-init-not-called,keyword-arg-before-vararg,no-else-return,no-self-argument,inconsistent-return-statements,unsubscriptable-object,too-many-branches,deprecated-lambda,old-style-class,no-init,expression-not-assigned,broad-except,logging-format-interpolation,model-no-explicit-unicode,too-many-ancestors,bad-continuation,bad-whitespace,redefined-builtin,missing-docstring,redefined-variable-type,no-self-use,line-too-long,suppressed-message,cmp-method,no-absolute-import,xrange-builtin,using-cmp-argument,basestring-builtin,backtick,unpacking-in-except,old-raise-syntax,getslice-method,long-builtin,print-statement,reduce-builtin,filter-builtin-not-iterating,import-star-module-level,unichr-builtin,dict-iter-method,range-builtin-not-iterating,file-builtin,old-division,standarderror-builtin,coerce-builtin,setslice-method,old-ne-operator,long-suffix,execfile-builtin,oct-method,metaclass-assignment,intern-builtin,apply-builtin,dict-view-method,raw_input-builtin,raising-string,coerce-method,unicode-builtin,next-method-called,hex-method,nonzero-method,round-builtin,cmp-builtin,reload-builtin,buffer-builtin,useless-suppression,zip-builtin-not-iterating,indexing-exception,map-builtin-not-iterating,delslice-method,old-octal-literal,input-builtin,parameter-unpacking,model-has-unicode,bare-except,too-few-public-methods,fixme,dangerous-default-value,attribute-defined-outside-init,pointless-string-statement,too-many-instance-attributes,arguments-differ,binary-op-exception,bad-classmethod-argument,locally-disabled,file-ignored,multiple-statements,superfluous-parens,bad-mcs-classmethod-argument,useless-object-inheritance
+disable=no-name-in-module,useless-super-delegation,len-as-condition,super-init-not-called,keyword-arg-before-vararg,no-else-return,no-self-argument,inconsistent-return-statements,unsubscriptable-object,too-many-branches,deprecated-lambda,old-style-class,no-init,expression-not-assigned,broad-except,logging-format-interpolation,model-no-explicit-unicode,too-many-ancestors,bad-continuation,bad-whitespace,redefined-builtin,missing-docstring,redefined-variable-type,no-self-use,line-too-long,suppressed-message,cmp-method,no-absolute-import,xrange-builtin,using-cmp-argument,basestring-builtin,backtick,unpacking-in-except,old-raise-syntax,getslice-method,long-builtin,print-statement,reduce-builtin,filter-builtin-not-iterating,import-star-module-level,unichr-builtin,dict-iter-method,range-builtin-not-iterating,file-builtin,old-division,standarderror-builtin,coerce-builtin,setslice-method,old-ne-operator,long-suffix,execfile-builtin,oct-method,metaclass-assignment,intern-builtin,apply-builtin,dict-view-method,raw_input-builtin,raising-string,coerce-method,unicode-builtin,next-method-called,hex-method,nonzero-method,round-builtin,cmp-builtin,reload-builtin,buffer-builtin,useless-suppression,zip-builtin-not-iterating,indexing-exception,map-builtin-not-iterating,delslice-method,old-octal-literal,input-builtin,parameter-unpacking,model-has-unicode,bare-except,too-few-public-methods,fixme,dangerous-default-value,attribute-defined-outside-init,pointless-string-statement,too-many-instance-attributes,arguments-differ,binary-op-exception,bad-classmethod-argument,locally-disabled,file-ignored,multiple-statements,superfluous-parens,bad-mcs-classmethod-argument,useless-object-inheritance
 
 
 [REPORTS]
@@ -277,7 +277,7 @@ ignore-mixin-members=yes
 # (useful for modules/projects where namespaces are manipulated during runtime
 # and thus existing member attributes cannot be deduced by static analysis. It
 # supports qualified module names, as well as Unix pattern matching.
-ignored-modules=vstutils.custom_model,vstutils.urls,vstutils.api.base,vstutils.api.views,vstutils.gui.views,vstutils.api.permissions,vstutils.api.filters,vstutils.middleware,vstutils.environment,vstutils.utils,vstutils.exceptions,vstutils.models,vstutils.api.decorators,vstutils.api.swagger,vstutils.api.serializers,
+ignored-modules=vstutils.tools,vstutils.custom_model,vstutils.urls,vstutils.api.base,vstutils.api.views,vstutils.gui.views,vstutils.api.permissions,vstutils.api.filters,vstutils.middleware,vstutils.environment,vstutils.utils,vstutils.exceptions,vstutils.models,vstutils.api.decorators,vstutils.api.swagger,vstutils.api.serializers,
 # ignored-modules=vstutils
 
 # List of class names for which member attributes should not be checked (useful

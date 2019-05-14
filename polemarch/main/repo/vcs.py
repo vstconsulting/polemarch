@@ -7,7 +7,7 @@ try:
     import git
 except:  # nocv
     warnings.warn("Git is not installed or have problems.")
-from ._base import _Base, os
+from ._base import _Base, os, logger
 
 ENV_VARS_TYPE =  Dict[Text, Union[Text, bool]]  # pylint: disable=invalid-name
 
@@ -68,11 +68,13 @@ class Git(_VCS):
             return result
 
     def _update_submodules(self, repo: git.Repo):
+        logger.debug('Update GIT submodules in project [{}]'.format(self.proj.id))
         for sm in repo.submodules:
             # Calling git directly for own submodules
             # since using relative path is not working in gitpython
             # see https://github.com/gitpython-developers/GitPython/issues/730
             with raise_context():
+                logger.debug('Update module "{}" in project [{}].'.format(sm.name, self.proj.id))
                 if sm.url[0:3] == '../':
                     sm_path = sm.name
                     repo.git.submodule('init', sm_path)
@@ -123,7 +125,29 @@ class Git(_VCS):
         return repo
 
     def make_update(self, env: ENV_VARS_TYPE) -> Tuple[git.Repo, Any]:
-        repo = self._get_or_create_repo(env)
+        try:
+            repo = self._get_or_create_repo(env)
+        except git.InvalidGitRepositoryError:
+            logger.info('Convert project [{}] to GIT.'.format(self.proj.id))
+            repo = git.Repo.init(self.path)
+            repo.create_remote('origin', self.proj.repository)
+            with repo.git.custom_environment(**env):
+                kwargs = self.options.get("FETCH_KWARGS", dict())
+                origin = repo.remote('origin')
+                logger.debug('Fetch remote brances for project [{}].'.format(self.proj.id))
+                origin.fetch(**kwargs)
+                if not list(origin.refs):
+                    config_writer = repo.config_writer()
+                    config_writer.set_value("user", "email", self.proj.owner.email).release()
+                    user_name = self.proj.owner.username
+                    if self.proj.owner.last_name and self.proj.owner.first_name:  # nocv
+                        user_name = '{u.fist_name} {u.last_name}'.format(u=self.proj.owner)
+                    config_writer.set_value("user", "name", user_name).release()
+                    repo.git.add(A=True)
+                    repo.git.commit(m='Create project from Polemarch.')
+                    logger.debug('Push project [{}] as master.'.format(self.proj.id))
+                    repo.git.push('--set-upstream', 'origin', 'master')
+
         results = repo, self.vcs_update(repo, env)
         with raise_context():
             repo.git.checkout(self.target_branch)

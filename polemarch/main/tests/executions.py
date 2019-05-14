@@ -647,6 +647,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         if repo_dir:
             if os.path.exists(repo_dir):
                 shutil.rmtree(repo_dir)
+        if submodule_dir:
             if os.path.exists(submodule_dir):
                 shutil.rmtree(submodule_dir)
 
@@ -1235,6 +1236,31 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(project_data['status'], 'ERROR')
         self.assertEqual(project_data['revision'], 'ERROR')
         self.assertEqual(project_data['branch'], 'waiting...')
+
+    def test_on_change_other_to_git(self):
+        # Prepare project and clean repository
+        project_data = self.create_project_test(str(uuid.uuid1()))
+        self.repo_dir = self.get_project_dir(**project_data)
+        self.generate_playbook(self.repo_dir, ['.polemarch.yaml'], data=dump(dict()))
+        self.sync_project(**project_data)
+
+        self.submodule_dir = tempfile.mkdtemp()
+        repo = git.Repo.init(self.submodule_dir, bare=True)
+
+        # Try to change project type
+        results = self.make_bulk([
+            dict(data_type=['project', project_data['id'], 'variables'], method='post',
+                 data={'key': 'repo_type', 'value': 'GIT'}),
+            dict(data_type=['project', project_data['id']], method='patch',
+                 data={'repository': self.submodule_dir}),
+            dict(data_type=['project', project_data['id'], 'sync'], method='post')
+        ], 'put')
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[2]['status'], 200)
+        self.assertTrue(os.path.exists(os.path.join(self.repo_dir, '.polemarch.yaml')))
+        self.assertEqual(repo.head.commit.summary, 'Create project from Polemarch.')
+        self.assertEqual(repo.head.commit.tree.blobs[0].name, '.polemarch.yaml')
 
     def test_complex(self):  # update test for new yaml based inv generator
         bulk_data = self.get_complex_data()
