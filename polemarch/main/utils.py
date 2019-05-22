@@ -5,6 +5,7 @@ import logging
 
 import sys
 import re
+import os
 import json
 from os.path import dirname
 
@@ -14,17 +15,18 @@ except ImportError:  # nocv
     from yaml import Loader, Dumper, load, dump
 
 from vstutils.utils import (
+    ON_POSIX,
     tmp_file_context,
     BaseVstObject,
     Executor,
-    UnhandledExecutor
+    UnhandledExecutor,
+    subprocess
 )
 
 from . import __file__ as file
 
 
 logger = logging.getLogger('polemarch')
-ON_POSIX = 'posix' in sys.builtin_module_names
 
 
 def project_path():
@@ -157,9 +159,23 @@ class AnsibleCache(SubCacheInterface):
 class PMAnsible(PMObject):
     __slots__ = ('execute_path', 'cache',)
     # Json regex
-    _regex = re.compile(r"([\{\[][^\w\d\.].*[\}\]]$)", re.MULTILINE)
+    _regex = re.compile(r"([\{\[\"]{1}.*[\}\]\"]{1})", re.MULTILINE|re.DOTALL)
     ref_name = 'object'
     cache_timeout = 86400*7
+
+    class ExecutorClass(UnhandledExecutor):
+        def execute(self, cmd: list, cwd: str):
+            self.output = ""
+            env = os.environ.copy()
+            env.update(self.env)
+            result = subprocess.check_output(
+                cmd, stderr=self._stderr,
+                bufsize=0, universal_newlines=True,
+                cwd=cwd, env=env,
+                close_fds=ON_POSIX
+            )
+            self.output = result
+            return self.output
 
     def __init__(self, execute_path: str = '/tmp/'):
         self.execute_path = execute_path
@@ -185,7 +201,7 @@ class PMAnsible(PMObject):
         cache = self.get_ansible_cache()
         result = cache.get()
         if result is None:
-            cmd = UnhandledExecutor(stderr=UnhandledExecutor.DEVNULL)
+            cmd = self.ExecutorClass(stderr=UnhandledExecutor.DEVNULL)
             cmd_command = self.get_args()
             cmd.execute(cmd_command, self.execute_path)
             result = self._get_only_json(cmd.output)
