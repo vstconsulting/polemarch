@@ -11,6 +11,8 @@ RUN cd /tmp/polemarch && \
     rm -rf /tmp/polemarch/dist /tmp/polemarch/.tox && \
     mkdir -p /etc/polemarch/ && \
     cp -vf /tmp/polemarch/test_settings.ini /etc/polemarch/settings.ini
+RUN apk update && apk add openssh && \
+    rm -rf /var/cache/apk/*
 
 # Run options
 ENV DJANGO_DEBUG=true
