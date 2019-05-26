@@ -159,7 +159,7 @@ class AnsibleCache(SubCacheInterface):
 class PMAnsible(PMObject):
     __slots__ = ('execute_path', 'cache',)
     # Json regex
-    _regex = re.compile(r"([\{\[\"]{1}.*[\}\]\"]{1})", re.MULTILINE|re.DOTALL)
+    _regex = re.compile(r"([\{\[\"]{1}.*[\}\]\"]{1})", re.MULTILINE | re.DOTALL)
     ref_name = 'object'
     cache_timeout = 86400*7
 

@@ -53,7 +53,7 @@ info:
   x-versions:
     application: 1.2.0
     library: 1.2.0
-    vstutils: 1.10.2
+    vstutils: 2.0.0
     django: 2.2.1
     ansible: 2.7.6
   version: v2

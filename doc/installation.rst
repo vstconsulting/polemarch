@@ -11,7 +11,7 @@ Install from PyPI
 
    .. sourcecode:: bash
 
-        sudo apt-get install python-virtualenv python3.6 python3.6-dev gcc libffi-dev libkrb5-dev libffi6 libssl-dev libyaml-dev libsasl2-dev libldap2-dev sshpass git
+        sudo apt-get install python3-virtualenv python3.6 python3.6-dev gcc libffi-dev libkrb5-dev libffi6 libssl-dev libyaml-dev libsasl2-dev libldap2-dev sshpass git
 
    Required packages on Red Hat/CentOS:
 
@@ -19,7 +19,7 @@ Install from PyPI
 
         sudo yum install epel-release
         sudo yum install https://$(rpm -E '%{?centos:centos}%{!?centos:rhel}%{rhel}').iuscommunity.org/ius-release.rpm
-        sudo yum install python3.6u python3.6u-devel openssl-devel libyaml-devel python-virtualenv krb5-devel krb5-libs openldap-devel git sshpass
+        sudo yum install python36u python36u-devel python36-virtualenv openssl-devel libyaml-devel krb5-devel krb5-libs openldap-devel git sshpass
 
 #. Create user:
     .. sourcecode:: bash
