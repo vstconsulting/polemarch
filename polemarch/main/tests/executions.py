@@ -620,7 +620,7 @@ class BaseExecutionsTestCase(BaseTestCase):
                 'project', prj['id'], {}, 'module', 'get', filters='limit=20'
             ),
             self.get_mod_bulk(
-                'project', prj['id'], {}, 'module', 'get', filters='path=redis'
+                'project', prj['id'], {}, 'module', 'get', filters='path=s3_website'
             ),
             self.get_mod_bulk(
                 'project', prj['id'], {}, 'module/<1[data][results][0][id]>', 'get'
@@ -631,8 +631,8 @@ class BaseExecutionsTestCase(BaseTestCase):
             self.assertEqual(result['status'], 200)
         self.assertTrue(results[0]['data']['count'] > 1000)
         self.assertEqual(results[1]['data']['count'], 1)
-        self.assertEqual(results[1]['data']['results'][0]['name'], 'redis')
-        self.assertEqual(results[2]['data']['data']['module'], 'redis')
+        self.assertEqual(results[1]['data']['results'][0]['name'], 's3_website')
+        self.assertEqual(results[2]['data']['data']['module'], 's3_website')
 
     def get_complex_bulk(self, item, op='add', **kwargs):
         return self.get_bulk(item, kwargs, op)
