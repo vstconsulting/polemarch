@@ -530,22 +530,6 @@ class OApiTestCase(BaseTestCase):
             objName, ansibleModule['properties']['ssh_extra_args'],
             type='string', description=True
         )
-        # self.check_fields(
-        #     objName, ansibleModule['properties']['su'],
-        #     type='boolean', default=False, description=True
-        # )
-        # self.check_fields(
-        #     objName, ansibleModule['properties']['su_user'],
-        #     type='string', description=True
-        # )
-        # self.check_fields(
-        #     objName, ansibleModule['properties']['sudo'],
-        #     type='boolean', default=False, description=True
-        # )
-        # self.check_fields(
-        #     objName, ansibleModule['properties']['sudo_user'],
-        #     type='string', description=True
-        # )
         self.check_fields(
             objName, ansibleModule['properties']['syntax_check'],
             type='boolean', default=False, description=True
