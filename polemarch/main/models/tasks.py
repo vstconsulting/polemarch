@@ -1,6 +1,6 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
-from typing import NoReturn, Any, Dict, List, Tuple, Iterable, TypeVar, Generator
+from typing import NoReturn, Any, Dict, List, Tuple, Iterable, TypeVar, Generator, Text
 import logging
 from collections import OrderedDict
 from datetime import timedelta, datetime
@@ -119,7 +119,7 @@ class Template(ACLModel):
             return value
         raise ValueError("Unknown data type set.")  # nocv
 
-    def __encrypt(self, new_vars: Dict, data_name: str = 'data') -> Dict:
+    def __encrypt(self, new_vars: Dict, data_name: Text = 'data') -> Dict:
         old_vars = getattr(self, data_name).get('vars', {})
         for key in filter(lambda k: new_vars[k] == '[~~ENCRYPTED~~]', new_vars.keys()):
             new_vars[key] = old_vars.get(key, new_vars[key])
@@ -488,7 +488,7 @@ class History(BModel):
         result = "{" + result[:-1] + "\n}"
         return json.loads(result)
 
-    def get_raw(self, original=True, filters=(), excludes=()) -> str:
+    def get_raw(self, original=True, filters=(), excludes=()) -> Text:
         qs = self.raw_history_line.filter(*filters).exclude(*excludes)
         qs = qs.order_by('line_gnumber', 'line_number')
         data = "".join(qs.values_list("line", flat=True))
@@ -532,7 +532,7 @@ class History(BModel):
         if endl:
             yield self.__create_line(number, nline, endl)
 
-    def write_line(self, value: str, number: int, endl: str = "") -> NoReturn:
+    def write_line(self, value: str, number: int, endl: Text = "") -> NoReturn:
         self.raw_history_line.bulk_create(
             map(lambda l: l, self.__bulking_lines(value, number, endl))
         )

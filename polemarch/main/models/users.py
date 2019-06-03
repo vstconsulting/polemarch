@@ -1,6 +1,6 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
-from typing import NoReturn, Dict
+from typing import NoReturn, Dict, Text
 import logging
 import json
 
@@ -32,7 +32,7 @@ class ACLPermission(BModel):
         pass
 
     @property
-    def member_type(self) -> str:  # noce
+    def member_type(self) -> Text:  # noce
         if self.user is not None:
             return "user"
         return "team"

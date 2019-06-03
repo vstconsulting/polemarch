@@ -81,7 +81,7 @@ class Host(AbstractModel):
 class GroupQuerySet(AbstractVarsQuerySet):
     # pylint: disable=no-member
 
-    def get_subgroups_id(self, accumulated: AbstractVarsQuerySet = None, tp: str = "parents") -> AbstractVarsQuerySet:
+    def get_subgroups_id(self, accumulated: AbstractVarsQuerySet = None, tp: Text = "parents") -> AbstractVarsQuerySet:
         accumulated = accumulated if accumulated else self.none()
         list_id = self.exclude(id__in=accumulated).values_list("id", flat=True)
         accumulated = (accumulated | list_id)
