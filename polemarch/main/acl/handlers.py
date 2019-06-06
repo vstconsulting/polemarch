@@ -1,12 +1,14 @@
+from typing import Type
+from django.db.models import Model
 
 
-class Default(object):
+class Default:
     # pylint: disable=unused-argument
     qs_methods = []
 
     def __init__(self, model=None, instance=None):
         self.instance = instance
-        self.model = model
+        self.model = model  # type: Type[Model]
 
     def set_owner(self, user):
         '''

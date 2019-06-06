@@ -1,38 +1,49 @@
+/**
+ * File with tests for /user/ view.
+ */
 
-window.qunitTestsArray['guiPaths.profile/settings'] = {
-    test:function()
-    {
-        let path = "profile/settings";
-        guiTests.openPage(path);
-        guiTests.hasElement(1, ".btn_save", path);
-        guiTests.hasEditButton(false);
-        guiTests.hasAddButton(0, path);
-        guiTests.hasElement(1, ".gui-field-chartLineSettings", path);
-        guiTests.hasAddButton(0, path);
-        $(".btn_save").trigger('click');
-    }
+/**
+ * Tests for views connected with User Model.
+ */
+window.qunitTestsArray['guiViews[user.pm]'] = {
+    test: function() {
+        let list_path = '/user/';
+        let page_path = list_path + '{' + path_pk_key + '}/';
+        let instances_info = guiTests.getEmptyInstancesInfo();
+
+        // creates random user, data of which will be used in following tests.
+        guiTests.createRandomUser(instances_info, true);
+
+        /////////////////////////////////////////////////////////////////
+        // Test for /user/{pk}/settings/ view
+        /////////////////////////////////////////////////////////////////
+        guiTests.testPageView(page_path + "settings/", instances_info, true);
+
+        /////////////////////////////////////////////////////////////////
+        // Test for /user/{pk}/settings/edit/ view
+        /////////////////////////////////////////////////////////////////
+        guiTests.testPageEditView(page_path + "settings/edit/", instances_info, {}, false);
+    },
 };
 
-window.qunitTestsArray['guiPaths.user.user_settings'] = {
-    test:function()
-    {
-        let env = {};
-        let pk_obj = {};
+/**
+ * Test for 'profile' views.
+ */
+window.qunitTestsArray['guiViews[profile.pm]'] = {
+    test: function() {
+        let instances_info = {
+            url_params: {},
+            key_fields_data : {},
+        };
 
-        // creates user for testing user settings
-        guiTests.createUser(env, pk_obj, true);
+        /////////////////////////////////////////////////////////////////
+        // Test for /profile/settings/ view
+        /////////////////////////////////////////////////////////////////
+        guiTests.testPageView("/profile/settings/", instances_info, true);
 
-        /////////////////////////////////////////////
-        // Test path /user/{pk}/settings/ (edit page)
-        /////////////////////////////////////////////
-
-        guiTests.openPage("/user/{pk}/settings/", env, (env) =>{
-            return vstMakeLocalApiUrl("/user/{pk}/settings/", pk_obj);
-        });
-
-        guiTests.updateObject("/user/{pk}/settings/", {autoupdateInterval:{value:5}}, true);
-
-        // deletes remaining objects
-        guiTests.deleteObjByPath("/user/{pk}/", env, pk_obj);
-    }
+        /////////////////////////////////////////////////////////////////
+        // Test for /profile/settings/edit/ view
+        /////////////////////////////////////////////////////////////////
+        guiTests.openPage("/profile/settings/edit/", instances_info.url_params);
+    },
 };

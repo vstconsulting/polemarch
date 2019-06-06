@@ -37,7 +37,6 @@ except ImportError:
 # ones.
 extensions = [
     'sphinxcontrib.httpdomain',
-    'sphinxcontrib.openapi',
     'vstutils.api.doc_generator'
 ]
 

@@ -38,7 +38,7 @@ class RepoTask(BaseTask):
 
 @task(app, ignore_result=True, bind=True)
 class ScheduledTask(BaseTask):
-    __slots__ = 'job_id',
+    __slots__ = ('job_id',)
 
     def __init__(self, app, job_id, *args, **kwargs):
         super(ScheduledTask.task_class, self).__init__(app, *args, **kwargs)

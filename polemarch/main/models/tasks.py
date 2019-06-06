@@ -1,12 +1,9 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
-
+from typing import NoReturn, Any, Dict, List, Tuple, Iterable, TypeVar, Generator, Text
 import logging
-try:
-    from ruamel.ordereddict import ordereddict as OrderedDict
-except ImportError:  # nocv
-    from collections import OrderedDict
-from datetime import timedelta
+from collections import OrderedDict
+from datetime import timedelta, datetime
 from functools import partial
 import json
 
@@ -28,10 +25,11 @@ from . import Inventory
 from ..exceptions import DataNotReady, NotApplicable
 from .base import ForeignKeyACL, BModel, ACLModel, BQuerySet, models
 from .vars import AbstractModel, AbstractVarsQuerySet
-from .projects import Project
+from .projects import Project, HISTORY_ID
 
 
 logger = logging.getLogger("polemarch")
+InvOrString = TypeVar('InvOrString', str, int, Inventory, None)
 
 
 # Block of real models
@@ -60,13 +58,13 @@ class Template(ACLModel):
     }
     kinds = list(template_fields.keys())
 
-    def get_option_data(self, option):
+    def get_option_data(self, option) -> Dict:
         return self.options.get(option, {})
 
-    def get_options_data(self):
+    def get_options_data(self) -> Dict:
         return json.loads(self.options_data or '{}')
 
-    def get_data(self):
+    def get_data(self) -> Dict:
         data = json.loads(self.template_data)
         if "inventory" in self.template_fields[self.kind] and self.inventory:
             try:
@@ -76,14 +74,14 @@ class Template(ACLModel):
         return data
 
     @property
-    def inventory_object(self):
+    def inventory_object(self) -> InvOrString:
         try:
             return self.project.inventories.get(pk=int(self.data['inventory']))
         except (ValueError, Inventory.DoesNotExist):
             self.project.check_path(self.data['inventory'])
             return self.data['inventory']
 
-    def get_data_with_options(self, option, **extra):
+    def get_data_with_options(self, option: str, **extra) -> Dict[str, Any]:
         data = self.get_data()
         option_data = self.get_option_data(option)
         option_vars = option_data.pop("vars", {})
@@ -94,7 +92,7 @@ class Template(ACLModel):
         data.update(extra)
         return data
 
-    def execute(self, user, option=None, **extra):
+    def execute(self, user: User, option: str = None, **extra):
         # pylint: disable=protected-access
         tp = self._exec_types.get(self.kind, None)
         if tp is None:
@@ -119,22 +117,20 @@ class Template(ACLModel):
             return json.loads(value)  # nocv
         elif isinstance(value, (dict, OrderedDict, list)):
             return value
-        else:
-            raise ValueError("Unknown data type set.")  # nocv
+        raise ValueError("Unknown data type set.")  # nocv
 
-    def __encrypt(self, new_vars, data_name='data'):
+    def __encrypt(self, new_vars: Dict, data_name: Text = 'data') -> Dict:
         old_vars = getattr(self, data_name).get('vars', {})
-        secrets = filter(lambda key: new_vars[key] == '[~~ENCRYPTED~~]', new_vars.keys())
-        for key in secrets:
+        for key in filter(lambda k: new_vars[k] == '[~~ENCRYPTED~~]', new_vars.keys()):
             new_vars[key] = old_vars.get(key, new_vars[key])
         return new_vars
 
-    def keep_encrypted_data(self, new_vars):
+    def keep_encrypted_data(self, new_vars: Dict) -> Dict:
         if self.template_data == '{}':
             return new_vars
         return self.__encrypt(new_vars)
 
-    def _validate_option_data(self, data):
+    def _validate_option_data(self, data: Dict) -> NoReturn:
         excepted = self.excepted_execution_fields
         errors = {
             name: ['Disallowed to override {}.'.format(name)]
@@ -143,7 +139,7 @@ class Template(ACLModel):
         if errors:
             raise ValidationError(errors)
 
-    def set_options_data(self, value):
+    def set_options_data(self, value: Any) -> NoReturn:
         options_data = self._convert_to_data(value)
         new = dict()
         for option, data in options_data.items():
@@ -153,7 +149,7 @@ class Template(ACLModel):
             new[option] = data
         self.options_data = json.dumps(new)
 
-    def set_data(self, value):
+    def set_data(self, value) -> NoReturn:
         data = self._convert_to_data(value)
         inventory_id = data.pop('inventory', None)
         if "inventory" in self.template_fields[self.kind]:
@@ -165,33 +161,33 @@ class Template(ACLModel):
         self.template_data = json.dumps(data)
 
     @property
-    def data(self):
+    def data(self) -> Dict:
         return self.get_data()
 
     @data.setter
-    def data(self, value):
+    def data(self, value) -> NoReturn:
         self.set_data(value)
 
     @data.deleter
-    def data(self):  # nocv
+    def data(self) -> NoReturn:  # nocv
         self.template_data = ""
         self.inventory = None
         self.project = None
 
     @property
-    def options(self):
+    def options(self) -> Dict[str, Dict]:
         return self.get_options_data()
 
     @options.setter
-    def options(self, value):
+    def options(self, value) -> NoReturn:
         self.set_options_data(value)
 
     @options.deleter
-    def options(self):  # nocv
+    def options(self) -> NoReturn:  # nocv
         self.options_data = ''
 
     @property
-    def options_list(self):
+    def options_list(self) -> List[str]:
         return list(self.options.keys())
 
 
@@ -246,11 +242,11 @@ class PeriodicTask(AbstractModel):
     ]
 
     @property
-    def inventory(self):
+    def inventory(self) -> InvOrString:
         return self._inventory or self.inventory_file
 
     @inventory.setter
-    def inventory(self, inventory):
+    def inventory(self, inventory: InvOrString) -> NoReturn:
         if isinstance(inventory, Inventory):
             self._inventory = inventory  # nocv
         elif isinstance(inventory, (six.string_types, six.text_type, int)):
@@ -261,7 +257,7 @@ class PeriodicTask(AbstractModel):
                 self.inventory_file = inventory
 
     @property
-    def crontab_kwargs(self):
+    def crontab_kwargs(self) -> Dict:
         kwargs, index, fields = dict(), 0, self.schedule.split(" ")
         for field_name in self.time_types_list:
             if index < len(fields) and len(fields[index]) > 0:
@@ -271,16 +267,16 @@ class PeriodicTask(AbstractModel):
             index += 1
         return kwargs
 
-    def get_vars(self):
+    def get_vars(self) -> OrderedDict:
         qs = self.variables.order_by("key")
         return OrderedDict(qs.values_list('key', 'value'))
 
-    def get_schedule(self):
+    def get_schedule(self) -> Any:
         if self.type == "CRONTAB":
             return crontab(**self.crontab_kwargs)
         return float(self.schedule)
 
-    def execute(self, sync=True):
+    def execute(self, sync: bool = True) -> HISTORY_ID:
         kwargs = dict(
             sync=sync, save_result=self.save_result,
             initiator=self.id, initiator_type="scheduler"
@@ -304,14 +300,14 @@ class PeriodicTask(AbstractModel):
 class HistoryQuerySet(BQuerySet):
     use_for_related_fields = True
 
-    def create(self, **kwargs):
+    def create(self, **kwargs) -> BModel:
         raw_stdout = kwargs.pop("raw_stdout", None)
         history = super(HistoryQuerySet, self).create(**kwargs)
         if raw_stdout:
             history.raw_stdout = raw_stdout
         return history
 
-    def _get_history_stats_by(self, qs, grouped_by='day'):
+    def _get_history_stats_by(self, qs, grouped_by='day') -> List:
         sum_by_date, values = {}, []
         qs = qs.values(grouped_by, 'status').annotate(sum=Count('id'))
         for hist_stat in qs.order_by(grouped_by):
@@ -323,7 +319,7 @@ class HistoryQuerySet(BQuerySet):
             values.append(hist_stat)
         return values
 
-    def stats(self, last):
+    def stats(self, last: int) -> OrderedDict:
         qs = self.filter(start_time__gte=now()-timedelta(days=last))
         qs = qs.annotate(
             day=dbfunc.TruncDay('start_time'),
@@ -336,16 +332,16 @@ class HistoryQuerySet(BQuerySet):
         result['year'] = self._get_history_stats_by(qs, 'year')
         return result
 
-    def __get_extra_options(self, extra, options):
+    def __get_extra_options(self, extra, options) -> Dict[str, Any]:
         return {opt: extra.pop(opt, options[opt]) for opt in options}
 
-    def __get_additional_options(self, extra_options):
+    def __get_additional_options(self, extra_options) -> Dict[str, Any]:
         options = dict()
         if extra_options['template_option'] is not None:
             options['template_option'] = extra_options['template_option']
         return options
 
-    def start(self, project, kind, mod_name, inventory, **extra):
+    def start(self, project, kind, mod_name, inventory, **extra) -> Tuple[Any, Dict]:
         extra_options = self.__get_extra_options(extra, project.EXTRA_OPTIONS)
         if not extra_options['save_result']:
             return None, extra
@@ -409,10 +405,10 @@ class History(BModel):
         ordering = ["-start_time"]
 
     @property
-    def working(self):
+    def working(self) -> bool:
         return self.status in self.working_statuses
 
-    def get_hook_data(self, when):
+    def get_hook_data(self, when: str) -> OrderedDict:
         data = OrderedDict()
         data['id'] = self.id
         data['start_time'] = self.start_time.isoformat()
@@ -427,22 +423,21 @@ class History(BModel):
             data["initiator"]['name'] = self.initiator_object.name
         return data
 
-    def _get_seconds_from_time(self, value):
+    def _get_seconds_from_time(self, value: datetime) -> int:
         return int(value.total_seconds())
 
     @property
-    def execution_time(self):
+    def execution_time(self) -> int:
         if self.stop_time is None:
             return self._get_seconds_from_time(now() - self.start_time)  # nocv
-        else:
-            return self._get_seconds_from_time(self.stop_time - self.start_time)
+        return self._get_seconds_from_time(self.stop_time - self.start_time)
 
     @property
-    def execute_args(self):
+    def execute_args(self) -> Dict[str, Any]:
         return json.loads(self.json_args)
 
     @execute_args.setter
-    def execute_args(self, value):
+    def execute_args(self, value: Dict) -> NoReturn:
         if not isinstance(value, dict):
             raise ValidationError(dict(args="Should be a dict."))
         data = {k: v for k, v in value.items() if k not in ['group']}
@@ -453,28 +448,27 @@ class History(BModel):
 
     # options
     @property
-    def options(self):
+    def options(self) -> Dict:
         return json.loads(self.json_options)
 
     @options.setter
-    def options(self, value):
+    def options(self, value: Dict) -> NoReturn:
         if not isinstance(value, dict):
             raise ValidationError(dict(args="Should be a dict."))  # nocv
         self.json_options = json.dumps(value)
 
     @property
-    def initiator_object(self):
+    def initiator_object(self) -> Any:
         if self.initiator_type == "project" and self.initiator:
             return self
         elif self.initiator_type == "scheduler" and self.initiator:
             return PeriodicTask.objects.get(id=self.initiator)
         elif self.initiator_type == "template" and self.initiator:
             return Template.objects.get(id=self.initiator)
-        else:
-            return None
+        return None
 
     @property
-    def facts(self):
+    def facts(self) -> Dict:
         if self.status not in self.stoped_statuses:
             raise DataNotReady("Execution still in process.")
         if self.kind != 'MODULE' or self.mode != 'setup' or self.status != 'OK':
@@ -494,27 +488,27 @@ class History(BModel):
         result = "{" + result[:-1] + "\n}"
         return json.loads(result)
 
-    def get_raw(self, original=True, filters=(), excludes=()):
+    def get_raw(self, original=True, filters=(), excludes=()) -> Text:
         qs = self.raw_history_line.filter(*filters).exclude(*excludes)
         qs = qs.order_by('line_gnumber', 'line_number')
         data = "".join(qs.values_list("line", flat=True))
         return data if original else self.ansi_escape.sub('', data)
 
     @property
-    def raw_stdout(self):
+    def raw_stdout(self) -> str:
         return self.get_raw()
 
     @raw_stdout.setter
     @transaction.atomic
-    def raw_stdout(self, lines):
+    def raw_stdout(self, lines: Iterable) -> NoReturn:
         del self.raw_stdout
         self.check_output(lines)
 
     @raw_stdout.deleter
-    def raw_stdout(self):
+    def raw_stdout(self) -> NoReturn:
         self.raw_history_line.all().delete()
 
-    def check_output(self, output):
+    def check_output(self, output: str) -> NoReturn:
         raw_count = self.raw_history_line.all().count()
         lines = re.findall(r'.+\n{0,}', output)
         counter = 0
@@ -524,12 +518,12 @@ class History(BModel):
             counter += 1
             self.write_line(number=counter, value=line)
 
-    def __create_line(self, gnum, num, val, hidden=False):
+    def __create_line(self, gnum: int, num: int, val: str, hidden: bool = False) -> BModel:
         return HistoryLines(
             history=self, line_gnumber=gnum, line_number=num, line=val, hidden=hidden
         )
 
-    def __bulking_lines(self, value, number, endl):
+    def __bulking_lines(self, value: str, number: int, endl: str) -> Generator:
         out = six.StringIO(value)
         nline = 0
         for line in iter(partial(out.read, 2 * 1024 - 100), ''):
@@ -538,7 +532,7 @@ class History(BModel):
         if endl:
             yield self.__create_line(number, nline, endl)
 
-    def write_line(self, value, number, endl=""):
+    def write_line(self, value: str, number: int, endl: Text = "") -> NoReturn:
         self.raw_history_line.bulk_create(
             map(lambda l: l, self.__bulking_lines(value, number, endl))
         )

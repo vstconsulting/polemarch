@@ -1,1376 +1,637 @@
-var widget_sort={};
-
-guiDashboard.model.className = "guiDashboard"
-
-guiDashboard.model.count = {
-    projects:'-',
-    inventories:'-',
-    hosts:'-',
-    groups:'-',
-    users:'-',
-    history:'-',
-}
-
-guiDashboard.statsData={
-    projects:'-',
-    inventories:'-',
-    hosts:'-',
-    groups:'-',
-    users:'-',
-    templates:'-'
-}
-
-guiDashboard.tpl_name = 'pmDashboard'
-
-guiDashboard.statsDataLast=14;
-guiDashboard.statsDataLastQuery=14;
-guiDashboard.statsDataMomentType='day';
-
-
 /**
- * Two-dimensional array with structure of Dashboard widgets.
- *
- * @example
- * [
- *  [{
-        name:'pmwTemplatesCounter',  // Имя класса виджета
-        opt:{},                      // Опции для виджета
-    }]
- ]
- *
- * @type Array
+ * Class of history chart widget.
  */
-guiDashboard.model.widgets = [
-    [
-
-    ],
-]
-
-/**
- * Two-dimensional array with default structure of Dashboard widgets.
- */
-guiDashboard.model.defaultWidgets = [
-    [
-        {
-            name:'pmwTemplatesCounter',
-            title:'Templates Counter',
-            sort:1,
-            active:true,
-            opt:{},
-            type:1,
-            collapse:false,
-        },
-        {
-            name:'pmwProjectsCounter',
-            title:'Projects Counter',
-            sort:2,
-            active:true,
-            opt:{},
-            type:1,
-            collapse:false,
-        },
-        {
-            name:'pmwInventoriesCounter',
-            title:'Inventories Counter',
-            sort:3,
-            active:true,
-            opt:{},
-            type:1,
-            collapse:false,
-        },
-        {
-            name:'pmwHostsCounter',
-            title:'Hosts Counter',
-            sort:4,
-            active:true,
-            opt:{},
-            type:1,
-            collapse:false,
-        },
-        {
-            name:'pmwGroupsCounter',
-            title:'Groups Counter',
-            sort:5,
-            active:true,
-            opt:{},
-            type:1,
-            collapse:false,
-        },
-        {
-            name:'pmwUsersCounter',
-            title:'Users Counter',
-            sort:6,
-            active:true,
-            opt:{},
-            type:1,
-            collapse:false,
-        },
-        // {
-        //     name:'pmwAnsibleModuleWidget',
-        //     title:'Run shell command',
-        //     sort:7,
-        //     active:true,
-        //     opt:{},
-        //     type:0,
-        //     collapse:false,
-        // },
-        {
-            name:'pmwChartWidget',
-            title:'Tasks history',
-            sort:7,
-            active:true,
-            opt:{},
-            type:0,
-            collapse:false,
-        },
-        /*{
-            name:'pmwTasksTemplatesWidget',
-            title:'Templates Task',
-            sort:8,
-            active:true,
-            opt:{},
-            type:0,
-            collapse:false,
-        },
-        {
-            name:'pmwModulesTemplatesWidget',
-            title:'Templates Module',
-            sort:9,
-            active:true,
-            opt:{},
-            type:0,
-            collapse:false,
-        },*//**/
-    ],
-]
-
-/**
- * Array with Dashboard's Chart line settings.
- */
-guiDashboard.model.ChartLineSettings = [
-
-]
-
-/**
- * Array with default Dashboard's Chart line settings.
- */
-guiDashboard.model.defaultChartLineSettings = [
-    {
-        name: "all_tasks",
-        title: "All tasks",
-        color: "#1f77b4",
-        bg_color:"rgba(31, 119, 180, 0.3)",
-        active: true
-    },
-    {
-        name: "ok",
-        title: "OK",
-        color: "#276900",
-        bg_color:"rgba(39, 105, 0, 0.3)",
-        active: true
-    },
-    {
-        name: "error",
-        title: "ERROR",
-        color: "#dc3545",
-        bg_color:"rgba(220, 53, 69, 0.3)",
-        active: true
-    },
-    {
-        name: "interrupted",
-        title: "INTERRUPTED",
-        color: "#9b97e4",
-        bg_color:"rgba(155, 151, 228, 0.3)",
-        active: true
-    },
-    {
-        name: "delay",
-        title: "DELAY",
-        color: "#808419",
-        bg_color:"rgba(128, 132, 25, 0.3)",
-        active: true
-    },
-    {
-        name: "offline",
-        title: "OFFLINE",
-        color: "#9e9e9e",
-        bg_color:"rgba(158, 158, 158, 0.3)",
-        active: true
-    }
-]
-
-guiDashboard.model.autoupdateInterval = 15000;
-
-guiDashboard.model.skinsSettings = {};
-guiDashboard.model.selectedSkin = 'default';
-guiDashboard.model.dataFromApiLoaded = false;
-
-/**
- * Function copies all properties of default chart line settings.
- * This function is supposed to be called when empty JSON was received from API.
- */
-guiDashboard.cloneChartLineSettingsTotally = function(){
-    guiDashboard.model.ChartLineSettings = JSON.parse(JSON.stringify(guiDashboard.model.defaultChartLineSettings));
-    return guiDashboard.model.ChartLineSettings;
-}
-
-/**
- * Function updates properties of chart line settings, info about which was received from API.
- * This function is supposed to be called when not empty JSON was received from API.
- */
-guiDashboard.cloneChartLineSettingsFromApi = function(data){
-    guiDashboard.model.ChartLineSettings = JSON.parse(JSON.stringify(guiDashboard.model.defaultChartLineSettings));
-    for(var i in guiDashboard.model.ChartLineSettings)
-    {
-        for(var j in data)
-        {
-            if(guiDashboard.model.ChartLineSettings[i].name == j)
-            {
-                for(var k in data[j])
-                {
-                    if(guiDashboard.model.ChartLineSettings[i].hasOwnProperty(k))
-                    {
-                        guiDashboard.model.ChartLineSettings[i][k] = data[j][k];
-                    }
-                }
-            }
-        }
-    }
-    return guiDashboard.model.ChartLineSettings;
-}
-
-/**
- * Function copies all properties of default widget settings.
- * This function is supposed to be called when empty JSON was received from API.
- */
-guiDashboard.cloneDefaultWidgetsTotally = function(){
-    for(var i in guiDashboard.model.defaultWidgets[0])
-    {
-        guiDashboard.model.widgets[0][i]={};
-        for (var j in guiDashboard.model.defaultWidgets[0][i])
-        {
-            guiDashboard.model.widgets[0][i][j]=guiDashboard.model.defaultWidgets[0][i][j];
-        }
-    }
-    console.log(guiDashboard.model.widgets[0]);
-    return guiDashboard.model.widgets[0];
-}
-
-/**
- * Function copies all properties of default 'static' widget settings.
- * 'Static' settings - settings, that don't change during user work with GUI.
- * For example, name, title, opt, type.
- * This function is supposed to be called when not empty JSON was received from API.
- */
-guiDashboard.cloneDefaultWidgetsStaticSettingsOnly = function(){
-    for(var i in guiDashboard.model.defaultWidgets[0])
-    {
-        guiDashboard.model.widgets[0][i]={};
-        guiDashboard.model.widgets[0][i].name=guiDashboard.model.defaultWidgets[0][i].name;
-        guiDashboard.model.widgets[0][i].title=guiDashboard.model.defaultWidgets[0][i].title;
-        guiDashboard.model.widgets[0][i].opt=guiDashboard.model.defaultWidgets[0][i].opt;
-        guiDashboard.model.widgets[0][i].type=guiDashboard.model.defaultWidgets[0][i].type;
-    }
-    return guiDashboard.model.widgets[0];
-}
-
-/**
- * Function adds not static properties to widget.
- * Function sets value from API if it is, otherwise, it sets default value.
- */
-guiDashboard.clonetWidgetsSettingsFromApiAndVerify = function(data){
-    guiDashboard.cloneDefaultWidgetsStaticSettingsOnly();
-    for(var i in guiDashboard.model.defaultWidgets[0])
-    {
-        for(var j in data)
-        {
-            if(guiDashboard.model.defaultWidgets[0][i].name==j)
-            {
-                for (var k in guiDashboard.model.defaultWidgets[0][i])
-                {
-                    if(k in data[j]){
-                        guiDashboard.model.widgets[0][i][k]=data[j][k];
-                    }
-                    else
-                    {
-                        guiDashboard.model.widgets[0][i][k]=guiDashboard.model.defaultWidgets[0][i][k];
-                    }
-                }
-            }
-        }
-    }
-    return guiDashboard.model.widgets[0];
-}
-
-/**
- * Function checks Necessity to send API request for loading of user's dashboard settings.
- * For example, if some property is missed in current widget object
- * or even if widget is missed, request will be sent.
- * @param {Object} defaultObj - object with default settings.
- * @param {Object} currentObj - object with current settings.
- */
-guiDashboard.checkNecessityToLoadDashboardSettingsFromApi = function(defaultObj, currentObj)
-{
-    var bool1 = false, bool2 = false;
-    for (var i in defaultObj){
-        for (var j in currentObj)
-        {
-            if(defaultObj[i].name == currentObj[j].name)
-            {
-                for(var k in defaultObj[i])
-                {
-                    if(!(k in currentObj[j])){
-                        bool1 = true;
-                    }
-
-                }
-            }
-        }
-    }
-
-    if(defaultObj.length != currentObj.length)
-    {
-        bool2 = true;
-    }
-
-    if(bool1 || bool2)
-    {
-        // request will be sent
-        return true;
-    }
-    else
-    {
-        // request will not be sent
-        return false;
-    }
-}
-
-/**
- * Function creates object with current widget settings,
- * based on changes in guiDashboard.model.widgets[0][i].
- * @param localObj(Object) - guiDashboard.model.widgets[0][i].
- */
-guiDashboard.getNewWidgetSettings = function(localObj)
-{
-    var obj={};
-    obj.sort=localObj.sort;
-    obj.active=localObj.active;
-    obj.collapse=localObj.collapse;
-    return obj;
-}
-
-/**
- * Function sends request to API for getting user's settings
- * (dashboard settings, chartline settings, autoupdate interval).
- * If request answer is not empty, API settings will be added to Dashboard model.
- */
-guiDashboard.getUserSettingsFromAPI = function()
-{
-    var userId=window.my_user_id;
-    if(guiDashboard.checkNecessityToLoadDashboardSettingsFromApi(guiDashboard.model.defaultWidgets[0], guiDashboard.model.widgets[0]) ||
-        guiDashboard.checkNecessityToLoadDashboardSettingsFromApi(guiDashboard.model.defaultChartLineSettings, guiDashboard.model.ChartLineSettings))
-    {
-        let query = {
-            method: "get",
-            data_type: ["user", userId, "settings"],
-        }
-
-        let def = new $.Deferred();
-        $.when(api.query(query, true)).done(function(answer)
-        {
-            let data = answer.data
-            guiDashboard.setUserSettingsFromApiAnswer(data);
-            def.resolve()
-        }).fail(e => {
-            console.warn(e)
-            webGui.showErrors(e)
-            def.reject()
-        })
-
-        return def.promise()
-    }
-    else
-    {
-        return false;
-    }
-}
-
-/*
-* Function sets users settings from API to guiDashboard object.
-* @param - object - data - data from API
-* */
-guiDashboard.setUserSettingsFromApiAnswer = function(data)
-{
-    if ($.isEmptyObject(data.widgetSettings))
-    {
-        guiDashboard.cloneDefaultWidgetsTotally();
-    }
-    else
-    {
-        guiDashboard.clonetWidgetsSettingsFromApiAndVerify(data.widgetSettings);
-        guiDashboard.model.widgets[0].sort(guiDashboard.sortCountWidget);
-    }
-
-    if ($.isEmptyObject(data.chartLineSettings))
-    {
-        guiDashboard.cloneChartLineSettingsTotally();
-    }
-    else
-    {
-        guiDashboard.cloneChartLineSettingsFromApi(data.chartLineSettings);
-    }
-
-    if(data.autoupdateInterval)
-    {
-        guiDashboard.cloneAutoupdateIntervalFromApi(data.autoupdateInterval);
-    }
-    else
-    {
-        guiDashboard.cloneDefaultAutoupdateInterval()
-    }
-
-    if(data.skinsSettings)
-    {
-        guiDashboard.cloneDataSkinsFromApi(data.skinsSettings);
-    }
-    else
-    {
-        guiLocalSettings.set('skins_settings', guiDashboard.model.skinsSettings);
-    }
-
-    if(data.selectedSkin)
-    {
-        guiDashboard.cloneSelectedSkinFromApi(data.selectedSkin);
-    }
-    else
-    {
-        guiDashboard.setSelectedSkin(guiDashboard.model.selectedSkin);
-    }
-
-    guiDashboard.model.dataFromApiLoaded = true;
-}
-
-/*
- * Function saves autoupdate interval from API into guiDashboard and into local storage.
- * @param (number) - interval - autoupdate interval
- */
-guiDashboard.cloneAutoupdateIntervalFromApi = function(interval)
-{
-    guiDashboard.model.autoupdateInterval = interval;
-    guiLocalSettings.set('page_update_interval', guiDashboard.model.autoupdateInterval)
-}
-
-/*
- * Function sets default autoupdate interval.
- */
-guiDashboard.cloneDefaultAutoupdateInterval = function()
-{
-    guiLocalSettings.setIfNotExists('page_update_interval', guiDashboard.model.autoupdateInterval)
-}
-
-/**
- * Function sets skinsSettings from API to local storage and to guiDashboard.model.skinsSettings.
- */
-guiDashboard.cloneDataSkinsFromApi = function(skins)
-{
-    guiDashboard.model.skinsSettings = $.extend(true, {}, skins);
-    guiLocalSettings.set('skins_settings', guiDashboard.model.skinsSettings);
-}
-
-/**
- * Function sets selected skin.
- */
-guiDashboard.setSelectedSkin = function(selectedSkin)
-{
-    guiCustomizer.setSkin(selectedSkin);
-    guiCustomizer.skin.init();
-    guiCustomizer.render();
-}
-
-/**
- * Function sets selected skin form api;
- */
-guiDashboard.cloneSelectedSkinFromApi = function(selectedSkin)
-{
-    guiDashboard.model.selectedSkin = selectedSkin;
-    guiDashboard.setSelectedSkin(selectedSkin);
-}
-
-
-
-/**
- * Function sends request to API for putting user's settings
- * (dashboard settings, chartline settings, autoupdate interval).
- */
-guiDashboard.putUserDashboardSettingsToAPI = function()
-{
-    var userId=window.my_user_id;
-    var widgetSettings= {};
-    for(var i in  guiDashboard.model.widgets[0]){
-        var objName=guiDashboard.model.widgets[0][i].name;
-        widgetSettings[objName]=guiDashboard.getNewWidgetSettings(guiDashboard.model.widgets[0][i]);
-    }
-    var chartLineSettings = {};
-    for(var i in guiDashboard.model.ChartLineSettings){
-        var objName=guiDashboard.model.ChartLineSettings[i].name;
-        chartLineSettings[objName]={active: guiDashboard.model.ChartLineSettings[i].active};
-    }
-
-    let query = {
-        method: "post",
-        data_type: ["user", userId, "settings"],
-        data:{
-            autoupdateInterval: guiDashboard.model.autoupdateInterval,
-            widgetSettings:widgetSettings,
-            chartLineSettings:chartLineSettings,
-            skinsSettings: guiDashboard.model.skinsSettings,
-            selectedSkin: guiDashboard.model.selectedSkin,
-        }
-    }
-
-    let def = new $.Deferred();
-
-    $.when(api.query(query, true)).done(d => {
-        def.resolve();
-    }).fail(e => {
-        console.warn(e)
-        webGui.showErrors(e)
-        def.reject()
-    })
-
-    return def.promise()
-}
-
-/**
- * Function sorts widgets array.
- */
-guiDashboard.sortCountWidget=function(Obj1, Obj2)
-{
-    return Obj1.sort-Obj2.sort;
-}
-
-/**
- * Function toggles 'active' widget property to false.
- */
-guiDashboard.setNewWidgetActiveValue = function(thisButton)
-{
-    var widgetName=thisButton.parentElement.parentElement.parentElement.parentElement.parentElement.getAttribute("id");
-    for(var i in guiDashboard.model.widgets[0])
-    {
-        if(guiDashboard.model.widgets[0][i].name==widgetName)
-        {
-            guiDashboard.model.widgets[0][i].active=false;
-        }
-    }
-    guiDashboard.putUserDashboardSettingsToAPI();
-}
-
-/**
- * Function toggles 'collapse' widget property to opposite (true/false).
- */
-guiDashboard.setNewWidgetCollapseValue = function(thisButton)
-{
-    var widgetName=thisButton.parentElement.parentElement.parentElement.parentElement.parentElement.getAttribute("id");
-    for(var i in guiDashboard.model.widgets[0])
-    {
-        if(guiDashboard.model.widgets[0][i].name==widgetName)
-        {
-            guiDashboard.model.widgets[0][i].collapse=!guiDashboard.model.widgets[0][i].collapse;
-
-            // hides select with period value on chart widget during its collapsing
-            if(widgetName=="pmwChartWidget")
-            {
-                if(guiDashboard.model.widgets[0][i].collapse==false)
-                {
-                    $("#period-list").slideDown(400);
-                }
-                else
-                {
-                    $("#period-list").slideUp(400);
-                }
-            }
-        }
-    }
-    guiDashboard.putUserDashboardSettingsToAPI();
-}
-
-/**
- * Function gets dashboard settings from table in modal.
- */
-guiDashboard.getOptionsFromTable = function(table_id, guiDashboard_obj)
-{
-    var modalTable=document.getElementById(table_id);
-    var modalTableTr=modalTable.getElementsByTagName("tr");
-    for(var i=1; i<modalTableTr.length; i++)
-    {
-        var guiDashboard_obj_name=modalTableTr[i].getAttribute("rowname");
-        var modalTableTrTds=modalTableTr[i].children;
-        for(var j=0; j<modalTableTrTds.length; j++)
-        {
-            var valueName=modalTableTrTds[j].getAttribute("valuename");
-
-            if(valueName)
-            {
-                var classList1=modalTableTrTds[j].children[0].classList;
-                var selected=false;
-                for(var k in classList1)
-                {
-                    if(classList1[k]=="selected")
-                    {
-                        selected=true;
-                    }
-                }
-                for(var z in  guiDashboard_obj)
-                {
-                    if(guiDashboard_obj[z].name==guiDashboard_obj_name)
-                    {
-                        guiDashboard_obj[z][valueName]=selected;
-                    }
-                }
-            }
-        }
-    }
-}
-
-/**
- * Function gets dashboard settings from modal and send them to API.
- */
-guiDashboard.saveWigdetsOptions = function()
-{
-    guiDashboard.getOptionsFromTable("modal-table",guiDashboard.model.widgets[0]);
-    guiDashboard.putUserDashboardSettingsToAPI();
-}
-
-/**
- * Function saves dashboard settings from modal.
- */
-guiDashboard.saveWigdetsOptionsFromModal = function()
-{
-    return $.when(guiDashboard.saveWigdetsOptions()).done(function(){
-        guiModal.modalClose();
-        return spajs.openURL("/");
-    }).promise();
-}
-
-/**
- * Function generates array with data for chart lines.
- */
-guiDashboard.getDataForStatusChart = function(tasks_data, tasks_data_t, status, date_format)
-{
-
-    for(var i in tasks_data) {
-        tasks_data[i]=0;
-    }
-
-    for(var i in guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType])
-    {
-        var val = guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType][i];
-        var time =+ moment(val[guiDashboard.statsDataMomentType]).tz(window.timeZone).format("x");
-        time = moment(time).tz(window.timeZone).format(date_format);
-
-        if(val.status==status){
-            tasks_data[time] = val.sum;
-        }
-    }
-
-    var chart_tasks_data1 = [];
-
-    for(var j in tasks_data_t)
-    {
-        var time = tasks_data_t[j]
-        chart_tasks_data1.push(tasks_data[time]/1);
-    }
-    return chart_tasks_data1;
-
-}
-
-/**
- * Function sends API request (/api/v2/stats/).
- */
-guiDashboard.loadStats=function()
-{
-    var thisObj = this;
-
-    let query = {
-        type: "get",
-        item: "stats",
-        filters:"last="+guiDashboard.statsDataLastQuery,
-    }
-
-    let def = new $.Deferred();
-    $.when(api.query(query, true)).done(function(answer)
-    {
-        thisObj.statsData=answer.data;
-        def.resolve()
-    }).fail(function(e){
-
-        def.reject(e)
-    })
-
-    return def.promise();
-}
-
-/**
- * Function is supposed to be called when period value was changed on Chart widget.
- * Function updates values of variables that are used for API request (api/v2/stats) and for chart rendering.
- */
-guiDashboard.updateStatsDataLast=function(thisEl)
-{
-    var newLast=thisEl.value;
-    switch(newLast) {
-        case '1095':
-            guiDashboard.statsDataLast=3;
-            guiDashboard.statsDataMomentType="year";
-            break;
-        case '365':
-            guiDashboard.statsDataLast=13;
-            guiDashboard.statsDataMomentType="month";
-            break;
-        case '90':
-            guiDashboard.statsDataLast=3;
-            guiDashboard.statsDataMomentType="month";
-            break;
-        default:
-            guiDashboard.statsDataLast=+newLast;
-            guiDashboard.statsDataMomentType="day";
-            break;
-    }
-    guiDashboard.statsDataLastQuery=+newLast;
-    guiLocalSettings.set('chart_period', +newLast);
-    guiDashboard.updateData();
-}
-
-guiDashboard.stopUpdates = function()
-{
-    clearTimeout(this.model.updateTimeoutId)
-    this.model.updateTimeoutId = undefined;
-}
-
-/**
- * Turn on/off drag-and-drop property of Dashboard widgets.
- */
-guiDashboard.toggleSortable = function(thisButton)
-{
-    var state = widget_sort.option("disabled");
-    widget_sort.option("disabled", !state);
-    if(thisButton.children[0].getAttribute("class")=="fa fa-lock")
-    {
-        thisButton.children[0].setAttribute("class", "fa fa-unlock");
-        var sortableArr=$('.cursor-move1');
-        for (var i=0; i<sortableArr.length; i++)
-        {
-            $(sortableArr[i]).addClass('cursor-move');
-            $(sortableArr[i]).removeClass('cursor-move1');
-        }
-    }
-    else
-    {
-        thisButton.children[0].setAttribute("class", "fa fa-lock");
-        var sortableArr=$('.cursor-move');
-        for (var i=0; i<sortableArr.length; i++)
-        {
-            $(sortableArr[i]).addClass('cursor-move1');
-            $(sortableArr[i]).removeClass('cursor-move');
-        }
-    }
-}
-
-tabSignal.connect('guiLocalSettings.hideMenu', function(){
-
-    setTimeout(function(){
-
-        if(spajs.currentOpenMenu && spajs.currentOpenMenu.id == 'home')
-        {
-            guiDashboard.updateData()
-        }
-    }, 200)
-})
-
-guiDashboard.updateData = function()
-{
-    if(this.model.updateTimeoutId)
-    {
-        clearTimeout(this.model.updateTimeoutId)
-        this.model.updateTimeoutId = undefined
-    }
-
-    $.when(guiDashboard.loadStats()).done(function()
-    {
-        // updates counters of widgets
-        pmwHostsCounter.updateCount();
-        pmwTemplatesCounter.updateCount();
-        pmwGroupsCounter.updateCount();
-        pmwProjectsCounter.updateCount();
-        pmwInventoriesCounter.updateCount();
-        pmwUsersCounter.updateCount();
-
-        // renders chart
-        guiDashboard.renderChart();
-
-        // renders Statistic bars on chart
-        guiDashboard.renderChartProgressBars();
-    });
-
-    this.model.updateTimeoutId = setTimeout(function(){
-        guiDashboard.updateData()
-    }, 1000*30)
-}
-
-/**
- * Function gets Start time for chart.
- * start time - time in milliseconds, from which chart will be representing data.
- */
-guiDashboard.getChartStartTime = function()
-{
-    // defines current months and year
-    let monthNum=moment().format("MM");
-    let yearNum=moment().format("YYYY");
-    let dayNum=moment().format("DD");
-    let hourNum=",T00:00:00";
-    let startTimeOrg="";
-
-    switch (guiDashboard.statsDataMomentType) {
-        case "year":
-            startTimeOrg=yearNum+"-01-01"+hourNum;
-            break;
-        case "month":
-            startTimeOrg=yearNum+"-"+monthNum+"-01"+hourNum;
-            break;
-        case "day":
-            startTimeOrg=yearNum+"-"+monthNum+"-"+dayNum+hourNum;
-            break;
-    }
-
-    // guiDashboard.statsDataLast - amount of previous periods (periods to reduce)
-    // guiDashboard.statsDataMomentType - period type - month/year
-    let startTime =+ moment(startTimeOrg).subtract(guiDashboard.statsDataLast-1, guiDashboard.statsDataMomentType).tz(window.timeZone).format("x");
-
-    return startTime;
-}
-
-/**
- * Function gets data for Chart.
- * @param startTime(number) - start time in milliseconds, from which chart will be representing data.
- * @param date_format(string) - format of time labels for x axes on chart.
- */
-guiDashboard.getChartData = function(startTime, date_format)
-{
-    let tasks_data = {};
-    let tasks_data_t = [];
-
-    // forms chart time intervals based on start date
-    for(let i = -1; i< guiDashboard.statsDataLast; i++)
-    {
-        // period up
-        let time =+ moment(startTime).add(i, guiDashboard.statsDataMomentType).tz(window.timeZone).format("x");
-        time = moment(time).tz(window.timeZone).format(date_format);
-        tasks_data[time] = 0;
-        tasks_data_t.push(time);
-    }
-
-    // object for chart settings
-    let chart_data_obj = {datasets:[], labels:[]};
-    for(let i in guiDashboard.model.ChartLineSettings)
-    {
-        let lineChart = guiDashboard.model.ChartLineSettings[i];
-
-        // forms array with values for 'all tasks' line
-        if(lineChart.name == 'all_tasks')
-        {
-            for (let i in guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType]) {
-                let val = guiDashboard.statsData.jobs[guiDashboard.statsDataMomentType][i];
-                let time = +moment(val[guiDashboard.statsDataMomentType]).tz(window.timeZone).format("x");
-                time = moment(time).tz(window.timeZone).format(date_format);
-                if(tasks_data[time] !== undefined)
-                {
-                    tasks_data[time] = val.all;
-                }
-            }
-
-            let chart_tasks_data = [];
-            for (let j in tasks_data_t) {
-                let time = tasks_data_t[j]
-                chart_tasks_data.push(tasks_data[time] / 1);
-                chart_data_obj.labels.push(time);
-            }
-
-            if(lineChart.active == true)
-            {
-
-                chart_data_obj.datasets.push({
-                    label: 'All tasks',
-                    data: chart_tasks_data,
-                    borderColor: lineChart.color,
-                    backgroundColor: lineChart.bg_color,
-                })
-            }
-        }
-
-        // forms array with values for others line
-        if(lineChart.name != 'all_tasks' && lineChart.active == true)
-        {
-            let chart_tasks_data_var = guiDashboard.getDataForStatusChart(tasks_data, tasks_data_t, lineChart.title, date_format);
-
-            chart_data_obj.datasets.push({
-                label: lineChart.title,
-                data: chart_tasks_data_var,
-                borderColor: guiDashboard.getChartLineColor(lineChart),
-                backgroundColor: guiDashboard.getChartLineColor(lineChart, true),
-            })
-        }
-    }
-
-    return chart_data_obj;
-}
-
-/**
- * Function gets colors for chartLines.
- * @param lineChart(object) - object with chartLine settings
- * @param bg(boolean) - if true, function returns color for line's background,
- * otherwise, it returns color for line's border.
- */
-guiDashboard.getChartLineColor = function(lineChart, bg)
-{
-    let alpha = 1;
-    let prop = 'color';
-    if(bg)
-    {
-        alpha = 0.3;
-        prop = 'bg_color';
-    }
-
-    if(guiCustomizer.skin.value['history_status_' + lineChart.name])
-    {
-        if(guiCustomizer.skin.value['history_status_' + lineChart.name][0] == "#")
-        {
-            return hexToRgbA(guiCustomizer.skin.value['history_status_' + lineChart.name], alpha);
-        }
-
-        return guiCustomizer.skin.value['history_status_' + lineChart.name]
-
-    }
-
-    return lineChart[prop];
-}
-
-/**
- * Function sets chart data and chart settings.
- */
-guiDashboard.setChartSettings = function(ctx, chart_data_obj)
-{
-    guiDashboard.model.historyChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            datasets: chart_data_obj.datasets,
-            labels: chart_data_obj.labels,
-        },
-
-        options:{
-            maintainAspectRatio: false,
-            legend: {
-                labels: {
-                    fontColor: guiCustomizer.skin.value.chart_legend_text_color,
-                },
-            },
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero:true,
-                        fontColor: guiCustomizer.skin.value.chart_axes_text_color,
-
+guiWidgets.history_chart = class HistoryChart extends guiWidgets.line_chart {
+    constructor(options) {
+        super(options);
+
+        this.format = 'history_chart';
+        this.period = options.period;
+        this.date_format = 'DD.MM.YY';
+
+        Object.defineProperty(this, 'chart_options', {
+            get: function() {
+                return {
+                    maintainAspectRatio: false,
+                    legend: {
+                        labels: {
+                            fontColor: guiCustomizer.skin.settings.chart_legend_text_color,
+                        },
                     },
-                    gridLines: {
-                        color: guiCustomizer.skin.value.chart_axes_lines_color,
-                    }
-                }],
-                xAxes: [{
-                    ticks: {
-                        fontColor: guiCustomizer.skin.value.chart_axes_text_color,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero:true,
+                                fontColor: guiCustomizer.skin.settings.chart_axes_text_color,
 
-                    },
-                    gridLines: {
-                        color: guiCustomizer.skin.value.chart_axes_lines_color,
+                            },
+                            gridLines: {
+                                color: guiCustomizer.skin.settings.chart_axes_lines_color,
+                            }
+                        }],
+                        xAxes: [{
+                            ticks: {
+                                fontColor: guiCustomizer.skin.settings.chart_axes_text_color,
+
+                            },
+                            gridLines: {
+                                color: guiCustomizer.skin.settings.chart_axes_lines_color,
+                            }
+                        }]
                     }
-                }]
+                };
             }
+        });
+    }
 
-        }
-
-    });
-}
-
-/**
- * Function renders Dashboard chart
- */
-guiDashboard.renderChart = function (need_update)
-{
-    let ctx = document.getElementById("chart_js_canvas");
-
-    if(ctx && ctx.getContext)
-    {
-        ctx = ctx.getContext('2d');
-
+    /**
+     * Method, that returns chart start time moment (first period on xAxes) -
+     * time in ISO 8601 format.
+     * @return {number}
+     * @private
+     */
+    _getChartStartTime() {
         // defines current months and year
-        let startTime = guiDashboard.getChartStartTime();
+        let monthNum = moment().format("MM");
+        let yearNum = moment().format("YYYY");
+        let dayNum = moment().format("DD");
+        let hourNum = ",T00:00:00";
+        let startTimeOrg = "";
 
-        let date_format = 'DD.MM.YY';
+        switch(this.period.type) {
+            case "year":
+                startTimeOrg = yearNum + "-01-01" + hourNum;
+                break;
+            case "month":
+                startTimeOrg = yearNum + "-" + monthNum + "-01" + hourNum;
+                break;
+            case "day":
+                startTimeOrg = yearNum + "-" + monthNum + "-" + dayNum + hourNum;
+                break;
+        }
 
-        // gets data for chart
-        let chart_data_obj = guiDashboard.getChartData(startTime, date_format);
+        return Number(
+            moment(startTimeOrg).subtract(this.period.amount - 1, this.period.type).tz(window.timeZone).format("x"),
+        );
+    }
+    /**
+     * Redefinition of '_formChartDataLabels' method of guiWidgets.line_chart class.
+     * @returns {Array}
+     * @private
+     */
+    _formChartDataLabels(raw_data) {
+        let labels = [];
+        let start_time = this._getChartStartTime();
 
-        // renders chart
-        if(guiDashboard.model.historyChart)
-        {
-            if(guiDashboard.updateChartOrNot(guiDashboard.model.historyChart, chart_data_obj) || need_update)
-            {
-                try
-                {
-                    guiDashboard.model.historyChart.destroy();
-                }
-                catch(e){}
+        for(let i = -1; i< this.period.amount; i++) {
+            // period up
+            let time =+ moment(start_time).add(i, this.period.type).tz(window.timeZone).format("x");
+            time = moment(time).tz(window.timeZone).format(this.date_format);
+            labels.push(time);
+        }
 
-                guiDashboard.setChartSettings(ctx, chart_data_obj);
+        return labels;
+    }
+    /**
+     * Redefinition of '_formChartDataDatasets_oneLine' method of guiWidgets.line_chart class.
+     * @private
+     */
+    _formChartDataDatasets_oneLine(line, raw_data, labels) {
+        let data = {};
+
+        for(let index in labels) {
+            data[labels[index]] = 0;
+        }
+
+        for(let index in raw_data[this.period.type]) {
+            let item = raw_data[this.period.type][index];
+
+            let time =+ moment(item[this.period.type]).tz(window.timeZone).format("x");
+            time = moment(time).tz(window.timeZone).format(this.date_format);
+
+            if(data[time] === undefined) {
+                continue;
+            }
+
+            if(line.name.toLowerCase() == 'all_tasks') {
+                data[time] = item.all;
+            } else if(line.name.toLowerCase() == item.status.toLowerCase()) {
+                data[time] = item.sum;
             }
         }
-        else
-        {
-            guiDashboard.setChartSettings(ctx, chart_data_obj);
-        }
+
+        return Object.values(data).map(item => Number(item));
     }
-}
+    /**
+     * Method, that form data sets for chart lines.
+     * @param {object} raw_data Object with raw data for chart.
+     * @param {array} labels Array with chart labels.
+     * @return {Array}
+     * @private
+     */
+    _formChartDataDatasets(raw_data, labels) {
+        let datasets = [];
 
-/**
- * Function renders progress bars with statistic near the chart.
- */
-guiDashboard.renderChartProgressBars = function()
-{
-    let el = $("#chart_progress_bars");
-    if(el.length != 0)
-    {
-        let d = guiDashboard.formChartProgressBarsData();
+        for(let index in this.lines) {
+            let line = this.lines[index];
 
-        let opt = {
-            settings: guiDashboard.model.ChartLineSettings,
-            stats_data: d.data,
-            all: d.all,
+            if(!line.active) continue;
+
+            datasets.push({
+                label: line.title || line.name,
+                data: this._formChartDataDatasets_oneLine(line, raw_data, labels),
+                borderColor: this._getChartLineColor(line),
+                backgroundColor: this._getChartLineColor(line, true),
+            });
         }
 
-        let html = spajs.just.render('chart_progress_bars', {opt: opt});
+        return datasets;
+    }
+    /**
+     * Method, that returns current color for chart line.
+     * @param {object} line Object with chart line settings.
+     * @param {boolean} bg If true - color should be return for 'background-color' CSS property.
+     * Otherwise, should be return for 'color' CSS property.
+     * @private
+     */
+    _getChartLineColor(line, bg) {
+        let alpha = 1;
+        let prop = 'color';
+        let skin = guiCustomizer.skin.settings;
 
-        $("#chart_progress_bars").html(html);
+        if(bg) {
+            alpha = 0.3;
+            prop = 'bg_color';
+        }
+
+        if(skin['history_status_' + line.name]) {
+            if(skin['history_status_' + line.name][0] == "#") {
+                let color = hexToRgbA(skin['history_status_' + line.name], alpha);
+                return color
+            }
+
+            return skin['history_status_' + line.name];
+        }
+
+        return line[prop];
+    }
+    /**
+     * Method, that returns data for widget progress bars - bars that show statistic info.
+     * @param {object} raw_data Object with raw data for chart.
+     * @returns {object}
+     */
+    getProgressBarsData(raw_data) {
+        let all = 0;
+        let data = {};
+
+        for(let index in this.lines) {
+            let line = this.lines[index];
+
+            if(line.name == 'all_tasks') continue;
+
+            data[line.name] = {
+                all: all,
+                sum: 0,
+                status: line.name.toUpperCase(),
+            }
+        }
+
+        if(raw_data && raw_data.year) {
+            let stats = raw_data.year;
+
+            for(let index in stats) {
+                let record = stats[index];
+                let status = record.status.toLowerCase();
+
+                data[status].sum += record.sum;
+            }
+
+            for(let key in data) {
+                all += data[key].sum;
+            }
+
+            for(let key in data) {
+                data[key].all = all;
+            }
+        }
+
+        return data;
+    }
+    /**
+     * Method, that sets chart period settings based on period.amount property.
+     * @param {number} number New period.amount property.
+     */
+    setChartPeriod(number) {
+        let amount, type;
+        let num = Number(number);
+
+        switch(num) {
+            case 1095:
+                amount = 3;
+                type = "year";
+                break;
+            case 365:
+                amount = 13;
+                type = "month";
+                break;
+            case 90:
+                amount = 3;
+                type = "month";
+                break;
+            default:
+                amount = num;
+                type = "day";
+                break;
+        }
+
+        this.period = {
+            type: type,
+            amount: amount,
+            query_amount: num,
+        };
+
+        guiLocalSettings.set('chart_period', num);
     }
 };
 
 /**
- *  Function forms data object for dashboardChart progress bar
+ * Sets Dashboard counter widgets.
  */
-guiDashboard.formChartProgressBarsData = function()
-{
-    let data = {};
-    let stats = {};
-    let all = 0;
-    if(guiDashboard.statsData && guiDashboard.statsData.jobs && guiDashboard.statsData.jobs.year)
-    {
-        stats = guiDashboard.statsData.jobs.year;
-        for(let i in stats)
-        {
-            let record = stats[i];
-            if(data[record.status])
-            {
-                data[record.status].all += record.all;
-                data[record.status].sum += record.sum;
-            }
-            else
-            {
-                data[record.status] = {
-                    all: record.all,
-                    sum: record.sum,
-                    status: record.status,
-                }
-            }
-            if(all < data[record.status].all)
-            {
-                all = data[record.status].all;
-            }
-        }
-        for(let i in data)
-        {
-            data[i].all = all;
-        }
-    }
-
-    return {all: all, data: data};
-}
-
+[
+    {name: 'pmwTemplatesCounter',   title: 'template',    sort: 1, active: true,},
+    {name: 'pmwProjectsCounter',    title: 'projects',    sort: 2, active: true, url: '/project'},
+    {name: 'pmwInventoriesCounter', title: 'inventories', sort: 3, active: true, url: '/inventory'},
+    {name: 'pmwGroupsCounter',      title: 'groups',      sort: 4, active: true, url: '/group'},
+    {name: 'pmwHostsCounter',       title: 'hosts',       sort: 5, active: true, url: '/host'},
+    {name: 'pmwUsersCounter',       title: 'users',       sort: 6, active: true, url: '/user'},
+].forEach(item => {
+    guiDashboard.widgets[item.name] = new guiWidgets.counter(item);
+});
 
 /**
- * Function check necessity of chart updating(render chart with new data.)
- * If data for chart has changed, function return true,
- * otherwise it returns false.
- * @param chart(object) - chart object;
- * @param new_data_obj(object) - object with new data for chart.
- * @returns boolean
+ * Sets Dashboard history chart widget.
  */
-guiDashboard.updateChartOrNot = function(chart, new_data_obj)
-{
-    let chart_data = chart.config.data;
-    let bool1 = deepEqual(chart_data.labels, new_data_obj.labels);
-
-    if(!bool1)
+guiDashboard.widgets['pmwChartWidget'] = new guiWidgets.history_chart(
     {
-        return true;
-    }
+        name: 'pmwChartWidget', title:'Tasks history', sort:7,
+        lines: {
+            all_tasks: {
+                name: "all_tasks",
+                title: "All tasks",
+                color: "#1f77b4",
+                bg_color: "rgba(31, 119, 180, 0.3)",
+                active: true,
+            },
+            ok: {
+                name: "ok",
+                title: "OK",
+                color: "#276900",
+                bg_color: "rgba(39, 105, 0, 0.3)",
+                active: true,
+            },
+            error: {
+                name: "error",
+                title: "ERROR",
+                color: "#dc3545",
+                bg_color: "rgba(220, 53, 69, 0.3)",
+                active: true,
+            },
+            interrupted: {
+                name: "interrupted",
+                title: "INTERRUPTED",
+                color: "#9b97e4",
+                bg_color: "rgba(155, 151, 228, 0.3)",
+                active: true,
+            },
+            delay: {
+                name: "delay",
+                title: "DELAY",
+                color: "#808419",
+                bg_color: "rgba(128, 132, 25, 0.3)",
+                active: true,
+            },
+            offline: {
+                name: "offline",
+                title: "OFFLINE",
+                color: "#9e9e9e",
+                bg_color: "rgba(158, 158, 158, 0.3)",
+                active: true,
+            },
+        },
+        period: {
+            /**
+             * Type of period interval.
+             */
+            type: 'day',
+            /**
+             * Amount of periods.
+             */
+            amount: 14,
+            /**
+             * Amount of periods in days.
+             * This property is used for API requests.
+             */
+            query_amount: 14,
+        },
+    },
+);
 
-    for(let i in chart_data.datasets)
-    {
-        let old_item = chart_data.datasets[i];
-        for(let j in new_data_obj.datasets)
-        {
-            let new_item = new_data_obj.datasets[i];
-            if(old_item.label == new_item.label)
-            {
-                let bool2 = deepEqual(new_item.data, old_item.data);
+/**
+ * Method, that updates Dashboard widgets' settings.
+ * @param {object} settings Object with new Dashboard widgets' settings.
+ */
+guiDashboard.updateWidgetSettings = function(settings) {
+    for(let key in settings) {
+        let s_item = settings[key];
 
-                if(!bool2)
-                {
-                    return true;
-                }
-            }
+        if(!this.widgets[key]) {
+            continue;
+        }
+
+        for(let prop in s_item) {
+            this.widgets[key][prop] = s_item[prop];
         }
     }
+};
 
-    return false;
+/**
+ * Method, that updates line settings of Dashboard pmwChartWidget.
+ * @param {object} settings Object with new line settings.
+ */
+guiDashboard.updateChartLineSettings = function(settings) {
+    for(let key in settings) {
+        if(!this.widgets['pmwChartWidget'].lines[key]) {
+            continue;
+        }
+
+        let s_item = settings[key];
+
+        for(let prop in s_item) {
+            this.widgets['pmwChartWidget'].lines[key][prop] = s_item[prop];
+        }
+    }
+};
+
+/**
+ * Method, that updates Dashboard widgets' settings, guiCustomizer settings
+ * and auto_update interval.
+ * @param {object} settings Object with new settings.
+ */
+guiDashboard.updateSettings = function(settings) {
+    if(settings.autoupdateInterval) {
+        guiLocalSettings.set('page_update_interval', settings.autoupdateInterval);
+    }
+
+    if(settings.selectedSkin) {
+        guiLocalSettings.set('skin', settings.selectedSkin);
+        guiCustomizer.skin.name = settings.selectedSkin;
+    }
+
+    if(settings.skinsSettings) {
+        guiLocalSettings.set('skins_settings', settings.skinsSettings);
+        guiCustomizer.skins_custom_settings =  settings.skinsSettings;
+    }
+
+    if(settings.widgetSettings) {
+        guiLocalSettings.set('widget_settings', settings.widgetSettings);
+        guiDashboard.updateWidgetSettings(settings.widgetSettings);
+    }
+
+    if(settings.chartLineSettings && guiDashboard.widgets['pmwChartWidget']) {
+        guiLocalSettings.set('chart_line_settings', settings.chartLineSettings);
+        guiDashboard.updateChartLineSettings(settings.chartLineSettings);
+    }
+};
+
+if(guiLocalSettings.get('widget_settings')) {
+    guiDashboard.updateWidgetSettings(guiLocalSettings.get('widget_settings'));
 }
 
-guiDashboard.open  = function(holder, menuInfo, data)
-{
-    setActiveMenuLi();
-    var thisObj = this;
+if(guiLocalSettings.get('chart_line_settings')) {
+    guiDashboard.updateChartLineSettings(guiLocalSettings.get('chart_line_settings'));
+}
 
-    return $.when(guiDashboard.getUserSettingsFromAPI()).always(function()
-    {
-        // inits all widgets
-        for(var i in guiDashboard.model.widgets)
-        {
-            for(var j in guiDashboard.model.widgets[i])
-            {
-                if(guiDashboard.model.widgets[i][j].widget === undefined  )
-                {
-                    let name = guiDashboard.model.widgets[i][j]['name']
-                    if(!window[name])
-                    {
-                        console.warn("widget name="+name+" not defined")
-                        continue;
-                    }
-                    guiDashboard.model.widgets[i][j].widget = new window[guiDashboard.model.widgets[i][j]['name']](guiDashboard.model.widgets[i][j].opt);
-                }
-            }
-        }
+if(guiLocalSettings.get('chart_period')) {
+    guiDashboard.widgets.pmwChartWidget.setChartPeriod(guiLocalSettings.get('chart_period'));
+}
 
-        guiDashboard.model.historyChart = undefined;
-        thisObj.updateData()
-        $(holder).insertTpl(spajs.just.render(thisObj.tpl_name, {guiObj:thisObj}))
-
-        //pmwTasksTemplatesWidget.render();
-        //pmwModulesTemplatesWidget.render();
-        pmwAnsibleModuleWidget.render();
-        pmwChartWidget.render();
-
-        if($('select').is('#chart-period'))
-        {
-            let chart_period = guiLocalSettings.get('chart_period') || guiDashboard.statsDataLastQuery;
-            $('#chart-period').val(chart_period).change();
-        }
-
-        //drag and drop for widgets
-        if($('div').is('#dnd-container'))
-        {
-            widget_sort = Sortable.create(document.getElementById("dnd-container"), {
-                animation: 150, // ms, animation speed moving items when sorting, `0` — without animation
-                handle: ".dnd-block", // Restricts sort start click/touch to the specified element
-                draggable: ".dnd-block", // Specifies which items inside the element should be sortable
-                disabled: true,
-                onUpdate: function (evt)
-                {
-                    var item = evt.item; // the current dragged HTMLElement
-                    // saves new sorting order
-                    var divArr=$('.dnd-block');
-                    var idArr=[];
-                    for (var i=0; i<divArr.length; i++)
-                    {
-                        idArr.push(divArr[i].id);
-                    }
-                    for(var i=0; i<idArr.length; i++)
-                    {
-                        for(var j=0; j<guiDashboard.model.widgets[0].length; j++)
-                        {
-                            if(idArr[i].toLowerCase()==guiDashboard.model.widgets[0][j].name.toLowerCase())
-                            {
-                                guiDashboard.model.widgets[0][j].sort=i+1;
-                                guiDashboard.model.widgets[0].sort(guiDashboard.sortCountWidget);
-                            }
-                        }
-                    }
-                    guiDashboard.putUserDashboardSettingsToAPI();
-                }
+customRoutesComponentsTemplates.home = {
+    mixins: [the_basest_view_mixin, view_with_autoupdate_mixin],
+    template: "#template_pm_dashboard",
+    data() {
+        return {
+            /**
+             * Property, that stores widgets objects.
+             */
+            widgets: guiDashboard.widgets,
+            /**
+             * Property, that stores widgets' data.
+             */
+            widgets_data: {},
+        };
+    },
+    watch: {
+        /**
+         * Updates widgets' data, when chart widget period was changed.
+         * @param value
+         */
+        'widgets.pmwChartWidget.period': function(value) {
+            this.setWidgetsData().then(data => {
+                this.widgets_data = data;
             });
         }
-    }).promise();
-
-}
-
-/**
- * Base widget class
- * @type Object
- */
-guiDashboardWidget = {
-    id:'',
-    model:{
-        test:1
     },
-    render:function(){
-
+    created() {
+        this.fetchData();
     },
-    init:function(opt){
-        mergeDeep(this.model, opt)
-    }
-}
+    computed: {
+        title() {
+            return 'Dashboard';
+        },
+        /**
+         * Property, that returns array with sorted widgets.
+         * @return {array}
+         */
+        sorted_widgets() {
+            return Object.values(this.widgets).sort((a, b) => {
+                return a.sort - b.sort;
+            });
+        },
+    },
+    methods: {
+        /**
+         * Method, that gets data for a current view.
+         */
+        fetchData() {
+            this.initLoading();
 
-/**
- * Creating classes for tasks history, run shell command, template tasks, template module
- * @type Object
- */
+            this.getWidgetsData().then(data => {
+                this.widgets_data = data;
+                this.setLoadingSuccessful();
+                this.startAutoUpdate();
+            }).catch(error => {
+                debugger;
+                this.setLoadingError(error);
+            });
+        },
+        /**
+         * Redefinition of 'getAutoUpdateInterval' method of view_with_autoupdate_mixin.
+         */
+        getAutoUpdateInterval() {
+            return 15000;
+        },
+        /**
+         * Redefinition of 'updateData' method of view_with_autoupdate_mixin.
+         */
+        updateData() {
+            return this.setWidgetsData().then(data => {
+                if(!deepEqual(this.widgets_data, data)) {
+                    this.widgets_data = data;
+                }
 
-var pmwAnsibleModuleWidget = inheritance(guiDashboardWidget);
-pmwAnsibleModuleWidget.render = function()
-{
-    var div_id="#pmwAnsibleModuleWidget";
-    //pmAnsibleModule.fastCommandWidget($(div_id));
-    return "";
-}
+                return data;
+            });
+        },
+        /**
+         * Method, that returns promise of getting widgets' data.
+         */
+        getWidgetsData() {
+            let data = this.$store.getters.getWidgets(this.$route.path);
 
-var pmwChartWidget=inheritance(guiDashboardWidget);
-pmwChartWidget.render = function()
-{
-    var div_id="#pmwChartWidget";
-    var html=spajs.just.render('pmwChartWidget');
-    $(div_id).html(html);
-    return "";
-}
+            if(data) {
+                return Promise.resolve(data);
+            }
 
+            return this.setWidgetsData();
+        },
+        /**
+         * Method, that returns promise of setting widgets' data in store.
+         */
+        setWidgetsData() {
+            return this.loadStats().then(response => {
+                let exclude_stats = ['jobs'];
+                let w_data = {};
 
-/**
- * Base class for counter widget
- * @type Object
- */
-var pmwItemsCounter = inheritance(guiDashboardWidget);
+                for(let key in response.data) {
+                    if(exclude_stats.includes(key)) {
+                        w_data['pmwChartWidget'] = response.data[key];
+                    }
 
-pmwItemsCounter.model.count = '-';
-//pmwItemsCounter.model.countObject = pmItems;
-pmwItemsCounter.model.nameInStats = "";
+                    w_data['pmw' + capitalizeString(key) + 'Counter'] = response.data[key];
+                }
 
-pmwItemsCounter.render = function()
-{
-    var html = spajs.just.render('pmwItemsCounter', {model:this.model});
-    return window.JUST.onInsert(html, function(){});
-}
-pmwItemsCounter.updateCount = function()
-{
-    var thisObj = this;
-    var statsData=guiDashboard.statsData;
-    thisObj.model.count=statsData[thisObj.model.nameInStats];
-}
+                this.$store.commit('setWidgets', {
+                    url: this.$route.path,
+                    data: w_data,
+                });
 
-/**
- * Class for hosts counter widget
- * @type Object
- */
-var pmwHostsCounter = inheritance(pmwItemsCounter);
-//pmwHostsCounter.model.countObject = pmHosts;
-pmwHostsCounter.model.nameInStats = "hosts";
-pmwHostsCounter.model.path = "host";
+                return w_data;
+            });
+        },
+        /**
+         * Method, that loads stats - dict with widgets data.
+         */
+        loadStats() {
+            return app.api.bulkQuery(this.formBulkStats());
+        },
+        /**
+         * Method, that returns bulk for stats query.
+         */
+        formBulkStats() {
+            return {
+                type: 'get',
+                item: 'stats',
+                filters: "last=" + this.widgets.pmwChartWidget.period.query_amount,
+            };
+        },
+    },
+};
 
-/**
- * Class for templates counter widget
- * @type Object
- */
-var pmwTemplatesCounter = inheritance(pmwItemsCounter);
-//pmwTemplatesCounter.model.countObject = pmTemplates;
-pmwTemplatesCounter.model.nameInStats = "templates";
-pmwTemplatesCounter.model.path = "";
+tabSignal.connect('app.afterInit', (obj) => {
+    let app = obj.app;
+    let setting_view = app.views["/profile/settings/"];
+    let qs = setting_view.objects.clone();
+    let f_obj = {};
+    f_obj[path_pk_key] = my_user_id;
+    // qs.url = qs.url.format({pk:my_user_id}).replace(/^\/|\/$/g, "");
+    qs.url = qs.url.format(f_obj).replace(/^\/|\/$/g, "");
 
-/**
- * Class for group counter widget
- * @type Object
- */
-var pmwGroupsCounter = inheritance(pmwItemsCounter);
-//pmwGroupsCounter.model.countObject = pmGroups;
-pmwGroupsCounter.model.nameInStats = "groups";
-pmwGroupsCounter.model.path = "group";
+    qs.get().then(instance => {
+        guiDashboard.updateSettings(instance.data);
 
-/**
- * Class for projects counter widget
- * @type Object
- */
-var pmwProjectsCounter = inheritance(pmwItemsCounter);
-//pmwProjectsCounter.model.countObject = pmProjects;
-pmwProjectsCounter.model.nameInStats = "projects";
-pmwProjectsCounter.model.path = "project";
+        let qs_1 = app.application.$store.getters.getQuerySet(qs.url);
+        if(!qs_1) {
+            app.application.$store.commit('setQuerySet', {
+                url: qs.url,
+                queryset: qs,
+            })
+        }
 
-/**
- * Class for inventories counter widget
- * @type Object
- */
-var pmwInventoriesCounter = inheritance(pmwItemsCounter);
-//pmwInventoriesCounter.model.countObject = pmInventories;
-pmwInventoriesCounter.model.nameInStats = "inventories";
-pmwInventoriesCounter.model.path = "inventory";
-
-/**
- * Class for users counter widget
- * @type Object
- */
-var pmwUsersCounter = inheritance(pmwItemsCounter);
-//pmwUsersCounter.model.countObject = pmUsers;
-pmwUsersCounter.model.nameInStats = "users";
-pmwUsersCounter.model.path = "user";
-
-tabSignal.connect("webGui.start", function(){
-    guiDashboard.getUserSettingsFromAPI();
-})
-
-guiDashboard.showWidgetSettingsModal = function ()
-{
-    let opt = {
-        title: 'Widget settings',
-    };
-
-    let html = spajs.just.render('widget_settings_modal');
-    guiModal.setModalHTML(html, opt);
-    guiModal.modalOpen();
-}
-
-tabSignal.connect("guiSkins.save", function(obj)
-{
-    guiDashboard.model.skinsSettings[obj.skin.name] = obj.skin.value;
-    guiDashboard.putUserDashboardSettingsToAPI();
-})
-
-tabSignal.connect("guiSkins.deleteSettings", function(obj)
-{
-    delete guiDashboard.model.skinsSettings[obj.skin.name];
-    guiDashboard.putUserDashboardSettingsToAPI();
-
+        tabSignal.connect('GuiCustomizer.skin.name.changed', guiCustomizerSkinOnChangeHandler);
+        tabSignal.connect('GuiCustomizer.skins_custom_settings.saved', guiCustomizerCustomSettingsOnSaveHandler);
+        tabSignal.connect('GuiCustomizer.skins_custom_settings.reseted', guiCustomizerCustomSettingsOnSaveHandler);
+    });
 });
 
-tabSignal.connect("guiSkin.changed", function(obj){
+/**
+ * Function, that returns QuerySet for profile/setting page.
+ */
+function getProfileSettingQsFromStore() {
+    let qs = app.application.$store.getters.getQuerySet('user/' + my_user_id + '/settings');
 
-    if(guiDashboard.model.dataFromApiLoaded)
-    {
-        guiDashboard.model.selectedSkin = obj.skinId;
-        guiDashboard.putUserDashboardSettingsToAPI();
+    if(!qs) {
+        return;
     }
 
-    guiDashboard.renderChart(true);
-    guiDashboard.renderChartProgressBars();
-});
+    return qs.copy();
+}
+
+/**
+ * Function, that updates data of QuerySet for profile/setting page
+ * and saves updated queryset in store.
+ * @param {object} qs QuerySet for profile/setting page
+ */
+function updateProfileSettingsQsAndSave(qs) {
+    qs.formQueryAndSend('post', qs.cache.data).then(response => {
+        app.application.$store.commit('setQuerySet', {
+            url: qs.url,
+            queryset: qs,
+        });
+    }).catch(error => {
+        debugger;
+    });
+}
+
+/**
+ * This function is supposed to be called from 'GuiCustomizer.skin.name.changed' tabSignal.
+ * This function updates selected skin and saves ProfileSettings QuerySet.
+ * @param {object} customizer GuiCustomizer instance.
+ */
+function guiCustomizerSkinOnChangeHandler(customizer) {
+    let qs = getProfileSettingQsFromStore();
+
+    if(!qs) {
+        return;
+    }
+
+    qs.cache.data.selectedSkin = customizer.skin.name;
+
+    return updateProfileSettingsQsAndSave(qs);
+}
+
+/**
+ * This function is supposed to be called from 'GuiCustomizer.skins_custom_settings.saved' tabSignal.
+ * This function updates skins_custom_settings and saves ProfileSettings QuerySet.
+ * @param {object} customizer GuiCustomizer instance.
+ */
+function guiCustomizerCustomSettingsOnSaveHandler(customizer) {
+    let qs = getProfileSettingQsFromStore();
+
+    if(!qs) {
+        return;
+    }
+
+    qs.cache.data.skinsSettings = customizer.skins_custom_settings;
+
+    return updateProfileSettingsQsAndSave(qs);
+}

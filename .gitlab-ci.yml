@@ -82,19 +82,11 @@ code_style:
     - .pep8
   retry: 2
 
-# DEPRECATED! Will removed in next release.
-py27-install:
+py37-coverage:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
-  only:
-    refs:
-      - master
-
-py36-coverage:
-  <<: *branch_tests
-  variables:
-    TOX_ENVS: "$CI_BUILD_NAME"
+  allow_failure: true
 
 py36-install:
   <<: *branch_tests
@@ -104,7 +96,7 @@ py36-install:
 master_coverage:
   <<: *branch_tests
   variables:
-    TOX_ENVS: "py36-coverage"
+    TOX_ENVS: "py37-coverage"
   except:
   only:
     refs:
@@ -150,6 +142,9 @@ release_pypi:
     - tags
     variables:
     - $PYPI_UPLOAD_PASSWORD
+    - $PYPI_UPLOAD_NAME
+  variables:
+    TOX_ARGS: ""
   script:
    - make test ENVS=build
   allow_failure: true
@@ -166,6 +161,7 @@ publish_pypi:
       - tags
     variables:
       - $PYPI_UPLOAD_PASSWORD
+      - $PYPI_UPLOAD_NAME
   script:
   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz dist/*.whl
 
@@ -179,6 +175,9 @@ publish_release:
     - tags
     variables:
     - $PYPI_UPLOAD_PASSWORD
+    - $PYPI_UPLOAD_NAME
+  variables:
+    TOX_ARGS: ""
   before_script:
   - git config --global user.name "${GITLAB_USER_NAME}"
   - git config --global user.email "${GITLAB_USER_EMAIL}"

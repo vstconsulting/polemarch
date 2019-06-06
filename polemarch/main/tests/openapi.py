@@ -116,7 +116,7 @@ class OApiTestCase(BaseTestCase):
         self.check_fields(objName, setOwner['required'], 'user_id')
         self.check_fields(
             objName, setOwner['properties']['user_id'],
-            type='integer', format='select2',
+            type='integer', format='fk',
             additionalProperties=dict(
                 value_field='id', view_field='username', model={'$ref': ref}
             )
@@ -531,22 +531,6 @@ class OApiTestCase(BaseTestCase):
             type='string', description=True
         )
         self.check_fields(
-            objName, ansibleModule['properties']['su'],
-            type='boolean', default=False, description=True
-        )
-        self.check_fields(
-            objName, ansibleModule['properties']['su_user'],
-            type='string', description=True
-        )
-        self.check_fields(
-            objName, ansibleModule['properties']['sudo'],
-            type='boolean', default=False, description=True
-        )
-        self.check_fields(
-            objName, ansibleModule['properties']['sudo_user'],
-            type='string', description=True
-        )
-        self.check_fields(
             objName, ansibleModule['properties']['syntax_check'],
             type='boolean', default=False, description=True
         )
@@ -714,22 +698,22 @@ class OApiTestCase(BaseTestCase):
             objName, ansiblePlaybook['properties']['step'],
             type='boolean', default=False, description=True
         )
-        self.check_fields(
-            objName, ansiblePlaybook['properties']['su'],
-            type='boolean', default=False, description=True
-        )
-        self.check_fields(
-            objName, ansiblePlaybook['properties']['su_user'],
-            type='string', description=True
-        )
-        self.check_fields(
-            objName, ansiblePlaybook['properties']['sudo'],
-            type='boolean', default=False, description=True
-        )
-        self.check_fields(
-            objName, ansiblePlaybook['properties']['sudo_user'],
-            type='string', description=True
-        )
+        # self.check_fields(
+        #     objName, ansiblePlaybook['properties']['su'],
+        #     type='boolean', default=False, description=True
+        # )
+        # self.check_fields(
+        #     objName, ansiblePlaybook['properties']['su_user'],
+        #     type='string', description=True
+        # )
+        # self.check_fields(
+        #     objName, ansiblePlaybook['properties']['sudo'],
+        #     type='boolean', default=False, description=True
+        # )
+        # self.check_fields(
+        #     objName, ansiblePlaybook['properties']['sudo_user'],
+        #     type='string', description=True
+        # )
         self.check_fields(
             objName, ansiblePlaybook['properties']['syntax_check'],
             type='boolean', default=False, description=True
@@ -858,7 +842,7 @@ class OApiTestCase(BaseTestCase):
 
         additional_properties = dict(
             field='kind', choices={},
-            types=dict(PLAYBOOK='autocomplete', MODULE='autocomplete', TEMPLATE='hidden')
+            types=dict(PLAYBOOK='fk_autocomplete', MODULE='fk_autocomplete', TEMPLATE='hidden')
         )
         self.check_fields(
             objName, periodicTask['properties']['mode'],
@@ -872,7 +856,7 @@ class OApiTestCase(BaseTestCase):
 
         additional_properties = dict(
             field='kind', choices={},
-            types=dict(PLAYBOOK='select2', MODULE='select2', TEMPLATE='hidden')
+            types=dict(PLAYBOOK='fk_autocomplete', MODULE='fk_autocomplete', TEMPLATE='hidden')
         )
         self.check_fields(
             objName, periodicTask['properties']['inventory'],
@@ -919,7 +903,9 @@ class OApiTestCase(BaseTestCase):
 
         additional_properties = dict(
             field='kind', choices={},
-            types=dict(PLAYBOOK='autocomplete', MODULE='autocomplete', TEMPLATE='hidden')
+            types=dict(
+                PLAYBOOK='fk_autocomplete', MODULE='fk_autocomplete', TEMPLATE='hidden'
+            )
         )
         self.check_fields(
             objName, onePeriodicTask['properties']['mode'],
@@ -933,7 +919,9 @@ class OApiTestCase(BaseTestCase):
 
         additional_properties = dict(
             field='kind', choices={},
-            types=dict(PLAYBOOK='select2', MODULE='select2', TEMPLATE='hidden')
+            types=dict(
+                PLAYBOOK='fk_autocomplete', MODULE='fk_autocomplete', TEMPLATE='hidden'
+            )
         )
         self.check_fields(
             objName, onePeriodicTask['properties']['inventory'],

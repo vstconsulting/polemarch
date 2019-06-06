@@ -1,25 +1,28 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from typing import NoReturn, Text, Any, Iterable, Tuple, List, Dict, Union
 import os
 import re
 import time
 import signal
+import shutil
 import logging
+import tempfile
 import traceback
-try:
-    from ruamel.ordereddict import ordereddict as OrderedDict
-    from collections import namedtuple  # nocv
-except ImportError:  # nocv
-    from collections import namedtuple, OrderedDict
+from collections import namedtuple, OrderedDict
+from subprocess import Popen
 from functools import reduce
 import six
 from django.utils import timezone
 from vstutils.utils import tmp_file, KVExchanger, raise_context
+from vstutils.tools import get_file_value
 from .hosts import Inventory
+from .tasks import History, Project
 from ...main.utils import CmdExecutor, AnsibleArgumentsReference, PMObject
 
 
 logger = logging.getLogger("polemarch")
+InventoryDataType = Tuple[Text, List]
 PolemarchInventory = namedtuple("PolemarchInventory", "raw keys")
 AnsibleExtra = namedtuple('AnsibleExtraArgs', [
     'args',
@@ -28,41 +31,41 @@ AnsibleExtra = namedtuple('AnsibleExtraArgs', [
 
 
 # Classes and methods for support
-class DummyHistory(object):
+class DummyHistory:
     # pylint: disable=unused-argument
     def __init__(self, *args, **kwargs):
         self.mode = kwargs.get('mode', None)
 
-    def __setattr__(self, key, value):
+    def __setattr__(self, key: Text, value: Any) -> NoReturn:
         if key == 'raw_args':
             logger.info(value)
 
-    def __getattr__(self, item):
+    def __getattr__(self, item: Text) -> None:
         return None  # nocv
 
     @property
-    def raw_stdout(self):
-        return ""
+    def raw_stdout(self) -> Text:
+        return ""  # nocv
 
     @raw_stdout.setter
-    def raw_stdout(self, value):
+    def raw_stdout(self, value: Text) -> NoReturn:
         logger.info(value)  # nocv
 
-    def get_hook_data(self, when):
+    def get_hook_data(self, when: Text) -> None:
         return None
 
-    def write_line(self, value, number, endl=''):  # nocv
+    def write_line(self, value: Text, number: int, endl: Text = ''):  # nocv
         # pylint: disable=unused-argument
         logger.info(value)
 
-    def save(self):
+    def save(self) -> None:
         pass
 
 
 class Executor(CmdExecutor):
     __slots__ = 'history', 'counter', 'exchanger'
 
-    def __init__(self, history):
+    def __init__(self, history: History):
         super(Executor, self).__init__()
         self.history = history
         self.counter = 0
@@ -73,20 +76,21 @@ class Executor(CmdExecutor):
         self.env = env_vars
 
     @property
-    def output(self):
-        return self.history.raw_stdout
+    def output(self) -> Text:
+        # Optimize for better performance.
+        return ''
 
     @output.setter
-    def output(self, value):
+    def output(self, value) -> NoReturn:
         pass  # nocv
 
-    def working_handler(self, proc):
+    def working_handler(self, proc: Popen):
         if proc.poll() is None and self.exchanger.get() is not None:  # nocv
             self.write_output("\n[ERROR]: User interrupted execution")
             self.exchanger.delete()
             for _ in range(5):
                 try:
-                    os.kill(proc.pid, signal.SIGINT)
+                    os.kill(-proc.pid, signal.SIGTERM)
                 except Exception:  # nocv
                     break
                 proc.send_signal(signal.SIGINT)
@@ -96,11 +100,11 @@ class Executor(CmdExecutor):
             proc.wait()
         super(Executor, self).working_handler(proc)
 
-    def write_output(self, line):
+    def write_output(self, line: Text):
         self.counter += 1
         self.history.write_line(line, self.counter, '\n')
 
-    def execute(self, cmd, cwd):
+    def execute(self, cmd: Iterable[Text], cwd: Text):
         pm_ansible_path = ' '.join(self.pm_ansible())
         new_cmd = list()
         for one_cmd in cmd:
@@ -133,44 +137,50 @@ class AnsibleCommand(PMObject):
         '''
 
     class Inventory(object):
-        def __init__(self, inventory, cwd="/tmp"):
+        hidden_vars = Inventory.HIDDEN_VARS
+
+        def __init__(self, inventory: Union[Inventory, int, Text], cwd: Text = "/tmp", tmpdir: Text = '/tmp'):
             self.cwd = cwd
+            self.tmpdir = tmpdir
             self._file = None
-            self.hidden_vars = Inventory.HIDDEN_VARS
             self.is_file = True
             if isinstance(inventory, (six.string_types, six.text_type)):
                 self.raw, self.keys = self.get_from_file(inventory)
             else:
                 self.raw, self.keys = self.get_from_int(inventory)
 
-        def get_from_int(self, inventory):
+        def get_from_int(self, inventory: Union[Inventory, int]) -> InventoryDataType:
             if isinstance(inventory, int):
                 inventory = Inventory.objects.get(pk=inventory)  # nocv
             return inventory.get_inventory()
 
-        def get_from_file(self, inventory):
-            self._file = "{}/{}".format(self.cwd, inventory)
+        def get_from_file(self, inventory: Text) -> InventoryDataType:
+            _file = "{}/{}".format(self.cwd, inventory)
             try:
-                with open(self._file, 'r') as file:
-                    return file.read(), []
+                new_filename = os.path.join(self.tmpdir, 'inventory')
+                shutil.copyfile(_file, new_filename)
+                if not os.path.exists(new_filename):
+                    raise IOError  # nocv
+                self._file = new_filename
+                return get_file_value(new_filename, ''), []
             except IOError:
                 self._file = inventory
                 self.is_file = False
                 return inventory.replace(',', '\n'), []
 
         @property
-        def file(self):
-            self._file = self._file or tmp_file(self.raw)
+        def file(self) -> Union[tmp_file, Text]:
+            self._file = self._file or tmp_file(self.raw, dir=self.tmpdir)
             return self._file
 
         @property
-        def file_name(self):
+        def file_name(self) -> Text:
             # pylint: disable=no-member
             if isinstance(self.file, (six.string_types, six.text_type)):
                 return self.file
             return self.file.name
 
-        def close(self):
+        def close(self) -> NoReturn:
             # pylint: disable=no-member
             map(lambda key_file: key_file.close(), self.keys) if self.keys else None
             if not isinstance(self.file, (six.string_types, six.text_type)):
@@ -182,19 +192,28 @@ class AnsibleCommand(PMObject):
         self.__will_raise_exception = False
         self.ref_type = self.ref_types[self.command_type]
         self.ansible_ref = self.ansible_ref_class().raw_dict[self.ref_type]
+        self.verbose = kwargs.get('verbose', 0)
+        self.cwd = tempfile.mkdtemp()
+        self._verbose_output('Execution tmpdir created - [{}].'.format(self.cwd), 0)
+        self.env = dict()
 
-    def __generate_arg_file(self, value):
-        file = tmp_file(value)
+    def _verbose_output(self, value: Text, level: int = 3) -> NoReturn:
+        if self.verbose >= level:
+            if hasattr(self, 'executor'):
+                self.executor.write_output(value)
+            logger.debug(value)
+
+    def __generate_arg_file(self, value: Text) -> Tuple[Text, List[tmp_file]]:
+        file = tmp_file(value, dir=self.cwd)
         return file.name, [file]
 
-    def __parse_key(self, key, value):
+    def __parse_key(self, key: Text, value: Text) -> Tuple[Text, List]:
         # pylint: disable=unused-argument,
         if "BEGIN RSA PRIVATE KEY" in value:
             return self.__generate_arg_file(value)
-        else:
-            return "{}/{}".format(self.workdir, value), []
+        return "{}/{}".format(self.workdir, value), []
 
-    def __convert_arg(self, ansible_extra, item):
+    def __convert_arg(self, ansible_extra: AnsibleExtra, item: Tuple[Text, Any]) -> Tuple[List, List]:
         extra_args, files = ansible_extra
         key, value = item
         key = key.replace('_', '-')
@@ -215,27 +234,27 @@ class AnsibleCommand(PMObject):
         extra_args += [str(value)] if key_type else []
         return extra_args, files
 
-    def __parse_extra_args(self, **extra):
+    def __parse_extra_args(self, **extra) -> AnsibleExtra:
         handler_func = self.__convert_arg
         return AnsibleExtra(*reduce(
             handler_func, extra.items(), ([], [])
         ))
 
-    def get_workdir(self):
+    def get_workdir(self) -> Text:
         return self.project.path
 
     @property
-    def workdir(self):
+    def workdir(self) -> Text:
         return self.get_workdir()
 
     @property
-    def path_to_ansible(self):
+    def path_to_ansible(self) -> List[Text]:
         return self.pm_ansible(self.command_type)
 
-    def get_hidden_vars(self):
+    def get_hidden_vars(self) -> List[Text]:
         return self.inventory_object.hidden_vars
 
-    def hide_passwords(self, raw):
+    def hide_passwords(self, raw: Text) -> Text:
         regex = r'|'.join((
             r"(?<=" + hide + r":\s).{1,}?(?=[\n\t\s])"
             for hide in self.get_hidden_vars()
@@ -244,16 +263,16 @@ class AnsibleCommand(PMObject):
         raw = re.sub(regex, subst, raw, 0, re.MULTILINE)
         return raw
 
-    def get_execution_revision(self, project):  # nocv
+    def get_execution_revision(self, project: Project):  # nocv
         return project.revision
 
-    def prepare(self, target, inventory, history, project):
+    def prepare(self, target: Text, inventory: Any, history: History, project: Project) -> NoReturn:
         self.target, self.project = target, project
         self.history = history if history else DummyHistory()
         self.history.status = "RUN"
         self.project.sync_on_execution_handler(self.history)
         if inventory:
-            self.inventory_object = self.Inventory(inventory, cwd=self.workdir)
+            self.inventory_object = self.Inventory(inventory, cwd=self.project.path, tmpdir=self.cwd)
             self.history.raw_inventory = self.hide_passwords(
                 self.inventory_object.raw
             )
@@ -263,7 +282,7 @@ class AnsibleCommand(PMObject):
         self.history.save()
         self.executor = self.ExecutorClass(self.history)
 
-    def _send_hook(self, when):
+    def _send_hook(self, when: Text) -> NoReturn:
         msg = OrderedDict()
         msg['execution_type'] = self.history.kind
         msg['when'] = when
@@ -277,25 +296,26 @@ class AnsibleCommand(PMObject):
         msg['history'] = self.history.get_hook_data(when)
         self.project.hook(when, msg)
 
-    def get_inventory_arg(self, target, extra_args):
+    def get_inventory_arg(self, target: Text, extra_args: List[Text]) -> List[Text]:
         # pylint: disable=unused-argument
         args = [target]
         if self.inventory_object is not None:
             args += ['-i', self.inventory_object.file_name]
         return args
 
-    def get_args(self, target, extra_args):
+    def get_args(self, target: Text, extra_args: List[Text]) -> List[Text]:
         return (
             self.path_to_ansible +
             self.get_inventory_arg(target, extra_args) +
             extra_args
         )
 
-    def get_kwargs(self, target, extra_args):
+    def get_kwargs(self, target, extra_args) -> Dict[Text, Any]:
         # pylint: disable=unused-argument
         return dict(cwd=self.workdir)
 
-    def error_handler(self, exception):
+    def error_handler(self, exception: BaseException) -> NoReturn:
+        # pylint: disable=no-else-return
         default_code = self.status_codes["other"]
         if isinstance(exception, self.ExecutorClass.CalledProcessError):  # nocv
             self.history.raw_stdout = "{}".format(exception.output)
@@ -308,7 +328,7 @@ class AnsibleCommand(PMObject):
         self.history.raw_stdout = self.history.raw_stdout + str(exception)
         self.history.status = default_code
 
-    def execute(self, target, inventory, history, project, **extra_args):
+    def execute(self, target: Text, inventory: Any, history: History, project: Project, **extra_args) -> NoReturn:
         try:
             self.prepare(target, inventory, history, project)
             self._send_hook('on_execution')
@@ -323,10 +343,12 @@ class AnsibleCommand(PMObject):
                 raise
         finally:
             inventory_object = getattr(self, "inventory_object", None)
-            inventory_object and inventory_object.close()
+            if inventory_object is not None:
+                inventory_object.close()
             self.history.stop_time = timezone.now()
             self.history.save()
             self._send_hook('after_execution')
+            self.__del__()
 
     def run(self):
         try:
@@ -334,6 +356,11 @@ class AnsibleCommand(PMObject):
         except Exception:  # nocv
             logger.error(traceback.format_exc())
             raise
+
+    def __del__(self):
+        if hasattr(self, 'cwd') and os.path.exists(self.cwd):
+            self._verbose_output('Tmpdir "{}" was cleared.'.format(self.cwd))
+            shutil.rmtree(self.cwd, ignore_errors=True)
 
 
 class AnsiblePlaybook(AnsibleCommand):
@@ -343,12 +370,12 @@ class AnsiblePlaybook(AnsibleCommand):
 class AnsibleModule(AnsibleCommand):
     command_type = "ansible"
 
-    def __init__(self, target, *pargs, **kwargs):
+    def __init__(self, target: Text, *pargs, **kwargs):
         kwargs['module-name'] = target
         if not kwargs.get('args', None):
             kwargs.pop('args', None)
         super(AnsibleModule, self).__init__(*pargs, **kwargs)
         self.ansible_ref['module-name'] = {'type': 'string'}
 
-    def execute(self, group, *args, **extra_args):
+    def execute(self, group: Text, *args, **extra_args):
         return super(AnsibleModule, self).execute(group, *args, **extra_args)

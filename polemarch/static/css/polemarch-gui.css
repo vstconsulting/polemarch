@@ -25,118 +25,118 @@
     }
 }
 
-.td_history_start_time, .td_history_stop_time,
-.td_project-history_start_time, .td_project-history_stop_time{
+.td-history-start_time, .td-history-stop_time,
+.td-project_history-start_time, .td-project_history-stop_time{
     width:180px;
 }
 
-.td_history_status,
-.td_project-history_status{
+.td-history-status,
+.td-project_history-status{
     width: 140px;
 }
 
 @media (max-width: 1400px) {
-    .td_history_stop_time,
-    .td_project-history_stop_time,
-    .td_project-periodic_task_schedule,
-    .td_project-periodic_task_type {
+    .td-history-stop_time,
+    .td-project_history-stop_time,
+    .td-project_periodic_task-schedule,
+    .td-project_periodic_task-type {
         display: none;
     }
 }
 
 @media (max-width: 1300px) {
-    .td_history_kind,
-    .td_project-history_kind {
+    .td-history-kind,
+    .td-project_history-kind {
         display: none;
     }
 }
 
 @media (max-width: 1200px) {
-    .td_history_initiator,
-    .td_project-history_initiator,
-    .td_history_revision,
-    .td_project-history_revision,
-    .td_project-periodic_task_template_opt,
-    .td_project-periodic_task_template {
+    .td-history-initiator,
+    .td-project_history-initiator,
+    .td-history-revision,
+    .td-project_history-revision,
+    .td-project_periodic_task-template_opt,
+    .td-project_periodic_task-template {
         display: none;
     }
 }
 
 @media (max-width: 1100px) {
-    .td_history_inventory,
-    .td_project-history_inventory {
+    .td-history-inventory,
+    .td-project_history-inventory {
         display: none;
     }
 }
 
 @media (max-width: 1000px) {
-    .td_history_executor,
-    .td_project-history_executor,
-    .td_hook_recipients,
-    .td_project-periodic_task_inventory {
+    .td-history-executor,
+    .td-project_history-executor,
+    .td-hook-recipients,
+    .td-project_periodic_task-inventory {
         display: none;
     }
 }
 
 @media (max-width: 900px) {
-    .td_project-periodic_task_mode {
+    .td-project_periodic_task-mode {
         display: none;
     }
 }
 
 @media (max-width: 780px) {
-    .td_history_project,
-    .td_project-history_project,
-    .td_hook_when,
-    .td_project-template_kind,
-    .td_project-periodic_task_kind {
+    .td-history-project,
+    .td-project_history-project,
+    .td-hook-when,
+    .td-project_template-kind,
+    .td-project_periodic_task-kind {
         display: none;
     }
 }
 
 @media (max-width: 700px) {
-    .td_history_start_time,
-    .td_project-history_start_time {
+    .td-history-start_time,
+    .td-project_history-start_time {
         width: 120px;
     }
 }
 
 @media (max-width: 600px) {
-    .td_history_start_time,
-    .td_project-history_start_time,
-    .td_project-template_options_list,
-    .td_project-periodic_task_save_result,
-    .td_project-module_path {
+    .td-history-start_time,
+    .td-project_history-start_time,
+    .td-project_template-options_list,
+    .td-project_periodic_task-save_result,
+    .td-project_module-path {
         display: none;
     }
 }
 
 @media (max-width: 480px) {
-    .td_hook_type,
+    .td-hook-type,
 
-    .td_group_children,
-    .td_inventory-group_children,
-    .td_project-group_children,
-    .td_project-inventory-group_children,
+    .td-group-children,
+    .td-inventory_group-children,
+    .td-project_group-children,
+    .td-project_inventory_group-children,
 
-    .td_host_type,
-    .td_group-host_type,
-    .td_inventory-host_type,
-    .td_project-host_type,
-    .td_project-group-host_type,
-    .td_project-inventory-host_type,
-    .td_project-inventory-group-host_type,
-    .td_project-periodic_task_enabled,
-    .td_project-playbook_playbook,
-    .td_community_template_type {
+    .td-host-type,
+    .td-group_host-type,
+    .td-inventory_host-type,
+    .td-project_host-type,
+    .td-project_grouph_host-type,
+    .td-project_inventory_host-type,
+    .td-project_inventory_group_host-type,
+    .td-project_periodic_task-enabled,
+    .td-project_playbook-playbook,
+    .td-community_template-type {
         display: none;
     }
 }
 
 @media (max-width: 480px) {
-    .column_history_actions,
-    .column_project-history_actions,
-    .td_hook_enable {
+    .column-history-actions,
+    .column-project_history-actions,
+    .td-hook-enable {
         display: none;
     }
 }
@@ -181,39 +181,39 @@ body {
 }
 
 
-.tr_status_offline .td_history_status,
-.tr_status_offline .td_project-history_status,
-.field_status_offline {
+.tr-status-offline .td-history-status,
+.tr-status-offline .td-project_history-status,
+.field-status-offline {
     color: var(--history-status-offline);
 }
 
-.tr_status_interrupted .td_history_status,
-.tr_status_interrupted .td_project-history_status,
-.field_status_interrupted {
+.tr-status-interrupted .td-history-status,
+.tr-status-interrupted .td-project_history-status,
+.field-status-interrupted {
     color: var(--history-status-interrupted);
 }
 
-.tr_status_run .td_history_status,
-.tr_status_run .td_project-history_status,
-.field_status_run {
+.tr-status-run .td-history-status,
+.tr-status-run .td-project_history-status,
+.field-status-run {
     color: var(--history-status-run);
 }
 
-.tr_status_error .td_history_status,
-.tr_status_error .td_project-history_status,
-.field_status_error {
+.tr-status-error .td-history-status,
+.tr-status-error .td-project_history-status,
+.field-status-error {
     color: var(--history-status-error);
 }
 
-.tr_status_delay .td_history_status,
-.tr_status_delay .td_project-history_status,
-.field_status_delay {
+.tr-status-delay .td-history-status,
+.tr-status-delay .td-project_history-status,
+.field-status-delay {
     color: var(--history-status-delay);
 }
 
-.tr_status_ok .td_history_status,
-.tr_status_ok .td_project-history_status,
-.field_status_ok {
+.tr-status-ok .td-history-status,
+.tr-status-ok .td-project_history-status,
+.field-status-ok {
     color: var(--history-status-ok);
 }
 
@@ -224,49 +224,49 @@ body {
 }
 
 
-.tr_status_sync .td_project_status,
-.field_status_sync {
+.tr-status-sync .td-project-status,
+.field-status-sync {
     color: var(--project-status-sync);
 }
 
-.tr_status_wait_sync .td_project_status,
-.field_status_wait_sync {
+.tr-status-wait_sync .td-project-status,
+.field-status-wait_sync {
     color: var(--project-status-wait-sync);
 }
 
-.tr_status_new .td_project_status,
-.field_status_new {
+.tr-status-new .td-project-status,
+.field-status-new {
     color: var(--project-status-new);
 }
 
-.tr_status_error .td_project_status,
-.field_status_error {
+.tr-status-error .td-project-status,
+.field-status-error {
     color: var(--project-status-error);
 }
 
-.tr_status_ok .td_project_status,
-.field_status_ok {
+.tr-status-ok .td-project-status,
+.field-status-ok {
     color: var(--project-status-ok);
 }
 
-.td_project_status {
+.td-project-status {
     display: none;
     width: 15%;
 }
 
-.td_project_type {
+.td-project-type {
     display: none;
     width: 18%;
 }
 
 @media (min-width: 767px) {
-    .td_project_type {
+    .td-project-type {
         display: table-cell;
     }
 }
 
 @media (min-width: 600px) {
-    .td_project_status {
+    .td-project-status {
         display: table-cell;
     }
 }
@@ -284,10 +284,10 @@ body {
     overflow: auto;
     max-height: calc(100vh - 338px);
     min-height: 400px;
-    line-height: 1;
     background: #000;
     padding-left: 15px;
     padding-right: 15px;
+    font-weight: normal!important;
 }
 
 @media (min-width: 767px) {
@@ -355,4 +355,34 @@ body {
         margin-top: 10px;
     }
 
+}
+
+.chart-period-select {
+    max-width: 145px;
+    height: 30px!important;
+    line-height: 30px;
+    padding: 3px 12px;
+    display: inline-block;
+    float: left;
+}
+
+.guifield-one_history_boolean .boolean-true, .guifield-one_history_boolean .boolean-false{
+    font-size: 24px;
+}
+
+.guifield-one_history_boolean .boolean-true {
+    color: var(--boolean-true-color);
+}
+
+.guifield-one_history_boolean .boolean-false {
+    color: var(--boolean-false-color);
+}
+
+.clear-btn {
+    float: right;
+    margin-top: 0px;
+}
+
+.clear-btn-title {
+    display: none;
 }

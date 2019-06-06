@@ -4,49 +4,42 @@
 
 {% block logo %}
 
-    <!-- Logo -->
-    <a href="/" class="brand-link logo app-logo">
-        <img src="/static/img/logo/logo.png" alt="{{ project_gui_name }}" class="brand-image img-circle elevation-3" style="opacity: .8; float: inherit">
-        <img src="/static/img/logo/horizontal.svg" class="brand-image text-logo" style="opacity: .8">
-    </a>
+<!-- Logo -->
+<a href="/" class="brand-link logo app-logo">
+    <img src="/static/img/logo/logo.png" alt="{{ project_gui_name }}" class="brand-image img-circle elevation-3" style="opacity: .8; float: inherit">
+    <img src="/static/img/logo/horizontal.svg" class="brand-image text-logo" style="opacity: .8">
+</a>
 {% endblock %}
 
 {% block common_sciprt %}
 <script type="text/javascript">
-window.resourceList = window.resourceList.concat([
-    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmElements.html?v={{gui_version}}"},
-    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmProject.html?v={{gui_version}}"},
-    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmHistory.html?v={{gui_version}}"},
-    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmUsers.html?v={{gui_version}}"},
-    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmDashboard.html?v={{gui_version}}"},
-    { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmTasksTemplates.html?v={{gui_version}}"},
+    window.resourceList = window.resourceList.concat([
+        { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmFields.html?v={{gui_version}}"},
+        { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmItems.html?v={{gui_version}}"},
+        { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmProjects.html?v={{gui_version}}"},
+        { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmHistory.html?v={{gui_version}}"},
 
-    { prioritet:110, type:'js', name: "{% static 'js/libs/c3/d3.min.js' %}?v={{gui_version}}"},
-    { prioritet:110, type:'js', name: "{% static 'js/libs/c3/c3.min.js' %}?v={{gui_version}}"},
+        { prioritet:150, type:'js', name: "{% static 'js/libs/ansi_up.js' %}?v={{gui_version}}"},
+        { prioritet:150, type:'js', name: "{% static 'js/pmCustomizer.js' %}?v={{gui_version}}"},
 
-    { prioritet:150, type:'js', name: "{% static 'js/libs/ansi_up.js' %}?v={{gui_version}}"},
-    { prioritet:150, type:'js', name: "{% static 'js/libs/Sortable.min.js' %}?v={{gui_version}}"},
-    { prioritet:150, type:'js', name: "{% static 'js/pmCustomizer.js' %}?v={{gui_version}}"},
+        { prioritet:160, type:'js', name: "{% static 'js/common.js' %}?v={{gui_version}}"},
 
-    { prioritet:160, type:'js', name: "{% static 'js/common.js' %}?v={{gui_version}}"},
-    { prioritet:160, type:'js', name: "{% static 'js/hardcoder.js' %}?v={{gui_version}}"},
-    { prioritet:183, type:'js', name: "{% static 'js/pmElements.js' %}?v={{gui_version}}"},
-    { prioritet:183, type:'js', name: "{% static 'js/pmUsers.js' %}?v={{gui_version}}"},
-    { prioritet:184, type:'js', name: "{% static 'js/pmGroups.js' %}?v={{gui_version}}"},
-    { prioritet:185, type:'js', name: "{% static 'js/pmInventories.js' %}?v={{gui_version}}"},
-    { prioritet:186, type:'js', name: "{% static 'js/pmProjects.js' %}?v={{gui_version}}"},
-    { prioritet:188, type:'js', name: "{% static 'js/pmPeriodicTasks.js' %}?v={{gui_version}}"},
-    { prioritet:189, type:'js', name: "{% static 'js/pmHistory.js' %}?v={{gui_version}}"},
-    { prioritet:190, type:'js', name: "{% static 'js/pmTemplates.js' %}?v={{gui_version}}"},
-    { prioritet:190, type:'js', name: "{% static 'js/pmCommunity.js' %}?v={{gui_version}}"},
-    { prioritet:400, type:'js', name: "{% static 'js/pmDashboard.js' %}?v={{gui_version}}"},
-    { prioritet:300, type:'js', name: "{% static 'js/guiForApp.js' %}?v={{gui_version}}"},
+        { prioritet:182, type:'js', name: "{% static 'js/pmFields.js' %}?v={{gui_version}}"},
+        { prioritet:182, type:'js', name: "{% static 'js/pmFieldsMixins.js' %}?v={{gui_version}}"},
+        { prioritet:183, type:'js', name: "{% static 'js/pmItems.js' %}?v={{gui_version}}"},
+        { prioritet:184, type:'js', name: "{% static 'js/pmHosts.js' %}?v={{gui_version}}"},
+        { prioritet:184.5, type:'js', name: "{% static 'js/pmGroups.js' %}?v={{gui_version}}"},
+        { prioritet:185, type:'js', name: "{% static 'js/pmInventories.js' %}?v={{gui_version}}"},
+        { prioritet:186, type:'js', name: "{% static 'js/pmProjects.js' %}?v={{gui_version}}"},
+        { prioritet:187, type:'js', name: "{% static 'js/pmHistory.js' %}?v={{gui_version}}"},
+        { prioritet:190, type:'js', name: "{% static 'js/pmTemplates.js' %}?v={{gui_version}}"},
+        { prioritet:191, type:'js', name: "{% static 'js/pmPeriodicTasks.js' %}?v={{gui_version}}"},
+        { prioritet:183, type:'js', name: "{% static 'js/pmUsers.js' %}?v={{gui_version}}"},
+        { prioritet:400, type:'js', name: "{% static 'js/pmDashboard.js' %}?v={{gui_version}}"},
 
-    { prioritet:107, type:'css', name: "{% static 'js/libs/c3/c3.min.css' %}?v={{gui_version}}"},
-
-    { prioritet:200, type:'css', name: "{% static 'css/polemarch-gui.css' %}?v={{gui_version}}"},
-    { prioritet:200, type:'css', name: "{% static 'css/ansi-colors.css' %}?v={{gui_version}}"},
-])
+        { prioritet:200, type:'css', name: "{% static 'css/polemarch-gui.css' %}?v={{gui_version}}"},
+        { prioritet:200, type:'css', name: "{% static 'css/ansi-colors.css' %}?v={{gui_version}}"},
+    ])
 </script>
 {% endblock %}
 

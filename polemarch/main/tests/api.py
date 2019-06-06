@@ -11,7 +11,7 @@ except ImportError:  # nocv
 
 from vstutils.utils import redirect_stdany
 from ._base import BaseTestCase, json
-from .hosts import InventoriesTestCase, InvBaseTestCase
+from .hosts import InventoriesTestCase, InvBaseTestCase  # noqa: F401
 from .executions import ProjectTestCase, BaseExecutionsTestCase
 from .openapi import OApiTestCase
 
@@ -352,7 +352,7 @@ class ApiUsersTestCase(ApiBaseTestCase):
         self.assertCount(self.get_result("get", settings_url), 0)
 
 
-class APITestCase(ApiUsersTestCase, InventoriesTestCase, ProjectTestCase, OApiTestCase):
+class APITestCase(ProjectTestCase, OApiTestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
 

@@ -1,14 +1,11 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
-
+from typing import Any, NoReturn, Tuple, Dict, List
 import logging
 import uuid
 
 from functools import reduce
-try:
-    from ruamel.ordereddict import ordereddict as OrderedDict
-except ImportError:  # nocv
-    from collections import OrderedDict
+from collections import OrderedDict
 from django.db import transaction
 from django.db.models import Case, When, Value
 from django.contrib.contenttypes.models import ContentType
@@ -20,7 +17,7 @@ from .base import ACLModel, BQuerySet, BModel, models
 logger = logging.getLogger("polemarch")
 
 
-def update_boolean(items, item):
+def update_boolean(items: Dict[str, Any], item: Any):
     value = items.get(item, None)
     if value is None:
         pass
@@ -34,7 +31,7 @@ def update_boolean(items, item):
 class VariablesQuerySet(BQuerySet):
     use_for_related_fields = True
 
-    def sort_by_key(self):
+    def sort_by_key(self) -> BQuerySet:
         args, kwargs = [], dict()
         keys = self.model.variables_keys
         index = keys.index
@@ -45,7 +42,7 @@ class VariablesQuerySet(BQuerySet):
         kwargs['output_field'] = models.IntegerField()
         return self.annotate(sort_idx=Case(*args, **kwargs)).order_by("sort_idx", "key")
 
-    def cleared(self):
+    def cleared(self) -> BQuerySet:
         return super(VariablesQuerySet, self).cleared().sort_by_key()
 
 
@@ -93,7 +90,7 @@ class Variable(BModel):
 class AbstractVarsQuerySet(BQuerySet):
     use_for_related_fields = True
 
-    def var_filter(self, **kwargs):
+    def var_filter(self, **kwargs) -> BQuerySet:
         qs = self
         for key, value in kwargs.items():
             qs = qs.filter(variables__key=key, variables__value=value)
@@ -123,7 +120,7 @@ class AbstractModel(ACLModel):
                           for k, v in self.vars.items()])
         return "{} {}".format(self.name, _vars)
 
-    def get_hook_data(self, when):
+    def get_hook_data(self, when: str) -> OrderedDict:
         # pylint: disable=unused-argument
         hook_data = OrderedDict()
         hook_data['id'] = self.id
@@ -131,7 +128,7 @@ class AbstractModel(ACLModel):
         return hook_data
 
     @transaction.atomic()
-    def set_vars(self, variables):
+    def set_vars(self, variables) -> NoReturn:
         encr = "[~~ENCRYPTED~~]"
         encrypted_vars = {k: v for k, v in variables.items() if v == encr}
         other_vars = {k: v for k, v in variables.items() if v != encr}
@@ -139,15 +136,15 @@ class AbstractModel(ACLModel):
         for key, value in other_vars.items():
             self.variables.create(key=key, value=value)
 
-    def get_vars(self):
+    def get_vars(self) -> OrderedDict:
         qs = self.variables.all().sort_by_key().values_list('key', 'value')
         return reduce(update_boolean, self.BOOLEAN_VARS, OrderedDict(qs))
 
-    def get_generated_vars(self):
+    def get_generated_vars(self, tmp_dir='/tmp') -> Tuple[Dict, List]:
         files = []
         obj_vars = self.get_vars()
         if "ansible_ssh_private_key_file" in obj_vars:
-            tmp = tmp_file()
+            tmp = tmp_file(dir=tmp_dir)
             tmp.write(obj_vars["ansible_ssh_private_key_file"])
             obj_vars["ansible_ssh_private_key_file"] = tmp.name
             files.append(tmp)
@@ -162,5 +159,5 @@ class AbstractModel(ACLModel):
         self.set_vars(value)
 
     @property
-    def have_vars(self):
+    def have_vars(self) -> bool:
         return bool(len(self.vars))  # nocv

@@ -3,11 +3,6 @@ from ..tests._base import BaseTestCase
 from django.core.validators import ValidationError
 from ..exceptions import UnknownTypeException
 
-try:
-    from mock import MagicMock
-except ImportError:  # nocv
-    from unittest.mock import MagicMock
-
 
 class TemplateCreateTestCase(BaseTestCase):
 

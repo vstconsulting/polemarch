@@ -1,12 +1,15 @@
 # pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
+from typing import Tuple, Dict, Text, Union, Any
 import warnings
 from vstutils.utils import tmp_file_context, raise_context
 try:
     import git
 except:  # nocv
     warnings.warn("Git is not installed or have problems.")
-from ._base import _Base, os
+from ._base import _Base, os, logger
+
+ENV_VARS_TYPE =  Dict[Text, Union[Text, bool]]  # pylint: disable=invalid-name
 
 
 class _VCS(_Base):  # nocv
@@ -21,7 +24,7 @@ class _VCS(_Base):  # nocv
 
 
 class Git(_VCS):
-    __slots__ = 'env', '_fetch_map'
+    __slots__ = ('env', '_fetch_map',)
 
     _fetch_statuses = [
         "NEW_TAG", "NEW_HEAD", "HEAD_UPTODATE",
@@ -44,17 +47,17 @@ class Git(_VCS):
         }
         self.target_branch = self.proj.vars.get('repo_branch', None)
 
-    def get_repo(self):
+    def get_repo(self) -> git.Repo:
         return git.Repo(self.path)
 
-    def vsc_clone(self, *args, **kwargs):
+    def vsc_clone(self, *args, **kwargs) -> git.Repo:
         repo = git.Repo.clone_from(*args, **kwargs)
         with repo.git.custom_environment(**kwargs.get('env', {})):
             self._update_submodules(repo)
         return repo
 
     @raise_context()
-    def _fetch_from_remote(self, repo, env):
+    def _fetch_from_remote(self, repo: git.Repo, env: ENV_VARS_TYPE):
         with repo.git.custom_environment(**env):
             kwargs = self.options.get("FETCH_KWARGS", dict())
             fetch_method = repo.git.fetch
@@ -64,12 +67,14 @@ class Git(_VCS):
             self._update_submodules(repo)
             return result
 
-    def _update_submodules(self, repo):
+    def _update_submodules(self, repo: git.Repo):
+        logger.debug('Update GIT submodules in project [{}]'.format(self.proj.id))
         for sm in repo.submodules:
             # Calling git directly for own submodules
             # since using relative path is not working in gitpython
             # see https://github.com/gitpython-developers/GitPython/issues/730
             with raise_context():
+                logger.debug('Update module "{}" in project [{}].'.format(sm.name, self.proj.id))
                 if sm.url[0:3] == '../':
                     sm_path = sm.name
                     repo.git.submodule('init', sm_path)
@@ -77,11 +82,11 @@ class Git(_VCS):
                 else:
                     sm.update(init=True)
 
-    def vcs_update(self, repo, env):
+    def vcs_update(self, repo: git.Repo, env: ENV_VARS_TYPE):
         fetch_result = self._fetch_from_remote(repo, env)
         return fetch_result
 
-    def get_branch_name(self):
+    def get_branch_name(self) -> str:
         # pylint: disable=broad-except
         reponame = "waiting..."
         with raise_context():
@@ -94,7 +99,7 @@ class Git(_VCS):
             reponame = repo.active_branch.name
         return reponame
 
-    def make_clone(self, env):
+    def make_clone(self, env: ENV_VARS_TYPE) -> Tuple[git.Repo, None]:
         kw = dict(**self.options.get("CLONE_KWARGS", dict()))
         if self.target_branch:
             kw['branch'] = self.target_branch.replace('tags/', '')
@@ -105,7 +110,7 @@ class Git(_VCS):
             )
         return repo, None
 
-    def _get_or_create_repo(self, env):
+    def _get_or_create_repo(self, env: ENV_VARS_TYPE) -> git.Repo:
         try:
             repo = self.get_repo()
             branch = self.target_branch
@@ -119,12 +124,34 @@ class Git(_VCS):
             repo = self.make_clone(env)[0]
         return repo
 
-    def make_update(self, env):
-        repo = self._get_or_create_repo(env)
-        resutls = repo, self.vcs_update(repo, env)
+    def make_update(self, env: ENV_VARS_TYPE) -> Tuple[git.Repo, Any]:
+        try:
+            repo = self._get_or_create_repo(env)
+        except git.InvalidGitRepositoryError:
+            logger.info('Convert project [{}] to GIT.'.format(self.proj.id))
+            repo = git.Repo.init(self.path)
+            repo.create_remote('origin', self.proj.repository)
+            with repo.git.custom_environment(**env):
+                kwargs = self.options.get("FETCH_KWARGS", dict())
+                origin = repo.remote('origin')
+                logger.debug('Fetch remote brances for project [{}].'.format(self.proj.id))
+                origin.fetch(**kwargs)
+                if not list(origin.refs):
+                    config_writer = repo.config_writer()
+                    config_writer.set_value("user", "email", self.proj.owner.email).release()
+                    user_name = self.proj.owner.username
+                    if self.proj.owner.last_name and self.proj.owner.first_name:  # nocv
+                        user_name = '{u.fist_name} {u.last_name}'.format(u=self.proj.owner)
+                    config_writer.set_value("user", "name", user_name).release()
+                    repo.git.add(A=True)
+                    repo.git.commit(m='Create project from Polemarch.')
+                    logger.debug('Push project [{}] as master.'.format(self.proj.id))
+                    repo.git.push('--set-upstream', 'origin', 'master')
+
+        results = repo, self.vcs_update(repo, env)
         with raise_context():
             repo.git.checkout(self.target_branch)
-        return resutls
+        return results
 
     def get_revision(self, *args, **kwargs):
         # pylint: disable=unused-argument
@@ -133,7 +160,7 @@ class Git(_VCS):
         repo = self.get_repo()
         return repo.head.object.hexsha
 
-    def _with_password(self, tmp, env_vars):
+    def _with_password(self, tmp, env_vars: ENV_VARS_TYPE) -> ENV_VARS_TYPE:
         env_vars.update(self.env.get("PASSWORD", dict()))
         tmp.write("echo '{}'".format(self.proj.vars["repo_password"]))
         os.chmod(tmp.name, 0o700)
@@ -141,7 +168,7 @@ class Git(_VCS):
         tmp.close()
         return env_vars
 
-    def _with_key(self, tmp, env_vars):
+    def _with_key(self, tmp, env_vars: Dict) -> ENV_VARS_TYPE:
         env_vars.update(self.env.get("KEY", dict()))
         tmp.write(self.proj.vars["repo_key"])
         tmp.close()
@@ -160,14 +187,16 @@ class Git(_VCS):
                 env_vars = self._with_key(tmp, env_vars)
             return super(Git, self)._operate(operation, **env_vars)
 
-    def _get_files(self, repo=None):
+    def _get_files(self, repo: git.Repo = None):
         return dict(repo.index.entries.keys()).keys()
 
-    def get(self):
-        return {res.ref.remote_head: self._fetch_map[res.flags]
-                for res in super(Git, self).get()[1]}
+    def get(self) -> Dict[str, str]:
+        return {
+            res.ref.remote_head: self._fetch_map[res.flags]
+            for res in super(Git, self).get()[1]
+        }
 
-    def revision(self):
+    def revision(self) -> Text:
         try:
             return self._operate(self.get_revision)
         except git.GitError:

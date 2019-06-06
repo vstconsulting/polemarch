@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-
+from typing import AnyStr
 import re
 from django.utils.translation import ugettext_lazy as _
 from django.core.validators import (RegexValidator,
@@ -13,7 +13,7 @@ class URLValidator(OldURLValidator):
 
 
 class DomainNameValidator(RegexValidator):
-    message = _('Ivalid domain name value.')
+    message = _('Invalid domain name value.')
     surl = URLValidator.ul
     ipv4_re = URLValidator.ipv4_re
     ipv6_re = URLValidator.ipv6_re
@@ -30,6 +30,6 @@ class DomainNameValidator(RegexValidator):
     )
 
 
-def validate_hostname(address):
+def validate_hostname(address: AnyStr):
     msg = _("Invalid hostname or IP '{}'.".format(address))
     DomainNameValidator(message=msg)(address)

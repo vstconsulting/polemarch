@@ -1,0 +1,146 @@
+<!--
+    Block of COMMON components -
+    - components for ALL view types
+-->
+<!-- template of logo (Vue component - '<logo></logo>' -->
+<script type="text/x-template" id="template_logo_pm">
+    <a href="/" class="brand-link logo app-logo">
+        <img :src="staticPath + 'img/logo/logo.png'" :alt="title"
+             class="brand-image img-circle elevation-3"
+             style="opacity: .8; float: inherit"
+        >
+        <img :src="staticPath + 'img/logo/horizontal.svg'" :alt="title"
+             class="brand-image text-logo" style="opacity: .8"
+        >
+    </a>
+</script>
+<!--
+    EndBlock of COMMON components -
+    - components for ALL view types
+-->
+
+<!--
+  Block of CUSTOM pages -
+    - home page, 404 page and so on
+-->
+<!-- template of dashboard page -->
+<script type="text/x-template" id="template_pm_dashboard">
+    <div style="display:contents;" >
+        <preloader :show="loading"></preloader>
+
+        <div class="content-wrapper-2" v-if="error">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <h1>
+                        <span @click="goToHistoryRecord(-1)" class="btn btn-default btn-previous-page">
+                            <span class="fa fa-arrow-left"></span>
+                        </span>
+                                <span class="h1-header" > Error {{ error.status }} </span>
+                            </h1>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-12">
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <section class="col-lg-12">
+                            <div class="card card-info">
+                                <div class="card-header with-border">
+                                    <br>
+                                </div>
+                                <div class="card-body">
+                                    {{ error_data }}
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <div class="content-wrapper-2" v-if="response">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <h1>
+                        <span class="h1-header" > {{ title }} </span>
+                    </h1>
+                </div>
+            </section>
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row" id="dnd-container">
+                        <component v-for="widget in sorted_widgets" :key="widget.name"
+                                   :is="'w_' + widget.format" :item="widget" :value="widgets_data[widget.name]">
+                        </component>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</script>
+
+<!-- template of history chart widget - content header -->
+<script type="text/x-template" id="template_w_history_chart_content_header">
+    <div style="display: contents;">
+        <transition name="fade">
+            <div class="pull-right" id="period-list" style="width:215px; min-width:145px;" v-if="!item.collapsed">
+                <div class="chart-period-select-wrapper">
+                    <label style="float:left; margin-right:10px; line-height:26px;">Period</label>
+                    <select id="chart-period" class="form-control chart-period-select"
+                            @change="onChangeHandler($event.target.value)"
+                    >
+                        <option v-for="option in period_options" :value="option.value"
+                                :selected="isOptionSelected(option)"
+                        >
+                            {{ option.title }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </transition>
+    </div>
+</script>
+
+<!-- template of history chart widget - content body -->
+<script type="text/x-template" id="template_w_history_chart_content_body">
+    <div class="row">
+        <div class="col-lg-8">
+            <div style="position: relative; margin: auto; height: 300px; width: 100%; overflow:hidden;">
+                <canvas id="chart_js_canvas"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div style="width: 100%;" class="text-data" id="chart_progress_bars">
+                <h5 class="text-center" style="margin-top:25px;">Statistic</h5>
+                <template v-for="line in item.lines">
+                    <template v-if="line.active && progressBarsData[line.name]">
+                        <div class="progress-group">
+                            {{ line.name }}
+                            <span class="float-right">
+                                <b> {{ progressBarsData[line.name].sum }} </b>/ {{ progressBarsData[line.name].all }}
+                            </span>
+                            <div class="progress progress-sm">
+                                <div class="progress-bar"
+                                     :style="getProgressBarStyles(progressBarsData[line.name])"
+                                ></div>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+            </div>
+        </div>
+    </div>
+</script>
+<!--
+  EndBlock of CUSTOM pages -
+    - home page, 404 page and so on
+-->

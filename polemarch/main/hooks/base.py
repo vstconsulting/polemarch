@@ -1,7 +1,8 @@
+from typing import Dict
 from django.conf import settings
 
 
-class BaseHook(object):
+class BaseHook:
     def __init__(self, hook_object, when_types=None, **kwargs):
         self.when_types = when_types or []
         self.hook_object = hook_object
@@ -16,7 +17,7 @@ class BaseHook(object):
         self.conf = dict()
         self.conf.update(kwargs)
 
-    def validate(self):
+    def validate(self) -> Dict:
         errors = {}
         when = self.hook_object.when
         if when is not None and when not in self.when_types:
@@ -30,7 +31,7 @@ class BaseHook(object):
     def execute(self, recipient, when, message):  # nocv
         raise NotImplementedError
 
-    def send(self, message, when):
+    def send(self, message, when: str) -> str:
         self.when = when
         filtered = filter(lambda r: r, self.conf['recipients'])
         execute = self.execute

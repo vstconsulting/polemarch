@@ -1,99 +1,123 @@
+/**
+ * File with tests for host views.
+ */
 
-window.qunitTestsArray['guiPaths.host'] = {
-    test:function()
-    {
-        let env = {};
-        let pk_obj = {};
+/**
+ * Tests for views connected with Host Model.
+ */
+window.qunitTestsArray['guiViews[host]'] = {
+    test: function() {
+        let list_path = '/host/';
+        let page_path = list_path + '{' + path_pk_key + '}/';
+        let instances_info = guiTests.getEmptyInstancesInfo();
 
-        // creates user needed for some following tests
-        guiTests.createUser(env, pk_obj);
+        // creates random user, data of which will be used in following tests.
+        guiTests.createRandomUser(instances_info);
 
-        //////////////////////////////////////////////////////
-        // Test path /host/ (list, new page, page, edit page)
-        /////////////////////////////////////////////////////
-
-        guiTests.testForPathInternalLevel("/host/",{
-            create:[
+        /////////////////////////////////////////////////////////////////
+        // Test for set of /host/ views (list, page_new, page, page_edit)
+        /////////////////////////////////////////////////////////////////
+        guiTests.testSetOfViews(list_path, instances_info, {
+            new: [
                 {
-                    is_valid:true,
-                    data:  {
-                        name:{value:rundomString(6)},
-                        notes:{value:rundomString(6)},
+                    is_valid: false,
+                    data: {
+                        name: {value: "@@@",},
+                    },
+                },
+                {
+                    is_valid: true,
+                    data: {
+                        name: {value: randomString(6),},
+                        notes: {value: randomString(6),},
+                        type: {value: "RANGE",},
                     },
                 },
             ],
-            update:[
+            edit: [
                 {
-                    is_valid:true,
+                    is_valid: true,
                     data: {
-                        notes:{value:rundomString(6)},
-                    },
-                },
-            ]
-        }, env, pk_obj, true);
-
-
-        ////////////////////////////////////////////////////////////////////
-        // Test path /host/{pk}/copy/
-        ///////////////////////////////////////////////////////////////////
-
-        guiTests.copyObjectByPath("/host/{pk}/copy/", {
-            data:{
-                name:{value:rundomString(6)},
-            },
-            page:{
-                delete: true,
-            },
-        }, env, pk_obj);
-
-
-        ////////////////////////////////////////////////////////////////////
-        // Test path /host/{pk}/set_owner/
-        ///////////////////////////////////////////////////////////////////
-
-        guiTests.executeAction("/host/{pk}/set_owner/", {
-            data: function() { return {
-                user_id: {
-                    value: {id: env.user_id, text: env.user_name},
-                    do_not_compare:true,
-                }
-            }}
-        }, env, pk_obj);
-
-
-        ////////////////////////////////////////////////////////////////////
-        // Test path /host/{pk}/variables/ (list, new page, page, edit page)
-        ////////////////////////////////////////////////////////////////////
-
-        guiTests.testForPathInternalLevel("/host/{pk}/variables/",{
-            create:[
-                {
-                    is_valid:true,
-                    data:  {
-                        key:{value:"ansible_user"},
-                        value:{value: "ubuntu"},
+                        name: {value: randomString(6) + randomString(6)},
                     },
                 },
             ],
-            update:[
+        }, true);
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Test for set of /host/{pk}/variables/ views (list, page_new, page, page_edit)
+        ////////////////////////////////////////////////////////////////////////////////
+        guiTests.testSetOfViews(page_path + "variables/", instances_info, {
+            new: [
                 {
                     is_valid:true,
                     data: {
-                        value:{value: "centos"},
+                        key: {value:"ansible_user"},
+                        value: {value: "ubuntu"},
+                    },
+                },
+            ],
+            edit: [
+                {
+                    is_valid:true,
+                    data: {
+                        value: {value: "centos"},
                     },
                 },
             ],
             page: {
-                delete: true,
-            }
-        }, env, pk_obj);
+                remove: true,
+            },
+        }, false);
 
-        // deletes host
+        ////////////////////////////////////////////////////////////////////////////////
+        // Tests for /host/{pk}/copy/ views
+        ////////////////////////////////////////////////////////////////////////////////
+        // Test for INVALID COPY
+        guiTests.copyInstanceFromPageView(page_path, instances_info, {
+            is_valid: false,
+            data: {
+                name: {value: 'copied_host_321',},
+                type: {value: 'HOST'},
+            }
+        });
+        // Test for VALID COPY
+        guiTests.copyInstanceFromPageView(page_path, instances_info, {
+            is_valid: true,
+            remove: true,
+            data: {
+                name: {value: 'copied-host-321',},
+                type: {value: 'RANGE'},
+            }
+        });
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Tests for /host/{pk}/set_owner/ view
+        ////////////////////////////////////////////////////////////////////////////////
+        guiTests.executeActionFromSomeView(page_path, instances_info, {
+            is_valid: true,
+            action: 'set_owner',
+            data: () => {
+                return {
+                    user_id: {
+                        value: {
+                            prefetch_value: instances_info.key_fields_data.user.username,
+                            value: instances_info.key_fields_data.user.id,
+                        },
+                        do_not_compare: true,
+                    },
+                };
+            },
+        });
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Tests, that delete created during tests instances.
+        ////////////////////////////////////////////////////////////////////////////////
         [
-            "/host/{pk}/",
+            page_path,
             "/user/{user_id}/",
         ].forEach((path) => {
-            guiTests.deleteObjByPath(path, env, pk_obj);
+            guiTests.testRemovePageViewInstance(path, instances_info, true);
         });
-    }
-}
+    },
+};

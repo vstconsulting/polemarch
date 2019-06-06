@@ -1,5 +1,6 @@
 # pylint: disable=no-member,unused-argument,too-many-lines
 from __future__ import unicode_literals
+from typing import Dict, List
 import json
 import uuid
 try:
@@ -27,28 +28,12 @@ from ..signals import api_post_save, api_pre_save
 # nothing
 #
 # Serializers field for usability
-class ModelRelatedField(serializers.PrimaryKeyRelatedField):
-    def __init__(self, **kwargs):  # nocv
-        model = kwargs.pop("model", None)
-        assert not ((model is not None or self.queryset is not None) and
-                    kwargs.get('read_only', None)), (
-            'Relational fields should not provide a `queryset` or `model`'
-            ' argument, when setting read_only=`True`.'
-        )
-        if model is not None:
-            kwargs["queryset"] = model.objects.all()
-        super(ModelRelatedField, self).__init__(**kwargs)
-
-
 class DictField(serializers.CharField):
 
     def to_internal_value(self, data):  # nocv
         return (
             data
-            if (
-                    isinstance(data, (six.string_types, six.text_type)) or
-                    isinstance(data, (dict, list))
-            )
+            if isinstance(data, (six.string_types, six.text_type, dict, list))
             else self.fail("Unknown type.")
         )
 
@@ -129,9 +114,9 @@ class ExecuteResponseSerializer(ActionResponseSerializer):
 
 class SetOwnerSerializer(DataSerializer):
     perms_msg = 'Permission denied. Only owner can change owner.'
-    user_id = vst_fields.Select2Field(required=True, select='User',
-                                      label='New owner',
-                                      autocomplete_represent='username')
+    user_id = vst_fields.FkField(required=True, select='User',
+                                 label='New owner',
+                                 autocomplete_represent='username')
 
     def update(self, instance, validated_data):
         if not self.instance.acl_handler.owned_by(self.current_user()):  # noce
@@ -140,44 +125,22 @@ class SetOwnerSerializer(DataSerializer):
         self.instance.acl_handler.set_owner(user)
         return user
 
-    def get_user(self, validated_data):
+    def get_user(self, validated_data: dict):
         return User.objects.get(**validated_data)
 
-    def current_user(self):
+    def current_user(self) -> User:
         return self.context['request'].user
 
-    def to_representation(self, value):
+    def to_representation(self, value: User):
         return dict(user_id=value.id)
 
-    def to_internal_value(self, data):
+    def to_internal_value(self, data: dict):
         return dict(pk=data['user_id'])
-
-
-class ChangePasswordSerializer(DataSerializer):
-    old_password = serializers.CharField(required=True)
-    password = serializers.CharField(required=True, label='New password')
-    password2 = serializers.CharField(required=True, label='Confirm new password')
-
-    def update(self, instance, validated_data):
-        if not instance.check_password(validated_data['old_password']):
-            raise exceptions.PermissionDenied('Password is not correct.')
-        if validated_data['password'] != validated_data['password2']:
-            raise exceptions.ValidationError("New passwords' values are not equal.")
-        instance.set_password(validated_data['password'])
-        instance.save()
-        return instance
-
-    def to_representation(self, value):
-        return dict(
-            old_password='***',
-            password='***',
-            password2='***',
-        )
 
 
 class _SignalSerializer(serializers.ModelSerializer):
     @cached_property
-    def _writable_fields(self):
+    def _writable_fields(self) -> List:
         writable_fields = super(_SignalSerializer, self)._writable_fields
         fields = []
         attrs = [
@@ -214,7 +177,7 @@ class _WithPermissionsSerializer(_SignalSerializer):
             )
         return result
 
-    def current_user(self):
+    def current_user(self) -> User:
         return self.context['request'].user  # nocv
 
 
@@ -222,36 +185,29 @@ class UserSerializer(vst_serializers.UserSerializer):
     is_staff = serializers.HiddenField(default=True, label='Staff')
 
     @with_signals
-    def create(self, data):
-        return super(UserSerializer, self).create(data)
+    def update(self, instance: User, validated_data: Dict):
+        return super(UserSerializer, self).update(instance, validated_data)
+
+
+class CreateUserSerializer(vst_serializers.CreateUserSerializer):
 
     @with_signals
-    def update(self, instance, validated_data):
-        return super(UserSerializer, self).update(instance, validated_data)
+    def create(self, validated_data: Dict) -> User:
+        return super().create(validated_data)
+
+
+class ChangePasswordSerializer(vst_serializers.ChangePasswordSerializer):
+
+    @with_signals
+    def update(self, instance: User, validated_data: Dict) -> User:
+        return super(ChangePasswordSerializer, self).update(instance, validated_data)
 
 
 class OneUserSerializer(UserSerializer):
     email = serializers.EmailField(required=False)
 
     class Meta(vst_serializers.OneUserSerializer.Meta):
-        fields = tuple(
-            field for field in vst_serializers.OneUserSerializer.Meta.fields
-            if field not in ['password']
-        )
-
-
-class CreateUserSerializer(OneUserSerializer):
-    password = vst_fields.VSTCharField(write_only=True)
-    password2 = vst_fields.VSTCharField(write_only=True, label='Repeat password')
-
-    class Meta(OneUserSerializer.Meta):
-        fields = list(OneUserSerializer.Meta.fields) + ['password', 'password2']
-
-    def run_validation(self, data=serializers.empty):
-        validated_data = super(CreateUserSerializer, self).run_validation(data)
-        if validated_data['password'] != validated_data.pop('password2', None):
-            raise exceptions.ValidationError('Passwords do not match.')
-        return validated_data
+        pass
 
 
 class ChartLineSettingSerializer(vst_serializers.JsonObjectSerializer):
@@ -383,10 +339,10 @@ class OneHistorySerializer(_SignalSerializer):
                   "raw_stdout",
                   "raw_inventory",)
 
-    def get_raw(self, request):
+    def get_raw(self, request) -> str:
         return self.instance.get_raw(request.query_params.get("color", "no") == "yes")
 
-    def get_raw_stdout(self, obj):
+    def get_raw_stdout(self, obj: models.History):
         return self.context.get('request').build_absolute_uri("raw/")
 
     def get_facts(self, request):
@@ -433,12 +389,12 @@ class VariableSerializer(_SignalSerializer):
             'value',
         )
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: models.Variable):
         result = super(VariableSerializer, self).to_representation(instance)
         if instance.key in getattr(instance.content_object, 'HIDDEN_VARS', []):
             result['value'] = "[~~ENCRYPTED~~]"
         elif instance.key in getattr(instance.content_object, 'BOOLEAN_VARS', []):
-            result['value'] = True if instance.value == 'True' else False
+            result['value'] = instance.value == 'True'
         return result
 
 
@@ -476,24 +432,24 @@ class ProjectVariableSerializer(VariableSerializer):
 
 class _WithVariablesSerializer(_WithPermissionsSerializer):
     @transaction.atomic
-    def _do_with_vars(self, method_name, *args, **kwargs):
+    def _do_with_vars(self, method_name: str, *args, **kwargs):
         method = getattr(super(_WithVariablesSerializer, self), method_name)
         instance = method(*args, **kwargs)
         return instance
 
-    def create(self, validated_data):
+    def create(self, validated_data: Dict):
         return self._do_with_vars("create", validated_data=validated_data)
 
-    def update(self, instance, validated_data):
+    def update(self, instance, validated_data: Dict):
         return self._do_with_vars("update", instance, validated_data=validated_data)
 
     def get_vars(self, representation):
         return representation.get('vars', None)
 
-    def to_representation(self, instance, hidden_vars=None):
+    def to_representation(self, instance, hidden_vars: List[str] = None):
         rep = super(_WithVariablesSerializer, self).to_representation(instance)
         hv = hidden_vars
-        hv = getattr(instance, 'HIDDEN_VARS', []) if hv is None else hv
+        hv = getattr(instance, 'HIDDEN_VARS', []) if hidden_vars is None else hidden_vars
         vars = self.get_vars(rep)
         if vars is not None:
             for mask_key in hv:
@@ -601,16 +557,16 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
 
     mode = vst_fields.DependEnumField(
         allow_blank=True, required=False, field='kind', types={
-            'PLAYBOOK': 'autocomplete',
-            'MODULE': 'autocomplete',
+            'PLAYBOOK': 'fk_autocomplete',
+            'MODULE': 'fk_autocomplete',
             'TEMPLATE': 'hidden',
         }
     )
 
     inventory = InventoryDependEnumField(
         allow_blank=True, required=False, field='kind', types={
-            'PLAYBOOK': 'select2',
-            'MODULE': 'select2',
+            'PLAYBOOK': 'fk_autocomplete',
+            'MODULE': 'fk_autocomplete',
             'TEMPLATE': 'hidden',
         }
     )
@@ -657,7 +613,7 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
                   'schedule',
                   'notes',)
 
-    def execute(self):
+    def execute(self) -> Response:
         inventory = self.instance.inventory
         rdata = ExecuteResponseSerializer(data=dict(
             detail="Started at inventory {}.".format(inventory),
@@ -695,7 +651,7 @@ class TemplateSerializer(_WithVariablesSerializer):
         except KeyError:  # nocv
             return None
 
-    def set_opts_vars(self, rep, hidden_vars):
+    def set_opts_vars(self, rep, hidden_vars: List[str]):
         if not rep.get('vars', None):
             return rep
         var = rep['vars']
@@ -704,13 +660,13 @@ class TemplateSerializer(_WithVariablesSerializer):
                 var[mask_key] = "[~~ENCRYPTED~~]"
         return rep
 
-    def repr_options(self, instance, data, hidden_vars):
+    def repr_options(self, instance: models.Template, data: Dict, hidden_vars: List):
         hv = hidden_vars
         hv = instance.HIDDEN_VARS if hv is None else hv
         for name, rep in data.get('options', {}).items():
             data['options'][name] = self.set_opts_vars(rep, hv)
 
-    def to_representation(self, instance):
+    def to_representation(self, instance, hidden_vars: List[str] = None) -> OrderedDict:
         data = OrderedDict()
         if instance.kind in ["Task", "Module"]:
             hidden_vars = models.PeriodicTask.HIDDEN_VARS
@@ -815,8 +771,10 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
 class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
     types = models.list_to_choices(models.Project.repo_handlers.keys())
     auth_types = ['NONE', 'KEY', 'PASSWORD']
-    branch_types = {t: "hidden" for t in models.Project.repo_handlers.keys()}
-    branch_types['GIT'] = 'string'
+    branch_auth_types = {t: "hidden" for t in models.Project.repo_handlers.keys()}
+    branch_auth_types['GIT'] = 'string'
+    branch_types = dict(**branch_auth_types)
+    branch_types['TAR'] = 'string'
 
     status = vst_fields.VSTCharField(read_only=True)
     type = serializers.ChoiceField(choices=types, default='MANUAL', label='Repo type')
@@ -824,7 +782,7 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
     repo_auth = vst_fields.DependEnumField(default='NONE',
                                            field='type',
                                            choices={"GIT": auth_types},
-                                           types=branch_types,
+                                           types=branch_auth_types,
                                            label='Repo auth type',
                                            write_only=True)
     auth_data = vst_fields.DependEnumField(allow_blank=True,
@@ -840,7 +798,7 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
     branch = vst_fields.DependEnumField(allow_blank=True,
                                         required=False,
                                         allow_null=True,
-                                        label='GIT branch/tag/SHA',
+                                        label='Branch for GIT(branch/tag/SHA) or TAR(subdir)',
                                         field='type',
                                         types=branch_types)
 
@@ -860,7 +818,7 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
             'name': {'required': True}
         }
 
-    def create(self, validated_data):
+    def create(self, validated_data: Dict) -> models.Project:
         repo_type = validated_data.pop('type')
         repo_auth_type = validated_data.pop('repo_auth')
         repo_auth_data = validated_data.pop('auth_data')
@@ -913,7 +871,7 @@ class ProjectTemplateCreateSerializer(vst_serializers.VSTSerializer):
             'name',
         )
 
-    def update(self, instance, validated_data):
+    def update(self, instance: models.ProjectTemplate, validated_data) -> models.Project:
         validated_data['name'] = validated_data.get(
             'name', '{} {}'.format(instance.name, uuid.uuid1())
         )
@@ -929,7 +887,7 @@ class ProjectTemplateCreateSerializer(vst_serializers.VSTSerializer):
         serializer.save()
         return serializer.instance
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: models.Project) -> Dict:
         return {
             'name': instance.name,
             'project_id': instance.id
@@ -974,7 +932,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'execute_view_data',)
 
     @transaction.atomic()
-    def sync(self):
+    def sync(self) -> Response:
         self.instance.start_repo_task("sync")
         serializer = ActionResponseSerializer(
             data=dict(detail="Sync with {}.".format(self.instance.repository))
@@ -982,7 +940,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         serializer.is_valid(True)
         return Response(serializer.data, status.HTTP_200_OK)
 
-    def _get_ansible_serializer(self, kind):
+    def _get_ansible_serializer(self, kind: str) -> serializers.Serializer:
         view = self.context['view']
         exec_method = getattr(view, 'execute_{}'.format(kind), None)
         if exec_method is None:  # nocv
@@ -992,7 +950,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         serializer.project = self.instance
         return serializer
 
-    def _execution(self, kind, data, user, **kwargs):
+    def _execution(self, kind: str, data: Dict, user: User, **kwargs) -> Response:
         template = data.pop("template", None)
         inventory = data.get("inventory", None)
         msg = "Started in the inventory {}.".format(
@@ -1026,14 +984,14 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
         rdata.is_valid(raise_exception=True)
         return Response(rdata.data, status.HTTP_201_CREATED)
 
-    def execute_playbook(self, request):
+    def execute_playbook(self, request) -> Response:
         return self._execution("playbook", dict(request.data), request.user)
 
-    def execute_module(self, request):
+    def execute_module(self, request) -> Response:
         return self._execution("module", dict(request.data), request.user)
 
 
-def generate_fileds(ansible_reference, ansible_type):
+def generate_fileds(ansible_reference: AnsibleArgumentsReference, ansible_type: str) -> OrderedDict:
     if ansible_type is None:
         return OrderedDict()  # nocv
 
@@ -1077,7 +1035,6 @@ def generate_fileds(ansible_reference, ansible_type):
 
 
 class AnsibleSerializerMetaclass(serializers.SerializerMetaclass):
-    # pylint: disable=super-on-old-class
     @staticmethod
     def __new__(cls, name, bases, attrs):
         ansible_reference = attrs.get('ansible_reference', None)
@@ -1153,7 +1110,7 @@ class InventoryImportSerializer(DataSerializer):
     raw_data = vst_fields.VSTCharField()
 
     @transaction.atomic()
-    def create(self, validated_data):
+    def create(self, validated_data: Dict) -> Dict:
         parser = AnsibleInventoryParser()
         inv_json = parser.get_inventory_data(validated_data['raw_data'])
 
@@ -1167,7 +1124,7 @@ class InventoryImportSerializer(DataSerializer):
             created_hosts[inv_host.name] = inv_host
 
         for group in inv_json['groups']:
-            children = False if len(group['groups']) == 0 else True
+            children = not len(group['groups']) == 0
             inv_group = inventory.groups.create(name=group['name'], children=children)
             inv_group.vars = group['vars']
             created_groups[inv_group.name] = inv_group

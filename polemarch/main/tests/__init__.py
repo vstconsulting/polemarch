@@ -1,2 +1,2 @@
-from .api import APITestCase
+from .api import APITestCase, ApiUsersTestCase, InventoriesTestCase
 from .commands import ServiceCommandTestCase

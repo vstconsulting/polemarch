@@ -257,6 +257,11 @@ __EXECUTOR_DEFAULT = '{INTERPRETER} -m pm_ansible'
 EXECUTOR = main.get("executor_path", fallback=__EXECUTOR_DEFAULT).strip().split(' ')
 SELFCARE = '/tmp/'
 
+MANUAL_PROJECT_VARS = SectionConfig(
+    'project_manual_vars',
+    dict(forks=4, timeout=30, fact_caching_timeout=3600, poll_interval=5)
+).all()
+
 
 # TEST settings
 if "test" in sys.argv:

@@ -1,0 +1,110 @@
+<!--
+    Block of FK_JUST_VALUE guiField's components -
+    - elements of base guiField structure
+-->
+<!-- template of fk_just_value field -->
+<script type="text/x-template" id="template_field_fk_just_value">
+    <field_content_readonly :value="value" :field="field"
+                            :wrapper_opt="wrapper_opt" :data="data"
+                            @proxyEvent="proxyEvent">
+    </field_content_readonly>
+</script>
+
+<!--
+    EndBlock of FK_JUST_VALUE guiField's components -
+    - elements of base guiField structure
+-->
+
+<!--
+    Block of ONE_HISTORY_STRING guiField's components -
+    - elements of base guiField structure
+-->
+<!-- content (value input area) of one_history_string readOnly field -->
+<script type="text/x-template" id="template_field_content_readonly_one_history_string">
+    <span :class="classes" :style="styles">{{ value }}</span>
+</script>
+<!--
+    EndBlock of ONE_HISTORY_STRING guiField's components -
+    - elements of base guiField structure
+-->
+
+
+<!--
+    Block of ONE_HISTORY_STRING guiField's components -
+    - elements of base guiField structure
+-->
+<!-- content (value input area) of one_history_choices readOnly field -->
+<script type="text/x-template" id="template_field_content_readonly_one_history_choices">
+    <span :class="classes" :style="styles">{{ value }}</span>
+</script>
+<!--
+    EndBlock of ONE_HISTORY_STRING guiField's components -
+    - elements of base guiField structure
+-->
+
+
+<!--
+    Block of ONE_HISTORY_RAW_INVENTORY guiField's components -
+    - elements of base guiField structure
+-->
+<!-- template of one_history_raw_inventory field -->
+<script type="text/x-template" id="template_field_one_history_raw_inventory">
+    <div style="display: contents" v-show="!is_hidden">
+        <div style="display: contents" v-show="!is_hidden">
+            <div :class="wrapper_classes" :style="wrapper_styles">
+                <field_content_readonly :value="value" :field="field" :wrapper_opt="wrapper_opt" :data="data" @proxyEvent="proxyEvent">
+                </field_content_readonly>
+                <!--<field_description :value="value" :field="field" :wrapper_opt="wrapper_opt" :data="data"></field_description>-->
+            </div>
+        </div>
+    </div>
+</script>
+<!--
+    EndBlock of ONE_HISTORY_RAW_INVENTORY guiField's components -
+    - elements of base guiField structure
+-->
+
+
+<!--
+    Block of ONE_HISTORY_BOOLEAN guiField's components -
+    - elements of base guiField structure
+-->
+<!-- content (value input area) of one_history_choices readOnly field -->
+<script type="text/x-template" id="template_field_content_read_only_one_history_boolean">
+    <span :class="classes" :style="styles"></span>
+</script>
+<!--
+    EndBlock of ONE_HISTORY_BOOLEAN guiField's components -
+    - elements of base guiField structure
+-->
+
+
+<!--
+    Block of ONE_HISTORY_EXECUTE_ARGS guiField's components -
+    - elements of base guiField structure
+-->
+<!-- template of one_history_execute_args field -->
+<script type="text/x-template" id="template_field_one_history_execute_args">
+    <div style="display: contents;">
+        <div :class="wrapper_classes" :style="wrapper_styles">
+            <field_label :value="value" :field="field" :wrapper_opt="wrapper_opt" :data="data"></field_label>
+            <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon"
+                    @click="execute_args_toggle = !execute_args_toggle"
+            >
+                <i class="fa fa-plus" :class="execute_args_toggle ? 'fa-minus' : 'fa-plus'"></i>
+            </button>
+
+            <transition name="fade">
+                <field_content_readonly v-show="execute_args_toggle"
+                                        :value="value" :field="field"
+                                        :wrapper_opt="wrapper_opt" :data="data" @proxyEvent="proxyEvent"
+                >
+                </field_content_readonly>
+            </transition>
+        </div>
+    </div>
+</script>
+<!--
+    EndBlock of ONE_HISTORY_EXECUTE_ARGS guiField's components -
+    - elements of base guiField structure
+-->

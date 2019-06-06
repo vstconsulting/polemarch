@@ -1,80 +1,71 @@
+/**
+ * Signal, that creates views for paths, which do not exist in API:
+ * - /inventory/{pk}/group/{group_id}/group/ and all paths, that nested in /group/{pk}/group/ path.
+ */
+tabSignal.connect('allViews.inited', obj => {
+    let views = obj.views;
+    let prefix = '/inventory/{' + path_pk_key + '}';
+    let constr = new SubViewWithOutApiPathConstructor(openapi_dictionary, app.models, {prefix: prefix});
+    let group_group_paths = Object.keys(views).filter(path => path.indexOf( "/group/{" + path_pk_key + "}/group/") == 0);
 
-tabSignal.connect("openapi.schema", function(data)
-{
-    window.guiSchema.path["/group/{pk}/"].schema.edit.fields.children.readOnly = true
+    group_group_paths.forEach(path => {
+        let new_path = prefix + path.replace('{group_id}', '{subgroup_id}').replace('{' + path_pk_key + '}', '{group_id}');
+        let new_view = constr.generateSubView(views, path, new_path);
+        views[new_path] = new_view;
+    });
+});
 
-    // Adding links to the link scheme
-    window.guiSchema.path["/group/{pk}/group/{group_id}/"].links['__link__group'] = "/group/{pk}/"
-    window.guiSchema.path["/group/{pk}/group/"].sublinks_l2['__link__group'] = "/group/{pk}/"
+/**
+ * Signal, that creates views for paths, which do not exist in API:
+ * - /project/{pk}/inventory/{inventory_id}/group/{group_id}/group/ and all paths, that nested in /group/{pk}/group/ path.
+ */
+tabSignal.connect('allViews.inited', obj => {
+    let views = obj.views;
+    let prefix = '/project/{' + path_pk_key + '}/inventory/{inventory_id}';
+    let constr = new SubViewWithOutApiPathConstructor(openapi_dictionary, app.models, {prefix: prefix});
+    let group_group_paths = Object.keys(views).filter(path => path.indexOf( "/group/{" + path_pk_key + "}/group/") == 0);
 
-    window.guiSchema.path["/group/{pk}/group/{group_id}/"].links['__link__host'] = "/host/{pk}/"
-    window.guiSchema.path["/group/{pk}/group/"].sublinks_l2['__link__host'] = "/host/{pk}/"
+    group_group_paths.forEach(path => {
+        let new_path = prefix + path.replace('{group_id}', '{subgroup_id}').replace('{' + path_pk_key + '}', '{group_id}');
+        let new_view = constr.generateSubView(views, path, new_path);
+        views[new_path] = new_view;
+    });
+});
 
-    window.guiSchema.path["/inventory/{pk}/group/{group_id}/"].links['__link__group'] = "/group/{pk}/"
-    window.guiSchema.path["/inventory/{pk}/group/"].sublinks_l2['__link__group'] = "/group/{pk}/"
-
-    window.guiSchema.path["/inventory/{pk}/group/{group_id}/"].links['__link__host'] = "/host/{pk}/"
-    window.guiSchema.path["/inventory/{pk}/group/"].sublinks_l2['__link__host'] = "/host/{pk}/"
-
-    window.guiSchema.path["/project/{pk}/inventory/{inventory_id}/group/{group_id}/"].links['__link__group'] = "/group/{pk}/"
-    window.guiSchema.path["/project/{pk}/inventory/{inventory_id}/group/"].sublinks_l2['__link__group'] = "/group/{pk}/"
-
-    window.guiSchema.path["/project/{pk}/inventory/{inventory_id}/group/{group_id}/"].links['__link__host'] = "/host/{pk}/"
-    window.guiSchema.path["/project/{pk}/inventory/{inventory_id}/group/"].sublinks_l2['__link__host'] = "/host/{pk}/"
-})
-
-tabSignal.connect("guiList.renderLine.group", function(obj){
-
-    if(obj.dataLine.line.children)
-    {
-        if(obj.dataLine.sublinks_l2['host'])
-        {
-            obj.dataLine.sublinks_l2['host'].hidden = true
+/**
+ * Signal, that hides 'Host' button from children group views and hides 'Group' button from not children group views.
+ */
+tabSignal.connect('allViews.inited', obj => {
+    let views = obj.views;
+    let group_views = Object.values(views).filter(view => {
+        let obj = view.schema;
+        if(obj.path.indexOf('group') != -1 && obj.name == 'group' && ['list', 'page'].includes(obj.type)) {
+            return true;
         }
+    });
 
-        if(obj.dataLine.sublinks_l2['group'])
-        {
-            obj.dataLine.sublinks_l2['group'].hidden = false
-        }
-    }
-    else
-    {
-        if(obj.dataLine.sublinks_l2['host'])
-        {
-        obj.dataLine.sublinks_l2['host'].hidden = false
-        }
+    group_views.forEach(view => {
+        view.getViewSublinkButtons = function(type, buttons, instance) {
+            let data = instance.data;
+            let btns = $.extend(true, {}, buttons);
 
-        if(obj.dataLine.sublinks_l2['group'])
-        {
-            obj.dataLine.sublinks_l2['group'].hidden = true
-        }
-    }
+            if(!data) {
+                return btns;
+            }
 
-})
+            if(type == 'sublinks' || type == 'child_links') {
+                if(data.children) {
+                    if(btns['host']) {
+                        btns['host'].hidden = true;
+                    }
+                } else {
+                    if(btns['group']) {
+                        btns['group'].hidden = true;
+                    }
+                }
+            }
 
-tabSignal.connect("guiList.renderPage.group", function(obj){
-
-    if(obj.data.children)
-    {
-        if(obj.options.links['host'])
-        {
-            obj.options.links['host'].hidden = true
+            return btns;
         }
-        if(obj.options.links['group'])
-        {
-            obj.options.links['group'].hidden = false
-        }
-    }
-    else
-    {
-        if(obj.options.links['host'])
-        {
-            obj.options.links['host'].hidden = false
-        }
-        if(obj.options.links['group'])
-        {
-            obj.options.links['group'].hidden = true
-        }
-    }
-
-})
+    });
+});

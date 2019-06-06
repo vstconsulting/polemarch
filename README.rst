@@ -38,26 +38,26 @@ Features
 * history of tasks execution with all details;
 * easy configurable clustering for reliability and scalability:
 * import of Ansible projects from Git repository (with submodules) or tar archive;
-* import of `inventory file <https://polemarch.readthedocs.io/en/latest/gui.html#import-inventory>`_;
+* import of `inventory file <https://about.polemarch.org/en/latest/gui.html#import-inventory>`_;
 * support of quick project deployment;
-* documentation: http://polemarch.readthedocs.io/en/latest/ ;
+* documentation: https://about.polemarch.org/en/latest/ ;
 * support of hosts groups and groups hierarchy;
 * support of multi user connection;
-* support of `hooks <https://polemarch.readthedocs.io/en/latest/gui.html#hooks>`_;
+* support of `hooks <https://about.polemarch.org/en/latest/gui.html#hooks>`_;
 * community `project samples <https://gitlab.com/vstconsulting/polemarch-community-repos>`_;
 * user friendly interface.
 
 Quickstart
 ----------
 
-`Default installation <https://polemarch.readthedocs.io/en/latest/quickstart.html>`_
+`Default installation <https://about.polemarch.org/en/latest/quickstart.html>`_
 is suitable for most simple and common cases, but
 Polemarch is highly configurable system. If you need something more advanced
 (scalability, dedicated DB, custom cache, logging or directories) you can
-always configure Polemarch like it is said in `documentation <https://polemarch.readthedocs.io/en/latest/config.html>`_.
+always configure Polemarch like it is said in `documentation <https://about.polemarch.org/en/latest/config.html>`_.
 
 
 How to contribute
 -----------------
 
-Refer to the documentation page about `contribution <http://polemarch.readthedocs.io/en/stable/contribute.html>`_.
+Refer to the documentation page about `contribution <https://about.polemarch.org/en/stable/contribute.html>`_.

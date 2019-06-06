@@ -5,6 +5,7 @@ import logging
 
 import sys
 import re
+import os
 import json
 from os.path import dirname
 
@@ -14,17 +15,18 @@ except ImportError:  # nocv
     from yaml import Loader, Dumper, load, dump
 
 from vstutils.utils import (
+    ON_POSIX,
     tmp_file_context,
     BaseVstObject,
     Executor,
-    UnhandledExecutor
+    UnhandledExecutor,
+    subprocess
 )
 
 from . import __file__ as file
 
 
 logger = logging.getLogger('polemarch')
-ON_POSIX = 'posix' in sys.builtin_module_names
 
 
 def project_path():
@@ -52,6 +54,7 @@ class CmdExecutor(Executor, PMObject):
     """
     Command executor with realtime output write
     """
+    __slots__ = ()
 
 
 class task(object):
@@ -129,13 +132,13 @@ class SubCacheInterface(PMObject):
     __slots__ = 'prefix', 'timeout', 'cache'
     cache_name = "subcache"
 
-    def __init__(self, prefix, timeout=86400*7):
+    def __init__(self, prefix: str, timeout: int = 86400*7):
         self.prefix = prefix
         self.timeout = timeout
         self.cache = self.get_django_cache(self.cache_name)
 
     @property
-    def key(self):
+    def key(self) -> str:
         return '{}-{}'.format(self.cache_name, self.prefix)
 
     def set(self, value):
@@ -154,13 +157,27 @@ class AnsibleCache(SubCacheInterface):
 
 
 class PMAnsible(PMObject):
-    __slots__ = 'execute_path', 'cache',
+    __slots__ = ('execute_path', 'cache',)
     # Json regex
-    _regex = re.compile(r"([\{\[][^\w\d\.].*[\}\]]$)", re.MULTILINE)
+    _regex = re.compile(r"([\{\[\"]{1}.*[\}\]\"]{1})", re.MULTILINE | re.DOTALL)
     ref_name = 'object'
     cache_timeout = 86400*7
 
-    def __init__(self, execute_path='/tmp/'):
+    class ExecutorClass(UnhandledExecutor):
+        def execute(self, cmd: list, cwd: str):
+            self.output = ""
+            env = os.environ.copy()
+            env.update(self.env)
+            result = subprocess.check_output(
+                cmd, stderr=self._stderr,
+                bufsize=0, universal_newlines=True,
+                cwd=cwd, env=env,
+                close_fds=ON_POSIX
+            )
+            self.output = result
+            return self.output
+
+    def __init__(self, execute_path: str = '/tmp/'):
         self.execute_path = execute_path
 
     def get_ansible_cache(self):
@@ -184,7 +201,7 @@ class PMAnsible(PMObject):
         cache = self.get_ansible_cache()
         result = cache.get()
         if result is None:
-            cmd = UnhandledExecutor(stderr=UnhandledExecutor.DEVNULL)
+            cmd = self.ExecutorClass(stderr=UnhandledExecutor.DEVNULL)
             cmd_command = self.get_args()
             cmd.execute(cmd_command, self.execute_path)
             result = self._get_only_json(cmd.output)
@@ -213,7 +230,7 @@ class AnsibleArgumentsReference(PMAnsible):
         super(AnsibleArgumentsReference, self).__init__()
         self.raw_dict = self._extract_from_cli()
 
-    def is_valid_value(self, command, argument, value):
+    def is_valid_value(self, command: str, argument: str, value):
         argument = argument.replace('_', '-')
         argument_data = self.raw_dict[command][argument]
         mtype = argument_data["type"]
@@ -223,7 +240,7 @@ class AnsibleArgumentsReference(PMAnsible):
             raise AssertionError("This argument should have value")
         return True
 
-    def validate_args(self, command, args):
+    def validate_args(self, command: str, args):
         argument = None
         try:
             for argument, value in args.items():
@@ -298,7 +315,7 @@ class AnsibleModules(PMAnsible):
 
 
 class AnsibleInventoryParser(PMAnsible):
-    __slots__ = 'path',
+    __slots__ = ('path',)
     ref_name = 'inventory_parser'
 
     def get_ansible_cache(self):
