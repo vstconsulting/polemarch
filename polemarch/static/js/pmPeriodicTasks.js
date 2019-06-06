@@ -1,333 +1,399 @@
-
-window.projPath = "/project/{pk}"
-
-function PeriodicTaskVariable_key_onInit(opt = {}, value, parent_object)
-{
-    let thisObj = this;
-    let periodicTask = new guiObjectFactory(projPath + "/periodic_task/{periodic_task_id}/");
-    $.when(periodicTask.load(parent_object.url_vars.api_periodic_task_id)).done(data => {
-
-        let inventory_path = '/inventory/{inventory_id}'
-        let list_obj = [];
-        list_obj.push(projPath + inventory_path + '/all_groups/')
-        list_obj.push(projPath + inventory_path + '/all_hosts/')
-
-        let additional_props = {
-            api_inventory_id: data.data.inventory,
-        }
-
-        let new_dynamic_properties = {
-            list_obj: list_obj,
-            value_field:'name',
-            view_field:'name',
-            url_vars: additional_props
-        }
-
-        let delete_fields = [];
-
-        let fields_options = {};
-
-        let fields = {}
-
-        if(periodicTask.model.data.kind == "PLAYBOOK")
-        {
-            fields = window.guiSchema.path[projPath + "/execute_playbook/"].schema.exec.fields;
-
-            delete_fields = ['playbook', 'inventory'];
-
-            // this is done, because we need to modify window.guiSchema.path[projPath + "/execute_playbook/"].schema.exec.fields,
-            // but we can't modify original object, because it's used in execute_playbook
-            fields_options = get_field_options_for_PeriodicTaskVariable_value(fields, delete_fields, 'playbook', new_dynamic_properties);
-
-        }
-        if(periodicTask.model.data.kind == "MODULE")
-        {
-            fields = window.guiSchema.path[projPath + "/execute_module/"].schema.exec.fields;
-
-            delete_fields = ['module', 'inventory'];
-
-            fields_options = get_field_options_for_PeriodicTaskVariable_value(fields, delete_fields, 'module', new_dynamic_properties);
-        }
-
-        thisObj.setType("enum", {
-            enum: fields_options.fields_names
-        });
-        thisObj.opt.all_fields = fields
-        thisObj.opt.fields_options = fields_options;
-
-        thisObj._callAllonChangeCallback()
-    })
-}
-
-/*
- * because we need to modify window.guiSchema.path[projPath + "/execute_playbook/"].schema.exec.fields,
- * but we can't modify original object, because it's used in execute_playbook
- * @param object - fields -  object with fields,
- * @param array - delete_fields - names of fields, that we need to delete,
- * @param string - pt_kind - kind of periodic task
- * @param object - new_dynamic_properties - object with overwritten dynamic_properties
+/**
+ * Function - onchange callback of dynamic field -  OnePeriodictask.fields.inventory.
+ * @param {object} parent_values Values of parent fields.
  */
+function OnePeriodictask_inventory_callback(parent_values={}) {
+    let kind = parent_values['kind'];
 
-function get_field_options_for_PeriodicTaskVariable_value(fields, delete_fields, pt_kind, new_dynamic_properties)
-{
-    let fields_options = {
-        fields_names: [],
-        fields_formats: {},
-        fields_overwrite_opt: {},
-    }
-
-    fields_options.fields_names = Object.keys(fields);
-
-    for(let i in fields_options.fields_names)
-    {
-        if($.inArray(fields_options.fields_names[i], delete_fields) != -1)
-        {
-            delete fields_options.fields_names[i];
-            continue;
+    if(kind && (kind.toLowerCase() == "playbook" || kind.toLowerCase() == "module")) {
+        return {
+            format: 'inventory_autocomplete',
+            additionalProperties: {
+                view_field: 'name',
+                value_field: 'id',
+                list_paths: ['/project/{' + path_pk_key + '}/inventory/'],
+            },
+            save_value: true,
         }
-
-        fields_options.fields_formats[fields_options.fields_names[i]] = getFieldType(fields[fields_options.fields_names[i]]);
     }
-
-    let ex_field = 'group';
-
-    if(pt_kind == 'playbook')
-    {
-        ex_field = 'limit';
-    }
-
-    fields_options.fields_formats[ex_field] = 'autocomplete';
-    fields_options.fields_overwrite_opt[ex_field] = {
-        dynamic_properties: new_dynamic_properties,
-        default: 'all',
-        required: true
-    }
-
-    return fields_options;
 }
 
-function PeriodicTaskVariable_value_callback(fieldObj, newValue)
-{
-    if(!newValue.value)
-    {
-        return;
+/**
+ * Function - onchange callback of dynamic field -  OnePeriodictask.fields.mode.
+ * @param {object} parent_values Values of parent fields.
+ */
+function OnePeriodictask_mode_callback(parent_values={}) {
+    let kind = parent_values['kind'];
+
+    if(kind) {
+        kind = kind.toLowerCase();
     }
 
-    if(!newValue.opt.all_fields)
-    {
-        return;
-    }
-
-    if(!newValue.opt.all_fields[newValue.value])
-    {
-        return;
-    }
-
-    let field_format = newValue.opt.fields_options.fields_formats[newValue.value]
-
-    if(newValue.value == 'group' || newValue.value == 'limit')
-    {
+    if(kind == "playbook") {
         return {
-            format: field_format,
-            override_opt: newValue.opt.fields_options.fields_overwrite_opt[newValue.value],
+            format: 'playbook_autocomplete',
+            additionalProperties: {
+                view_field: 'playbook',
+                value_field: 'playbook',
+                list_paths: ['/project/{' + path_pk_key + '}/playbook/'],
+            },
+            required: true,
         }
+    } else if(kind == "module") {
+        return {
+            format: 'module_autocomplete',
+            additionalProperties: {
+                // there is no 'name' filters
+                view_field: 'path',
+                value_field: 'path',
+                list_paths: ['/project/{' + path_pk_key + '}/module/'],
+            },
+            required: true,
+        }
+    }
+}
+
+/**
+ * Function - onchange callback of dynamic field -  OnePeriodictask.fields.template.
+ * @param {object} parent_values Values of parent fields.
+ */
+function OnePeriodictask_template_callback(parent_values={}) {
+    let kind = parent_values['kind'];
+
+    if(kind) {
+        kind = kind.toLowerCase();
+    }
+
+    if(kind == 'template') {
+        return {
+            format: 'fk',
+            additionalProperties: {
+                view_field: 'name',
+                value_field: 'id',
+                list_paths: ['/project/{' + path_pk_key + '}/template/'],
+            },
+            required: true,
+        };
     }
 
     return {
-        format:field_format,
-        override_opt: {
-            required: newValue.opt.all_fields[newValue.value].required || false,
+        format: 'hidden',
+    };
+}
+
+/**
+ * Function - that forms onchange callback of dynamic field - OnePeriodictask.fields.template_opt.
+ */
+function OnePeriodictask_template_opt_callback() {
+    /**
+     * Variable, that saves previous values of template field.
+     * This is needed to know: should we save template_field value or not.
+     */
+    let previous_template;
+
+    /**
+     * Function - onchange callback of dynamic field - OnePeriodictask.fields.template_opt.
+     * @param {object} parent_values Values of parent fields.
+     */
+    return function(parent_values) {
+        let kind = parent_values['kind'];
+
+        if(kind && kind.toLowerCase() !== 'template') {
+            return {
+                format: 'hidden',
+            };
+        }
+
+        let template = parent_values['template'];
+
+        if(template && typeof template == 'object' && template.value !== undefined) {
+            template = template.value;
+        }
+
+        let save_value = false;
+
+        if(previous_template === undefined || previous_template == template) {
+            save_value = true;
+        }
+
+        previous_template = template;
+
+        if(template) {
+            return {
+                format: 'fk',
+                additionalProperties: {
+                    view_field: 'name',
+                    value_field: 'name',
+                    list_paths: ['/project/{' + path_pk_key + '}/template/{template_id}/option/'],
+                    url_params: {template_id: template},
+                },
+                save_value: save_value,
+            };
+        } else {
+            return {
+                format: 'hidden',
+            };
+        }
+    };
+}
+////////////////////////////////////////////////////////////////////////////////////
+// Block of extensions for PERIODIC TASK entity
+////////////////////////////////////////////////////////////////////////////////////
+['Periodictask','OnePeriodictask'].forEach(model => {
+    let str = "models[{0}].fields.beforeInit".format([model]);
+    tabSignal.connect(str, (fields => {
+        if(model == 'Periodictask') {
+            ['mode', 'inventory', 'template', 'template_opt'].forEach(field => {
+                fields[field].hidden = true;
+            });
+        }
+
+        fields.inventory.format = 'dynamic';
+        fields.inventory.additionalProperties.callback = OnePeriodictask_inventory_callback;
+
+        fields.mode.additionalProperties.callback = OnePeriodictask_mode_callback;
+
+        fields.template.format = 'dynamic';
+        fields.template.additionalProperties = {
+            field: 'kind',
+            callback: OnePeriodictask_template_callback,
+        };
+
+        fields.template_opt.additionalProperties.field = ['template'];
+        fields.template_opt.additionalProperties.types.TEMPLATE = "fk";
+        fields.template_opt.additionalProperties.callback = OnePeriodictask_template_opt_callback();
+
+        fields.schedule.additionalProperties.types.INTERVAL = 'uptime';
+    }));
+});
+
+/**
+ * Changes 'kind' filter type to 'choices'.
+ */
+tabSignal.connect("views[/project/{" + path_pk_key + "}/periodic_task/].filters.beforeInit", filters => {
+    for(let index in filters) {
+        let filter = filters[index];
+
+        if(filter.name == 'kind') {
+            filter.type = 'choices';
+            filter.enum = [''].concat(app.models['Periodictask'].fields.kind.options.enum);
         }
     }
-}
+});
 
-tabSignal.connect("openapi.schema.definition.PeriodicTaskVariable", function(data)
-{
-    data.definition.properties.key.dynamic_properties = {}
-    data.definition.properties.key.format = "dynamic"
-    data.definition.properties.key.required = true
-    data.definition.properties.key.__func__onInit = "PeriodicTaskVariable_key_onInit"
+/**
+ * Hides 'variables' button from periodic_task views, where data.kind == 'TEMPLATE'.
+ */
+tabSignal.connect('allViews.inited', obj => {
+    let views = obj.views;
 
+    [
+        '/project/{' + path_pk_key + '}/periodic_task/',
+        '/project/{' + path_pk_key + '}/periodic_task/{periodic_task_id}/',
+    ].forEach(path => {
+        views[path].getViewSublinkButtons = function(type, buttons, instance) {
+            let data = instance.data;
+            let btns = $.extend(true, {}, buttons);
 
-    data.definition.properties.value.dynamic_properties = {}
-    data.definition.properties.value.format = "dynamic"
-    data.definition.properties.value.required = true
-    data.definition.properties.value.parent_field = 'key'
-    data.definition.properties.value.dynamic_properties.__func__callback = "PeriodicTaskVariable_value_callback"
-})
-
-function OnePeriodictask_mode_callback (fieldObj, newValue)
-{
-    let obj = {
-        type:"autocomplete"
-    }
-    if(newValue.value == "PLAYBOOK")
-    {
-        obj.override_opt = {
-            dynamic_properties:{
-                list_obj:projPath + "/playbook/",
-                value_field:'playbook',
-                view_field:'playbook',
+            if(!data) {
+                return btns;
             }
-        };
-    }
-    else if(newValue.value == "MODULE")
-    {
-        obj.override_opt = {
-            dynamic_properties:{
-                list_obj:projPath + "/module/",
-                value_field:'name',
-                view_field:'path',
+
+            if(data['kind'] == 'TEMPLATE' && btns['variables']) {
+                btns['variables'].hidden = true;
             }
-        };
 
-    }
-    else
-    {
-        obj.type = "hidden"
-    }
-    return obj
-}
-
-function OnePeriodictask_template_callback (fieldObj, newValue)
-{
-    let obj = {
-        type:"null"
-    }
-
-    if(newValue.value == "TEMPLATE")
-    {
-        $(".sublink-btn-variables").addClass('hidden-true').removeClass('hidden-false')
-        obj.type = "select2"
-        obj.override_opt = {
-            dynamic_properties:{
-                list_obj:projPath + "/template/",
-                value_field:'id',
-                view_field:'name',
-            }
-        };
-    }
-    else
-    {
-        $(".sublink-btn-variables").removeClass('hidden-true').addClass('hidden-false')
-    }
-
-    return obj
-}
-
-function OnePeriodictask_template_opt_callback (fieldObj, newValue)
-{
-    let obj = {
-        type:"hidden"
-    }
-    
-    if(newValue.value)
-    {
-        obj.type = "select2"
-        obj.override_opt = {
-            dynamic_properties:{
-                list_obj:projPath + "/template/{template_id}/option/",
-                value_field:'name',
-                view_field:'name',
-                url_vars:{
-                    api_template_id:newValue.value
-                }
-            }
-        };
-    }
-
-    return obj
-}
-
-function OnePeriodictask_inventory_callback (fieldObj, newValue)
-{
-    let obj = {
-        type:"hybrid_autocomplete"
-    }
-    if(newValue.value != "TEMPLATE")
-    {
-        obj.override_opt = {
-            dynamic_properties:{
-                list_obj:projPath + "/inventory/",
-                value_field:'id',
-                view_field:'name',
-            }
-        };
-    }
-    else
-    {
-        obj.type = "hidden"
-    }
-    return obj
-}
-
-
-function signal_gui_schema_name_periodic_task(data){
-
-    data.value.fields.mode.type = "dynamic"
-    data.value.fields.mode.dynamic_properties = {}
-    data.value.fields.mode.required = false
-    data.value.fields.mode.dynamic_properties.__func__callback = "OnePeriodictask_mode_callback"
-
-    data.value.fields.template_opt.type = "dynamic"
-    data.value.fields.template_opt.required = false
-    data.value.fields.template_opt.additionalProperties.field = "template"
-    data.value.fields.template_opt.dynamic_properties = {}
-    data.value.fields.template_opt.dynamic_properties.__func__callback = "OnePeriodictask_template_opt_callback"
-
-    data.value.fields.inventory.type = "dynamic"
-    data.value.fields.inventory.required = false
-    data.value.fields.inventory.dynamic_properties = {}
-    data.value.fields.inventory.dynamic_properties.__func__callback = "OnePeriodictask_inventory_callback"
-
-    data.value.fields.template.format = "dynamic"
-    data.value.fields.template.parent_field = "kind"
-    data.value.fields.template.required = false
-    data.value.fields.template.dynamic_properties = {}
-    data.value.fields.template.dynamic_properties.__func__callback = "OnePeriodictask_template_callback"
-
-    data.value.fields.schedule.dynamic_properties.types["INTERVAL"] = "uptime";
-}
-
-tabSignal.connect("gui.schema.name.periodic_task.edit", signal_gui_schema_name_periodic_task)
-tabSignal.connect("gui.schema.name.periodic_task.new", signal_gui_schema_name_periodic_task)
-tabSignal.connect("gui.schema.name.periodic_task.get", signal_gui_schema_name_periodic_task)
-
-
-tabSignal.connect("guiList.renderLine.periodic_task", function(obj)
-{
-    // Для kind == TEMPLATE прятать ссылку на Variables
-    if(obj.dataLine.line.kind == "TEMPLATE")
-    {
-        if(obj.dataLine.sublinks_l2['variables'])
-        {
-            obj.dataLine.sublinks_l2['variables'].hidden = true
+            return btns;
         }
-    }
-    else
-    {
-        if(obj.dataLine.sublinks_l2['variables'])
-        {
-            obj.dataLine.sublinks_l2['variables'].hidden = false
-        }
-    }
-})
+    });
+});
+////////////////////////////////////////////////////////////////////////////////////
+// EndBlock of extensions for PERIODIC TASK entity
+////////////////////////////////////////////////////////////////////////////////////
 
-tabSignal.connect("guiList.renderPage.periodic_task", function(obj)
-{
-    // Для kind == TEMPLATE прятать ссылку на Variables
-    if(obj.data.kind == "TEMPLATE")
-    {
-        if(obj.options.links['variables'])
-        {
-            obj.options.links['variables'].hidden = true
-        }
+
+////////////////////////////////////////////////////////////////////////////////////
+// Block of extensions for PERIODIC TASK VARIABLE entity
+////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Model class for OnePeriodicTaskVariable model.
+ */
+guiModels.OnePeriodicTaskVariableModel = class OnePeriodicTaskVariableModel extends guiModels.Model {
+    /**
+     * Redefinition of guiModels.Model class's 'constructor'.
+     */
+    constructor(name, fields) {
+        super(name, fields);
+
+        this.view_name = 'key';
     }
-    else
-    {
-        if(obj.options.links['variables'])
-        {
-            obj.options.links['variables'].hidden = false
+
+    save(method="patch") {
+        return this.queryset.getParentInstance().then(parent_instance => {
+            let instance_data = this.toInner(this.data);
+
+            delete instance_data.kind;
+            delete instance_data.inventory;
+
+            return this.queryset.formQueryAndSend(method, instance_data).then(response => {
+                return this.queryset.model.getInstance(
+                    this.queryset._formInstanceData(
+                        parent_instance.data, response.data,
+                    ),
+                    this.queryset,
+                );
+            });
+        }).catch(error => {
+            debugger;
+            throw error;
+        });
+    };
+};
+
+/**
+ * QuerySet class for OnePeriodicTaskVariable model's QuerySet.
+ */
+guiQuerySets.OnePeriodicTaskVariableQuerySet = class OnePeriodicTaskVariableQuerySet extends guiQuerySets.QuerySet {
+    /**
+     * Method, that returns data_type for parent instance bulk requests.
+     */
+    getParentInstanceDataType() {
+        return this.url.replace(/^\/|\/$/g, "")
+            .replace(/\/variables([A-z,0-9,_,\/]*)$/, "").split("/");
+    };
+    /**
+     * Method, that returns promise, that returns parent instance.
+     */
+    getParentInstance() {
+        if(this.parent_instance) {
+            return Promise.resolve(this.parent_instance);
         }
-    }
-})
+
+        let bulk = {
+            data_type: this.getParentInstanceDataType(),
+            method: 'get',
+        };
+
+        return this.sendQuery(bulk).then(response => {
+            return this.parent_instance = app.models.OnePeriodictask.getInstance(
+                response.data,
+                this.clone({url: this.url.replace(/\/variables([A-z,0-9,_,\/]*)$/, "") }),
+            );
+        }).catch(error => {
+            debugger;
+            throw error;
+        });
+    };
+    /**
+     * Redefinition of 'get' method of guiQuerySets.QuerySet class.
+     */
+    get() {
+        if(this.cache) {
+            return Promise.resolve(this.cache);
+        }
+
+        return this.getParentInstance().then(parent_instance => {
+            return this.formQueryAndSend('get').then(response => {
+                let instance = this.model.getInstance(
+                    this._formInstanceData(parent_instance.data, response.data),
+                    this,
+                );
+
+                this.cache = instance;
+                return instance;
+            });
+
+        }).catch(error => {
+            debugger;
+            throw error;
+        });
+    };
+    /**
+     * Method, that returns periodic task variable data object.
+     * @param {object} parent_data Data of periodic task instance.
+     * @param {string} instance_data Data of periodic task variable instance.
+     * @private
+     */
+    _formInstanceData(parent_data, instance_data) {
+        return Object.assign(
+            {}, instance_data, {kind: parent_data.kind, inventory: parent_data.inventory},
+        );
+    };
+};
+
+tabSignal.connect('openapi.loaded', (openapi) => {
+    let copy = $.extend(true, {}, openapi.definitions.PeriodicTaskVariable);
+
+    openapi.definitions.OnePeriodicTaskVariable = copy;
+
+
+    let list = openapi.paths['/project/{' + path_pk_key + '}/periodic_task/{periodic_task_id}/variables/'];
+    list.post.parameters[0].schema.$ref = "#/definitions/OnePeriodicTaskVariable";
+    list.post.responses[201].schema.$ref = "#/definitions/OnePeriodicTaskVariable";
+
+    let page = openapi.paths['/project/{' + path_pk_key + '}/periodic_task/{periodic_task_id}/variables/{variables_id}/'];
+    page.get.responses[200].schema.$ref = "#/definitions/OnePeriodicTaskVariable";
+    page.patch.responses[200].schema.$ref = "#/definitions/OnePeriodicTaskVariable";
+    page.put.responses[200].schema.$ref = "#/definitions/OnePeriodicTaskVariable";
+    page.patch.parameters[0].schema.$ref = "#/definitions/OnePeriodicTaskVariable";
+    page.put.parameters[0].schema.$ref = "#/definitions/OnePeriodicTaskVariable";
+
+});
+
+tabSignal.connect("models[OnePeriodicTaskVariable].fields.beforeInit", function(fields) {
+    fields.kind = {
+        title: 'Kind',
+        type: 'hidden',
+        hidden: true,
+    };
+
+    fields.inventory = {
+        title: 'Inventory',
+        type: 'hidden',
+        hidden: true,
+    };
+
+    fields.key.format = 'dynamic';
+    fields.key.additionalProperties = {
+        field: ['kind'],
+        callback: OneTemplateVariable_key_callback,
+    };
+
+    fields.value.format = 'dynamic';
+    fields.value.additionalProperties = {
+        field: ['inventory', 'key'],
+        types: template_vars.value.types,
+        callback: OneTemplateVariable_value_callback(),
+    };
+});
+
+tabSignal.connect("views[/project/{" + path_pk_key + "}/periodic_task/{periodic_task_id}/variables/new/].afterInit", (obj) => {
+    obj.view.mixins = obj.view.mixins.concat({
+        methods: {
+            fetchData() {
+                this.initLoading();
+                let qs = this.setAndGetQuerySetFromSandBox(this.view, this.qs_url);
+                qs.getParentInstance().then(parent_instance => {
+                    this.data.instance = qs.cache = qs.model.getInstance(
+                        this._formInstanceData(parent_instance), qs,
+                    );
+                    this.setLoadingSuccessful();
+                    this.getParentInstancesForPath();
+                }).catch(error => {
+                    debugger;
+                    throw error;
+                });
+            },
+
+            _formInstanceData(parent_instance) {
+                return {
+                    kind: parent_instance.data.kind,
+                    inventory: parent_instance.data.inventory,
+                };
+            },
+        },
+    });
+});
+////////////////////////////////////////////////////////////////////////////////////
+// EndBlock of extensions for PERIODIC TASK VARIABLE entity
+////////////////////////////////////////////////////////////////////////////////////

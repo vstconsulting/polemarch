@@ -1,99 +1,129 @@
-function addSettingsToChangePassword(obj)
-{
-    let properties = obj.definition.properties;
-    ['old_password', 'password', 'password2'].forEach(function (name) {
-        properties[name].format = 'password';
-    })
+/**
+ * Function emits signal, that edits UserSettings page view.
+ * @param {string} path /user/{pk}/settings/.
+ */
+function editUserSettingsPageInOpenApi(path) {
+    tabSignal.connect('openapi.loaded', (openapi) => {
+        let path_obj = openapi.paths[path];
+        path_obj.post.operationId = path_obj.post.operationId.replace('_add', '_edit');
+    });
 }
 
 /**
- * Function adds settings to user_settings schema.
- * Function is expected to be called from "openapi.completed" tabSignal.
- * @param path {string} - path of schema object.
+ * Function emits signal, that edits UserSettings page_edit view.
+ * @param {string} path /user/{pk}/settings/edit/.
  */
-function addSettingsToUserSettings(path){
-    let user_settings = guiSchema.path[path];
-    if(!user_settings)
-    {
-        return;
-    }
-    user_settings.canEdit = true;
-    user_settings.canEditInView = true;
-    user_settings.methodEdit = 'post';
+function editUserSettingsPageEditView(path) {
+    tabSignal.connect("views[" + path + "].beforeInit", function(obj){
+        obj.schema.query_type = "post";
+    });
 
-    if(user_settings && user_settings.method)
-    {
-        user_settings.method.post = 'edit';
-    }
-
-    try {
-        ['chartLineSettings', 'widgetSettings'].forEach(function (name) {
-            user_settings.schema.get.fields[name].format = 'inner_api_object';
-            user_settings.schema.get.fields[name].readOnly = false;
-        })
-        user_settings.schema.get.fields['autoupdateInterval'].readOnly = false;
-        user_settings.schema.get.fields['autoupdateInterval'].min = 1;
-        user_settings.schema.get.fields['autoupdateInterval'].default = guiDashboard.model.autoupdateInterval / 1000;
-        user_settings.schema.get.fields['autoupdateInterval'].title = 'Data autoupdate interval';
-        user_settings.schema.get.fields['autoupdateInterval'].format = 'time_interval';
-
-        user_settings.schema.edit = {
-            fields: $.extend(true, {}, user_settings.schema.get.fields),
-            operationId: 'user_settings_edit',
-            query_type: 'post',
-        }
-    }
-    catch(e){}
+    tabSignal.connect("views[" + path + "].afterInit", function(obj) {
+        obj.view.mixins.push(user_settings_page_edit_mixin);
+    });
 }
 
 /**
- * Custom function for updating user_settings' data.
- * Function is expected to be called from extension_object
- * of user_settings page object. (For example, 'gui_user_settings').
+ * Function emits signal, that deletes UserSettings page_new view.
+ * @param {string} path /user/{pk}/settings/new/.
  */
-function gui_user_settings_update(){
-    let base_update = gui_page_object.update.apply(this, arguments);
-    return $.when(base_update).done(data => {
-        guiDashboard.setUserSettingsFromApiAnswer(data.data)
-    })
+function deleteUserSettingsPageNewView(path) {
+    tabSignal.connect("allViews.inited", function(obj){
+        delete obj.views[path];
+    });
 }
 
 /**
- * Custom function for getting data from user_settings' form.
- * Function is expected to be called from extension_object
- * of user_settings page object. (For example, 'gui_user_settings').
+ * Function, that emits signals for UserSettings views.
+ * @param {string} base_path /user/{pk}/settings/.
  */
-function gui_user_settings_getDataFromForm() {
-    let base_data_from_form = gui_base_object.getDataFromForm.apply(this, arguments);
+function prepareUserSettingsViews(base_path) {
+    editUserSettingsPageInOpenApi(base_path);
 
-    base_data_from_form['skinsSettings'] = $.extend(true, {}, guiDashboard.model.skinsSettings);
-    base_data_from_form['selectedSkin'] = guiDashboard.model.selectedSkin;
+    editUserSettingsPageEditView(base_path + 'edit/');
 
-    return base_data_from_form;
+    deleteUserSettingsPageNewView(base_path + 'new/');
 }
 
-tabSignal.connect("openapi.completed", function()
-{
-    addSettingsToUserSettings('/user/{pk}/settings/');
+/**
+ * Mixin for UserSettings page_edit view.
+ */
+var user_settings_page_edit_mixin = {
+    methods: {
+        saveInstance() {
+            let data = this.getValidData();
+            if(!data) {
+                return;
+            }
 
-    let user = guiSchema.path['/user/'];
-    try{
-        user.schema.new.fields['password'].format = "password";
-        user.schema.new.fields['password2'].format = "password";
-    }
-    catch(e){}
-})
+            if(this.qs_url.replace(/^\/|\/$/g, "") == 'user/' + my_user_id + '/settings') {
+                data.selectedSkin = guiCustomizer.skin.name;
+                data.skinsSettings = guiCustomizer.skins_custom_settings;
+            }
 
-tabSignal.connect("openapi.schema.definition.ChangePassword", addSettingsToChangePassword);
+            let instance = this.data.instance;
+            instance.data = data;
+            let method = this.view.schema.query_type;
+            instance.save(method).then(instance => {
+                let qs = this.getQuerySet(this.view, this.qs_url).clone();
+                qs.cache = instance;
+                this.setQuerySet(this.view, this.qs_url, qs);
 
-gui_user_settings = {
-    update: function()
-    {
-        return gui_user_settings_update.apply(this, arguments);
+                guiDashboard.updateSettings(instance.data);
+
+                guiPopUp.success('User settings were successfully saved.');
+
+                let url = this.getRedirectUrl({instance:instance});
+
+                this.$router.push({path: url});
+
+            }).catch(error => {
+                let str = app.error_handler.errorToString(error);
+
+                let srt_to_show = pop_up_msg.instance.error.save.format(
+                    ['settings', this.view.schema.name, str],
+                );
+
+                app.error_handler.showError(srt_to_show, str);
+                debugger;
+            });
+        },
+
+        getRedirectUrl() {
+            return this.qs_url;
+        },
     },
+};
 
-    getDataFromForm: function()
-    {
-        return gui_user_settings_getDataFromForm.apply(this, arguments);
-    },
-}
+/**
+ * Signal, that edits options of UserSettings model's fields.
+ */
+tabSignal.connect("models[UserSettings].fields.beforeInit", (fields => {
+    [
+        {name: 'chartLineSettings', title: "Dashboard chart lines settings", },
+        {name: 'widgetSettings', title: "Dashboard widgets settings"},
+    ].forEach((item) => {
+        fields[item.name].format = 'inner_api_object';
+        fields[item.name].title = item.title;
+    });
+
+    fields.autoupdateInterval.format = 'time_interval';
+    fields.autoupdateInterval.required = true;
+    fields.autoupdateInterval.title = 'Auto update interval';
+    fields.autoupdateInterval.description = 'application automatically updates pages data' +
+        ' with following interval (time in seconds)';
+
+    fields.selectedSkin = {
+        title: 'Selected skin',
+        format: 'hidden',
+    };
+    fields.skinsSettings = {
+        title: 'Skin settings',
+        format: 'hidden',
+    };
+}));
+
+/**
+ * Emits signals for UserSettings views.
+ */
+prepareUserSettingsViews('/user/{' + path_pk_key + '}/settings/');
