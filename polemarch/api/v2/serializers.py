@@ -114,9 +114,9 @@ class ExecuteResponseSerializer(ActionResponseSerializer):
 
 class SetOwnerSerializer(DataSerializer):
     perms_msg = 'Permission denied. Only owner can change owner.'
-    user_id = vst_fields.Select2Field(required=True, select='User',
-                                      label='New owner',
-                                      autocomplete_represent='username')
+    user_id = vst_fields.FkField(required=True, select='User',
+                                 label='New owner',
+                                 autocomplete_represent='username')
 
     def update(self, instance, validated_data):
         if not self.instance.acl_handler.owned_by(self.current_user()):  # noce
@@ -557,16 +557,16 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
 
     mode = vst_fields.DependEnumField(
         allow_blank=True, required=False, field='kind', types={
-            'PLAYBOOK': 'autocomplete',
-            'MODULE': 'autocomplete',
+            'PLAYBOOK': 'fk_autocomplete',
+            'MODULE': 'fk_autocomplete',
             'TEMPLATE': 'hidden',
         }
     )
 
     inventory = InventoryDependEnumField(
         allow_blank=True, required=False, field='kind', types={
-            'PLAYBOOK': 'select2',
-            'MODULE': 'select2',
+            'PLAYBOOK': 'fk_autocomplete',
+            'MODULE': 'fk_autocomplete',
             'TEMPLATE': 'hidden',
         }
     )

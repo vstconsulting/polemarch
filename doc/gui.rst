@@ -20,12 +20,13 @@ As you can see, Polemarch GUI provides user with 2 menus:
 
 Also there are some widgets on content block of Dashboard page. User can customize Dashboard page as he wish.
 For example, user can change widgets' position, hide some widgets or collapse them.
+To do it user should open UserSettings page from his profile page.
 
-To change widgets' position user should click on 'lock' button. After this button has been clicked,
-user is able to change widgets' position by Drag and Drop.
+.. To change widgets' position user should click on 'lock' button. After this button has been clicked,
+   user is able to change widgets' position by Drag and Drop.
 
-To collapse or to hide/show some widgets user should click on 'cogwheel' button. After this button has been clicked,
-Polemarch opens modal window, where user can activate or collapse some widgets.
+.. To collapse or to hide/show some widgets user should click on 'cogwheel' button. After this button has been clicked,
+   Polemarch opens modal window, where user can activate or collapse some widgets.
 
 
 Before you start
@@ -115,9 +116,7 @@ Also there are some new buttons:
 
 Sublinks buttons:
 
-* **group** - this button opens project's group list.
 * **history** - this button opens project executions' history list.
-* **host** - this button opens project's host list.
 * **inventory** - this button opens project's inventory list.
 * **module** - this button opens project's module list.
 * **periodic task** - this button opens project's periodic task list.
@@ -135,9 +134,11 @@ Action buttons:
 * **sync** - this button syncs your Polemarch project with GIT repository.
 * **remove** - |remove_button_def| project.
 
-.. |create_button_def| replace:: this button creates new
+.. |create_button_def| replace:: this button opens page for creation of new
 .. |edit_button_def| replace:: this button turns on edit mod for this page.
+.. |save_new_button_def| replace:: this button saves new
 .. |save_button_def| replace:: this button saves all changes you have made on this page.
+.. |reload_button_def| replace:: this button resets all changes that you have done on this page.
 .. |copy_button_def| replace:: this button opens "copy" action page.
 .. |set_owner_button_def| replace:: this button opens "set owner" action page.
 .. |remove_button_def| replace:: this button deletes
@@ -151,9 +152,10 @@ If you want to edit values of some fields on any page in Polemarch, you should c
 As you can see, edit mod looks exactly the same as read only mod, except several points:
 
 * you have opportunity to change values of editable fields;
-* there is **save** button - |save_button_def|
+* there are **save** button - |save_button_def|
+* and **reload** button - |reload_button_def|
 
-Now, let's back to edit mod of our project page.
+Now, let's back to read only mod of our project page.
 
 .. image:: gui_screenshots/test_project_1.png
 
@@ -201,6 +203,8 @@ After clicking on "edit" button you will see:
 
 Then you need to change branch name of 'value' field and click on "save" button.
 
+.. image:: gui_screenshots/test_project_variables_3_1.png
+
 .. note::
     If your need to choose branch with tag name
     you should use following format of branch name "``tags/[tag_name]``".
@@ -227,7 +231,7 @@ As you can see, there are 2 fields on this page:
 
 Also there is only one button on this page:
 
-* **exec** - |exec_button_def|
+* **execute** - |exec_button_def|
 
 .. |exec_button_def| replace:: this button starts action execution.
 
@@ -243,7 +247,7 @@ After all fields have been filled, our page started look like:
 
 .. image:: gui_screenshots/execute_module_2.png
 
-So, let's execute our first task on Polemarch! To do it click on "exec" button.
+So, let's execute our first task on Polemarch! To do it click on "execute" button.
 
 When status of your module execution changes to "OK" you will see the next page:
 
@@ -259,7 +263,7 @@ To do it before every module/playbook execution is rather inconvenient.
 In this case Polemarch templates save our time and nerves.
 Polemarch template is an object, that saves all options that user used during task execution.
 
-For example, let's create tast template (template that uses playbooks).
+For example, let's create task template (template that uses playbooks).
 To do it click on "template" button on project page.
 
 .. image:: gui_screenshots/create_template.png
@@ -268,9 +272,9 @@ As you can see, there are no templates in the project's template list now.
 
 There is only one button here:
 
-* **create** - |create_button_def| template.
+* **new** - |create_button_def| template.
 
-To create template click on "create" button on this page.
+To create template click on "new" button on this page.
 
 .. image:: gui_screenshots/create_template_2.png
 
@@ -323,9 +327,9 @@ As you can see, there are no variables in the template's variables list now.
 
 There is only one button here:
 
-* **create** - |create_button_def| variable.
+* **new** - |create_button_def| variable.
 
-To create variable click on "create" button on this page.
+To create variable click on "new" button on this page.
 
 .. image:: gui_screenshots/create_template_variable_2.png
 
@@ -337,9 +341,9 @@ As you can see, there are only 2 fields on this page:
 
 There is only one button here:
 
-* **create** - |create_button_def| variable.
+* **save** - |save_new_button_def| variable.
 
-To save our variable click on "create" button.
+To save our variable click on "save" button.
 
 Now we are ready to execute our template. To do it come back to template page:
 
@@ -355,9 +359,9 @@ As you can see, there is only 1 field on this page:
 
 Also there is only one button on this page:
 
-* **exec** - |exec_button_def|
+* **execute** - |exec_button_def|
 
-We do not have any template's options in our system, so just click on "exec" button.
+We do not have any template's options in our system, so just click on "execute" button.
 
 When status of your template execution changes to "OK" you will see the next page:
 
@@ -390,9 +394,9 @@ As you can see, there are no periodic tasks in the project's periodic task list 
 
 There is only one button here:
 
-* **create** - |create_button_def| periodic task.
+* **new** - |create_button_def| periodic task.
 
-To create periodic task click on "create" button on this page.
+To create periodic task click on "new" button on this page.
 
 .. image:: gui_screenshots/create_periodic_task_1.png
 
@@ -481,7 +485,7 @@ As you can see, there are only 2 fields on this page:
 
 Also there is only one button there:
 
-* **create** - |create_button_def| inventory.
+* **save** - |save_new_button_def| inventory.
 
 After inventory creation you will see the next page:
 
@@ -525,11 +529,11 @@ As you can see, there are no groups in the inventory's group list now.
 
 There are 2 buttons here:
 
-* **create** - |create_button_def| group.
+* **new** - |create_button_def| group.
 * **add** - this button opens the all group list from database,
   from which you can choose group for this inventory.
 
-We need to create group. To do it click on "create" button.
+We need to create group. To do it click on "new" button.
 
 .. image:: gui_screenshots/create_group.png
 
@@ -579,11 +583,11 @@ As you can see, there are no hosts in the group's host list now.
 
 There are 2 buttons here:
 
-* **create** - |create_button_def| host.
+* **new** - |create_button_def| host.
 * **add** - this button opens the all host list from database,
   from which you can choose host for this group.
 
-We need to create host. To do it click on "create" button.
+We need to create host. To do it click on "new" button.
 
 .. image:: gui_screenshots/create_host.png
 
@@ -641,9 +645,9 @@ As you can see, there are no variables in the host's variables list now.
 
 There is only 1 button here:
 
-* **create** - |create_button_def| variable.
+* **new** - |create_button_def| variable.
 
-To create variable click on "create" button:
+To create variable click on "new" button:
 
 .. image:: gui_screenshots/test_host_variables_1.png
 
@@ -936,9 +940,9 @@ As you can see, there are no hooks in the system now.
 
 There is only one button here:
 
-* **create** - |create_button_def| hook.
+* **new** - |create_button_def| hook.
 
-To create hook click on "create" button.
+To create hook click on "new" button.
 
 .. image:: gui_screenshots/create_hook.png
 
@@ -973,7 +977,7 @@ If you need to create user with "staff" rights you can do it with Polemarch GUI:
 
 .. image:: gui_screenshots/user_list.png
 
-To create new user click on "create" button.
+To create new user click on "new" button.
 
 .. image:: gui_screenshots/create_user.png
 
@@ -1036,4 +1040,4 @@ As you can see, the form of "change password" action consists of following field
 
 There is only one button here:
 
-* **exec** - |exec_button_def|
+* **execute** - |exec_button_def|

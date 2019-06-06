@@ -1,105 +1,187 @@
+<!-- template for /history/{pk}/ view -->
+<script type="text/x-template" id="template_view_history_one">
+    <div style="display:contents;" >
 
-<script type="text/x-just" data-just="history_stdout_line"><span class="stdout-line <%- line.fatal %>" ><%= guiObj.Syntax(line.text) %></span>
-</script>
+        <div class="in-loading" v-if="loading">
+            <div id="loader-wrapper">
+                <div id="loader"></div>
+            </div>
+        </div>
 
-<script type="text/x-just" data-just="history_one_get">
-    <!-- history_one -->
-
-    <%[ main_content_row %>
-        <div class="container-fluid">
-            <div class="history-mode row">
-            <section class="col col-xl-8 history-LeftInfo" id="history-mode-section">
-                <div class="card card-info collapsed-card">
-                    <div class="card-header with-border collapsed-card">
-                        Inventory<br>
-                        <div class="card-tools pull-right">
-                            <button type="button" class="btn btn-history-resize btn-sm btn-light btn-icon" onclick="$('.history-mode').toggleClass('history-fullsize'); $('#history-mode-section').toggleClass('col-xl-8');" >
-                                <i class="fa fa-expand"></i>
-                                <i class="fa fa-compress"></i>
-                            </button>
-
-                            <button type="button" class="btn btn-light btn-sm btn-light btn-icon" data-widget="collapse"><i class="fa fa-plus"></i> </button>
+        <div class="content-wrapper" v-if="error">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <h1>
+                        <span @click="goToHistoryRecord(-1)" class="btn btn-default">
+                            <span class="fa fa-arrow-left"></span>
+                        </span>
+                                <span class="h1-header" > Error {{ error.status }} </span>
+                            </h1>
                         </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="form-group col-lg-12">
-                                <pre
-                                id="raw_inventory-pre"
-                                style="overflow: auto; max-height: 600px;" ><%= guiObj.model.data.justText('raw_inventory') %></pre>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card card-info">
-                    <div class="card-header with-border">
-                        stdout<br>
-                        <div class="card-tools pull-right">
-                                <~ guiObj.model.data >
-                                    <% if(!(guiObj.model.data.status == 'RUN' || guiObj.model.data.status == 'DELAY')) { %>
-
-                                            <button type="button"
-                                                    class="btn btn-light btn-sm btn-light btn-icon"
-                                                    id="clear_output"
-                                                    style="margin-right:5px;"
-                                                    <%= justOn('click', () =>{clearHistoryStdOut(guiObj.api.actions['clear'], guiObj)}, 'clear_output') %>
-                                            >
-
-
-
-                                                <span class="fa fa-trash" style="font-size:20px;"></span> <span class="hidden-sm hidden-xs" ></span>
-                                            </button>
-
-                                    <% } %>
-                                <~>
-
-                            <button type="button" class="btn btn-card-tool btn-history-resize btn-sm btn-light btn-icon" onclick="$('.history-mode').toggleClass('history-fullsize'); $('#history-mode-section').toggleClass('col-xl-8');" >
-                                <i class="fa fa-expand"></i>
-                                <i class="fa fa-compress"></i>
-                            </button>
-
-                            <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon" data-widget="collapse" ><i class="fa fa-minus"></i> </button>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="form-group col-lg-12">
-                                <label class="control-label" >stdout
-                                    (<a href="<%- guiObj.model.data.raw_stdout %>"
-                                            target="_blank"
-                                            download="stdout-<%- guiObj.model.data.mode %>-<%- guiObj.model.data.start_time %>.log"
-                                            >Full raw stdout</a>)</label>
-                                <pre
-                                    class="history-stdout"
-                                    id="history-stdout"></pre>
-                            </div>
+                        <div class="col-lg-6">
+                            <breadcrumbs :breadcrumbs="breadcrumbs"></breadcrumbs>
                         </div>
                     </div>
                 </div>
             </section>
-
-            <section class="col-xl-4 col-lg-12 history-RightInfo col12-mode">
-                <div class="card card-info">
-                    <div class="card-header with-border">
-                        Task<br>
-                        <div class="card-tools pull-right">
-                            <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon" onclick="$('.history-mode').toggleClass('history-fullsize'); $('#history-mode-section').toggleClass('col-xl-8');" ><i class="fa fa-compress"></i> </button>
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-12">
                         </div>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <%* fields_block %>
-                        </div>
+                    <br>
+                    <div class="row">
+                        <section class="col-lg-12">
+                            <div class="card card-info">
+                                <div class="card-header with-border">
+                                    <br>
+                                </div>
+                                <div class="card-body">
+                                    {{ error_data }}
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </section>
+        </div>
 
+        <div class="content-wrapper-2" id='spajs-right-area' v-if="response">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <h1>
+                                <span @click="goToHistoryRecord(-1)" class="btn btn-default">
+                                    <span class="fa fa-arrow-left"></span>
+                                </span>
+                                <span class="h1-header" > {{ title  | capitalize | split }}</span>
+                            </h1>
+                        </div>
+                        <div class="col-lg-6" >
+                            <breadcrumbs :breadcrumbs="breadcrumbs"></breadcrumbs>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <gui_buttons_row :view="view" :data="data" :opt="opt"></gui_buttons_row>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <section class="col-lg-12 col col-xl-9">
+                            <!-- Section with Inventory fields -->
+                            <section>
+                                <div class="card card-info">
+                                    <div class="card-header with-border" style="min-height: 50px;">
+                                        <field_fk_just_value :field="inventory_field"
+                                                             :wrapper_opt="inventory_field_wrapper_opt"
+                                                             :prop_data="inventory_field_prop_data"
+                                        >
+                                        </field_fk_just_value>
+                                        <!-- Button for collapse  and expand this section -->
+                                        <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon"
+                                                @click="inventory_toggle = !inventory_toggle" style="float: right;"
+                                        >
+                                            <i class="fa fa-plus" :class="inventory_toggle ? 'fa-minus' : 'fa-plus'"></i>
+                                        </button>
+                                    </div>
+                                    <transition name="fade">
+                                        <div class="card-body" v-show="inventory_toggle">
+                                            <field_one_history_raw_inventory :field="raw_inventory_field"
+                                                                             :wrapper_opt="inventory_field_wrapper_opt"
+                                                                             :prop_data="inventory_field_prop_data"
+                                            >
+                                            </field_one_history_raw_inventory>
+                                        </div>
+                                    </transition>
+                                </div>
+                            </section>
+
+                            <!-- Section with output information -->
+                            <section>
+                                <div class="card card-info">
+                                    <div class="card-header with-border" style="min-height: 50px;">
+                                        <span>Execution output</span>
+
+
+                                        <!-- Button for collapse  and expand this section -->
+                                        <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon"
+                                                style="float: right;" @click="output_toggle = !output_toggle"
+                                        >
+                                            <i class="fa fa-plus" :class="output_toggle ? 'fa-minus' : 'fa-plus'"></i>
+                                        </button>
+
+                                        <clear_button v-show="clear_button_show" type="action"
+                                                      :options="clear_button_options"
+                                                      :look="clear_button_look">
+                                        </clear_button>
+
+                                    </div>
+                                    <transition name="fade">
+                                        <div class="card-body" v-show="output_toggle">
+                                            <history_stdout :instance="data.instance" :url="url" :cleared="was_cleared"></history_stdout>
+                                        </div>
+                                    </transition>
+                                    <transition name="fade">
+                                        <div class="card-footer clearfix" v-if="content_footer_component && !card_collapsed">
+                                            <component :is="content_footer_component" :data="data" :view="view" :opt="opt"></component>
+                                        </div>
+                                    </transition>
+                                </div>
+                                <component :is="content_additional" :data="data" :view="view" :opt="opt" v-if="content_additional">
+                                </component>
+                            </section>
+                        </section>
+
+                        <!-- Section with information about task -->
+                        <!--<section class="col-lg-8 col-xl-3 col-lg-8">-->
+                        <section class="col-lg-12 col-xl-3">
+                            <div class="card card-info">
+                                <div class="card-header with-border" style="min-height: 50px;">
+                                    <span>Details</span>
+                                    <!-- Button for collapse  and expand this section -->
+                                    <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon"
+                                            @click="information_toggle = !information_toggle" style="float: right;"
+                                    >
+                                        <i class="fa fa-plus" :class="information_toggle ? 'fa-minus' : 'fa-plus'"></i>
+                                    </button>
+                                </div>
+                                <transition name="fade">
+                                    <div class="card-body" v-show="information_toggle">
+                                        <component :is="content_body_component" :data="data" :view="view" :opt="opt"></component>
+                                    </div>
+                                </transition>
+                                <transition name="fade">
+                                    <div class="card-footer clearfix" v-if="content_footer_component && !card_collapsed">
+                                        <component :is="content_footer_component" :data="data" :view="view" :opt="opt"></component>
+                                    </div>
+                                </transition>
+                            </div>
+                            <component :is="content_additional" :data="data" :view="view" :opt="opt" v-if="content_additional">
+                            </component>
+                        </section>
                     </div>
                 </div>
             </section>
         </div>
     </div>
+</script>
 
-    <%] %>
-    <!-- /items_new_page -->
-
-    <%! entity_one_get %>
+<!-- template of history stdout component -->
+<script type="text/x-template" id="template_history_stdout">
+    <div>
+        <span>
+            <b>stdout</b> (<a :href="raw_stdout_link" target="_blank" class="revers-color">Full raw stdout</a>)
+            <i class="fa fa-spinner fa-pulse fa-fw" v-show="loading"></i>
+        </span>
+        <pre class="history-stdout" v-html="linesHTML" @scroll="scrollHandler"></pre>
+    </div>
 </script>
