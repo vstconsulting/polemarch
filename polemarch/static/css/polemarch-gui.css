@@ -284,10 +284,10 @@ body {
     overflow: auto;
     max-height: calc(100vh - 338px);
     min-height: 400px;
-    line-height: 1;
     background: #000;
     padding-left: 15px;
     padding-right: 15px;
+    font-weight: normal!important;
 }
 
 @media (min-width: 767px) {

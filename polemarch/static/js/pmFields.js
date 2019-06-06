@@ -127,6 +127,10 @@ guiFields.history_initiator = class HistoryInitiatorField extends guiFields.fk {
 
         let path = dict[data.initiator_type];
 
+        if(!path) {
+            return selected;
+        }
+
         for(let index in qs) {
             let item = qs[index];
 
@@ -148,7 +152,6 @@ guiFields.history_initiator = class HistoryInitiatorField extends guiFields.fk {
             return url;
         }
 
-        // let project = data['project'] || app.application.$route.params.pk;
         let project = data['project'] || app.application.$route.params[path_pk_key];
 
         if(project && typeof project == 'object' && project.value) {
@@ -158,7 +161,6 @@ guiFields.history_initiator = class HistoryInitiatorField extends guiFields.fk {
         let f_obj = {};
         f_obj[path_pk_key] = project;
 
-        // return url.format({pk:project});
         return url.format(f_obj);
     }
 };

@@ -7,6 +7,9 @@ info:
   termsOfService: ''
   contact:
     name: System Administrator
+  x-docs:
+    has_docs: true
+    docs_url: /docs/
   x-links:
     Request:
       - url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%201.2.0
@@ -10815,7 +10818,7 @@ definitions:
       user_id:
         title: New owner
         type: integer
-        format: select2
+        format: fk
         additionalProperties:
           model:
             $ref: '#/definitions/User'
@@ -11824,8 +11827,8 @@ definitions:
           field: kind
           choices: {}
           types:
-            PLAYBOOK: autocomplete
-            MODULE: autocomplete
+            PLAYBOOK: fk_autocomplete
+            MODULE: fk_autocomplete
             TEMPLATE: hidden
       inventory:
         title: Inventory
@@ -11835,8 +11838,8 @@ definitions:
           field: kind
           choices: {}
           types:
-            PLAYBOOK: select2
-            MODULE: select2
+            PLAYBOOK: fk_autocomplete
+            MODULE: fk_autocomplete
             TEMPLATE: hidden
       save_result:
         title: Save result
@@ -11905,8 +11908,8 @@ definitions:
           field: kind
           choices: {}
           types:
-            PLAYBOOK: autocomplete
-            MODULE: autocomplete
+            PLAYBOOK: fk_autocomplete
+            MODULE: fk_autocomplete
             TEMPLATE: hidden
       inventory:
         title: Inventory
@@ -11916,8 +11919,8 @@ definitions:
           field: kind
           choices: {}
           types:
-            PLAYBOOK: select2
-            MODULE: select2
+            PLAYBOOK: fk_autocomplete
+            MODULE: fk_autocomplete
             TEMPLATE: hidden
       save_result:
         title: Save result
