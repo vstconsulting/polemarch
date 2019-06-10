@@ -7,14 +7,14 @@ Update
 
 Before updating of package of any type it is strongly recommended to stop all services and create backup for safety.
 
-Update to 0.2.x
----------------
+Update from any old version
+---------------------------
 
 1. Firstly, we strongly recommend you to create a database backup and to stop all Polemarch services for safety.
 
-2. Secondly, if you are updating from 0.1.x to 0.2.x, you need to update you current 0.1.x version to 0.1.13 version.
+2. Secondly, if you are updating from 0.x.y to 1.x.y, you need to update you current 0.x.y version to 1.0.0 version.
 
-3. Then update 0.1.13 version to 0.2.x. If you don't know how to do it, look :doc:`"Install from PyPI" </quickstart>`.
+3. Then update to the latest version. If you don't know how to do it, look :doc:`"Install from PyPI" </quickstart>`.
 
 
 Migrate

@@ -203,7 +203,7 @@ After clicking on "edit" button you will see:
 
 Then you need to change branch name of 'value' field and click on "save" button.
 
-.. image:: gui_screenshots/test_project_variables_3_1.png
+.. image:: gui_screenshots/test_project_variables_3.png
 
 .. note::
     If your need to choose branch with tag name
