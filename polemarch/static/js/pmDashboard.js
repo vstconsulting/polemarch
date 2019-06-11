@@ -55,7 +55,7 @@ guiWidgets.history_chart = class HistoryChart extends guiWidgets.line_chart {
         let monthNum = moment().format("MM");
         let yearNum = moment().format("YYYY");
         let dayNum = moment().format("DD");
-        let hourNum = ",T00:00:00";
+        let hourNum = "T00:00:00";
         let startTimeOrg = "";
 
         switch(this.period.type) {
