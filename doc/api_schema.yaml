@@ -11,52 +11,52 @@ info:
     has_docs: true
     docs_url: /docs/
   x-links:
-    Request:
-      - url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%201.2.0
-        name: Question
-      - url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%201.2.0
-        name: Bug report
-      - url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Feature%20request&issue%5Btitle%5D=
-        name: Feature request
     Documentation:
-      url: http://polemarch.readthedocs.io/
       name: Official documentation
+      url: http://polemarch.readthedocs.io/
     Repository:
-      url: https://gitlab.com/vstconsulting/polemarch.git
       name: Official repository
+      url: https://gitlab.com/vstconsulting/polemarch.git
+    Request:
+      - name: Question
+        url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%201.2.0
+      - name: Bug report
+        url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%201.2.0
+      - name: Feature request
+        url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Feature%20request&issue%5Btitle%5D=
   x-menu:
     - name: Projects
-      url: /project
       span_class: fa fa-fort-awesome
+      url: /project
     - name: Community
-      url: /community_template
       span_class: fa fa-cloud
+      url: /community_template
     - name: Inventories
-      url: /inventory
       span_class: fa fa-folder
       sublinks:
         - name: Groups
-          url: /group
           span_class: fa fa-tasks
+          url: /group
         - name: Hosts
-          url: /host
           span_class: fa fa-codepen
+          url: /host
+      url: /inventory
     - name: History
-      url: /history
       span_class: fa fa-calendar
+      url: /history
     - name: System
       span_class: fa fa-cog
       sublinks:
         - name: Users
-          url: /user
           span_class: fa fa-user
+          url: /user
         - name: Hooks
-          url: /hook
           span_class: fa fa-plug
+          url: /hook
   x-versions:
     application: 1.2.0
     library: 1.2.0
-    vstutils: 2.0.0
+    vstutils: 2.1.0
     django: 2.2.1
     ansible: 2.7.6
   version: v2
@@ -109,9 +109,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -135,7 +137,7 @@ paths:
       tags:
         - community_template
     parameters: []
-  /community_template/{pk}/:
+  /community_template/{id}/:
     get:
       operationId: community_template_get
       description: Return a community project template instance.
@@ -164,12 +166,12 @@ paths:
       tags:
         - community_template
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique value identifying this project template.
         required: true
         type: integer
-  /community_template/{pk}/use_it/:
+  /community_template/{id}/use_it/:
     post:
       operationId: community_template_use_it
       description: Create project based on this template.
@@ -203,7 +205,7 @@ paths:
       tags:
         - community_template
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique value identifying this project template.
         required: true
@@ -269,9 +271,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -327,7 +331,7 @@ paths:
       tags:
         - group
     parameters: []
-  /group/{pk}/:
+  /group/{id}/:
     get:
       operationId: group_get
       description: Return a group instance.
@@ -445,12 +449,12 @@ paths:
       tags:
         - group
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{pk}/copy/:
+  /group/{id}/copy/:
     post:
       operationId: group_copy
       description: Copy instance with deps.
@@ -484,12 +488,12 @@ paths:
       tags:
         - group
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{pk}/group/:
+  /group/{id}/group/:
     get:
       operationId: group_group_list
       description: Return all groups.
@@ -550,9 +554,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -608,12 +614,12 @@ paths:
       tags:
         - group
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{pk}/group/{group_id}/:
+  /group/{id}/group/{group_id}/:
     get:
       operationId: group_group_get
       description: Return a group instance.
@@ -736,12 +742,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this groups sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{pk}/group/{group_id}/copy/:
+  /group/{id}/group/{group_id}/copy/:
     post:
       operationId: group_group_copy
       description: Copy instance with deps.
@@ -780,12 +786,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this groups sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{pk}/group/{group_id}/set_owner/:
+  /group/{id}/group/{group_id}/set_owner/:
     post:
       operationId: group_group_set_owner
       description: Change instance owner.
@@ -824,12 +830,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this groups sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{pk}/group/{group_id}/variables/:
+  /group/{id}/group/{group_id}/variables/:
     get:
       operationId: group_group_variables_list
       description: Return all variables of instance.
@@ -885,9 +891,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -948,12 +956,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this groups sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{pk}/group/{group_id}/variables/{variables_id}/:
+  /group/{id}/group/{group_id}/variables/{variables_id}/:
     get:
       operationId: group_group_variables_get
       description: Return a variable of instance.
@@ -1076,7 +1084,7 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this groups sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
@@ -1087,7 +1095,7 @@ paths:
         type: integer
         description: A unique integer value identifying instance of this variables
           sublist.
-  /group/{pk}/host/:
+  /group/{id}/host/:
     get:
       operationId: group_host_list
       description: Return all hosts.
@@ -1153,9 +1161,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -1211,12 +1221,12 @@ paths:
       tags:
         - group
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{pk}/host/{host_id}/:
+  /group/{id}/host/{host_id}/:
     get:
       operationId: group_host_get
       description: Return a host instance.
@@ -1339,12 +1349,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this hosts sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{pk}/host/{host_id}/copy/:
+  /group/{id}/host/{host_id}/copy/:
     post:
       operationId: group_host_copy
       description: Copy instance with deps.
@@ -1383,12 +1393,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this hosts sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{pk}/host/{host_id}/set_owner/:
+  /group/{id}/host/{host_id}/set_owner/:
     post:
       operationId: group_host_set_owner
       description: Change instance owner.
@@ -1427,12 +1437,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this hosts sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{pk}/host/{host_id}/variables/:
+  /group/{id}/host/{host_id}/variables/:
     get:
       operationId: group_host_variables_list
       description: Return all variables of instance.
@@ -1488,9 +1498,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -1551,12 +1563,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this hosts sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{pk}/host/{host_id}/variables/{variables_id}/:
+  /group/{id}/host/{host_id}/variables/{variables_id}/:
     get:
       operationId: group_host_variables_get
       description: Return a variable of instance.
@@ -1679,7 +1691,7 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this hosts sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
@@ -1690,7 +1702,7 @@ paths:
         type: integer
         description: A unique integer value identifying instance of this variables
           sublist.
-  /group/{pk}/set_owner/:
+  /group/{id}/set_owner/:
     post:
       operationId: group_set_owner
       description: Change instance owner.
@@ -1724,12 +1736,12 @@ paths:
       tags:
         - group
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{pk}/variables/:
+  /group/{id}/variables/:
     get:
       operationId: group_variables_list
       description: Return all variables of instance.
@@ -1785,9 +1797,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -1843,12 +1857,12 @@ paths:
       tags:
         - group
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{pk}/variables/{variables_id}/:
+  /group/{id}/variables/{variables_id}/:
     get:
       operationId: group_variables_get
       description: Return a variable of instance.
@@ -1966,7 +1980,7 @@ paths:
       tags:
         - group
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
@@ -2058,9 +2072,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -2084,7 +2100,7 @@ paths:
       tags:
         - history
     parameters: []
-  /history/{pk}/:
+  /history/{id}/:
     get:
       operationId: history_get
       description: Return a execution history instance.
@@ -2138,12 +2154,12 @@ paths:
       tags:
         - history
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this history.
         required: true
         type: integer
-  /history/{pk}/cancel/:
+  /history/{id}/cancel/:
     post:
       operationId: history_cancel
       description: Cencel working task.
@@ -2177,12 +2193,12 @@ paths:
       tags:
         - history
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this history.
         required: true
         type: integer
-  /history/{pk}/clear/:
+  /history/{id}/clear/:
     delete:
       operationId: history_clear
       description: Clear history output.
@@ -2209,12 +2225,12 @@ paths:
       tags:
         - history
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this history.
         required: true
         type: integer
-  /history/{pk}/facts/:
+  /history/{id}/facts/:
     get:
       operationId: history_facts
       description: Get compilated history facts (only for execution 'module' with
@@ -2244,7 +2260,7 @@ paths:
       tags:
         - history
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this history.
         required: true
@@ -2310,9 +2326,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -2368,7 +2386,7 @@ paths:
       tags:
         - hook
     parameters: []
-  /hook/{pk}/:
+  /hook/{id}/:
     get:
       operationId: hook_get
       description: Return a hook instance.
@@ -2486,7 +2504,7 @@ paths:
       tags:
         - hook
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this hook.
         required: true
@@ -2557,9 +2575,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -2615,7 +2635,7 @@ paths:
       tags:
         - host
     parameters: []
-  /host/{pk}/:
+  /host/{id}/:
     get:
       operationId: host_get
       description: Return a host instance.
@@ -2733,12 +2753,12 @@ paths:
       tags:
         - host
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this host.
         required: true
         type: integer
-  /host/{pk}/copy/:
+  /host/{id}/copy/:
     post:
       operationId: host_copy
       description: Copy instance with deps.
@@ -2772,12 +2792,12 @@ paths:
       tags:
         - host
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this host.
         required: true
         type: integer
-  /host/{pk}/set_owner/:
+  /host/{id}/set_owner/:
     post:
       operationId: host_set_owner
       description: Change instance owner.
@@ -2811,12 +2831,12 @@ paths:
       tags:
         - host
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this host.
         required: true
         type: integer
-  /host/{pk}/variables/:
+  /host/{id}/variables/:
     get:
       operationId: host_variables_list
       description: Return all variables of instance.
@@ -2872,9 +2892,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -2930,12 +2952,12 @@ paths:
       tags:
         - host
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this host.
         required: true
         type: integer
-  /host/{pk}/variables/{variables_id}/:
+  /host/{id}/variables/{variables_id}/:
     get:
       operationId: host_variables_get
       description: Return a variable of instance.
@@ -3053,7 +3075,7 @@ paths:
       tags:
         - host
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this host.
         required: true
@@ -3125,9 +3147,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -3217,7 +3241,7 @@ paths:
       tags:
         - inventory
     parameters: []
-  /inventory/{pk}/:
+  /inventory/{id}/:
     get:
       operationId: inventory_get
       description: Return a inventory instance.
@@ -3335,12 +3359,12 @@ paths:
       tags:
         - inventory
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{pk}/all_groups/:
+  /inventory/{id}/all_groups/:
     get:
       operationId: inventory_all_groups_list
       description: Return all groups.
@@ -3401,9 +3425,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -3427,12 +3453,12 @@ paths:
       tags:
         - inventory
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{pk}/all_groups/{all_groups_id}/:
+  /inventory/{id}/all_groups/{all_groups_id}/:
     get:
       operationId: inventory_all_groups_get
       description: Return a group instance.
@@ -3465,12 +3491,12 @@ paths:
         in: path
         required: true
         type: string
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{pk}/all_hosts/:
+  /inventory/{id}/all_hosts/:
     get:
       operationId: inventory_all_hosts_list
       description: Return all hosts.
@@ -3536,9 +3562,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -3562,12 +3590,12 @@ paths:
       tags:
         - inventory
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{pk}/all_hosts/{all_hosts_id}/:
+  /inventory/{id}/all_hosts/{all_hosts_id}/:
     get:
       operationId: inventory_all_hosts_get
       description: Return a host instance.
@@ -3600,12 +3628,12 @@ paths:
         in: path
         required: true
         type: string
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{pk}/copy/:
+  /inventory/{id}/copy/:
     post:
       operationId: inventory_copy
       description: Copy instance with deps.
@@ -3639,12 +3667,12 @@ paths:
       tags:
         - inventory
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{pk}/group/:
+  /inventory/{id}/group/:
     get:
       operationId: inventory_group_list
       description: Return all groups.
@@ -3705,9 +3733,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -3763,12 +3793,12 @@ paths:
       tags:
         - inventory
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{pk}/group/{group_id}/:
+  /inventory/{id}/group/{group_id}/:
     get:
       operationId: inventory_group_get
       description: Return a group instance.
@@ -3891,12 +3921,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this groups sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{pk}/group/{group_id}/copy/:
+  /inventory/{id}/group/{group_id}/copy/:
     post:
       operationId: inventory_group_copy
       description: Copy instance with deps.
@@ -3935,12 +3965,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this groups sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{pk}/group/{group_id}/set_owner/:
+  /inventory/{id}/group/{group_id}/set_owner/:
     post:
       operationId: inventory_group_set_owner
       description: Change instance owner.
@@ -3979,12 +4009,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this groups sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{pk}/group/{group_id}/variables/:
+  /inventory/{id}/group/{group_id}/variables/:
     get:
       operationId: inventory_group_variables_list
       description: Return all variables of instance.
@@ -4040,9 +4070,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -4103,12 +4135,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this groups sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{pk}/group/{group_id}/variables/{variables_id}/:
+  /inventory/{id}/group/{group_id}/variables/{variables_id}/:
     get:
       operationId: inventory_group_variables_get
       description: Return a variable of instance.
@@ -4231,7 +4263,7 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this groups sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
@@ -4242,7 +4274,7 @@ paths:
         type: integer
         description: A unique integer value identifying instance of this variables
           sublist.
-  /inventory/{pk}/host/:
+  /inventory/{id}/host/:
     get:
       operationId: inventory_host_list
       description: Return all hosts.
@@ -4308,9 +4340,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -4366,12 +4400,12 @@ paths:
       tags:
         - inventory
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{pk}/host/{host_id}/:
+  /inventory/{id}/host/{host_id}/:
     get:
       operationId: inventory_host_get
       description: Return a host instance.
@@ -4494,12 +4528,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this hosts sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{pk}/host/{host_id}/copy/:
+  /inventory/{id}/host/{host_id}/copy/:
     post:
       operationId: inventory_host_copy
       description: Copy instance with deps.
@@ -4538,12 +4572,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this hosts sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{pk}/host/{host_id}/set_owner/:
+  /inventory/{id}/host/{host_id}/set_owner/:
     post:
       operationId: inventory_host_set_owner
       description: Change instance owner.
@@ -4582,12 +4616,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this hosts sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{pk}/host/{host_id}/variables/:
+  /inventory/{id}/host/{host_id}/variables/:
     get:
       operationId: inventory_host_variables_list
       description: Return all variables of instance.
@@ -4643,9 +4677,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -4706,12 +4742,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this hosts sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{pk}/host/{host_id}/variables/{variables_id}/:
+  /inventory/{id}/host/{host_id}/variables/{variables_id}/:
     get:
       operationId: inventory_host_variables_get
       description: Return a variable of instance.
@@ -4834,7 +4870,7 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this hosts sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
@@ -4845,7 +4881,7 @@ paths:
         type: integer
         description: A unique integer value identifying instance of this variables
           sublist.
-  /inventory/{pk}/set_owner/:
+  /inventory/{id}/set_owner/:
     post:
       operationId: inventory_set_owner
       description: Change instance owner.
@@ -4879,12 +4915,12 @@ paths:
       tags:
         - inventory
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{pk}/variables/:
+  /inventory/{id}/variables/:
     get:
       operationId: inventory_variables_list
       description: Return all variables of instance.
@@ -4940,9 +4976,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -4998,12 +5036,12 @@ paths:
       tags:
         - inventory
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{pk}/variables/{variables_id}/:
+  /inventory/{id}/variables/{variables_id}/:
     get:
       operationId: inventory_variables_get
       description: Return a variable of instance.
@@ -5121,7 +5159,7 @@ paths:
       tags:
         - inventory
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this inventory.
         required: true
@@ -5203,9 +5241,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -5261,7 +5301,7 @@ paths:
       tags:
         - project
     parameters: []
-  /project/{pk}/:
+  /project/{id}/:
     get:
       operationId: project_get
       description: Return a project instance.
@@ -5379,12 +5419,12 @@ paths:
       tags:
         - project
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/copy/:
+  /project/{id}/copy/:
     post:
       operationId: project_copy
       description: Copy instance with deps.
@@ -5418,12 +5458,12 @@ paths:
       tags:
         - project
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/execute_module/:
+  /project/{id}/execute_module/:
     post:
       operationId: project_execute_module
       description: Execute `ansible -m [module]` with arguments.
@@ -5457,12 +5497,12 @@ paths:
       tags:
         - project
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/execute_playbook/:
+  /project/{id}/execute_playbook/:
     post:
       operationId: project_execute_playbook
       description: Execute `ansible-playbook` with arguments.
@@ -5496,12 +5536,12 @@ paths:
       tags:
         - project
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/history/:
+  /project/{id}/history/:
     get:
       operationId: project_history_list
       description: ''
@@ -5582,9 +5622,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -5608,12 +5650,12 @@ paths:
       tags:
         - project
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/history/{history_id}/:
+  /project/{id}/history/{history_id}/:
     get:
       operationId: project_history_get
       description: ''
@@ -5672,12 +5714,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this history sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/history/{history_id}/cancel/:
+  /project/{id}/history/{history_id}/cancel/:
     post:
       operationId: project_history_cancel
       description: Cencel working task.
@@ -5716,12 +5758,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this history sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/history/{history_id}/clear/:
+  /project/{id}/history/{history_id}/clear/:
     delete:
       operationId: project_history_clear
       description: Clear history output.
@@ -5753,12 +5795,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this history sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/history/{history_id}/facts/:
+  /project/{id}/history/{history_id}/facts/:
     get:
       operationId: project_history_facts
       description: Get compilated history facts (only for execution 'module' with
@@ -5793,12 +5835,12 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this history sublist.
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/inventory/:
+  /project/{id}/inventory/:
     get:
       operationId: project_inventory_list
       description: Return all inventories.
@@ -5859,9 +5901,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -5917,12 +5961,12 @@ paths:
       tags:
         - project
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/inventory/import_inventory/:
+  /project/{id}/inventory/import_inventory/:
     post:
       operationId: project_inventory_import_inventory
       description: Create a new inventory.
@@ -5956,12 +6000,12 @@ paths:
       tags:
         - project
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/inventory/{inventory_id}/:
+  /project/{id}/inventory/{inventory_id}/:
     get:
       operationId: project_inventory_get
       description: Return a inventory instance.
@@ -6079,18 +6123,18 @@ paths:
       tags:
         - project
     parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/inventory/{inventory_id}/all_groups/:
+  /project/{id}/inventory/{inventory_id}/all_groups/:
     get:
       operationId: project_inventory_all_groups_list
       description: Return all groups.
@@ -6151,9 +6195,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -6177,18 +6223,18 @@ paths:
       tags:
         - project
     parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/inventory/{inventory_id}/all_groups/{all_groups_id}/:
+  /project/{id}/inventory/{inventory_id}/all_groups/{all_groups_id}/:
     get:
       operationId: project_inventory_all_groups_get
       description: Return a group instance.
@@ -6221,18 +6267,18 @@ paths:
         in: path
         required: true
         type: string
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/inventory/{inventory_id}/all_hosts/:
+  /project/{id}/inventory/{inventory_id}/all_hosts/:
     get:
       operationId: project_inventory_all_hosts_list
       description: Return all hosts.
@@ -6298,9 +6344,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -6324,18 +6372,18 @@ paths:
       tags:
         - project
     parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/inventory/{inventory_id}/all_hosts/{all_hosts_id}/:
+  /project/{id}/inventory/{inventory_id}/all_hosts/{all_hosts_id}/:
     get:
       operationId: project_inventory_all_hosts_get
       description: Return a host instance.
@@ -6368,18 +6416,18 @@ paths:
         in: path
         required: true
         type: string
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/inventory/{inventory_id}/copy/:
+  /project/{id}/inventory/{inventory_id}/copy/:
     post:
       operationId: project_inventory_copy
       description: Copy instance with deps.
@@ -6413,18 +6461,18 @@ paths:
       tags:
         - project
     parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/inventory/{inventory_id}/group/:
+  /project/{id}/inventory/{inventory_id}/group/:
     get:
       operationId: project_inventory_group_list
       description: Return all groups.
@@ -6485,9 +6533,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -6543,18 +6593,18 @@ paths:
       tags:
         - project
     parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/inventory/{inventory_id}/group/{group_id}/:
+  /project/{id}/inventory/{inventory_id}/group/{group_id}/:
     get:
       operationId: project_inventory_group_get
       description: Return a group instance.
@@ -6676,18 +6726,18 @@ paths:
         in: path
         required: true
         type: string
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/inventory/{inventory_id}/group/{group_id}/copy/:
+  /project/{id}/inventory/{inventory_id}/group/{group_id}/copy/:
     post:
       operationId: project_inventory_group_inventory_copy
       description: Copy instance with deps.
@@ -6725,18 +6775,18 @@ paths:
         in: path
         required: true
         type: string
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/inventory/{inventory_id}/group/{group_id}/set_owner/:
+  /project/{id}/inventory/{inventory_id}/group/{group_id}/set_owner/:
     post:
       operationId: project_inventory_group_inventory_set_owner
       description: Change instance owner.
@@ -6774,18 +6824,18 @@ paths:
         in: path
         required: true
         type: string
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/inventory/{inventory_id}/group/{group_id}/variables/:
+  /project/{id}/inventory/{inventory_id}/group/{group_id}/variables/:
     get:
       operationId: project_inventory_group_variables_list
       description: Return all variables of instance.
@@ -6841,9 +6891,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -6903,18 +6955,18 @@ paths:
         in: path
         required: true
         type: string
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/inventory/{inventory_id}/group/{group_id}/variables/{variables_id}/:
+  /project/{id}/inventory/{inventory_id}/group/{group_id}/variables/{variables_id}/:
     get:
       operationId: project_inventory_group_variables_get
       description: Return a variable of instance.
@@ -7036,24 +7088,24 @@ paths:
         in: path
         required: true
         type: string
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
       - name: variables_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this variables
           sublist.
-  /project/{pk}/inventory/{inventory_id}/host/:
+  /project/{id}/inventory/{inventory_id}/host/:
     get:
       operationId: project_inventory_host_list
       description: Return all hosts.
@@ -7119,9 +7171,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -7177,18 +7231,18 @@ paths:
       tags:
         - project
     parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/inventory/{inventory_id}/host/{host_id}/:
+  /project/{id}/inventory/{inventory_id}/host/{host_id}/:
     get:
       operationId: project_inventory_host_get
       description: Return a host instance.
@@ -7310,18 +7364,18 @@ paths:
         in: path
         required: true
         type: string
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/inventory/{inventory_id}/host/{host_id}/copy/:
+  /project/{id}/inventory/{inventory_id}/host/{host_id}/copy/:
     post:
       operationId: project_inventory_host_inventory_copy
       description: Copy instance with deps.
@@ -7359,18 +7413,18 @@ paths:
         in: path
         required: true
         type: string
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/inventory/{inventory_id}/host/{host_id}/set_owner/:
+  /project/{id}/inventory/{inventory_id}/host/{host_id}/set_owner/:
     post:
       operationId: project_inventory_host_inventory_set_owner
       description: Change instance owner.
@@ -7408,18 +7462,18 @@ paths:
         in: path
         required: true
         type: string
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/inventory/{inventory_id}/host/{host_id}/variables/:
+  /project/{id}/inventory/{inventory_id}/host/{host_id}/variables/:
     get:
       operationId: project_inventory_host_variables_list
       description: Return all variables of instance.
@@ -7475,9 +7529,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -7537,18 +7593,18 @@ paths:
         in: path
         required: true
         type: string
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/inventory/{inventory_id}/host/{host_id}/variables/{variables_id}/:
+  /project/{id}/inventory/{inventory_id}/host/{host_id}/variables/{variables_id}/:
     get:
       operationId: project_inventory_host_variables_get
       description: Return a variable of instance.
@@ -7670,24 +7726,24 @@ paths:
         in: path
         required: true
         type: string
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
       - name: variables_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this variables
           sublist.
-  /project/{pk}/inventory/{inventory_id}/set_owner/:
+  /project/{id}/inventory/{inventory_id}/set_owner/:
     post:
       operationId: project_inventory_set_owner
       description: Change instance owner.
@@ -7721,18 +7777,18 @@ paths:
       tags:
         - project
     parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/inventory/{inventory_id}/variables/:
+  /project/{id}/inventory/{inventory_id}/variables/:
     get:
       operationId: project_inventory_variables_list
       description: Return all variables of instance.
@@ -7788,9 +7844,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -7846,18 +7904,18 @@ paths:
       tags:
         - project
     parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/inventory/{inventory_id}/variables/{variables_id}/:
+  /project/{id}/inventory/{inventory_id}/variables/{variables_id}/:
     get:
       operationId: project_inventory_variables_get
       description: Return a variable of instance.
@@ -7975,24 +8033,24 @@ paths:
       tags:
         - project
     parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: inventory_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
       - name: variables_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this variables
           sublist.
-  /project/{pk}/module/:
+  /project/{id}/module/:
     get:
       operationId: project_module_list
       description: Return all available modules of project.
@@ -8036,9 +8094,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -8062,12 +8122,12 @@ paths:
       tags:
         - project
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/module/{module_id}/:
+  /project/{id}/module/{module_id}/:
     get:
       operationId: project_module_get
       description: Return a module details of project instance.
@@ -8096,16 +8156,16 @@ paths:
       tags:
         - project
     parameters:
-      - name: module_id
-        in: path
-        required: true
-        type: string
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/periodic_task/:
+      - name: module_id
+        in: path
+        required: true
+        type: string
+  /project/{id}/periodic_task/:
     get:
       operationId: project_periodic_task_list
       description: Return all periodic tasks in project.
@@ -8181,9 +8241,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -8239,12 +8301,12 @@ paths:
       tags:
         - project
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/periodic_task/{periodic_task_id}/:
+  /project/{id}/periodic_task/{periodic_task_id}/:
     get:
       operationId: project_periodic_task_get
       description: Return a perodic task instance.
@@ -8362,18 +8424,18 @@ paths:
       tags:
         - project
     parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: periodic_task_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this periodic_task
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/periodic_task/{periodic_task_id}/execute/:
+  /project/{id}/periodic_task/{periodic_task_id}/execute/:
     post:
       operationId: project_periodic_task_execute
       description: Ad-hoc execute periodic task.
@@ -8407,18 +8469,18 @@ paths:
       tags:
         - project
     parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: periodic_task_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this periodic_task
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/periodic_task/{periodic_task_id}/variables/:
+  /project/{id}/periodic_task/{periodic_task_id}/variables/:
     get:
       operationId: project_periodic_task_variables_list
       description: Return all variables of periodic task.
@@ -8474,9 +8536,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -8532,18 +8596,18 @@ paths:
       tags:
         - project
     parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: periodic_task_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this periodic_task
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{pk}/periodic_task/{periodic_task_id}/variables/{variables_id}/:
+  /project/{id}/periodic_task/{periodic_task_id}/variables/{variables_id}/:
     get:
       operationId: project_periodic_task_variables_get
       description: Return a variable of periodic task.
@@ -8661,24 +8725,24 @@ paths:
       tags:
         - project
     parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
       - name: periodic_task_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this periodic_task
           sublist.
-      - name: pk
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
       - name: variables_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this variables
           sublist.
-  /project/{pk}/playbook/:
+  /project/{id}/playbook/:
     get:
       operationId: project_playbook_list
       description: Return all playbooks of project.
@@ -8744,9 +8808,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -8770,12 +8836,12 @@ paths:
       tags:
         - project
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/playbook/{playbook_id}/:
+  /project/{id}/playbook/{playbook_id}/:
     get:
       operationId: project_playbook_get
       description: Return a playbook of project instance.
@@ -8804,7 +8870,7 @@ paths:
       tags:
         - project
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
@@ -8815,7 +8881,7 @@ paths:
         type: integer
         description: A unique integer value identifying instance of this playbook
           sublist.
-  /project/{pk}/set_owner/:
+  /project/{id}/set_owner/:
     post:
       operationId: project_set_owner
       description: Change instance owner.
@@ -8849,12 +8915,12 @@ paths:
       tags:
         - project
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/sync/:
+  /project/{id}/sync/:
     post:
       operationId: project_sync
       description: Sync project with repository.
@@ -8888,12 +8954,12 @@ paths:
       tags:
         - project
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/template/:
+  /project/{id}/template/:
     get:
       operationId: project_template_list
       description: Return all execute templates in project.
@@ -8959,9 +9025,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -9017,12 +9085,12 @@ paths:
       tags:
         - project
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/template/{template_id}/:
+  /project/{id}/template/{template_id}/:
     get:
       operationId: project_template_get
       description: Return a execute template instance.
@@ -9140,7 +9208,7 @@ paths:
       tags:
         - project
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
@@ -9151,7 +9219,7 @@ paths:
         type: integer
         description: A unique integer value identifying instance of this template
           sublist.
-  /project/{pk}/template/{template_id}/execute/:
+  /project/{id}/template/{template_id}/execute/:
     post:
       operationId: project_template_execute
       description: Execute template with option.
@@ -9185,7 +9253,7 @@ paths:
       tags:
         - project
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
@@ -9196,7 +9264,7 @@ paths:
         type: integer
         description: A unique integer value identifying instance of this template
           sublist.
-  /project/{pk}/variables/:
+  /project/{id}/variables/:
     get:
       operationId: project_variables_list
       description: Return all variables of instance.
@@ -9252,9 +9320,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -9310,12 +9380,12 @@ paths:
       tags:
         - project
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{pk}/variables/{variables_id}/:
+  /project/{id}/variables/{variables_id}/:
     get:
       operationId: project_variables_get
       description: Return a variable of instance.
@@ -9433,7 +9503,7 @@ paths:
       tags:
         - project
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this project.
         required: true
@@ -9500,9 +9570,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -9558,7 +9630,7 @@ paths:
       tags:
         - team
     parameters: []
-  /team/{pk}/:
+  /team/{id}/:
     get:
       operationId: team_get
       description: Return a team instance.
@@ -9676,12 +9748,12 @@ paths:
       tags:
         - team
     parameters:
-      - name: pk
+      - name: id
         in: path
-        description: A unique value identifying this user group.
+        description: A unique integer value identifying this user group.
         required: true
-        type: string
-  /team/{pk}/copy/:
+        type: integer
+  /team/{id}/copy/:
     post:
       operationId: team_copy
       description: Copy instance with deps.
@@ -9715,12 +9787,12 @@ paths:
       tags:
         - team
     parameters:
-      - name: pk
+      - name: id
         in: path
-        description: A unique value identifying this user group.
+        description: A unique integer value identifying this user group.
         required: true
-        type: string
-  /team/{pk}/set_owner/:
+        type: integer
+  /team/{id}/set_owner/:
     post:
       operationId: team_set_owner
       description: Change instance owner.
@@ -9754,12 +9826,12 @@ paths:
       tags:
         - team
     parameters:
-      - name: pk
+      - name: id
         in: path
-        description: A unique value identifying this user group.
+        description: A unique integer value identifying this user group.
         required: true
-        type: string
-  /team/{pk}/user/:
+        type: integer
+  /team/{id}/user/:
     get:
       operationId: team_user_list
       description: Return all users.
@@ -9835,9 +9907,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -9893,12 +9967,12 @@ paths:
       tags:
         - team
     parameters:
-      - name: pk
+      - name: id
         in: path
-        description: A unique value identifying this user group.
+        description: A unique integer value identifying this user group.
         required: true
-        type: string
-  /team/{pk}/user/{user_id}/:
+        type: integer
+  /team/{id}/user/{user_id}/:
     get:
       operationId: team_user_get
       description: Return a user instance.
@@ -10016,17 +10090,17 @@ paths:
       tags:
         - team
     parameters:
-      - name: pk
+      - name: id
         in: path
-        description: A unique value identifying this user group.
+        description: A unique integer value identifying this user group.
         required: true
-        type: string
+        type: integer
       - name: user_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this users sublist.
-  /team/{pk}/user/{user_id}/change_password/:
+  /team/{id}/user/{user_id}/change_password/:
     post:
       operationId: team_user_change_password
       description: Create a new user.
@@ -10060,17 +10134,17 @@ paths:
       tags:
         - team
     parameters:
-      - name: pk
+      - name: id
         in: path
-        description: A unique value identifying this user group.
+        description: A unique integer value identifying this user group.
         required: true
-        type: string
+        type: integer
       - name: user_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this users sublist.
-  /team/{pk}/user/{user_id}/copy/:
+  /team/{id}/user/{user_id}/copy/:
     post:
       operationId: team_user_copy
       description: Copy instance with deps.
@@ -10104,23 +10178,23 @@ paths:
       tags:
         - team
     parameters:
-      - name: pk
+      - name: id
         in: path
-        description: A unique value identifying this user group.
+        description: A unique integer value identifying this user group.
         required: true
-        type: string
+        type: integer
       - name: user_id
         in: path
         required: true
         type: integer
         description: A unique integer value identifying instance of this users sublist.
-  /team/{pk}/user/{user_id}/settings/:
+  /team/{id}/user/{user_id}/settings/:
     get:
       operationId: team_user_settings_get
-      description: "A settings object, that allows API settings to be accessed as\
-        \ properties.\n    For example:\n\n        from rest_framework.settings import\
-        \ api_settings\n        print(api_settings.DEFAULT_RENDERER_CLASSES)\n\n \
-        \   Any setting with string import paths will be automatically resolved\n\
+      summary: "A settings object, that allows API settings to be accessed as properties.\n\
+        \    For example:"
+      description: "from rest_framework.settings import api_settings\n        print(api_settings.DEFAULT_RENDERER_CLASSES)\n\
+        \n    Any setting with string import paths will be automatically resolved\n\
         \    and return the class, rather than the string literal."
       parameters: []
       responses:
@@ -10148,10 +10222,10 @@ paths:
         - team
     post:
       operationId: team_user_settings_add
-      description: "A settings object, that allows API settings to be accessed as\
-        \ properties.\n    For example:\n\n        from rest_framework.settings import\
-        \ api_settings\n        print(api_settings.DEFAULT_RENDERER_CLASSES)\n\n \
-        \   Any setting with string import paths will be automatically resolved\n\
+      summary: "A settings object, that allows API settings to be accessed as properties.\n\
+        \    For example:"
+      description: "from rest_framework.settings import api_settings\n        print(api_settings.DEFAULT_RENDERER_CLASSES)\n\
+        \n    Any setting with string import paths will be automatically resolved\n\
         \    and return the class, rather than the string literal."
       parameters:
         - name: data
@@ -10184,10 +10258,10 @@ paths:
         - team
     delete:
       operationId: team_user_settings_remove
-      description: "A settings object, that allows API settings to be accessed as\
-        \ properties.\n    For example:\n\n        from rest_framework.settings import\
-        \ api_settings\n        print(api_settings.DEFAULT_RENDERER_CLASSES)\n\n \
-        \   Any setting with string import paths will be automatically resolved\n\
+      summary: "A settings object, that allows API settings to be accessed as properties.\n\
+        \    For example:"
+      description: "from rest_framework.settings import api_settings\n        print(api_settings.DEFAULT_RENDERER_CLASSES)\n\
+        \n    Any setting with string import paths will be automatically resolved\n\
         \    and return the class, rather than the string literal."
       parameters: []
       responses:
@@ -10212,11 +10286,11 @@ paths:
       tags:
         - team
     parameters:
-      - name: pk
+      - name: id
         in: path
-        description: A unique value identifying this user group.
+        description: A unique integer value identifying this user group.
         required: true
-        type: string
+        type: integer
       - name: user_id
         in: path
         required: true
@@ -10298,9 +10372,11 @@ paths:
               next:
                 type: string
                 format: uri
+                x-nullable: true
               previous:
                 type: string
                 format: uri
+                x-nullable: true
               results:
                 type: array
                 items:
@@ -10356,7 +10432,7 @@ paths:
       tags:
         - user
     parameters: []
-  /user/{pk}/:
+  /user/{id}/:
     get:
       operationId: user_get
       description: Return a user instance.
@@ -10474,12 +10550,12 @@ paths:
       tags:
         - user
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this user.
         required: true
         type: integer
-  /user/{pk}/change_password/:
+  /user/{id}/change_password/:
     post:
       operationId: user_change_password
       description: ''
@@ -10513,12 +10589,12 @@ paths:
       tags:
         - user
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this user.
         required: true
         type: integer
-  /user/{pk}/copy/:
+  /user/{id}/copy/:
     post:
       operationId: user_copy
       description: Copy instance with deps.
@@ -10552,12 +10628,12 @@ paths:
       tags:
         - user
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this user.
         required: true
         type: integer
-  /user/{pk}/settings/:
+  /user/{id}/settings/:
     get:
       operationId: user_settings_get
       description: Return user settings.
@@ -10643,7 +10719,7 @@ paths:
       tags:
         - user
     parameters:
-      - name: pk
+      - name: id
         in: path
         description: A unique integer value identifying this user.
         required: true
@@ -10718,6 +10794,7 @@ definitions:
         readOnly: true
         additionalProperties:
           redirect: true
+        x-nullable: true
       name:
         title: Name
         type: string
@@ -10765,7 +10842,6 @@ definitions:
         type: string
         format: email
         minLength: 1
-    readOnly: true
   GroupCreateMaster:
     type: object
     properties:
@@ -10867,14 +10943,14 @@ definitions:
         type: string
         format: dynamic
         additionalProperties:
-          field: key
           choices: {}
+          field: key
           types:
+            ansible_become: boolean
+            ansible_become_pass: password
+            ansible_port: integer
             ansible_ssh_pass: password
             ansible_ssh_private_key_file: secretfile
-            ansible_become: boolean
-            ansible_port: integer
-            ansible_become_pass: password
   Host:
     type: object
     properties:
@@ -10935,6 +11011,7 @@ definitions:
       executor:
         title: Executor
         type: integer
+        x-nullable: true
       initiator:
         title: Initiator
         type: integer
@@ -10946,9 +11023,11 @@ definitions:
       project:
         title: Project
         type: integer
+        x-nullable: true
       inventory:
         title: Inventory
         type: integer
+        x-nullable: true
       kind:
         title: Kind
         type: string
@@ -10977,6 +11056,7 @@ definitions:
         title: Stop time
         type: string
         format: date-time
+        x-nullable: true
   OneHistory:
     required:
       - mode
@@ -11000,16 +11080,20 @@ definitions:
       executor:
         title: Executor
         type: integer
+        x-nullable: true
       project:
         title: Project
         type: integer
+        x-nullable: true
       revision:
         title: Revision
         type: string
         maxLength: 256
+        x-nullable: true
       inventory:
         title: Inventory
         type: integer
+        x-nullable: true
       kind:
         title: Kind
         type: string
@@ -11036,6 +11120,7 @@ definitions:
         title: Stop time
         type: string
         format: date-time
+        x-nullable: true
       initiator:
         title: Initiator
         type: integer
@@ -11156,6 +11241,7 @@ definitions:
         type: integer
         additionalProperties:
           redirect: true
+        x-nullable: true
       name:
         title: Name
         type: string
@@ -11229,15 +11315,15 @@ definitions:
         format: dynamic
         default: NONE
         additionalProperties:
-          field: type
           choices:
             GIT:
               - NONE
               - KEY
               - PASSWORD
+          field: type
           types:
-            MANUAL: hidden
             GIT: string
+            MANUAL: hidden
             TAR: hidden
       auth_data:
         title: Repo auth data
@@ -11245,23 +11331,24 @@ definitions:
         format: dynamic
         default: ''
         additionalProperties:
-          field: repo_auth
           choices: {}
+          field: repo_auth
           types:
             KEY: secretfile
-            PASSWORD: password
             NONE: hidden
+            PASSWORD: password
       branch:
         title: Branch for GIT(branch/tag/SHA) or TAR(subdir)
         type: string
         format: dynamic
         additionalProperties:
-          field: type
           choices: {}
+          field: type
           types:
-            MANUAL: hidden
             GIT: string
+            MANUAL: hidden
             TAR: string
+        x-nullable: true
   OneProject:
     type: object
     properties:
@@ -11507,9 +11594,11 @@ definitions:
         type: integer
         additionalProperties:
           redirect: true
+        x-nullable: true
       executor:
         title: Executor
         type: integer
+        x-nullable: true
   AnsiblePlaybook:
     required:
       - playbook
@@ -11715,6 +11804,7 @@ definitions:
       executor:
         title: Executor
         type: integer
+        x-nullable: true
       initiator:
         title: Initiator
         type: integer
@@ -11727,9 +11817,11 @@ definitions:
         title: Revision
         type: string
         maxLength: 256
+        x-nullable: true
       inventory:
         title: Inventory
         type: integer
+        x-nullable: true
       kind:
         title: Kind
         type: string
@@ -11758,6 +11850,7 @@ definitions:
         title: Stop time
         type: string
         format: date-time
+        x-nullable: true
   Module:
     required:
       - path
@@ -11824,22 +11917,22 @@ definitions:
         type: string
         format: dynamic
         additionalProperties:
-          field: kind
           choices: {}
+          field: kind
           types:
-            PLAYBOOK: fk_autocomplete
             MODULE: fk_autocomplete
+            PLAYBOOK: fk_autocomplete
             TEMPLATE: hidden
       inventory:
         title: Inventory
         type: string
         format: dynamic
         additionalProperties:
-          field: kind
           choices: {}
+          field: kind
           types:
-            PLAYBOOK: fk_autocomplete
             MODULE: fk_autocomplete
+            PLAYBOOK: fk_autocomplete
             TEMPLATE: hidden
       save_result:
         title: Save result
@@ -11847,16 +11940,17 @@ definitions:
       template:
         title: Template
         type: integer
+        x-nullable: true
       template_opt:
         title: Template opt
         type: string
         format: dynamic
         additionalProperties:
-          field: kind
           choices: {}
+          field: kind
           types:
-            PLAYBOOK: hidden
             MODULE: hidden
+            PLAYBOOK: hidden
             TEMPLATE: autocomplete
       enabled:
         title: Enabled
@@ -11873,8 +11967,8 @@ definitions:
         type: string
         format: dynamic
         additionalProperties:
-          field: type
           choices: {}
+          field: type
           types:
             CRONTAB: crontab
             INTERVAL: integer
@@ -11905,22 +11999,22 @@ definitions:
         type: string
         format: dynamic
         additionalProperties:
-          field: kind
           choices: {}
+          field: kind
           types:
-            PLAYBOOK: fk_autocomplete
             MODULE: fk_autocomplete
+            PLAYBOOK: fk_autocomplete
             TEMPLATE: hidden
       inventory:
         title: Inventory
         type: string
         format: dynamic
         additionalProperties:
-          field: kind
           choices: {}
+          field: kind
           types:
-            PLAYBOOK: fk_autocomplete
             MODULE: fk_autocomplete
+            PLAYBOOK: fk_autocomplete
             TEMPLATE: hidden
       save_result:
         title: Save result
@@ -11928,16 +12022,17 @@ definitions:
       template:
         title: Template
         type: integer
+        x-nullable: true
       template_opt:
         title: Template opt
         type: string
         format: dynamic
         additionalProperties:
-          field: kind
           choices: {}
+          field: kind
           types:
-            PLAYBOOK: hidden
             MODULE: hidden
+            PLAYBOOK: hidden
             TEMPLATE: autocomplete
       enabled:
         title: Enabled
@@ -11954,8 +12049,8 @@ definitions:
         type: string
         format: dynamic
         additionalProperties:
-          field: type
           choices: {}
+          field: type
           types:
             CRONTAB: crontab
             INTERVAL: integer
@@ -12117,18 +12212,18 @@ definitions:
         type: string
         format: dynamic
         additionalProperties:
-          field: key
           choices:
+            repo_sync_on_run:
+              - true
+              - false
             repo_type:
               - MANUAL
               - GIT
               - TAR
-            repo_sync_on_run:
-              - true
-              - false
+          field: key
           types:
-            repo_password: password
             repo_key: secretfile
+            repo_password: password
   Team:
     required:
       - name
