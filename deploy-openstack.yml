@@ -1,0 +1,227 @@
+---
+- name: Start playbook (Create and setting instance in OpenStack)
+  hosts: localhost
+  tasks:
+
+    - name: Get latest version
+      shell:
+        chdir: ./
+        cmd: python setup.py --version | tr -d '\n'
+      register: pm_version
+
+    - name: Build dist
+      command: tox -c tox_build.ini -e py36-build
+      args:
+        creates: "dist/{{ version_polemarch }}-{{ pm_version['stdout'] }}.tar.gz"
+        chdir: ./
+
+    - name: Create a new instance with the necessary settings (step 1)
+      register: new_instance_answer
+      os_server:
+        name: "{{ instance_name }}"
+        image: "{{ instance_image }}"
+        key_name: "{{ instance_key_name }}"
+        timeout: 300
+        flavor: "{{ instance_flavor }}"
+        nics:
+         - net-name: "{{ instance_net_name }}"
+
+    - name: Assign floating ip for new instance
+      register: new_instance_floating
+      os_floating_ip:
+        reuse: yes
+        server: "{{ new_instance_answer['server']['id'] }}"
+        network: "{{ instance_network }}"
+        wait: true
+        timeout: 180
+
+    - name: Setting set fact
+      set_fact:
+        cacheable: true
+        new_host: "{{ new_instance_floating['floating_ip']['floating_ip_address'] }}"
+
+    - name: Wait starting instance....
+      wait_for:
+        host: '{{ new_host }}'
+        port: 22
+        sleep: 10
+        timeout: 900
+
+    - name: Python check
+      delegate_to: '{{ new_host }}'
+      become: yes
+      raw: /usr/bin/python -c 'import sys'
+      register: py_interpreter
+      ignore_errors: yes
+
+    - name: Install python
+      delegate_to: '{{ new_host }}'
+      become: yes
+      raw: bash -c 'if [ "`cat /etc/issue | grep "Ubuntu\|Debian" | wc -l`" == "1" ]; then apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install python-minimal; else yum install python -y; fi'
+      when: py_interpreter is failed
+
+    - name: Create new group for PM
+      delegate_to: '{{ new_host }}'
+      become: yes
+      group:
+        name: "{{ user_data_instance_group }}"
+
+    - name: Create new user for PM
+      delegate_to: '{{ new_host }}'
+      become: yes
+      user:
+        name: "{{ user_data_instance_user }}"
+        groups: "{{ user_data_instance_group }}"
+        shell: /bin/bash
+
+    - name: Transfer src to host
+      delegate_to: '{{ new_host }}'
+      become: yes
+      copy:
+        src: "dist/{{ version_polemarch }}-{{ pm_version['stdout'] }}.tar.gz"
+        dest: "/tmp/{{ version_polemarch }}-{{ pm_version['stdout'] }}.tar.gz"
+        owner: "{{ user_data_instance_user }}"
+        group: "{{ user_data_instance_group }}"
+
+    - name: Update packages
+      delegate_to: '{{ new_host }}'
+      become: yes
+      apt:
+        upgrade: dist
+        update_cache: yes
+      when: upgrade_system == "yes"
+
+    - name: Install dependencies for Polemarch on remote host (Step 2)
+      delegate_to: '{{ new_host }}'
+      become: yes
+      apt:
+        update_cache: yes
+        name:
+          - python-virtualenv
+          - python3.6
+          - python3.6-dev
+          - gcc
+          - libffi-dev
+          - libkrb5-dev
+          - libffi6
+          - libssl-dev
+          - libyaml-dev
+          - libsasl2-dev
+          - libldap2-dev
+          - sshpass
+          - git
+          - mysql-server
+          - redis
+          - rabbit
+          - libmysqld-dev
+
+    - name: Create directory for virtualenv PM
+      delegate_to: '{{ new_host }}'
+      become: yes
+      file:
+        path: '{{ path_pm }}'
+        state: directory
+        recurse: yes
+        owner: "{{ user_data_instance_user }}"
+        group: "{{ user_data_instance_group }}"
+
+    - name: Check starting service a pyuwsgi
+      delegate_to: '{{ new_host }}'
+      register: check_status_pyuwsgi
+      become: yes
+      become_user: "{{ user_data_instance_user }}"
+      become_flags: '-H'
+      shell: "ps -ef | grep {{ path_pm }}bin/pyuwsgi | grep -v grep"
+      failed_when: check_status_pyuwsgi.rc != 1 and check_status_pyuwsgi.rc != 0
+      args:
+        warn: no
+
+    - name: Stop service polemarch
+      delegate_to: '{{ new_host }}'
+      become: yes
+      become_user: "{{ user_data_instance_user }}"
+      become_flags: '-H'
+      shell: "{{ path_pm }}bin/{{ version_polemarch }}ctl webserver stop={{ path_pm }}{{ uwsgi_pidfile }}"
+      args:
+        warn: no
+      when: check_status_pyuwsgi.stdout != ""
+
+    - name: Pip instal polemarch and dependences
+      delegate_to: '{{ new_host }}'
+      become: yes
+      become_user: "{{ user_data_instance_user }}"
+      become_flags: '-H'
+      pip:
+        name:
+          - "/tmp/{{ version_polemarch }}-{{ pm_version['stdout'] }}.tar.gz"
+          - mysqlclient
+        virtualenv: '{{ path_pm }}'
+        virtualenv_python: python3.6
+
+    - name: Delete file polemarch-{{ pm_version['stdout'] }}.tar.gz
+      delegate_to: '{{ new_host }}'
+      become: yes
+      become_user: "{{ user_data_instance_user }}"
+      become_flags: '-H'
+      shell:
+        cmd: "rm -r /tmp/{{ version_polemarch }}-{{ pm_version['stdout'] }}.tar.gz"
+
+    - name: Create directory "/etc/polemarch/"
+      delegate_to: '{{ new_host }}'
+      become: yes
+      file:
+        path: /etc/polemarch
+        state: directory
+        owner: "{{ user_data_instance_user }}"
+        group: "{{ user_data_instance_group }}"
+
+    - name: Create dir for logs and pid
+      delegate_to: '{{ new_host }}'
+      become: yes
+      become_user: "{{ user_data_instance_user }}"
+      become_flags: '-H'
+      shell:
+        cmd: mkdir -p '{{ path_pm }}'logs '{{ path_pm }}'pid
+      args:
+        warn: no
+
+    - name: Сreate settings file
+      delegate_to: '{{ new_host }}'
+      become: yes
+      template:
+        src: deployment/settings_pm.j2
+        dest: /etc/polemarch/settings.ini
+        owner: "{{ user_data_instance_user }}"
+        group: "{{ user_data_instance_group }}"
+
+    - name: Create user and BD in MySQL
+      delegate_to: '{{ new_host }}'
+      become: yes
+      shell:
+        cmd: |
+          mysql <<QUERY_INPUT
+          SET @@global.innodb_large_prefix = 1;
+          CREATE USER IF NOT EXISTS {{ sql_db_user }};
+          CREATE DATABASE IF NOT EXISTS {{ sql_db_name }} default CHARACTER set utf8   default COLLATE utf8_general_ci;
+          grant all on {{ sql_db_name }}.* to '{{ sql_db_user }}'@'localhost' identified by '{{ sql_db_password }}';
+          QUERY_INPUT
+
+    - name: Migrate a polemarch
+      delegate_to: '{{ new_host }}'
+      become: yes
+      become_user: "{{ user_data_instance_user }}"
+      become_flags: '-H'
+      shell: "{{ path_pm }}bin/{{ version_polemarch }}ctl migrate"
+
+    - name: Start webserver polemarch
+      delegate_to: '{{ new_host }}'
+      become: yes
+      become_user: "{{ user_data_instance_user }}"
+      become_flags: '-H'
+      shell: "{{ path_pm }}bin/{{ version_polemarch }}ctl webserver"
+      when: check_status_pyuwsgi.stdout == ""
+
+    # Print host
+    - debug:
+        msg:
+        - "HTTP": "http://{{ new_host }}:8080/"

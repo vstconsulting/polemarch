@@ -60,10 +60,10 @@ class Git(_VCS):
     def _fetch_from_remote(self, repo: git.Repo, env: ENV_VARS_TYPE):
         with repo.git.custom_environment(**env):
             kwargs = self.options.get("FETCH_KWARGS", dict())
-            fetch_method = repo.git.fetch
+            fetch_method_name = 'fetch'
             if not repo.head.is_detached:
-                fetch_method = repo.git.pull
-            result = fetch_method(**kwargs)
+                fetch_method_name = 'pull'
+            result = getattr(repo.remotes[0], fetch_method_name)(**kwargs)
             self._update_submodules(repo)
             return result
 

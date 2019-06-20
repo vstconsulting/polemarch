@@ -187,7 +187,7 @@ As you can see, now current project has only 2 variables:
 
 Other available project variables, that you can add with clicking on "Create" button:
 
-* **repo_sync_on_run** - boolean, if true, Polemarch will sync project before every task execution;
+* **repo_sync_on_run** - boolean, if true, Polemarch will sync project before every task execution (dont use in concurrent executions, experimental);
 * **repo_password** - GIT repository password;
 * **repo_key** - GIT repository key.
 * Environment variables, with key starting from **env_**. For example **env_test_var** would create environment variable ``test_var`` on run tasks from this project.

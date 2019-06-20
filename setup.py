@@ -28,7 +28,8 @@ except ImportError:
     has_sphinx = False
 
 
-is_help = any([a for a in ['-h', '--help'] if a in sys.argv])
+ignored_keys = ['-h', '--help', '--version']
+is_help = any([a for a in ignored_keys if a in sys.argv])
 
 
 def get_discription(file_path='README.rst', folder=os.getcwd()):
