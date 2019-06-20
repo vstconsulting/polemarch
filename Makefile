@@ -41,10 +41,6 @@ PREBUILD_DIR = $(BUILD_DIR)/$(INSTALL_DIR)
 PREBUILD_BINDIR = $(BUILD_DIR)/$(INSTALL_BINDIR)
 SOURCE_DIR = $(shell pwd)
 COMPILE_DIR = $(shell echo -n "$$(pwd)/dist")
-COMPOSE = docker-compose-testrun.yml
-COMPOSE_ARGS = --abort-on-container-exit
-COMPLEX_TESTS_COMPOSE = docker-compose-tests.yml
-COMPLEX_TESTS_COMPOSE_ARGS = '--abort-on-container-exit --build'
 define VARS_STR
 PY=$(PY)
 PY_VERSION=$(PY_VERSION)
@@ -207,14 +203,8 @@ deb: print_vars
 	# cleanup
 	rm -rf debian
 
-compose_down:
-	docker-compose -f $(COMPOSE) down
+deploy:
+	ansible-playbook deploy-openstack.yml -v --private-key $(OPENSTACK_KEY) $(DEPLOY_ARGS)
 
-compose:
-	docker-compose -f $(COMPOSE) build
-
-run:
-	docker-compose -f $(COMPOSE) up $(COMPOSE_ARGS)
-
-complex_tests:
-	$(MAKE) run COMPOSE=$(COMPLEX_TESTS_COMPOSE) COMPOSE_ARGS=$(COMPLEX_TESTS_COMPOSE_ARGS)
+destroy:
+	ansible-playbook destroy-openstack.yml -v --private-key $(OPENSTACK_KEY) $(DEPLOY_ARGS)
