@@ -317,16 +317,24 @@ class AnsibleCommand(PMObject):
     def error_handler(self, exception: BaseException) -> NoReturn:
         # pylint: disable=no-else-return
         default_code = self.status_codes["other"]
+        error_text = str(exception)
+        self.history.status = default_code
+
         if isinstance(exception, self.ExecutorClass.CalledProcessError):  # nocv
-            self.history.raw_stdout = "{}".format(exception.output)
+            error_text = "{}".format(exception.output)
             self.history.status = self.status_codes.get(
                 exception.returncode, default_code
             )
-            return
         elif isinstance(exception, self.project.SyncError):
             self.__will_raise_exception = True
-        self.history.raw_stdout = self.history.raw_stdout + str(exception)
-        self.history.status = default_code
+
+        last_line_object = self.history.raw_history_line.last()
+        last_line = 0
+        if last_line_object:
+            last_line = last_line_object.line_number  # nocv
+        for line in error_text.split('\n'):
+            last_line += 1
+            self.history.write_line(line, last_line)
 
     def execute(self, target: Text, inventory: Any, history: History, project: Project, **extra_args) -> NoReturn:
         try:
