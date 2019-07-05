@@ -110,17 +110,17 @@ OPENAPI_EXTRA_LINKS = dict()
 OPENAPI_EXTRA_LINKS['Request'] = [
     {
         'url': (
-            'https://gitlab.com/vstconsulting/polemarch/issues/new?'
-            'issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%20'
-            +str(POLEMARCH_VERSION)
+                'https://gitlab.com/vstconsulting/polemarch/issues/new?'
+                'issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%20'
+                +str(POLEMARCH_VERSION)
         ),
         'name': 'Question'
     },
     {
         'url': (
-            'https://gitlab.com/vstconsulting/polemarch/issues/new?'
-            'issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%20'
-            + str(POLEMARCH_VERSION)
+                'https://gitlab.com/vstconsulting/polemarch/issues/new?'
+                'issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%20'
+                + str(POLEMARCH_VERSION)
         ),
         'name': 'Bug report'
     },
@@ -262,6 +262,45 @@ MANUAL_PROJECT_VARS = SectionConfig(
     dict(forks=4, timeout=30, fact_caching_timeout=3600, poll_interval=5)
 ).all()
 
+__PWA_ICONS_SIZES = [
+    "36x36", "48x48", "72x72", "96x96", "120x120", "128x128", "144x144",
+    "150x150", "152x152", "180x180", "192x192", "310x310", "512x512"
+]
+
+PWA_MANIFEST = {
+    "description": "Ansible based service for IT infrastructure management",
+    "icons": list(
+        map(lambda icon_size : {
+            "src": "{0}img/logo/logo_{1}.png".format(STATIC_URL, icon_size),
+            "sizes": icon_size,
+            "type": "image/png"
+        }, __PWA_ICONS_SIZES)
+    ),
+}
+
+SPA_STATIC += [
+    {'priority': 200, 'type': 'tpl', 'name': 'templates/pmFields.html', 'spa': True, 'api': False},
+    {'priority': 200, 'type': 'tpl', 'name': 'templates/pmItems.html', 'spa': True, 'api': True},
+    {'priority': 200, 'type': 'tpl', 'name': 'templates/pmProjects.html', 'spa': True, 'api': False},
+    {'priority': 200, 'type': 'tpl', 'name': 'templates/pmHistory.html', 'spa': True, 'api': False},
+    {'priority': 150, 'type': 'js', 'name': 'js/libs/ansi_up.js', 'spa': True, 'api': True},
+    {'priority': 150, 'type': 'js', 'name': 'js/pmCustomizer.js', 'spa': True, 'api': True},
+    {'priority': 160, 'type': 'js', 'name': 'js/common.js', 'spa': True, 'api': True},
+    {'priority': 182, 'type': 'js', 'name': 'js/pmFields.js', 'spa': True, 'api': False},
+    {'priority': 182, 'type': 'js', 'name': 'js/pmFieldsMixins.js', 'spa': True, 'api': False},
+    {'priority': 183, 'type': 'js', 'name': 'js/pmItems.js', 'spa': True, 'api': True},
+    {'priority': 184, 'type': 'js', 'name': 'js/pmHosts.js', 'spa': True, 'api': False},
+    {'priority': 184.5, 'type': 'js', 'name': 'js/pmGroups.js', 'spa': True, 'api': False},
+    {'priority': 185, 'type': 'js', 'name': 'js/pmInventories.js', 'spa': True, 'api': False},
+    {'priority': 186, 'type': 'js', 'name': 'js/pmProjects.js', 'spa': True, 'api': False},
+    {'priority': 187, 'type': 'js', 'name': 'js/pmHistory.js', 'spa': True, 'api': False},
+    {'priority': 190, 'type': 'js', 'name': 'js/pmTemplates.js', 'spa': True, 'api': False},
+    {'priority': 191, 'type': 'js', 'name': 'js/pmPeriodicTasks.js', 'spa': True, 'api': False},
+    {'priority': 183, 'type': 'js', 'name': 'js/pmUsers.js', 'spa': True, 'api': False},
+    {'priority': 400, 'type': 'js', 'name': 'js/pmDashboard.js', 'spa': True, 'api': False},
+    {'priority': 200, 'type': 'css', 'name': 'css/polemarch-gui.css', 'spa': True, 'api': True},
+    {'priority': 200, 'type': 'css', 'name': 'css/ansi-colors.css', 'spa': True, 'api': True},
+]
 
 # TEST settings
 if "test" in sys.argv:
