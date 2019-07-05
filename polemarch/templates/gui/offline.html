@@ -1,0 +1,8 @@
+{% extends "gui/offline.html" %}
+{% load request_static %}
+
+{% block logo_or_name %}
+    <div style="max-width: 360px; margin: 0px auto;">
+        <img src="{% static_path '/img/logo/vertical.png' %}" alt="Polemarch logo" style=" display:block; margin: auto;  width: 50%;">
+    </div>
+{% endblock %}

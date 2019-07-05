@@ -94,9 +94,9 @@
         <transition name="fade">
             <div class="pull-right" id="period-list" style="width:215px; min-width:145px;" v-if="!item.collapsed">
                 <div class="chart-period-select-wrapper">
-                    <label style="float:left; margin-right:10px; line-height:26px;">Period</label>
-                    <select id="chart-period" class="form-control chart-period-select"
-                            @change="onChangeHandler($event.target.value)"
+                    <label style="float:left; margin-right:10px; line-height:26px;" id="chart-period-label">Period</label>
+                    <select id="chart-period" class="form-control chart-period-select" aria-label="Chart Period"
+                            @change="onChangeHandler($event.target.value)" aria-labelledby="chart-period-label"
                     >
                         <option v-for="option in period_options" :value="option.value"
                                 :selected="isOptionSelected(option)"

@@ -494,23 +494,7 @@ var history_pk_mixin = {
                  * Method, that gets lines and set them to this.lines async.
                  */
                 getLines() {
-                    if(app.files_cache.use_cache) {
-                        return this.getLinesFromCache();
-                    } else {
-                        return this.loadLines();
-                    }
-                },
-
-                /**
-                 * Method, that gets lines from cache (if they exist there) or loads them from API.
-                 */
-                getLinesFromCache() {
-                    return app.files_cache.getFile(this.lines_url).then(response => {
-                        this.lines = JSON.parse(response.data);
-                        return response;
-                    }).catch(error => {
-                        return this.loadLines();
-                    });
+                    return this.loadLines();
                 },
 
                 /**
@@ -596,10 +580,6 @@ var history_pk_mixin = {
                         if(filtered.length == 0) {
                             this.lines.push(new_line);
                         }
-                    }
-
-                    if(app.files_cache.use_cache) {
-                        app.files_cache.setFile(this.lines_url, JSON.stringify(this.lines));
                     }
                 },
                 /**

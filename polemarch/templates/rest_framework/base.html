@@ -1,4 +1,4 @@
-{% extends "rest_framework/rest_base.html" %}
+{% extends "rest_framework/base.html" %}
 {% load request_static %}
 
 {% block logo %}
@@ -13,76 +13,4 @@
 {% block bootstrap_theme %}
     {{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% static_path "css/polemarch-gui.css" %}"/>
-{% endblock %}
-
-{% block resource_list %}
-    <script src="{% static_path 'js/libs/tabSignal.js' %}?v={{gui_version}}"></script>
-
-    <script>
-        window.resourceList = [
-            { prioritet:3, type:'js', name: "{% static 'js/libs/md5.min.js' %}?v={{gui_version}}"},
-            { prioritet:4, type:'js', name: "{% static 'js/libs/touchwipe.js' %}?v={{gui_version}}"},
-
-            { prioritet:4, type:'js', name: "{% static 'js/libs/visibility/visibility.core.js' %}?v={{gui_version}}"},
-
-            { prioritet:4, type:'js', name: "{% static 'js/libs/iziToast.min.js' %}?v={{gui_version}}"},
-            { prioritet:4, type:'js', name: "{% static 'js/libs/iziModal.min.js' %}?v={{gui_version}}"},
-            { prioritet:4, type:'js', name: "{% static 'js/libs/imask.js' %}?v={{gui_version}}"},
-
-            { prioritet:4, type:'js', name: "{% static 'AdminLTE-3.0.0/plugins/bootstrap/js/bootstrap.bundle.min.js' %}?v={{gui_version}}"},
-            { prioritet:5, type:'js', name: "{% static 'AdminLTE-3.0.0/plugins/slimScroll/jquery.slimscroll.min.js' %}?v={{gui_version}}"},
-            { prioritet:9, type:'js', name: "{% static 'js/guiCustomizer.js' %}?v={{gui_version}}"},
-
-            { prioritet:4, type:'js', name: "{% static 'plugins/fastclick/fastclick.min.js' %}?v={{gui_version}}"},
-
-
-            { prioritet:11.5, type:'js', name: "{% static 'js/libs/xregexp-all.js' %}?v={{gui_version}}"},
-
-            { prioritet:8, type:'js', name: "{% static 'AdminLTE-3.0.0/min/js/adminlte.min.js' %}?v={{gui_version}}"},
-            { prioritet:8, type:'js', name: "{% static 'js/common-utils.js' %}?v={{gui_version}}"},
-
-            { prioritet:110, type:'js', name: "{% static 'js/libs/autocomplete.js' %}?v={{gui_version}}"},
-            { prioritet:110, type:'js', name: "{% static 'plugins/select2/select2.full.min.js' %}?v={{gui_version}}"},
-
-            { prioritet:50, type:'js', name: "{% static 'js/libs/moment.min.js' %}?v={{gui_version}}"},
-            { prioritet:51, type:'js', name: "{% static 'js/libs/moment-timezone.min.js' %}?v={{gui_version}}"},
-            { prioritet:51, type:'js', name: "{% static 'js/libs/Chart.min.js' %}?v={{gui_version}}"},
-            { prioritet:50, type:'js', name: "{% static 'js/libs/jquery.scrollTo.min.js' %}?v={{gui_version}}"},
-
-            { prioritet:9,   type:'js', name: "{% static 'js/libs/axios.min.js' %}?v={{gui_version}}"},
-            { prioritet:9,   type:'js', name: "{% static 'js/libs/vue/vue.min.js' %}?v={{gui_version}}"},
-            { prioritet:9.1,   type:'js', name: "{% static 'js/libs/vue/vuex.min.js' %}?v={{gui_version}}"},
-            { prioritet:9.2,   type:'js', name: "{% static 'js/libs/vue/vue-router.min.js' %}?v={{gui_version}}"},
-
-            { prioritet:300, type:'tpl', name: "{% static 'templates/guiFields.html' %}?v={{gui_version}}"},
-            { prioritet:300, type:'tpl', name: "{% static 'templates/guiItems.html' %}?v={{gui_version}}"},
-
-            { prioritet:9.8, type:'js', name: "{% static 'js/guiPopUp.js' %}?v={{gui_version}}"},
-            { prioritet:9.9,   type:'js', name: "{% static 'js/guiFieldsMixins.js' %}?v={{gui_version}}" },
-            { prioritet:10,   type:'js', name: "{% static 'js/guiFields.js' %}?v={{gui_version}}" },
-            { prioritet:10.1,   type:'js', name: "{% static 'js/guiItems.js' %}?v={{gui_version}}" },
-            { prioritet:10.7,   type:'js', name: "{% static 'js/guiApi.js' %}?v={{gui_version}}" },
-            { prioritet:10.9,   type:'js', name: "{% static 'js/guiAppForApi.js' %}?v={{gui_version}}" },
-            { prioritet:300, type:'js', name: "{% static 'js/guiUsers.js' %}?v={{gui_version}}"},
-
-            { prioritet:150, type:'js', name: "{% static 'js/pmCustomizer.js' %}?v={{gui_version}}"},
-            { prioritet:160, type:'js', name: "{% static 'js/common.js' %}?v={{gui_version}}"},
-            { prioritet:183, type:'js', name: "{% static 'js/pmItems.js' %}?v={{gui_version}}"},
-            { prioritet:200, type:'tpl', name: "{% static '/' %}templates/pmItems.html?v={{gui_version}}"},
-
-            { prioritet:101, type:'css', name: "{% static 'AdminLTE-3.0.0/plugins/bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}"},
-            { prioritet:102, type:'css', name: "{% static 'css/iziToast.min.css' %}?v={{gui_version}}"},
-            { prioritet:102, type:'css', name: "{% static 'css/iziModal.min.css' %}?v={{gui_version}}"},
-            { prioritet:103, type:'css', name: "{% static 'AdminLTE-3.0.0/plugins/font-awesome/css/font-awesome.min.css' %}?v={{gui_version}}"},
-            { prioritet:105, type:'css', name: "{% static 'AdminLTE-3.0.0/min/css/adminlte.min.css' %}?v={{gui_version}}"},
-            { prioritet:108, type:'css', name: "{% static 'css/gui.css' %}?v={{gui_version}}"},
-
-            { prioritet:99, type:'css', name: "{% static 'plugins/select2/select2.min.css' %}?v={{gui_version}}"},
-
-            { prioritet:150, type:'js', name: "{% static 'js/libs/ansi_up.js' %}?v={{gui_version}}"},
-
-            { prioritet:200, type:'css', name: "{% static 'css/polemarch-gui.css' %}?v={{gui_version}}"},
-            { prioritet:200, type:'css', name: "{% static 'css/ansi-colors.css' %}?v={{gui_version}}"},
-        ]
-    </script>
 {% endblock %}
