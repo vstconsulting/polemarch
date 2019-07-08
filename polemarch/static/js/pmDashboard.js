@@ -203,6 +203,10 @@ guiWidgets.history_chart = class HistoryChart extends guiWidgets.line_chart {
                 let record = stats[index];
                 let status = record.status.toLowerCase();
 
+                if(!data[status]) {
+                    continue;
+                }
+
                 data[status].sum += record.sum;
             }
 
