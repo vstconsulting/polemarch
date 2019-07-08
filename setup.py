@@ -346,6 +346,9 @@ if 'develop' in sys.argv:
 kwargs = dict(
     name='polemarch',
     ext_modules_list=ext_list,
+    static_exclude_min=[
+        'polemarch/templates/gui/service-worker.js',
+    ],
     install_requires=[
     ] +
     load_requirements('requirements.txt', os.getcwd()),
