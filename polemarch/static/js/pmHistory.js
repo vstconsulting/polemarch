@@ -205,7 +205,23 @@ var history_pk_mixin = {
             was_cleared: undefined,
         }
     },
-
+    /**
+     * Redefinition of 'beforeRouteUpdate' hook of view_with_autoupdate_mixin.
+     */
+    beforeRouteUpdate(to, from, next) {
+        this.stopChildrenAutoUpdate();
+        this.stopAutoUpdate();
+        next();
+    },
+    /**
+     * Redefinition of 'beforeRouteUpdate' hook of view_with_autoupdate_mixin.
+     */
+    beforeRouteLeave(to, from, next) {
+        this.stopChildrenAutoUpdate();
+        this.stopAutoUpdate();
+        this.$destroy();
+        next();
+    },
     computed: {
         /**
          * Property, that returns inventory field instance from inventory section.
@@ -273,6 +289,16 @@ var history_pk_mixin = {
         }
     },
     methods: {
+        /**
+         * Stops autoupdate of history_stdout component.
+         */
+        stopChildrenAutoUpdate() {
+            this.$children.forEach(child => {
+                if(child.stopAutoUpdate && typeof child.stopAutoUpdate == 'function') {
+                    child.stopAutoUpdate();
+                }
+            });
+        },
         /**
          * Method, that sends API request for cleaning of history stdout.
          */
