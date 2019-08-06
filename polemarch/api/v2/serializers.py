@@ -19,7 +19,6 @@ from vstutils.api.base import Response
 from ...main.utils import AnsibleArgumentsReference, AnsibleInventoryParser
 
 from ...main.models import Inventory
-from ...main.repo._base import _Base as base_repo_class
 from ...main import models
 from ..signals import api_post_save, api_pre_save
 
@@ -420,7 +419,7 @@ class PeriodicTaskVariableSerializer(VariableSerializer):
 class ProjectVariableSerializer(VariableSerializer):
     key = vst_fields.AutoCompletionField(
         required=True,
-        autocomplete=models.Project.VARS_KEY+['ci_'+i for i in base_repo_class.handler_class.ci_types.keys()]
+        autocomplete=models.Project.VARS_KEY+['ci_template']
     )
     value = vst_fields.DependEnumField(allow_blank=True, field='key', choices={
         'repo_type': list(models.Project.repo_handlers.keys()),
