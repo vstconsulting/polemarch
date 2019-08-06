@@ -1,7 +1,8 @@
 # pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
-from typing import Text, NoReturn
+from typing import Text, Tuple
 import tarfile
+from pathlib import Path
 from ._base import _ArchiveRepo, shutil, FILENAME
 
 
@@ -19,7 +20,7 @@ class Tar(_ArchiveRepo):
 
         return filter(bool, map(change_member, members))
 
-    def _extract(self, archive: FILENAME, path: Text, options) -> NoReturn:
+    def _extract(self, archive: FILENAME, path: Text, options) -> Tuple[Path, bool]:
         # pylint: disable=broad-except
         moved = False
         try:
@@ -37,3 +38,4 @@ class Tar(_ArchiveRepo):
             raise
         else:
             shutil.rmtree(path + ".bak") if moved else None
+            return Path(path), True

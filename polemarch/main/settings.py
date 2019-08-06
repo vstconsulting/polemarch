@@ -262,6 +262,10 @@ MANUAL_PROJECT_VARS = SectionConfig(
     dict(forks=4, timeout=30, fact_caching_timeout=3600, poll_interval=5)
 ).all()
 
+PROJECT_REPOSYNC_WAIT_SECONDS = main.getseconds('repo_sync_on_run_timeout', fallback='1:00')
+PROJECT_CI_HANDLER_CLASS = "{}.main.ci.DefaultHandler".format(VST_PROJECT_LIB_NAME)
+
+
 __PWA_ICONS_SIZES = [
     "36x36", "48x48", "72x72", "96x96", "120x120", "128x128", "144x144",
     "150x150", "152x152", "180x180", "192x192", "310x310", "512x512"

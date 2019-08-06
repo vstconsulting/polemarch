@@ -1045,8 +1045,8 @@ class OApiTestCase(BaseTestCase):
         self.check_fields(objName, projectVariable['properties']['id'], **id_value)
 
         key_list = [
-            'repo_type', 'repo_sync_on_run', 'repo_branch',
-            'repo_password', 'repo_key'
+            'repo_type', 'repo_sync_on_run', 'repo_sync_on_run_timeout',
+            'repo_branch', 'repo_password', 'repo_key', 'ci_template'
         ]
         self.check_fields(
             objName, projectVariable['properties']['key'],
@@ -1054,7 +1054,12 @@ class OApiTestCase(BaseTestCase):
         )
         additional_properties = dict(
             field='key',
-            types=dict(repo_password='password', repo_key='secretfile'),
+            types=dict(
+                repo_password='password',
+                repo_key='secretfile',
+                repo_sync_on_run_timeout='uptime',
+                ci_template='fk'
+            ),
             choices=dict(
                 repo_type=['MANUAL', 'GIT', 'TAR'],
                 repo_sync_on_run=[True, False]

@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Tuple, Iterable, NoReturn, TypeVar, Text
 import os
 import logging
 import traceback
+import time
 import uuid
 import six
 import requests
@@ -119,6 +120,7 @@ class Project(AbstractModel):
     VARS_KEY = [
         'repo_type',
         'repo_sync_on_run',
+        'repo_sync_on_run_timeout',
         'repo_branch',
         'repo_password',
         'repo_key'
@@ -140,13 +142,16 @@ class Project(AbstractModel):
         'boolean': bool,
     }
 
-    STATUSES = [
-        'NEW',
+    BUSY_STATUSES = [
         'WAIT_SYNC',
         'SYNC',
+    ]
+
+    STATUSES = [
+        'NEW',
         'ERROR',
         'OK',
-    ]
+    ] + BUSY_STATUSES
 
     @classproperty
     def PROJECTS_DIR(cls) -> Text:
@@ -178,10 +183,7 @@ class Project(AbstractModel):
 
     @property
     def env_vars(self) -> Dict[Text, Any]:
-        env_var_list = dict()
-        for var_obj in self.variables.filter(key__startswith='env_'):
-            env_var_list[var_obj.key[4:]] = var_obj.value
-        return env_var_list
+        return self.get_vars_prefixed('env')
 
     @property
     def type(self) -> Text:
@@ -189,6 +191,13 @@ class Project(AbstractModel):
             return self.variables.get(key="repo_type").value
         except self.variables.model.DoesNotExist:  # nocv
             return 'MANUAL'
+
+    @property
+    def repo_sync_timeout(self):
+        try:
+            return self.variables.get(key="repo_sync_on_run_timeout").value
+        except self.variables.model.DoesNotExist:
+            return settings.PROJECT_REPOSYNC_WAIT_SECONDS
 
     @property
     def config(self) -> Dict[Text, Any]:
@@ -292,11 +301,18 @@ class Project(AbstractModel):
     def hook(self, when, msg) -> NoReturn:
         Hook.objects.all().execute(when, msg)
 
-    def sync_on_execution_handler(self, history: BModel) -> NoReturn:
+    def sync_on_execution_handler(self) -> NoReturn:
         if not self.vars.get('repo_sync_on_run', False):
             return
+        timeout = self.repo_sync_timeout
         try:
-            self.sync()
+            for i in range(timeout):  # pylint: disable=unused-variable
+                self.refresh_from_db(fields=['status'])
+                if self.status not in self.BUSY_STATUSES:
+                    self.sync()
+                    return
+                time.sleep(1)  # nocv
+            raise Exception('Project busy (timeout={}).'.format(timeout))  # nocv
         except Exception as exc:  # nocv
             raise self.SyncError("ERROR on Sync operation: " + str(exc))
 

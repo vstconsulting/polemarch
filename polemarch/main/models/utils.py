@@ -203,6 +203,23 @@ class AnsibleCommand(PMObject):
                 self.executor.write_output(value)
             logger.debug(value)
 
+    def _get_tmp_name(self) -> Text:
+        return os.path.join(self.cwd, 'project_sources')
+
+    def _send_hook(self, when: Text) -> NoReturn:
+        msg = OrderedDict()
+        msg['execution_type'] = self.history.kind
+        msg['when'] = when
+        inventory = self.history.inventory
+        if isinstance(inventory, Inventory):
+            inventory = inventory.get_hook_data(when)
+        msg['target'] = OrderedDict()
+        msg['target']['name'] = self.history.mode
+        msg['target']['inventory'] = inventory
+        msg['target']['project'] = self.project.get_hook_data(when)
+        msg['history'] = self.history.get_hook_data(when)
+        self.project.hook(when, msg)
+
     def __generate_arg_file(self, value: Text) -> Tuple[Text, List[tmp_file]]:
         file = tmp_file(value, dir=self.cwd)
         return file.name, [file]
@@ -240,9 +257,6 @@ class AnsibleCommand(PMObject):
             handler_func, extra.items(), ([], [])
         ))
 
-    def get_workdir(self) -> Text:
-        return self.project.path
-
     @property
     def workdir(self) -> Text:
         return self.get_workdir()
@@ -253,6 +267,27 @@ class AnsibleCommand(PMObject):
 
     def get_hidden_vars(self) -> List[Text]:
         return self.inventory_object.hidden_vars
+
+    def get_inventory_arg(self, target: Text, extra_args: List[Text]) -> List[Text]:
+        # pylint: disable=unused-argument
+        args = [target]
+        if self.inventory_object is not None:
+            args += ['-i', self.inventory_object.file_name]
+        return args
+
+    def get_args(self, target: Text, extra_args: List[Text]) -> List[Text]:
+        return (
+            self.path_to_ansible +
+            self.get_inventory_arg(target, extra_args) +
+            extra_args
+        )
+
+    def get_workdir(self) -> Text:
+        return self._get_tmp_name()
+
+    def get_kwargs(self, target, extra_args) -> Dict[Text, Any]:
+        # pylint: disable=unused-argument
+        return dict(cwd=self._get_tmp_name())
 
     def hide_passwords(self, raw: Text) -> Text:
         regex = r'|'.join((
@@ -270,7 +305,7 @@ class AnsibleCommand(PMObject):
         self.target, self.project = target, project
         self.history = history if history else DummyHistory()
         self.history.status = "RUN"
-        self.project.sync_on_execution_handler(self.history)
+        self.project.sync_on_execution_handler()
         if inventory:
             self.inventory_object = self.Inventory(inventory, cwd=self.project.path, tmpdir=self.cwd)
             self.history.raw_inventory = self.hide_passwords(
@@ -282,37 +317,48 @@ class AnsibleCommand(PMObject):
         self.history.save()
         self.executor = self.ExecutorClass(self.history)
 
-    def _send_hook(self, when: Text) -> NoReturn:
-        msg = OrderedDict()
-        msg['execution_type'] = self.history.kind
-        msg['when'] = when
-        inventory = self.history.inventory
-        if isinstance(inventory, Inventory):
-            inventory = inventory.get_hook_data(when)
-        msg['target'] = OrderedDict()
-        msg['target']['name'] = self.history.mode
-        msg['target']['inventory'] = inventory
-        msg['target']['project'] = self.project.get_hook_data(when)
-        msg['history'] = self.history.get_hook_data(when)
-        self.project.hook(when, msg)
-
-    def get_inventory_arg(self, target: Text, extra_args: List[Text]) -> List[Text]:
-        # pylint: disable=unused-argument
-        args = [target]
-        if self.inventory_object is not None:
-            args += ['-i', self.inventory_object.file_name]
-        return args
-
-    def get_args(self, target: Text, extra_args: List[Text]) -> List[Text]:
-        return (
-            self.path_to_ansible +
-            self.get_inventory_arg(target, extra_args) +
-            extra_args
+        prepare_func = getattr(
+            self,
+            'dir_prepare_{}'.format(project.type.lower()),
+            self.dir_prepare_copy
         )
+        work_dir = self._get_tmp_name()
+        self._verbose_output('Copy project to tmp directory.', 2)
+        prepare_func(self.project.path, work_dir, self.history.revision)
+        self._verbose_output('Project copied to {}.'.format(work_dir), 2)
+        project_cfg = os.path.join(work_dir, 'ansible.cfg')
+        if os.path.exists(project_cfg) and os.path.isfile(project_cfg):
+            self.executor.env['ANSIBLE_CONFIG'] = os.environ.get(
+                'ANSIBLE_CONFIG', project_cfg
+            )
 
-    def get_kwargs(self, target, extra_args) -> Dict[Text, Any]:
+    def dir_prepare_git(self, src: Text, work_dir: Text, revision: Text):
+        # pylint: disable=no-member
+        import git
+        repo = git.Repo.clone_from(
+            url=src + "/.git",
+            to_path=work_dir,
+            **self.project.repo_handlers.opts(self.project.type).get('PREP_KWARGS', {})
+        )
+        repo.git.checkout(revision or self.project.branch)
+        for sm in repo.submodules:
+            # Calling git directly for own submodules
+            # since using relative path is not working in gitpython
+            # see https://github.com/gitpython-developers/GitPython/issues/730
+            with raise_context():
+                if sm.url[0:3] == '../':
+                    repo_parent_url, _ = os.path.split(repo.remotes.origin.url)
+                    actual_url = os.path.join(repo_parent_url, sm.name)
+                    with sm.config_writer() as writer:
+                        writer.set('url', actual_url)
+                sm.update(init=True)
+
+    def dir_prepare_copy(self, src: Text, work_dir: Text, revision: Text):
         # pylint: disable=unused-argument
-        return dict(cwd=self.workdir)
+        if os.path.exists(src):
+            shutil.copytree(src=src, dst=work_dir)
+        else:  # nocv
+            raise Exception('Project dir {} is not exist.'.format(src))
 
     def error_handler(self, exception: BaseException) -> NoReturn:
         # pylint: disable=no-else-return
