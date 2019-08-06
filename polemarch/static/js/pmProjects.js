@@ -395,3 +395,39 @@ tabSignal.connect("views[/project/].filters.beforeInit", filters => {
         }
     }
 });
+
+/**
+ * Variable, that stores pairs (key, value), where:
+ * - key - value of the 'key' field of ProjectVariable model;
+ * - value - value of the 'value' field of ProjectVariable model.
+ */
+var ProjectVariable_value_from_key = {
+    ci_template: {
+        additionalProperties: {
+            list_paths: ["/project/{" + path_pk_key + "}/template/"],
+            view_field: 'name',
+            value_field: 'id',
+        }
+    },
+};
+
+/**
+ * Function - onchange callback of dynamic field - ProjectVariable.fields.value.
+ * @param {object} parent_values Values of parent fields.
+ */
+function ProjectVariable_value_callback(parent_values={}) {
+    if(parent_values.key && Object.keys(ProjectVariable_value_from_key).includes(parent_values.key)) {
+        return ProjectVariable_value_from_key[parent_values.key];
+    }
+
+    return {};
+}
+
+/**
+ * Adds callback for dynamic 'value' field of ProjectVariable model.
+ */
+tabSignal.connect("models[ProjectVariable].fields.beforeInit", (fields) => {
+    if(fields['value'] && fields['value'].additionalProperties) {
+        fields['value'].additionalProperties.callback = ProjectVariable_value_callback;
+    }
+});

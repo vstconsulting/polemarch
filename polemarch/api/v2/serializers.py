@@ -1,4 +1,4 @@
-# pylint: disable=no-member,unused-argument,too-many-lines
+# pylint: disable=no-member,unused-argument,too-many-lines,c-extension-no-member
 from __future__ import unicode_literals
 from typing import Dict, List
 import json
@@ -419,14 +419,16 @@ class PeriodicTaskVariableSerializer(VariableSerializer):
 class ProjectVariableSerializer(VariableSerializer):
     key = vst_fields.AutoCompletionField(
         required=True,
-        autocomplete=models.Project.VARS_KEY
+        autocomplete=models.Project.VARS_KEY+['ci_template']
     )
     value = vst_fields.DependEnumField(allow_blank=True, field='key', choices={
         'repo_type': list(models.Project.repo_handlers.keys()),
         'repo_sync_on_run': [True, False]
     }, types={
         'repo_password': 'password',
-        'repo_key': 'secretfile'
+        'repo_key': 'secretfile',
+        'repo_sync_on_run_timeout': 'uptime',
+        'ci_template': 'fk'
     })
 
 

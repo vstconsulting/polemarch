@@ -21,7 +21,7 @@ from .users import BaseUser, UserGroup, ACLPermission, UserSettings
 from .tasks import PeriodicTask, History, HistoryLines, Template
 from .hooks import Hook
 from ..validators import RegexValidator, validate_hostname
-from ..exceptions import UnknownTypeException
+from ..exceptions import UnknownTypeException, Conflict
 from ..utils import AnsibleArgumentsReference, CmdExecutor
 
 
@@ -84,10 +84,32 @@ def check_variables_values(instance: Variable, *args, **kwargs) -> NoReturn:
     elif isinstance(content_object, Host):
         if instance.key == 'ansible_host':
             validate_hostname(instance.value)
-    elif isinstance(content_object, Project):
-        if instance.key[0:4] != 'env_' and instance.key not in Project.VARS_KEY:
-            msg = 'Unknown variable key \'{}\'. Key must be in {} or starts from \'env_\''
-            raise ValidationError(msg.format(instance.key, Project.VARS_KEY))
+
+
+@receiver(signals.pre_save, sender=Variable)
+def check_project_variables_values(instance: Variable, *args, **kwargs) -> NoReturn:
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+        return
+    if not isinstance(instance.content_object, Project):
+        return
+
+    project_object = instance.content_object
+
+    is_ci_var = instance.key.startswith('ci_')
+    key_startswith = instance.key.startswith('env_') or is_ci_var
+    if not key_startswith and instance.key not in Project.VARS_KEY:
+        msg = 'Unknown variable key \'{}\'. Key must be in {} or starts from \'env_\' or \'ci_\'.'
+        raise ValidationError(msg.format(instance.key, Project.VARS_KEY))
+
+    is_ci_template = instance.key == 'ci_template'
+    qs_variables = project_object.variables.all()
+
+    if is_ci_var and qs_variables.filter(key__startswith='repo_sync_on_run').exists():
+        raise Conflict('Couldnt install CI/CD to project with "repo_sync_on_run" settings.')
+    if instance.key.startswith('repo_sync_on_run') and project_object.get_vars_prefixed('ci'):
+        raise Conflict('Couldnt install "repo_sync_on_run" settings for CI/CD project.')
+    if is_ci_template and not project_object.template.filter(pk=instance.value).exists():
+        raise ValidationError('Template does not exists in this project.')
 
 
 @receiver(signals.pre_save, sender=Group)

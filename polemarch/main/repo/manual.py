@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from typing import Tuple, Text
 import errno
+from pathlib import Path
 from django.conf import settings
 from vstutils.utils import get_render, raise_context
 from ._base import _Base, os
@@ -15,18 +16,18 @@ class Manual(_Base):
             with raise_context():
                 fd.write(get_render('polemarch/{}'.format(name), settings.MANUAL_PROJECT_VARS))
 
-    def make_clone(self, options) -> Tuple[None, None]:
+    def make_clone(self, options) -> Tuple[Path, bool]:
         try:
             os.mkdir(self.path)
             for file in self.project_files:
                 self.generate_file(file)
         except OSError as oserror:
             if oserror.errno == errno.EEXIST:
-                return None, None
+                return Path(self.path), False
             raise  # nocv
-        return None, None
+        return Path(self.path), True
 
-    def make_update(self, options) -> Tuple[None, None]:
+    def make_update(self, options) -> Tuple[Path, bool]:
         if not os.path.exists(self.path):  # nocv
             os.mkdir(self.path)
-        return None, None
+        return Path(self.path), True
