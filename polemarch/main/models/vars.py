@@ -1,6 +1,6 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
-from typing import Any, NoReturn, Tuple, Dict, List
+from typing import Any, NoReturn, Tuple, Dict, List, Text
 import logging
 import uuid
 
@@ -136,9 +136,17 @@ class AbstractModel(ACLModel):
         for key, value in other_vars.items():
             self.variables.create(key=key, value=value)
 
-    def get_vars(self) -> OrderedDict:
+    def get_vars(self) -> [OrderedDict, Dict]:
         qs = self.variables.all().sort_by_key().values_list('key', 'value')
         return reduce(update_boolean, self.BOOLEAN_VARS, OrderedDict(qs))
+
+    def get_vars_prefixed(self, prefix: Text):
+        vars_by_prefix_dict = dict()
+        search_prefix = prefix + '_'
+        search_prefix_len = len(search_prefix)
+        for var_obj in self.variables.filter(key__startswith=prefix):
+            vars_by_prefix_dict[var_obj.key[search_prefix_len:]] = var_obj.value
+        return vars_by_prefix_dict
 
     def get_generated_vars(self, tmp_dir='/tmp') -> Tuple[Dict, List]:
         files = []

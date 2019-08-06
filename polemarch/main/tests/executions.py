@@ -1530,3 +1530,62 @@ class ProjectTestCase(BaseExecutionsTestCase):
             results[5]['data']['repository'],
             'http://test.repo.url/path/to/project.tar.gz'
         )
+
+    def test_project_ci(self):
+        bulk_data = [
+            # 0
+            dict(data_type=['project'], method='post', data=dict(name='testProjCI')),
+            # 1
+            dict(
+                data_type=['project', '<0[data][id]>', 'template'],
+                method='post', data=self.template_module
+            ),
+            # 2
+            dict(
+                data_type=['project', '<0[data][id]>', 'variables'],
+                method='post', data=dict(key='ci_template', value='100')
+            ),
+            # 3
+            dict(
+                data_type=['project', '<0[data][id]>', 'variables'],
+                method='post', data=dict(key='ci_template', value='<1[data][id]>')
+            ),
+            # 4
+            dict(data_type=['project', '<0[data][id]>', 'sync'], method='post'),
+            # 5
+            dict(data_type=['project', '<0[data][id]>', 'history'], method='get'),
+            # 6
+            dict(
+                data_type=['project', '<0[data][id]>', 'variables'],
+                method='post', data=dict(key='repo_sync_on_run', value=True)
+            ),
+            # 7
+            dict(
+                data_type=['project', '<0[data][id]>', 'variables', '<3[data][id]>'],
+                method='delete'
+            ),
+            # 8
+            dict(
+                data_type=['project', '<0[data][id]>', 'variables'],
+                method='post', data=dict(key='repo_sync_on_run', value=True)
+            ),
+            # 9
+            dict(
+                data_type=['project', '<0[data][id]>', 'variables'],
+                method='post', data=dict(key='ci_template', value='<1[data][id]>')
+            ),
+            dict(data_type=['project', '<0[data][id]>'], method='delete'),
+        ]
+        results = self.make_bulk(bulk_data, 'put')
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 201)
+        self.assertEqual(results[2]['status'], 400)
+        self.assertEqual(results[3]['status'], 201)
+        self.assertEqual(results[4]['status'], 200)
+        self.assertEqual(results[5]['status'], 200)
+        self.assertEqual(results[5]['data']['count'], 1)
+        self.assertEqual(results[6]['status'], 409)
+        self.assertEqual(results[7]['status'], 204)
+        self.assertEqual(results[8]['status'], 201)
+        self.assertEqual(results[9]['status'], 409)
+        self.assertEqual(results[-1]['status'], 204)

@@ -9,7 +9,8 @@ import traceback
 
 from six.moves.urllib.request import urlretrieve
 from django.db import transaction
-from vstutils.utils import raise_context
+from django.conf import settings
+from vstutils.utils import raise_context, import_class
 from ..utils import AnsibleModules
 from ..models.projects import Project
 from ..models.tasks import Template
@@ -18,10 +19,11 @@ logger = logging.getLogger("polemarch")
 FILENAME = TypeVar('FILENAME', Text, str)
 
 
-class _Base(object):
+class _Base:
     __slots__ = 'options', 'proj', 'path'
 
     regex = r"(^[\w\d\.\-_]{1,})\.yml"
+    handler_class = import_class(settings.PROJECT_CI_HANDLER_CLASS)
 
     def __init__(self, project: Project, **options):
         self.options = options
@@ -118,8 +120,6 @@ class _Base(object):
     def _handle_yaml(self, data: Union[Dict, None]) -> NoReturn:
         """
         Loads and returns data from `.polemarch.yaml` file
-
-        :rtype: dict
         """
         for feature in data.keys():
             if feature in ['templates_rewrite', ]:
@@ -131,8 +131,6 @@ class _Base(object):
     def _set_tasks_list(self, playbooks_names: Iterable[Text]) -> NoReturn:
         """
         Updates playbooks in project.
-
-        :rtype: None
         """
         # pylint: disable=invalid-name
         project = self.proj
@@ -179,8 +177,6 @@ class _Base(object):
         '''
         Find and update playbooks in project.
         :param files: list of filenames.
-        :type files: list, tuple
-        :rtype: None
         '''
         reg = re.compile(self.regex)
         playbooks = filter(reg.match, files)
@@ -221,6 +217,8 @@ class _Base(object):
             self._set_status("ERROR")
             raise
         else:
+            with raise_context(verbose=True):
+                self.handler_class(self, result).trigger_execution()
             return result
 
     def make_clone(self, options):  # pragma: no cover
@@ -289,18 +287,16 @@ class _Base(object):
 
 
 class _ArchiveRepo(_Base):
-    def make_clone(self, options) -> Tuple[None, None]:
+    def make_clone(self, options) -> Tuple[Any, Any]:
         if os.path.exists(self.path):
             shutil.rmtree(self.path)
         os.mkdir(self.path)
         archive = self._download(self.proj.repository, options)
-        self._extract(archive, self.path, options)
-        return None, None
+        return self._extract(archive, self.path, options)
 
-    def make_update(self, options) -> Tuple[None, None]:
+    def make_update(self, options) -> Tuple[Any, Any]:
         archive = self._download(self.proj.repository, options)
-        self._extract(archive, self.path, options)
-        return None, None
+        return self._extract(archive, self.path, options)
 
     def _download(self, url: Text, options) -> FILENAME:
         # pylint: disable=unused-argument

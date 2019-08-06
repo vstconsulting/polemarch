@@ -112,6 +112,9 @@ class Template(ACLModel):
         )
         return response
 
+    def ci_run(self):
+        self.execute(self.project.owner)
+
     def _convert_to_data(self, value):
         if isinstance(value, (six.string_types, six.text_type)):
             return json.loads(value)  # nocv

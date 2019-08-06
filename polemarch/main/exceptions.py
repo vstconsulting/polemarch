@@ -27,3 +27,7 @@ class DataNotReady(PMException):
 
 class NotApplicable(exceptions.NotApplicable):
     pass
+
+
+class Conflict(PMException):
+    status = exceptions.status.HTTP_409_CONFLICT
