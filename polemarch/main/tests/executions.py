@@ -18,6 +18,16 @@ from ..unittests.ansible import inventory_data, valid_inventory
 
 logger = logging.getLogger('polemarch')
 pm_mod = settings.VST_PROJECT_LIB_NAME
+ssh_key_pattern = '''-----BEGIN OPENSSH PRIVATE KEY-----
+our_private_key_string
+-----END OPENSSH PRIVATE KEY-----
+'''
+
+ssh_rsa_pattern = '''-----BEGIN RSA PRIVATE KEY-----
+our_private_key_string
+-----END RSA PRIVATE KEY-----
+'''
+
 test_ansible_cfg = '''
 [defaults]
 library = lib:lib2
@@ -600,7 +610,7 @@ class BaseExecutionsTestCase(BaseTestCase):
         _exec = dict(
             connection="local", limit="docker",
             playbook="<1[data][results][0][playbook]>", inventory=inventory,
-            private_key='BEGIN RSA PRIVATE KEY'
+            private_key=ssh_key_pattern
         )
         bulk_data = self.project_bulk_sync_and_playbooks(prj['id'])
         bulk_data += [
@@ -658,7 +668,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.sync_project(**project_data)
         # Create test ssh-key
         with open(self.get_file_path('key.pem', path), 'w') as key:
-            key.write('BEGIN RSA PRIVATE KEY')
+            key.write(ssh_key_pattern)
         self.make_test_templates(project_data)
         self.make_test_periodic_task(project_data)
         self.make_test_readme(project_data)
@@ -1148,7 +1158,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 )
                 _ex_playbook = dict(
                     playbook='unknown.yml', inventory='192.168.254.255',
-                    private_key='BEGIN RSA PRIVATE KEY'
+                    private_key=ssh_rsa_pattern
                 )
                 unsync = dict(key='repo_sync_on_run', value=False)
                 pk = project_data['id']

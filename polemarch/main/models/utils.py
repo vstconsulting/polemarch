@@ -226,7 +226,7 @@ class AnsibleCommand(PMObject):
 
     def __parse_key(self, key: Text, value: Text) -> Tuple[Text, List]:
         # pylint: disable=unused-argument,
-        if "BEGIN RSA PRIVATE KEY" in value:
+        if re.match(r"[-]+BEGIN .+ KEY[-]+", value):
             return self.__generate_arg_file(value)
         return "{}/{}".format(self.workdir, value), []
 
