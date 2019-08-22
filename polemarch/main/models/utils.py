@@ -9,6 +9,7 @@ import shutil
 import logging
 import tempfile
 import traceback
+from pathlib import Path
 from collections import namedtuple, OrderedDict
 from subprocess import Popen
 from functools import reduce
@@ -227,8 +228,12 @@ class AnsibleCommand(PMObject):
     def __parse_key(self, key: Text, value: Text) -> Tuple[Text, List]:
         # pylint: disable=unused-argument,
         if re.match(r"[-]+BEGIN .+ KEY[-]+", value):
+            # Add new line if not exists and generate tmpfile for private key value
+            value = value + '/n' if value[-1] != '/n' else value
             return self.__generate_arg_file(value)
-        return "{}/{}".format(self.workdir, value), []
+        # Return path in project if it's path
+        path = (Path(self.workdir)/Path(value).expanduser()).resolve()
+        return str(path), []
 
     def __convert_arg(self, ansible_extra: AnsibleExtra, item: Tuple[Text, Any]) -> Tuple[List, List]:
         extra_args, files = ansible_extra
