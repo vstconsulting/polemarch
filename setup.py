@@ -4,6 +4,8 @@ import os
 import sys
 import fnmatch
 import codecs
+import gzip
+import shutil
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
@@ -111,7 +113,9 @@ def make_extensions(extensions_list, packages):
     ext_count = len(ext_modules)
     nthreads = ext_count if ext_count < 10 else 10
 
-    language_level = 3
+    language_level = 2
+    if 'bdist_wheel' in sys.argv and sys.version_info.major == 3:
+        language_level = 3
     if is_help:
         pass
     elif has_cython and ('compile' in sys.argv or 'bdist_wheel' in sys.argv):
@@ -159,6 +163,9 @@ def minify_static_files(base_dir, files, exclude=None):
                     minified = func(static_file_fd.read(), subfunc)
                 with codecs.open(fext_file, 'w', encoding='utf-8') as static_file_fd:
                     static_file_fd.write(minified)
+                with open(fext_file, 'rb') as f_in:
+                    with gzip.open("{}.gz".format(fext_file), 'wb') as f_out:
+                        shutil.copyfileobj(f_in, f_out)
                 print('Minfied file {}.'.format(fext_file))
 
 

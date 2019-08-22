@@ -45,6 +45,7 @@ Features
 * support of multi user connection;
 * support of `hooks <https://about.polemarch.org/en/latest/gui.html#hooks>`_;
 * community `project samples <https://gitlab.com/vstconsulting/polemarch-community-repos>`_;
+* CI support;
 * user friendly interface.
 
 Quickstart
