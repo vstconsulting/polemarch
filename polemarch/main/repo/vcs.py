@@ -1,13 +1,13 @@
 # pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
-from typing import Tuple, Dict, Text, Union, Any
+from typing import Tuple, Dict, Text, Union, Any, Iterable
 import warnings
 from vstutils.utils import tmp_file_context, raise_context
 try:
     import git
 except:  # nocv
     warnings.warn("Git is not installed or have problems.")
-from ._base import _Base, os, logger
+from ._base import _Base, os, logger, pathlib
 
 ENV_VARS_TYPE =  Dict[Text, Union[Text, bool]]  # pylint: disable=invalid-name
 
@@ -187,8 +187,21 @@ class Git(_VCS):
                 env_vars = self._with_key(tmp, env_vars)
             return super(Git, self)._operate(operation, **env_vars)
 
-    def _get_files(self, repo: git.Repo = None):
-        return dict(repo.index.entries.keys()).keys()
+    def search_files(self, repo: git.Repo = None, pattern: Text = '**/*') -> Iterable[pathlib.Path]:
+        recursive = pattern.startswith('**/')
+        if recursive:
+            pattern = pattern.replace('**/', '')
+        for path in dict(repo.index.entries.keys()).keys():
+            result = pathlib.Path(path)
+            if not recursive and result.parent != pathlib.Path('.'):
+                continue
+            if result.match(pattern):
+                yield result
+
+        for sm in repo.submodules:
+            if recursive or pattern.startswith(sm.name):
+                for file in self.search_files(sm.module(), pattern.replace(sm.name + '/', '')):
+                    yield pathlib.Path(sm.name)/file
 
     def get(self) -> Dict[str, str]:
         return {
