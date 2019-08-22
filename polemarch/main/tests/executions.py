@@ -2,6 +2,7 @@ import shutil
 import uuid
 import tempfile
 import logging
+from pathlib import Path
 from collections import OrderedDict
 from datetime import timedelta
 
@@ -540,8 +541,8 @@ class BaseExecutionsTestCase(BaseTestCase):
         finally:
             self.remove_project(**project_data)
 
-    def get_file_path(self, name, path):
-        return "{}/{}".format(path, name)
+    def get_file_path(self, name: str, path: str) -> Path:
+        return Path(path).joinpath(*name.split('/'))
 
     def generate_playbook(self, path, name='test', count=1, data=test_playbook_content):
         '''
@@ -564,7 +565,9 @@ class BaseExecutionsTestCase(BaseTestCase):
             _files = ['{}-{}.yml'.format(name, i) for i in range(count or 1)]
         for filename in _files:
             file_path = self.get_file_path(filename, path)
-            with open(file_path, 'w') as playbook:
+            if not file_path.parent.exists():
+                file_path.parent.mkdir(parents=True)
+            with file_path.open('w') as playbook:
                 playbook.write(data)
             files.append(filename)
         return files
@@ -1191,7 +1194,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         # Prepare repo
         self.repo_dir = tempfile.mkdtemp()
         self.submodule_dir = "{}_submodule".format(self.repo_dir)
-        self.generate_playbook(self.repo_dir, ['main.yml'])
+        self.generate_playbook(self.repo_dir, ['main.yml', 'subdir/other.yml'], 2)
         self.generate_playbook(self.repo_dir, ['.polemarch.yaml'], data=dump(pm_yaml))
         self.generate_playbook(self.repo_dir, ['ansible.cfg'], data=test_ansible_cfg)
         lib_dir = self.submodule_dir
@@ -1208,7 +1211,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
             'add', '../{}/.git'.format(self.submodule_dir.split('/')[-1]), 'lib'
         )
         repo.git.submodule('add', '{}/.git'.format(self.submodule_dir), 'sm1')
-        repo.index.add(["main.yml", ".polemarch.yaml", "ansible.cfg"])
+        repo.index.add(["main.yml", "subdir/other.yml", ".polemarch.yaml", "ansible.cfg"])
         repo.index.commit("no message")
         first_revision = repo.head.object.hexsha
         repo.create_head('new_branch')

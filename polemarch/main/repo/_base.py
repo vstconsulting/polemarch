@@ -2,8 +2,8 @@
 from __future__ import unicode_literals
 from typing import Any, Text, Dict, List, Tuple, Union, Iterable, Callable, TypeVar, NoReturn
 import os
-import re
 import shutil
+import pathlib
 import logging
 import traceback
 
@@ -128,7 +128,7 @@ class _Base:
             feature_name = 'pm_handle_{}'.format(feature)
             getattr(self, feature_name, self.pm_handle_unknown)(feature, data)
 
-    def _set_tasks_list(self, playbooks_names: Iterable[Text]) -> NoReturn:
+    def _set_tasks_list(self, playbooks_names: Iterable[pathlib.Path]) -> NoReturn:
         """
         Updates playbooks in project.
         """
@@ -173,16 +173,16 @@ class _Base:
             ModuleClass(path=path, project=project) for path in modules
         ])
 
-    def _update_tasks(self, files: List[Text]) -> NoReturn:
+    def _update_tasks(self, files: Iterable[pathlib.Path]) -> NoReturn:
         '''
         Find and update playbooks in project.
         :param files: list of filenames.
         '''
-        reg = re.compile(self.regex)
-        playbooks = filter(reg.match, files)
-        self._set_tasks_list(playbooks)
+        # reg = re.compile(self.regex)
+        # playbooks = filter(reg.match, files)
+        self._set_tasks_list(files)
 
-    def _get_files(self, repo: Any = None) -> List:
+    def _get_files(self, repo: Any = None) -> pathlib.Path:
         '''
         Get all files, where playbooks should be.
         :param repo: Repo object
@@ -191,7 +191,10 @@ class _Base:
         :rtype: list
         '''
         # pylint: disable=unused-argument
-        return os.listdir(self.path)
+        return pathlib.Path(self.path)
+
+    def search_files(self, repo: Any = None, pattern: Text = '**/*') -> Iterable[pathlib.Path]:
+        return self._get_files(repo).glob(pattern)
 
     def _operate(self, operation: Callable, **kwargs) -> Any:
         return operation(kwargs)
@@ -208,7 +211,7 @@ class _Base:
             with transaction.atomic():
                 result = self._operate(operation)
                 self._set_status("OK")
-                self._update_tasks(self._get_files(result[0]))
+                self._update_tasks(self.search_files(result[0], '*.yml'))
                 self._set_project_modules()
                 self._handle_yaml(self._load_yaml() or dict())
         except Exception as err:
@@ -264,7 +267,7 @@ class _Base:
         for __ in range(attempt):
             try:
                 repo = self._make_operations(self.make_clone)[0]
-                return "Received {} files.".format(len(self._get_files(repo)))
+                return "Received {} files.".format(len(list(self.search_files(repo))))
             except:
                 self.delete()
         raise Exception("Clone didn't perform by {} attempts.".format(attempt))
