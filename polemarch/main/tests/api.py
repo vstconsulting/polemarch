@@ -358,7 +358,7 @@ class APITestCase(ProjectTestCase, OApiTestCase):
 
     def test_api_versions_list(self):
         result = self.get_result("get", "/api/")
-        self.assertEqual(len(result), 2)
+        self.assertEqual(len(result), 3)
         self.assertTrue(result.get(self._settings('VST_API_VERSION'), False))
         self.assertTrue(result.get('openapi', False))
 
