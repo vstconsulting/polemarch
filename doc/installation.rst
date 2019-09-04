@@ -46,7 +46,7 @@ Install from PyPI
 
    .. sourcecode:: bash
 
-        pip install -U polemarch mysqlclient
+        pip install -U polemarch[mysql]
 
 #. Edit config file:
 
