@@ -295,8 +295,7 @@ guiFields.one_history_date_time = class OneHistoryDateTime extends guiFields.dat
             return;
         }
 
-        return moment(value).tz(window.timeZone).format("YYYY-MM-DD") +
-            ' ' + moment(value).tz(window.timeZone).format("HH:mm:ss");
+         return moment(moment.tz(value, window.timeZone)).tz(moment.tz.guess()).format("YYYY-MM-DD HH:mm:ss");
     };
 
 };
