@@ -75,6 +75,7 @@ code_style:
     changes:
     - polemarch/main/**/*
     - polemarch/api/**/*
+    - polemarch/static/js/*
     - requirements.txt
     - Makefile
     - tox.ini
