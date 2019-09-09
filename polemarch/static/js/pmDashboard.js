@@ -1,3 +1,67 @@
+
+/**
+ * Function, that returns QuerySet for profile/setting page.
+ */
+function getProfileSettingQsFromStore() {
+    let qs = app.application.$store.getters.getQuerySet('user/' + my_user_id + '/settings');
+
+    if(!qs) {
+        return;
+    }
+
+    return qs.copy();
+}
+
+/**
+ * Function, that updates data of QuerySet for profile/setting page
+ * and saves updated queryset in store.
+ * @param {object} qs QuerySet for profile/setting page
+ */
+function updateProfileSettingsQsAndSave(qs) {
+    qs.formQueryAndSend('post', qs.cache.data).then(response => { /* jshint unused: false */
+        app.application.$store.commit('setQuerySet', {
+            url: qs.url,
+            queryset: qs,
+        });
+    }).catch(error => { /* jshint unused: false */
+        debugger;
+    });
+}
+
+/**
+ * This function is supposed to be called from 'GuiCustomizer.skin.name.changed' tabSignal.
+ * This function updates selected skin and saves ProfileSettings QuerySet.
+ * @param {object} customizer GuiCustomizer instance.
+ */
+function guiCustomizerSkinOnChangeHandler(customizer) {
+    let qs = getProfileSettingQsFromStore();
+
+    if(!qs) {
+        return;
+    }
+
+    qs.cache.data.selectedSkin = customizer.skin.name;
+
+    return updateProfileSettingsQsAndSave(qs);
+}
+
+/**
+ * This function is supposed to be called from 'GuiCustomizer.skins_custom_settings.saved' tabSignal.
+ * This function updates skins_custom_settings and saves ProfileSettings QuerySet.
+ * @param {object} customizer GuiCustomizer instance.
+ */
+function guiCustomizerCustomSettingsOnSaveHandler(customizer) {
+    let qs = getProfileSettingQsFromStore();
+
+    if(!qs) {
+        return;
+    }
+
+    qs.cache.data.skinsSettings = customizer.skins_custom_settings;
+
+    return updateProfileSettingsQsAndSave(qs);
+}
+
 /**
  * Class of history chart widget.
  */
@@ -79,7 +143,7 @@ guiWidgets.history_chart = class HistoryChart extends guiWidgets.line_chart {
      * @returns {Array}
      * @private
      */
-    _formChartDataLabels(raw_data) {
+    _formChartDataLabels(raw_data) { /* jshint unused: false */
         let labels = [];
         let start_time = this._getChartStartTime();
 
@@ -99,11 +163,11 @@ guiWidgets.history_chart = class HistoryChart extends guiWidgets.line_chart {
     _formChartDataDatasets_oneLine(line, raw_data, labels) {
         let data = {};
 
-        for(let index in labels) {
+        for(let index = 0; index < labels.length; index++) {
             data[labels[index]] = 0;
         }
 
-        for(let index in raw_data[this.period.type]) {
+        for(let index = 0; index < raw_data[this.period.type].length; index++) {
             let item = raw_data[this.period.type][index];
 
             let time =+ moment(item[this.period.type]).tz(window.timeZone).format("x");
@@ -132,17 +196,21 @@ guiWidgets.history_chart = class HistoryChart extends guiWidgets.line_chart {
     _formChartDataDatasets(raw_data, labels) {
         let datasets = [];
 
-        for(let index in this.lines) {
-            let line = this.lines[index];
+        for(let key in this.lines) {
+            if(this.lines.hasOwnProperty(key)) {
+                let line = this.lines[key];
 
-            if(!line.active) continue;
+                if (!line.active) {
+                    continue;
+                }
 
-            datasets.push({
-                label: line.title || line.name,
-                data: this._formChartDataDatasets_oneLine(line, raw_data, labels),
-                borderColor: this._getChartLineColor(line),
-                backgroundColor: this._getChartLineColor(line, true),
-            });
+                datasets.push({
+                    label: line.title || line.name,
+                    data: this._formChartDataDatasets_oneLine(line, raw_data, labels),
+                    borderColor: this._getChartLineColor(line),
+                    backgroundColor: this._getChartLineColor(line, true),
+                });
+            }
         }
 
         return datasets;
@@ -166,8 +234,8 @@ guiWidgets.history_chart = class HistoryChart extends guiWidgets.line_chart {
 
         if(skin['history_status_' + line.name]) {
             if(skin['history_status_' + line.name][0] == "#") {
-                let color = hexToRgbA(skin['history_status_' + line.name], alpha);
-                return color
+                let color = hexToRgbA(skin['history_status_' + line.name], alpha); /* globals hexToRgbA */
+                return color;
             }
 
             return skin['history_status_' + line.name];
@@ -184,22 +252,26 @@ guiWidgets.history_chart = class HistoryChart extends guiWidgets.line_chart {
         let all = 0;
         let data = {};
 
-        for(let index in this.lines) {
-            let line = this.lines[index];
+        for(let key in this.lines) {
+            if(this.lines.hasOwnProperty(key)) {
+                let line = this.lines[key];
 
-            if(line.name == 'all_tasks') continue;
+                if (line.name == 'all_tasks') {
+                    continue;
+                }
 
-            data[line.name] = {
-                all: all,
-                sum: 0,
-                status: line.name.toUpperCase(),
+                data[line.name] = {
+                    all: all,
+                    sum: 0,
+                    status: line.name.toUpperCase(),
+                };
             }
         }
 
         if(raw_data && raw_data.year) {
             let stats = raw_data.year;
 
-            for(let index in stats) {
+            for(let index = 0; index < stats.length; index++) {
                 let record = stats[index];
                 let status = record.status.toLowerCase();
 
@@ -211,11 +283,15 @@ guiWidgets.history_chart = class HistoryChart extends guiWidgets.line_chart {
             }
 
             for(let key in data) {
-                all += data[key].sum;
+                if(data.hasOwnProperty(key)){
+                    all += data[key].sum;
+                }
             }
 
             for(let key in data) {
-                data[key].all = all;
+                if(data.hasOwnProperty(key)){
+                    data[key].all = all;
+                }
             }
         }
 
@@ -273,9 +349,9 @@ guiWidgets.history_chart = class HistoryChart extends guiWidgets.line_chart {
 });
 
 /**
- * Sets Dashboard history chart widget.
+ * Sets Dashboard history `chart` widget.
  */
-guiDashboard.widgets['pmwChartWidget'] = new guiWidgets.history_chart(
+guiDashboard.widgets.pmwChartWidget = new guiWidgets.history_chart(
     {
         name: 'pmwChartWidget', title:'Tasks history', sort:7,
         lines: {
@@ -346,14 +422,18 @@ guiDashboard.widgets['pmwChartWidget'] = new guiWidgets.history_chart(
  */
 guiDashboard.updateWidgetSettings = function(settings) {
     for(let key in settings) {
-        let s_item = settings[key];
+        if(settings.hasOwnProperty(key)) {
+            let s_item = settings[key];
 
-        if(!this.widgets[key]) {
-            continue;
-        }
+            if (!this.widgets[key]) {
+                continue;
+            }
 
-        for(let prop in s_item) {
-            this.widgets[key][prop] = s_item[prop];
+            for (let prop in s_item) {
+                if(s_item.hasOwnProperty(prop)) {
+                    this.widgets[key][prop] = s_item[prop];
+                }
+            }
         }
     }
 };
@@ -364,15 +444,16 @@ guiDashboard.updateWidgetSettings = function(settings) {
  */
 guiDashboard.updateChartLineSettings = function(settings) {
     for(let key in settings) {
-        if(!this.widgets['pmwChartWidget'].lines[key]) {
+        if(!this.widgets.pmwChartWidget.lines[key]) {
             continue;
         }
 
         let s_item = settings[key];
 
         for(let prop in s_item) {
-            this.widgets['pmwChartWidget'].lines[key][prop] = s_item[prop];
-        }
+            if(s_item.hasOwnProperty(prop)) {
+                this.widgets.pmwChartWidget.lines[key][prop] = s_item[prop];
+            }}
     }
 };
 
@@ -401,7 +482,7 @@ guiDashboard.updateSettings = function(settings) {
         guiDashboard.updateWidgetSettings(settings.widgetSettings);
     }
 
-    if(settings.chartLineSettings && guiDashboard.widgets['pmwChartWidget']) {
+    if(settings.chartLineSettings && guiDashboard.widgets.pmwChartWidget) {
         guiLocalSettings.set('chart_line_settings', settings.chartLineSettings);
         guiDashboard.updateChartLineSettings(settings.chartLineSettings);
     }
@@ -419,8 +500,8 @@ if(guiLocalSettings.get('chart_period')) {
     guiDashboard.widgets.pmwChartWidget.setChartPeriod(guiLocalSettings.get('chart_period'));
 }
 
-customRoutesComponentsTemplates.home = {
-    mixins: [the_basest_view_mixin, view_with_autoupdate_mixin],
+customRoutesComponentsTemplates.home = { /* globals customRoutesComponentsTemplates */
+    mixins: [the_basest_view_mixin, view_with_autoupdate_mixin], /* globals the_basest_view_mixin */
     template: "#template_pm_dashboard",
     data() {
         return {
@@ -439,7 +520,7 @@ customRoutesComponentsTemplates.home = {
          * Updates widgets' data, when chart widget period was changed.
          * @param value
          */
-        'widgets.pmwChartWidget.period': function(value) {
+        'widgets.pmwChartWidget.period': function(value) { /* jshint unused: false */
             this.setWidgetsData().then(data => {
                 this.widgets_data = data;
             });
@@ -517,11 +598,13 @@ customRoutesComponentsTemplates.home = {
                 let w_data = {};
 
                 for(let key in response.data) {
-                    if(exclude_stats.includes(key)) {
-                        w_data['pmwChartWidget'] = response.data[key];
-                    }
+                    if (response.data.hasOwnProperty(key)) {
+                        if (exclude_stats.includes(key)) {
+                            w_data.pmwChartWidget = response.data[key];
+                        }
 
-                    w_data['pmw' + capitalizeString(key) + 'Counter'] = response.data[key];
+                        w_data['pmw' + capitalizeString(key) + 'Counter'] = response.data[key];
+                    }
                 }
 
                 this.$store.commit('setWidgets', {
@@ -568,7 +651,7 @@ tabSignal.connect('app.afterInit', (obj) => {
             app.application.$store.commit('setQuerySet', {
                 url: qs.url,
                 queryset: qs,
-            })
+            });
         }
 
         tabSignal.connect('GuiCustomizer.skin.name.changed', guiCustomizerSkinOnChangeHandler);
@@ -576,66 +659,3 @@ tabSignal.connect('app.afterInit', (obj) => {
         tabSignal.connect('GuiCustomizer.skins_custom_settings.reseted', guiCustomizerCustomSettingsOnSaveHandler);
     });
 });
-
-/**
- * Function, that returns QuerySet for profile/setting page.
- */
-function getProfileSettingQsFromStore() {
-    let qs = app.application.$store.getters.getQuerySet('user/' + my_user_id + '/settings');
-
-    if(!qs) {
-        return;
-    }
-
-    return qs.copy();
-}
-
-/**
- * Function, that updates data of QuerySet for profile/setting page
- * and saves updated queryset in store.
- * @param {object} qs QuerySet for profile/setting page
- */
-function updateProfileSettingsQsAndSave(qs) {
-    qs.formQueryAndSend('post', qs.cache.data).then(response => {
-        app.application.$store.commit('setQuerySet', {
-            url: qs.url,
-            queryset: qs,
-        });
-    }).catch(error => {
-        debugger;
-    });
-}
-
-/**
- * This function is supposed to be called from 'GuiCustomizer.skin.name.changed' tabSignal.
- * This function updates selected skin and saves ProfileSettings QuerySet.
- * @param {object} customizer GuiCustomizer instance.
- */
-function guiCustomizerSkinOnChangeHandler(customizer) {
-    let qs = getProfileSettingQsFromStore();
-
-    if(!qs) {
-        return;
-    }
-
-    qs.cache.data.selectedSkin = customizer.skin.name;
-
-    return updateProfileSettingsQsAndSave(qs);
-}
-
-/**
- * This function is supposed to be called from 'GuiCustomizer.skins_custom_settings.saved' tabSignal.
- * This function updates skins_custom_settings and saves ProfileSettings QuerySet.
- * @param {object} customizer GuiCustomizer instance.
- */
-function guiCustomizerCustomSettingsOnSaveHandler(customizer) {
-    let qs = getProfileSettingQsFromStore();
-
-    if(!qs) {
-        return;
-    }
-
-    qs.cache.data.skinsSettings = customizer.skins_custom_settings;
-
-    return updateProfileSettingsQsAndSave(qs);
-}

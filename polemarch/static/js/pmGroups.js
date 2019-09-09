@@ -55,17 +55,17 @@ tabSignal.connect('allViews.inited', obj => {
 
             if(type == 'sublinks' || type == 'child_links') {
                 if(data.children) {
-                    if(btns['host']) {
-                        btns['host'].hidden = true;
+                    if(btns.host) {
+                        btns.host.hidden = true;
                     }
                 } else {
-                    if(btns['group']) {
-                        btns['group'].hidden = true;
+                    if(btns.group) {
+                        btns.group.hidden = true;
                     }
                 }
             }
 
             return btns;
-        }
+        };
     });
 });

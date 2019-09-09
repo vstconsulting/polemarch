@@ -63,7 +63,7 @@ code_style:
   variables:
     TOX_ARGS: "--workdir /cache/.tox_polemarch_code"
   script:
-   - make test ENVS=flake,pylint
+   - make test ENVS=flake,pylint,jshint
   except:
     refs:
       - tags
