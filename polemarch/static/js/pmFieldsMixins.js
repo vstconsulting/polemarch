@@ -1,14 +1,14 @@
 /**
  * Mixin for 'field_content_read_only' of json gui_field.
  */
-var ansible_json_field_content_read_only_mixin = {
+const ansible_json_field_content_read_only_mixin = {
     template: "#template_field_content_readonly_json",
     data() {
         return {
             real_elements: {},
             real_elements_values: {},
             realField: {},
-        }
+        };
     },
     created() {
         if(!this.value) {
@@ -29,7 +29,7 @@ var ansible_json_field_content_read_only_mixin = {
                 'requirements', 'extends_documentation_fragment', 'options', 'notes', 'author',
             ];
 
-            for(let i in sorted_keys) {
+            for(let i = 0; i < sorted_keys.length; i++) {
                 let field = sorted_keys[i];
                 if(this.realFields[field] !== undefined) {
                     sorted_values[field] = this.realFields[field];
@@ -60,53 +60,57 @@ var ansible_json_field_content_read_only_mixin = {
             let options_child_fields_subtitle = "Option: ";
 
             for(let field in this.value) {
-                let options = {
-                    name: field,
-                    readOnly: this.field.options.readOnly || true,
-                    title: capitalizeString(field.replace(/_/g, " ")),
-                    format: 'string',
-                };
+                if(this.value.hasOwnProperty(field)) {
+                    let options = {
+                        name: field,
+                        readOnly: this.field.options.readOnly || true,
+                        title: capitalizeString(field.replace(/_/g, " ")),
+                        format: 'string',
+                    };
 
-                if(fields_types[field] && options.title != options_field_title) {
-                    options.format = fields_types[field];
+                    if (fields_types[field] && options.title != options_field_title) {
+                        options.format = fields_types[field];
 
-                    if(this.field.options.title && options.title.search(options_child_fields_subtitle) != -1) {
-                        options.hide_title = true;
-                    }
-                } else if (typeof this.value[field] == "string" && this.value[field].length > 50) {
-                    options.format = 'textarea';
-                } else if (typeof this.value[field] == 'boolean') {
-                    options.format = 'boolean';
-                } else if (typeof this.value[field] == 'object') {
-                    if(Array.isArray(this.value[field])) {
+                        if (this.field.options.title && options.title.search(options_child_fields_subtitle) != -1) {
+                            options.hide_title = true;
+                        }
+                    } else if (typeof this.value[field] == "string" && this.value[field].length > 50) {
                         options.format = 'textarea';
-                    } else if (this.value[field] === null) {
-                        options.format = 'null';
-                    } else {
-                        options.format = 'ansible_json';
-                        if(allPropertiesIsObjects(this.value[field])) {
-                            options.divider = true;
-                            options.title += ":";
+                    } else if (typeof this.value[field] == 'boolean') {
+                        options.format = 'boolean';
+                    } else if (typeof this.value[field] == 'object') {
+                        if (Array.isArray(this.value[field])) {
+                            options.format = 'textarea';
+                        } else if (this.value[field] === null) {
+                            options.format = 'null';
                         } else {
-                            if(this.field.options.title == options_field_title) {
-                                options.title = options_child_fields_subtitle + field;
+                            options.format = 'ansible_json';
+                            if (allPropertiesIsObjects(this.value[field])) { /* globals allPropertiesIsObjects */
+                                options.divider = true;
+                                options.title += ":";
+                            } else {
+                                /* jshint maxdepth: false */
+                                if (this.field.options.title == options_field_title) {
+                                    options.title = options_child_fields_subtitle + field;
+                                }
                             }
                         }
                     }
-                }
 
-                if ((
+                    if ((
                         typeof this.value[field] == "string" && this.value[field] == "") ||
-                    (Array.isArray(this.value[field]) && this.value[field].length == 0) ||
-                    (
-                        typeof this.value[field] == "object" && this.value[field] !== null
-                        && Array.isArray(this.value[field]) == false
-                        && Object.keys(this.value[field]).length == 0
-                    )) {
-                    options.format = 'hidden';
-                }
+                        (Array.isArray(this.value[field]) && this.value[field].length == 0) ||
+                        (
+                            typeof this.value[field] == "object" &&
+                            this.value[field] !== null &&
+                            Array.isArray(this.value[field]) == false &&
+                            Object.keys(this.value[field]).length == 0
+                        )) {
+                        options.format = 'hidden';
+                    }
 
-                realElements[field] = new guiFields[options.format](options);
+                    realElements[field] = new guiFields[options.format](options);
+                }
             }
 
             return realElements;
@@ -117,7 +121,7 @@ var ansible_json_field_content_read_only_mixin = {
 /**
  * Mixin for 'one_history_fk' fields.
  */
-var one_history_fk_mixin = {
+const one_history_fk_mixin = {
     components: {
         field_content_readonly: {
             mixins: [
@@ -145,7 +149,7 @@ gui_fields_mixins.ansible_json = {
                 base: "form-group guiField",
                 grid: "col-lg-12 col-xs-12 col-sm-12 col-md-12",
             },
-        }
+        };
     },
     components: {
         field_content_readonly: {
@@ -190,7 +194,7 @@ gui_fields_mixins.one_history_string = {
                 ),
                 grid: "col-lg-12 col-xs-12 col-sm-12 col-md-12",
             },
-        }
+        };
     },
     components: {
         field_label: {
@@ -240,7 +244,7 @@ gui_fields_mixins.one_history_initiator = {
 gui_fields_mixins.one_history_choices = {
     components: {
         field_content_readonly: {
-            mixins: [choices_field_content_readonly_mixin],
+           mixins: [choices_field_content_readonly_mixin], /* globals choices_field_content_readonly_mixin */
             template: "#template_field_content_readonly_one_history_choices",
             data() {
                 return {
@@ -258,7 +262,7 @@ gui_fields_mixins.one_history_choices = {
 gui_fields_mixins.one_history_boolean = {
     components: {
         field_content_readonly: {
-            mixins: [base_field_content_edit_mixin, boolean_field_content_mixin],
+            mixins: [base_field_content_edit_mixin, boolean_field_content_mixin], /* globals base_field_content_edit_mixin, boolean_field_content_mixin */
             template: "#template_field_content_read_only_one_history_boolean",
             data() {
                 return {
@@ -286,7 +290,7 @@ gui_fields_mixins.one_history_execute_args = {
     data: function () {
         return {
             execute_args_toggle: false,
-        }
+        };
     },
     components: {
         field_label: {
@@ -315,7 +319,7 @@ gui_fields_mixins.one_history_raw_inventory = {
 gui_fields_mixins.history_executor = {
     components: {
         field_list_view: {
-            mixins: [base_field_list_view_mixin, field_fk_content_readonly_mixin],
+            mixins: [base_field_list_view_mixin, field_fk_content_readonly_mixin], /* globals base_field_list_view_mixin */
             template: "#template_field_part_list_view_fk",
             computed: {
                 text() {

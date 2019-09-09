@@ -19,7 +19,7 @@ vst_vue_components.items.logo = Vue.component('logo', {
  * Component for guiWidgets.history_chart.
  */
 vst_vue_components.widgets.w_history_chart = Vue.component('w_history_chart', {
-    mixins: [w_line_chart_mixin],
+    mixins: [w_line_chart_mixin], /* globals w_line_chart_mixin */
     data() {
         return {
             with_content_header: true,
@@ -27,7 +27,7 @@ vst_vue_components.widgets.w_history_chart = Vue.component('w_history_chart', {
     },
     components: {
         content_header: {
-            mixins: [base_widget_mixin],
+            mixins: [base_widget_mixin], /* globals base_widget_mixin */
             template: "#template_w_history_chart_content_header",
             data() {
                 return {
@@ -61,7 +61,7 @@ vst_vue_components.widgets.w_history_chart = Vue.component('w_history_chart', {
             },
         },
         content_body: {
-            mixins: [w_line_chart_content_body_mixin],
+            mixins: [w_line_chart_content_body_mixin], /* globals w_line_chart_content_body_mixin */
             template: "#template_w_history_chart_content_body",
             data() {
                 return {
@@ -70,7 +70,7 @@ vst_vue_components.widgets.w_history_chart = Vue.component('w_history_chart', {
                 };
             },
             watch: {
-                'customizer.skin.name': function(value) {
+                'customizer.skin.name': function(value) { /* jshint unused: false */ /* TODO ask about args*/
                     this.generateChart();
                 }
             },

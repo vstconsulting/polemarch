@@ -1,54 +1,7 @@
 /**
- * Function emits signal, that edits UserSettings page view.
- * @param {string} path /user/{pk}/settings/.
- */
-function editUserSettingsPageInOpenApi(path) {
-    tabSignal.connect('openapi.loaded', (openapi) => {
-        let path_obj = openapi.paths[path];
-        path_obj.post.operationId = path_obj.post.operationId.replace('_add', '_edit');
-    });
-}
-
-/**
- * Function emits signal, that edits UserSettings page_edit view.
- * @param {string} path /user/{pk}/settings/edit/.
- */
-function editUserSettingsPageEditView(path) {
-    tabSignal.connect("views[" + path + "].beforeInit", function(obj){
-        obj.schema.query_type = "post";
-    });
-
-    tabSignal.connect("views[" + path + "].afterInit", function(obj) {
-        obj.view.mixins.push(user_settings_page_edit_mixin);
-    });
-}
-
-/**
- * Function emits signal, that deletes UserSettings page_new view.
- * @param {string} path /user/{pk}/settings/new/.
- */
-function deleteUserSettingsPageNewView(path) {
-    tabSignal.connect("allViews.inited", function(obj){
-        delete obj.views[path];
-    });
-}
-
-/**
- * Function, that emits signals for UserSettings views.
- * @param {string} base_path /user/{pk}/settings/.
- */
-function prepareUserSettingsViews(base_path) {
-    editUserSettingsPageInOpenApi(base_path);
-
-    editUserSettingsPageEditView(base_path + 'edit/');
-
-    deleteUserSettingsPageNewView(base_path + 'new/');
-}
-
-/**
  * Mixin for UserSettings page_edit view.
  */
-var user_settings_page_edit_mixin = {
+const user_settings_page_edit_mixin = {
     methods: {
         saveInstance() {
             let data = this.getValidData();
@@ -94,6 +47,53 @@ var user_settings_page_edit_mixin = {
         },
     },
 };
+
+/**
+ * Function emits signal, that edits UserSettings page view.
+ * @param {string} path /user/{pk}/settings/.
+ */
+function editUserSettingsPageInOpenApi(path) {
+    tabSignal.connect('openapi.loaded', (openapi) => {
+        let path_obj = openapi.paths[path];
+        path_obj.post.operationId = path_obj.post.operationId.replace('_add', '_edit');
+    });
+}
+
+/**
+ * Function emits signal, that edits UserSettings page_edit view.
+ * @param {string} path /user/{pk}/settings/edit/.
+ */
+function editUserSettingsPageEditView(path) {
+    tabSignal.connect("views[" + path + "].beforeInit", function(obj){
+        obj.schema.query_type = "post";
+    });
+
+    tabSignal.connect("views[" + path + "].afterInit", function(obj) {
+        obj.view.mixins.push(user_settings_page_edit_mixin);
+    });
+}
+
+/**
+ * Function emits signal, that deletes UserSettings page_new view.
+ * @param {string} path /user/{pk}/settings/new/.
+ */
+function deleteUserSettingsPageNewView(path) {
+    tabSignal.connect("allViews.inited", function(obj){
+        delete obj.views[path];
+    });
+}
+
+/**
+ * Function, that emits signals for UserSettings views.
+ * @param {string} base_path /user/{pk}/settings/.
+ */
+function prepareUserSettingsViews(base_path) {
+    editUserSettingsPageInOpenApi(base_path);
+
+    editUserSettingsPageEditView(base_path + 'edit/');
+
+    deleteUserSettingsPageNewView(base_path + 'new/');
+}
 
 /**
  * Signal, that edits options of UserSettings model's fields.
