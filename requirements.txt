@@ -1,5 +1,5 @@
 # Main
-vstutils[rpc,ldap,doc,prod]~=2.6.3
+vstutils[rpc,ldap,doc,prod]~=2.7.0
 docutils==0.15.2
 markdown2==2.3.8
 
