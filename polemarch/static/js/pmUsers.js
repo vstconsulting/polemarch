@@ -17,7 +17,9 @@ const user_settings_page_edit_mixin = {
             let instance = this.data.instance;
             instance.data = data;
             let method = this.view.schema.query_type;
+            this.loading = true;
             instance.save(method).then(instance => {
+                this.loading = false;
                 let qs = this.getQuerySet(this.view, this.qs_url).clone();
                 qs.cache = instance;
                 this.setQuerySet(this.view, this.qs_url, qs);
@@ -31,6 +33,7 @@ const user_settings_page_edit_mixin = {
                 this.$router.push({path: url});
 
             }).catch(error => {
+                this.loading = false;
                 let str = app.error_handler.errorToString(error);
 
                 let srt_to_show = pop_up_msg.instance.error.save.format(

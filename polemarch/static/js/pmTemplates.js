@@ -214,7 +214,9 @@ const template_sublink_qs_mixin = (Class_name) => class extends Class_name {
  * @param {boolean} required Required field or not.
  */
 function OneTemplate_group_callback(required=false) {
-    /**
+    let previous_inventory;
+
+     /**
      * Function - onchange callback of dynamic field - OneTemplate.fields.group.
      * @param {object} parent_values Values of parent fields.
      */
@@ -234,10 +236,19 @@ function OneTemplate_group_callback(required=false) {
             inventory = inventory.value;
         }
 
+        let save_value = false;
+
+        if(previous_inventory === undefined || previous_inventory == inventory) {
+            save_value = true;
+        }
+
+        previous_inventory = inventory;
+
         if(inventory && !isNaN(Number(inventory))) {
             return {
                 format: 'group_autocomplete',
                 required: required,
+                save_value: save_value,
                 additionalProperties: {
                     list_paths: [
                         '/project/{' + path_pk_key + '}/inventory/{inventory_id}/all_groups/',
@@ -250,6 +261,7 @@ function OneTemplate_group_callback(required=false) {
             };
         } else {
             return {
+                save_value: save_value,
                 format: 'autocomplete',
                 required: required,
             };
@@ -1596,11 +1608,10 @@ guiQuerySets.TemplateOptionVariableQuerySet = class TemplateOptionVariableQueryS
         let option_name = this.getOptionName();
 
         if(!(data && data.options && data.options[option_name] &&
-                data.options[option_name].vars)) {
+            data.options[option_name].vars)) {
             return instances;
         }
 
-        debugger;
         for(let item in data.options[option_name].vars) {
             if(data.options[option_name].vars.hasOwnProperty(item)) {
                 instances.push(
