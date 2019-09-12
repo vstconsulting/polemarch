@@ -567,13 +567,7 @@ const history_pk_mixin = {
                  * @param {string} line_content Content of line.
                  */
                 ansiUp(line_content) {
-                    let comments = [];	// Array to collect all comments
-                    let strings = [];	// Array to collect all line
-                    let res = [];	// Array to collect all RegEx
-                    let all = {'C': comments, 'S': strings, 'R': res}; /* jshint unused: false */ /* TODO check can we delete this variables */
-                    let safe = {'<': '<', '>': '>', '&': '&'}; /* jshint unused: false */
-
-                    let ansi_up = AnsiUp(); /* globals AnsiUp */
+                    let ansi_up = new AnsiUp(); /* globals AnsiUp */
                     ansi_up.use_classes = true;
                     let html = ansi_up.ansi_to_html(line_content);
 
