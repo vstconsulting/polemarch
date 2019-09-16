@@ -1,6 +1,8 @@
 from collections import OrderedDict
 from vstutils.settings import *
 
+WEBSERVER_COMMAND = 'webserver'
+
 POLEMARCH_VERSION = PROJECT_VERSION
 APACHE = False if ("runserver" in sys.argv) else True
 
