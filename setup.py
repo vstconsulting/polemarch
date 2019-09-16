@@ -359,6 +359,8 @@ kwargs = dict(
     load_requirements('requirements.txt', os.getcwd()),
     extras_require={
         'test': load_requirements('requirements-test.txt', os.getcwd()),
+        'mysql': ['mysqlclient'],
+        'postgresql': ['psycopg2'],
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt', os.getcwd()),

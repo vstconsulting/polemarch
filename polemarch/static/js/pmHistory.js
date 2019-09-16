@@ -1,4 +1,32 @@
 /**
+ * Variable, that stores array with History Models names,
+ * fields of those should be changed in the tabSignal.
+ */
+const history_models = ['History', 'OneHistory', 'ProjectHistory'];
+
+/**
+ * Variable, that stores pairs (key, value), where:
+ * - key - value of initiator_type field;
+ * - value - path from which should be loaded prefetch data.
+ */
+const history_initiator_types = {
+    project: '/project/',
+    template: '/project/{' + path_pk_key + '}/template/',
+    scheduler: '/project/{' + path_pk_key + '}/periodic_task/',
+};
+
+/**
+ * Variable, that stores array with History paths,
+ * options of those should be changed in the tabSignal.
+ */
+const history_paths = [
+    '/history/',
+    '/history/{' + path_pk_key + '}/',
+    '/project/{' + path_pk_key + '}/history/',
+    '/project/{' + path_pk_key + '}/history/{history_id}/',
+];
+
+/**
  * Function, that adds signal for some history model's fields.
  * @param {string} model
  */
@@ -60,18 +88,36 @@ function historyModelsFieldsHandler(model) {
 }
 
 /**
+ * Function - onchange callback of dynamic field - OneHistory.fields.mode.
+ */
+function OneHistory_kind_mode_callback(parent_values={}) {
+    let obj = {
+        format: 'one_history_string',
+        save_value: true,
+    };
+
+    if(parent_values.kind) {
+        obj.title = parent_values.kind.toLowerCase();
+    }
+
+    return obj;
+}
+
+/**
  * Function, that adds signal for some OneHistory model's fields.
  * @param {string} model
  */
 function OneHistoryFieldsHandler(model) {
     tabSignal.connect("models[" + model + "].fields.beforeInit", (fields) => {
         for(let field in fields) {
-            fields[field].format = 'one_history_string';
+            if(fields.hasOwnProperty(field)) {
+                fields[field].format = 'one_history_string';
 
-            if(['kind', 'raw_args', 'raw_stdout', 'initiator_type'].includes(field)) {
-                fields[field].format = 'hidden';
-            } else if(['start_time', 'stop_time'].includes(field)) {
-                fields[field].format = 'one_history_date_time';
+                if (['kind', 'raw_args', 'raw_stdout', 'initiator_type'].includes(field)) {
+                    fields[field].format = 'hidden';
+                } else if (['start_time', 'stop_time'].includes(field)) {
+                    fields[field].format = 'one_history_date_time';
+                }
             }
         }
 
@@ -97,105 +143,9 @@ function OneHistoryFieldsHandler(model) {
 }
 
 /**
- * Function, that adds signal for some history view's filters.
- * @param {string} path
- */
-function historyPathsFiltersHandler(path) {
-    /**
-     * Changes 'status' filter type to 'choices'.
-     */
-    tabSignal.connect("views[" + path + "].filters.beforeInit", filters => {
-        for(let index in filters) {
-            let filter = filters[index];
-
-            if(filter.name == 'status') {
-                filter.type = 'choices';
-                filter.enum = app.models['History'].fields.status.options.enum;
-            }
-        }
-    });
-}
-
-/**
- * Function, that adds signal for some history view modification.
- * @param {string} path
- */
-function historyPathsViewsHandler(path) {
-    tabSignal.connect("views[" + path + "].afterInit", (obj) => {
-        if(obj.view.schema.type == 'page') {
-            obj.view.mixins = obj.view.mixins.concat(history_pk_mixin);
-            obj.view.template = '#template_view_history_one';
-        }
-    });
-
-    tabSignal.connect('views[' + path + '].created', obj => {
-        if(obj.view.schema.type == 'list' && obj.view.schema.operations && obj.view.schema.operations.add) {
-            delete obj.view.schema.operations.add;
-        }
-    });
-}
-
-/**
- * Function - onchange callback of dynamic field - OneHistory.fields.mode.
- */
-function OneHistory_kind_mode_callback(parent_values={}) {
-    let obj = {
-        format: 'one_history_string',
-        save_value: true,
-    };
-
-    if(parent_values['kind']) {
-        obj.title = parent_values['kind'].toLowerCase();
-    }
-
-    return obj;
-}
-
-/**
- * Function, that adds signals for history models and history views.
- */
-function addHistorySignals() {
-    history_models.forEach(historyModelsFieldsHandler);
-
-    history_paths.forEach(historyPathsViewsHandler);
-
-    history_paths.forEach(historyPathsFiltersHandler);
-
-    OneHistoryFieldsHandler('OneHistory');
-}
-
-/**
- * Variable, that stores array with History Models names,
- * fields of those should be changed in the tabSignal.
- */
-var history_models = ['History', 'OneHistory', 'ProjectHistory'];
-
-/**
- * Variable, that stores pairs (key, value), where:
- * - key - value of initiator_type field;
- * - value - path from which should be loaded prefetch data.
- */
-var history_initiator_types = {
-    project: '/project/',
-    template: '/project/{' + path_pk_key + '}/template/',
-    scheduler: '/project/{' + path_pk_key + '}/periodic_task/',
-};
-
-/**
- * Variable, that stores array with History paths,
- * options of those should be changed in the tabSignal.
- */
-var history_paths = [
-    '/history/',
-    '/history/{' + path_pk_key + '}/',
-    '/project/{' + path_pk_key + '}/history/',
-    '/project/{' + path_pk_key + '}/history/{history_id}/',
-];
-
-/**
  * Mixin for /history/{pk}/ view.
  */
-var history_pk_mixin = {
+const history_pk_mixin = {
     data: function () {
         return {
             inventory_toggle: false,
@@ -203,12 +153,12 @@ var history_pk_mixin = {
             information_toggle: true,
 
             was_cleared: undefined,
-        }
+        };
     },
     /**
      * Redefinition of 'beforeRouteUpdate' hook of view_with_autoupdate_mixin.
      */
-    beforeRouteUpdate(to, from, next) {
+    beforeRouteUpdate(to, from, next) { /* jshint unused: false */
         this.stopChildrenAutoUpdate();
         this.stopAutoUpdate();
         next();
@@ -216,7 +166,7 @@ var history_pk_mixin = {
     /**
      * Redefinition of 'beforeRouteUpdate' hook of view_with_autoupdate_mixin.
      */
-    beforeRouteLeave(to, from, next) {
+    beforeRouteLeave(to, from, next) { /* jshint unused: false */
         this.stopChildrenAutoUpdate();
         this.stopAutoUpdate();
         this.$destroy();
@@ -275,7 +225,7 @@ var history_pk_mixin = {
         clear_button_options() {
             return {
                 name: 'clear',
-            }
+            };
         },
         /**
          * Property, that returns object with look options for clear button.
@@ -305,7 +255,7 @@ var history_pk_mixin = {
         clearInstance() {
             let qs = this.getQuerySet(this.view, this.qs_url).clone({url: this.qs_url + '/clear'});
 
-            qs.formQueryAndSend('delete').then(response => {
+            qs.formQueryAndSend('delete').then(response => { /* jshint unused: false */
                 guiPopUp.success(pop_up_msg.instance.success.execute.format(
                     ['clear', this.view.schema.name]
                 ));
@@ -327,7 +277,7 @@ var history_pk_mixin = {
          * Component for clear history stdout button.
          */
         clear_button: {
-            mixins: [base_button_mixin],
+            mixins: [base_button_mixin], /* globals base_button_mixin */
         },
         /**
          * Component, that is responsible for loading and showing history stdout output.
@@ -384,7 +334,7 @@ var history_pk_mixin = {
                 raw_stdout_link() {
                     let url = this.url.replace(/^\/|\/$/g, "");
 
-                    return '/api/' + api_version + '/' + url + '/raw';
+                    return '/api/' + api_version + '/' + url + '/raw'; /* globals api_version */
                 },
                 /**
                  * Property, that returns url for getting stdout lines.
@@ -401,7 +351,7 @@ var history_pk_mixin = {
                 gluedLines() {
                     let obj = {};
 
-                    for(let index in this.lines) {
+                    for(let index = 0; index < this.lines.length; index++) {
                         let subline = this.lines[index];
 
                         if(!obj[subline.line_gnumber]) {
@@ -423,7 +373,9 @@ var history_pk_mixin = {
                     let html = [];
 
                     for(let key in this.gluedLines) {
-                        html.push(this.ansiUp(this.gluedLines[key].text));
+                        if(this.gluedLines.hasOwnProperty(key)) {
+                            html.push(this.ansiUp(this.gluedLines[key].text));
+                        }
                     }
 
                     return html.join("");
@@ -451,7 +403,7 @@ var history_pk_mixin = {
 
             created() {
                 this.lines_qs = new guiQuerySets.QuerySet(app.models.OneHistory, this.lines_url);
-                this.getLines().then(responce => {
+                this.getLines().then(response => { /* jshint unused: false */
                     setTimeout(() => {
                         $(this.stdout_el).scrollTop($(this.stdout_el).prop('scrollHeight'));
                     }, 300);
@@ -473,7 +425,7 @@ var history_pk_mixin = {
                     if(["RUN", "DELAY"].includes(instance_data.status)) {
                         this.last_status = instance_data.status;
 
-                        return this.loadLinesFromBeginning().then(response => {
+                        return this.loadLinesFromBeginning().then(response => { /* jshint unused: false */
                             setTimeout(() => {
                                 $(this.stdout_el).scrollTop($(this.stdout_el).prop('scrollHeight'));
                             }, 300);
@@ -501,7 +453,7 @@ var history_pk_mixin = {
                     if(this.needLoadAdditionalData) {
                         let height = $(this.stdout_el).prop('scrollHeight');
 
-                        return this.loadLinesFromEnd().then(response => {
+                        return this.loadLinesFromEnd().then(response => { /* jshint unused: false */
                             setTimeout(() => {
                                 $(this.stdout_el).scrollTop($(this.stdout_el).prop('scrollHeight') - height);
                             }, 300);
@@ -594,7 +546,7 @@ var history_pk_mixin = {
                  * @param {array} new_lines Array with potential new lines.
                  */
                 saveNewLines(new_lines=[]) {
-                    for(let index in new_lines) {
+                    for(let index = 0; index < new_lines.length; index++) {
                         let new_line = new_lines[index];
 
                         let filtered = this.lines.filter(line => {
@@ -615,13 +567,7 @@ var history_pk_mixin = {
                  * @param {string} line_content Content of line.
                  */
                 ansiUp(line_content) {
-                    let comments = [];	// Array to collect all comments
-                    let strings = [];	// Array to collect all line
-                    let res = [];	// Array to collect all RegEx
-                    let all = {'C': comments, 'S': strings, 'R': res};
-                    let safe = {'<': '<', '>': '>', '&': '&'};
-
-                    let ansi_up = new AnsiUp;
+                    let ansi_up = new AnsiUp(); /* globals AnsiUp */
                     ansi_up.use_classes = true;
                     let html = ansi_up.ansi_to_html(line_content);
 
@@ -632,6 +578,60 @@ var history_pk_mixin = {
     },
 };
 
+
+/**
+ * Function, that adds signal for some history view's filters.
+ * @param {string} path
+ */
+function historyPathsFiltersHandler(path) {
+    /**
+     * Changes 'status' filter type to 'choices'.
+     */
+    tabSignal.connect("views[" + path + "].filters.beforeInit", filters => {
+        for(let key in filters) {
+            if(filters.hasOwnProperty(key)) {
+                let filter = filters[key];
+
+                if (filter.name == 'status') {
+                    filter.type = 'choices';
+                    filter.enum = app.models.History.fields.status.options.enum;
+                }
+            }
+        }
+    });
+}
+
+/**
+ * Function, that adds signal for some history view modification.
+ * @param {string} path
+ */
+function historyPathsViewsHandler(path) {
+    tabSignal.connect("views[" + path + "].afterInit", (obj) => {
+        if(obj.view.schema.type == 'page') {
+            obj.view.mixins = obj.view.mixins.concat(history_pk_mixin);
+            obj.view.template = '#template_view_history_one';
+        }
+    });
+
+    tabSignal.connect('views[' + path + '].created', obj => {
+        if(obj.view.schema.type == 'list' && obj.view.schema.operations && obj.view.schema.operations.add) {
+            delete obj.view.schema.operations.add;
+        }
+    });
+}
+
+/**
+ * Function, that adds signals for history models and history views.
+ */
+function addHistorySignals() {
+    history_models.forEach(historyModelsFieldsHandler);
+
+    history_paths.forEach(historyPathsViewsHandler);
+
+    history_paths.forEach(historyPathsFiltersHandler);
+
+    OneHistoryFieldsHandler('OneHistory');
+}
 // adds signal for history models and views.
 addHistorySignals();
 
@@ -648,18 +648,18 @@ tabSignal.connect('allViews.inited', obj => {
             }
 
             if(type == 'actions' || type == 'child_links') {
-                if(!['RUN', 'DELAY'].includes(data['status'])) {
-                    btns['cancel'].hidden = true;
+                if(!['RUN', 'DELAY'].includes(data.status)) {
+                    btns.cancel.hidden = true;
                 }
 
-                if(!(data['status'] == 'OK' && data['kind'] == 'MODULE' && data['mode'] == 'setup')) {
-                    btns['facts'].hidden = true;
+                if(!(data.status == 'OK' && data.kind == 'MODULE' && data.mode == 'setup')) {
+                    btns.facts.hidden = true;
                 }
 
-                btns['clear'].hidden = true;
+                btns.clear.hidden = true;
             }
 
             return btns;
-        }
+        };
     });
 });

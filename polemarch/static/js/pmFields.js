@@ -77,7 +77,7 @@ guiFields.playbook_autocomplete = class PlaybookAutocompleteField extends guiFie
      * @return {boolean}
      * @private
      */
-    _prefetchDataOrNot(data) {
+    _prefetchDataOrNot(data) { /* jshint unused: false */
         return false;
     }
     /**
@@ -109,12 +109,12 @@ guiFields.group_autocomplete = class GroupAutocompleteField extends guiFields.pl
  */
 guiFields.history_initiator = class HistoryInitiatorField extends guiFields.fk {
     static get initiatorTypes() {
-        return history_initiator_types;
+        return history_initiator_types; /* globals history_initiator_types */
     }
     /**
      * Redefinition of 'getAppropriateQuerySet' method of fk guiField.
      */
-    getAppropriateQuerySet(data={}, querysets) {
+    getAppropriateQuerySet(data={}, querysets=null) {
         let qs = querysets;
 
         if(!qs) {
@@ -131,7 +131,7 @@ guiFields.history_initiator = class HistoryInitiatorField extends guiFields.fk {
             return selected;
         }
 
-        for(let index in qs) {
+        for(let index = 0; index < qs.length; index++) {
             let item = qs[index];
 
             let p1 = item.url.replace(/^\/|\/$/g, "").split("/");
@@ -147,12 +147,12 @@ guiFields.history_initiator = class HistoryInitiatorField extends guiFields.fk {
     /**
      * Redefinition of 'formatQuerySetUrl' method of fk guiField.
      */
-    formatQuerySetUrl(url="", data={}, params={}) {
+    formatQuerySetUrl(url="", data={}, params={}) { /* jshint unused: false */
         if(url.indexOf('{') == -1) {
             return url;
         }
 
-        let project = data['project'] || app.application.$route.params[path_pk_key];
+        let project = data.project || app.application.$route.params[path_pk_key];
 
         if(project && typeof project == 'object' && project.value) {
             project = project.value;
@@ -183,7 +183,7 @@ guiFields.history_executor = class HistoryExecutorField extends guiFields.fk {
      * @param {object} data
      */
     makeLinkOrNot(data={}) {
-        if(data['initiator_type'] == 'scheduler') {
+        if(data.initiator_type == 'scheduler') {
             return false;
         }
 
@@ -194,7 +194,7 @@ guiFields.history_executor = class HistoryExecutorField extends guiFields.fk {
      * @param {object} data
      */
     prefetchDataOrNot(data={}) {
-        if(data['initiator_type'] == 'scheduler') {
+        if(data.initiator_type == 'scheduler') {
             return false;
         }
 
@@ -205,7 +205,7 @@ guiFields.history_executor = class HistoryExecutorField extends guiFields.fk {
      * @param {object} data
      */
     toRepresent(data={}) {
-        if(data['initiator_type'] == 'scheduler') {
+        if(data.initiator_type == 'scheduler') {
             return 'system';
         }
 
@@ -241,7 +241,7 @@ guiFields.ansible_json = class AnsibleJsonField extends guiFields.base {
      * Redefinition of base guiField static property 'mixins'.
      */
     static get mixins() {
-        return super.mixins.concat(gui_fields_mixins.ansible_json)
+        return super.mixins.concat(gui_fields_mixins.ansible_json);
     }
 };
 
@@ -295,9 +295,8 @@ guiFields.one_history_date_time = class OneHistoryDateTime extends guiFields.dat
             return;
         }
 
-        return moment(value).tz(window.timeZone).format("YYYY-MM-DD") +
-            ' ' + moment(value).tz(window.timeZone).format("HH:mm:ss");
-    };
+         return moment(moment.tz(value, window.timeZone)).tz(moment.tz.guess()).format("YYYY-MM-DD HH:mm:ss");
+    }
 
 };
 
@@ -373,19 +372,21 @@ guiFields.one_history_execute_args = class OneHistoryExecuteArgsField extends gu
         let realFields = {};
 
         for(let field in value) {
-            let opt = {
-                name: field,
-                readOnly: this.options.readOnly || false,
-                title: field,
-                format: 'one_history_string',
-            };
+            if(value.hasOwnProperty(field)) {
+                let opt = {
+                    name: field,
+                    readOnly: this.options.readOnly || false,
+                    title: field,
+                    format: 'one_history_string',
+                };
 
 
-            if(typeof value[field] == 'boolean') {
-                opt.format = 'one_history_boolean';
+                if (typeof value[field] == 'boolean') {
+                    opt.format = 'one_history_boolean';
+                }
+
+                realFields[field] = new guiFields[opt.format](opt);
             }
-
-            realFields[field] = new guiFields[opt.format](opt);
         }
 
         return realFields;

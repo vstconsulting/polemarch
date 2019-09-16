@@ -1,4 +1,57 @@
 /**
+ * Mixin for UserSettings page_edit view.
+ */
+const user_settings_page_edit_mixin = {
+    methods: {
+        saveInstance() {
+            let data = this.getValidData();
+            if(!data) {
+                return;
+            }
+
+            if(this.qs_url.replace(/^\/|\/$/g, "") == 'user/' + my_user_id + '/settings') {
+                data.selectedSkin = guiCustomizer.skin.name;
+                data.skinsSettings = guiCustomizer.skins_custom_settings;
+            }
+
+            let instance = this.data.instance;
+            instance.data = data;
+            let method = this.view.schema.query_type;
+            this.loading = true;
+            instance.save(method).then(instance => {
+                this.loading = false;
+                let qs = this.getQuerySet(this.view, this.qs_url).clone();
+                qs.cache = instance;
+                this.setQuerySet(this.view, this.qs_url, qs);
+
+                guiDashboard.updateSettings(instance.data);
+
+                guiPopUp.success('User settings were successfully saved.');
+
+                let url = this.getRedirectUrl({instance:instance});
+
+                this.$router.push({path: url});
+
+            }).catch(error => {
+                this.loading = false;
+                let str = app.error_handler.errorToString(error);
+
+                let srt_to_show = pop_up_msg.instance.error.save.format(
+                    ['settings', this.view.schema.name, str],
+                );
+
+                app.error_handler.showError(srt_to_show, str);
+                debugger;
+            });
+        },
+
+        getRedirectUrl() {
+            return this.qs_url;
+        },
+    },
+};
+
+/**
  * Function emits signal, that edits UserSettings page view.
  * @param {string} path /user/{pk}/settings/.
  */
@@ -44,56 +97,6 @@ function prepareUserSettingsViews(base_path) {
 
     deleteUserSettingsPageNewView(base_path + 'new/');
 }
-
-/**
- * Mixin for UserSettings page_edit view.
- */
-var user_settings_page_edit_mixin = {
-    methods: {
-        saveInstance() {
-            let data = this.getValidData();
-            if(!data) {
-                return;
-            }
-
-            if(this.qs_url.replace(/^\/|\/$/g, "") == 'user/' + my_user_id + '/settings') {
-                data.selectedSkin = guiCustomizer.skin.name;
-                data.skinsSettings = guiCustomizer.skins_custom_settings;
-            }
-
-            let instance = this.data.instance;
-            instance.data = data;
-            let method = this.view.schema.query_type;
-            instance.save(method).then(instance => {
-                let qs = this.getQuerySet(this.view, this.qs_url).clone();
-                qs.cache = instance;
-                this.setQuerySet(this.view, this.qs_url, qs);
-
-                guiDashboard.updateSettings(instance.data);
-
-                guiPopUp.success('User settings were successfully saved.');
-
-                let url = this.getRedirectUrl({instance:instance});
-
-                this.$router.push({path: url});
-
-            }).catch(error => {
-                let str = app.error_handler.errorToString(error);
-
-                let srt_to_show = pop_up_msg.instance.error.save.format(
-                    ['settings', this.view.schema.name, str],
-                );
-
-                app.error_handler.showError(srt_to_show, str);
-                debugger;
-            });
-        },
-
-        getRedirectUrl() {
-            return this.qs_url;
-        },
-    },
-};
 
 /**
  * Signal, that edits options of UserSettings model's fields.

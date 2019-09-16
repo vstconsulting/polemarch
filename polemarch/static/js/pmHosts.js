@@ -14,7 +14,7 @@ function addSignalOwnerReadOnly(model) {
  * Variable, that stores array with Host paths,
  * options of those should be changed in the tabSignal.
  */
-var host_paths = [
+const host_paths = [
     '/host/', '/group/{' + path_pk_key + '}/host/', '/inventory/{' + path_pk_key + '}/host/',
     '/inventory/{' + path_pk_key + '}/group/{group_id}/host/',
     '/project/{' + path_pk_key + '}/inventory/{inventory_id}/host/',
@@ -25,12 +25,14 @@ var host_paths = [
  */
 host_paths.forEach(path => {
     tabSignal.connect("views[" + path + "].filters.beforeInit", filters => {
-        for(let index in filters) {
-            let filter = filters[index];
+        for(let key in filters) {
+            if(filters.hasOwnProperty(key)) {
+                let filter = filters[key];
 
-            if(filter.name == 'type') {
-                filter.type = 'choices';
-                filter.enum = [''].concat(app.models['Host'].fields.type.options.enum);
+                if (filter.name == 'type') {
+                    filter.type = 'choices';
+                    filter.enum = [''].concat(app.models.Host.fields.type.options.enum);
+                }
             }
         }
     });

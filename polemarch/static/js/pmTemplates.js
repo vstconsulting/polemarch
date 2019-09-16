@@ -1,16 +1,24 @@
 /**
+ * Variable, that stores properties for callbacks of OneTemplateVariable dynamic fields.
+ */
+const template_vars = {
+    key: {},
+    value: {},
+};
+
+/**
  * Mixin for template sublinks' Model classes.
  * @param Class_name
  */
-var template_sublink_model_mixin = (Class_name) => class extends Class_name {
+const template_sublink_model_mixin = (Class_name) => class extends Class_name {
     /**
      * Redefinition of 'save' method of guiModels.Model class.
      */
-    save(method="patch") {
+    save(method="patch") { /* jshint unused: false */
         return this.queryset.getTemplateInstance().then(template_instance => {
             this._onSave(template_instance.data, this.toInner(this.data));
 
-            return this.queryset.formQueryAndSend('patch', template_instance.data).then(response => {
+            return this.queryset.formQueryAndSend('patch', template_instance.data).then(response => { /* jshint unused: false */
                 return this.queryset.model.getInstance(
                     this.queryset._formInstanceData(
                         template_instance.data, this.getPkValue(),
@@ -22,14 +30,14 @@ var template_sublink_model_mixin = (Class_name) => class extends Class_name {
             debugger;
             throw error;
         });
-    };
+    }
     /**
      * Method - 'save' method callback.
      * @param {object} template_data Template instance data.
      * @param {object} instance_data Instance data.
      * @private
      */
-    _onSave(template_data, instance_data) {};
+    _onSave(template_data, instance_data) {} /* jshint unused: false */
     /**
      * Redefinition of 'delete' method of guiModels.Model class.
      */
@@ -41,20 +49,20 @@ var template_sublink_model_mixin = (Class_name) => class extends Class_name {
                 return response;
             });
         });
-    };
+    }
     /**
      * Method - 'delete' method callback.
      * @param {object} template_data Template instance data.
      * @private
      */
-    _onDelete(template_data) {};
+    _onDelete(template_data) {} /* jshint unused: false */
 };
 
 /**
  * Mixin for template sublinks' QuerySet classes.
  * @param Class_name
  */
-var template_sublink_qs_mixin = (Class_name) => class extends Class_name {
+const template_sublink_qs_mixin = (Class_name) => class extends Class_name {
     /**
      * Redefinition of 'makeQueryString' method of guiQuerySets.QuerySet class.
      */
@@ -62,11 +70,13 @@ var template_sublink_qs_mixin = (Class_name) => class extends Class_name {
         let filters = [];
         let allowed_filters = ['limit'];
         for(let key in query) {
-            if(!allowed_filters.includes(key)) continue;
+            if(!allowed_filters.includes(key)) {
+                continue;
+            }
             filters.push([key, query[key]].join('='));
         }
         return filters.join("&");
-    };
+    }
     /**
      * Redefinition of 'items' method of guiQuerySets.QuerySet class.
      */
@@ -97,8 +107,8 @@ var template_sublink_qs_mixin = (Class_name) => class extends Class_name {
         }).catch(error => {
             debugger;
             throw error;
-        })
-    };
+        });
+    }
     /**
      * Redefinition of 'get' method of guiQuerySets.QuerySet class.
      */
@@ -124,7 +134,7 @@ var template_sublink_qs_mixin = (Class_name) => class extends Class_name {
             debugger;
             throw error;
         });
-    };
+    }
     /**
      * Method, that returns promise, that returns parent template instance.
      * @param {boolean} reload Means, that data should be updated or not.
@@ -143,7 +153,7 @@ var template_sublink_qs_mixin = (Class_name) => class extends Class_name {
             debugger;
             throw error;
         });
-    };
+    }
     /**
      * Method, that filters instances and returns them and their api_count.
      * @param {array} instances Array of instances objects.
@@ -167,7 +177,7 @@ var template_sublink_qs_mixin = (Class_name) => class extends Class_name {
                     }
                 } else {
                     if(typeof instance.data[filter] == 'boolean' && typeof filter_value == 'string') {
-                        filter_value = stringToBoolean(filter_value);
+                        filter_value = stringToBoolean(filter_value); /* globals stringToBoolean */
                     }
 
                     if(instance.data[filter] == filter_value) {
@@ -188,7 +198,7 @@ var template_sublink_qs_mixin = (Class_name) => class extends Class_name {
         }
 
         return {filtered_instances: filtered_instances, api_count: api_count};
-    };
+    }
     /**
      * Method, that returns Array with names of allowed filters.
      * @returns {array}
@@ -196,7 +206,7 @@ var template_sublink_qs_mixin = (Class_name) => class extends Class_name {
      */
     _getFilterNames() {
         return ['name'];
-    };
+    }
 };
 
 /**
@@ -204,30 +214,41 @@ var template_sublink_qs_mixin = (Class_name) => class extends Class_name {
  * @param {boolean} required Required field or not.
  */
 function OneTemplate_group_callback(required=false) {
-    /**
+    let previous_inventory;
+
+     /**
      * Function - onchange callback of dynamic field - OneTemplate.fields.group.
      * @param {object} parent_values Values of parent fields.
      */
     return function(parent_values={}) {
-        let kind = parent_values['kind'];
+        let kind = parent_values.kind;
 
         if(kind && kind.toLowerCase() == 'task') {
             return {
                 format: 'hidden',
                 required: false,
-            }
+            };
         }
 
-        let inventory = parent_values['inventory'];
+        let inventory = parent_values.inventory;
 
         if(inventory && typeof inventory == 'object' && inventory.value !== undefined) {
             inventory = inventory.value;
         }
 
+        let save_value = false;
+
+        if(previous_inventory === undefined || previous_inventory == inventory) {
+            save_value = true;
+        }
+
+        previous_inventory = inventory;
+
         if(inventory && !isNaN(Number(inventory))) {
             return {
                 format: 'group_autocomplete',
                 required: required,
+                save_value: save_value,
                 additionalProperties: {
                     list_paths: [
                         '/project/{' + path_pk_key + '}/inventory/{inventory_id}/all_groups/',
@@ -240,6 +261,7 @@ function OneTemplate_group_callback(required=false) {
             };
         } else {
             return {
+                save_value: save_value,
                 format: 'autocomplete',
                 required: required,
             };
@@ -333,7 +355,7 @@ function OneTemplateVariable_key_callback(parent_values={}) {
         save_value: true,
     };
 
-    let p_v = parent_values['kind'];
+    let p_v = parent_values.kind;
 
     if(p_v) {
         p_v = p_v.toLowerCase();
@@ -356,8 +378,8 @@ function OneTemplateVariable_value_callback() {
      * @param {object} parent_values Values of parent fields.
      */
     return function(parent_values={}) {
-        let key = parent_values['key'];
-        let inventory = parent_values['inventory'];
+        let key = parent_values.key;
+        let inventory = parent_values.inventory;
 
         if(key && (key.toLowerCase() == 'group' || key.toLowerCase() == 'limit') &&
             inventory && !isNaN(Number(inventory))) {
@@ -579,8 +601,12 @@ function formEnumForVariables(openapi) {
         let types = {};
 
         for(let key in obj) {
-            if(exclude_keys.includes(key)) continue;
-            types[key] = obj[key].format || obj[key].type;
+            if(obj.hasOwnProperty(key)) {
+                if (exclude_keys.includes(key)) {
+                    continue;
+                }
+                types[key] = obj[key].format || obj[key].type;
+            }
         }
 
         return types;
@@ -711,17 +737,9 @@ function getFiltersForTemplateVariable() {
 }
 
 /**
- * Variable, that stores properties for callbacks of OneTemplateVariable dynamic fields.
- */
-var template_vars = {
-    key: {},
-    value: {},
-};
-
-/**
  * Mixin for Vue component of TemplateVariable 'list' View.
  */
-var tmp_vars_list_mixin = {
+const tmp_vars_list_mixin = {
     methods: {
         /**
          * Redefinition of 'removeInstances' method of list view.
@@ -737,14 +755,16 @@ var tmp_vars_list_mixin = {
                 let selected = [];
 
                 for(let key in selections) {
-                    if(!selections[key]) continue;
+                    if(!selections[key]) {
+                        continue;
+                    }
 
                     selected.push(key);
                     this._removeInstance(template_instance, key);
                 }
 
                 return qs.formQueryAndSend('patch', template_instance.data)
-                    .then(response => {
+                    .then(response => { /* jshint unused: false */
                         return this.removeInstances_callback(selected);
                     });
             }).catch(error => {
@@ -789,7 +809,7 @@ var tmp_vars_list_mixin = {
                     return;
                 }
 
-                for(let index in new_qs.cache) {
+                for(let index = 0; index < new_qs.cache.length; index++) {
                     let list_instance = new_qs.cache[index];
 
                     if(list_instance.getPkValue() == item) {
@@ -811,7 +831,7 @@ var tmp_vars_list_mixin = {
 /**
  * Mixin for Vue component of TemplateVariable 'page_new' View.
  */
-var tmp_vars_new_mixin = {
+const tmp_vars_new_mixin = {
     methods: {
         fetchData() {
             this.initLoading();
@@ -924,7 +944,7 @@ guiModels.OneTemplateModel = class OneTemplateModel extends guiModels.Model {
             debugger;
             throw error;
         });
-    };
+    }
 };
 
 /**
@@ -978,7 +998,7 @@ guiQuerySets.OneTemplateQuerySet = class OneTemplateQuerySet extends guiQuerySet
             debugger;
             throw error;
         });
-    };
+    }
 };
 
 tabSignal.connect("models[Template].fields.beforeInit", function(fields) {
@@ -1031,9 +1051,9 @@ tabSignal.connect("models[TemplateExec].fields.beforeInit", function(fields) {
  */
 tabSignal.connect("views[/project/{" + path_pk_key + "}/template/{template_id}/edit/].afterInit", (obj) => {
     let mixins = [...obj.view.mixins].reverse();
-    let baseSaveInstance = routesComponentsTemplates.page_edit.methods.saveInstance;
+    let baseSaveInstance = routesComponentsTemplates.page_edit.methods.saveInstance; /* globals routesComponentsTemplates */
 
-    for(let index in mixins) {
+    for(let index = 0; index < mixins.length; index++) {
         let item = mixins[index];
 
         if(item.methods && item.methods.saveInstance) {
@@ -1079,11 +1099,13 @@ tabSignal.connect("views[/project/{" + path_pk_key + "}/template/{template_id}/e
  */
 tabSignal.connect("views[/project/{" + path_pk_key + "}/template/].filters.beforeInit", filters => {
     for(let index in filters) {
-        let filter = filters[index];
+        if(filters.hasOwnProperty(index)) {
+            let filter = filters[index];
 
-        if(filter.name == 'kind') {
-            filter.type = 'choices';
-            filter.enum = [''].concat(app.models['Template'].fields.kind.options.enum);
+            if (filter.name == 'kind') {
+                filter.type = 'choices';
+                filter.enum = [''].concat(app.models.Template.fields.kind.options.enum);
+            }
         }
     }
 });
@@ -1119,7 +1141,7 @@ guiModels.TemplateVariableModel = class TemplateVariableModel
         }
 
         template_data.data.vars[instance_data.key] = instance_data.value;
-    };
+    }
 
     /**
      * Redefinition of '_onDelete' method of template_sublink_model_mixin.
@@ -1129,7 +1151,7 @@ guiModels.TemplateVariableModel = class TemplateVariableModel
             template_data.data.vars) {
             delete template_data.data.vars[this.getPkValue()];
         }
-    };
+    }
 };
 
 /**
@@ -1143,7 +1165,7 @@ guiQuerySets.TemplateVariableQuerySet = class TemplateVariableQuerySet
     getDataType() {
         return this.url.replace(/^\/|\/$/g, "")
             .replace(/\/variables([A-z,0-9,_,\/]*)$/, "").split("/");
-    };
+    }
     /**
      * Method, that forms instances, based on data.
      * @param {object} data Template instance data.
@@ -1158,19 +1180,21 @@ guiQuerySets.TemplateVariableQuerySet = class TemplateVariableQuerySet
         }
 
         for(let item in data.data.vars) {
-            instances.push(
-                this.model.getInstance(
-                    {
-                        kind: data.kind, inventory: data.data.inventory,
-                        key: item, value: data.data.vars[item]
-                    },
-                    this.clone(),
-                ),
-            );
+            if(data.data.vars.hasOwnProperty(item)) {
+                instances.push(
+                    this.model.getInstance(
+                        {
+                            kind: data.kind, inventory: data.data.inventory,
+                            key: item, value: data.data.vars[item]
+                        },
+                        this.clone(),
+                    ),
+                );
+            }
         }
 
         return instances;
-    };
+    }
     /**
      * Method, that checks existence of instance.
      * @param {object} template_instance Template instance.
@@ -1186,7 +1210,7 @@ guiQuerySets.TemplateVariableQuerySet = class TemplateVariableQuerySet
         }
 
         return false;
-    };
+    }
     /**
      * Method, that returns option data object.
      * @param {object} template_data Data of template instance.
@@ -1200,7 +1224,7 @@ guiQuerySets.TemplateVariableQuerySet = class TemplateVariableQuerySet
             key: instance_name,
             value: template_data.data.vars[instance_name],
         };
-    };
+    }
     /**
      * Method, that returns Array with names of allowed filters.
      * @returns {array}
@@ -1208,7 +1232,7 @@ guiQuerySets.TemplateVariableQuerySet = class TemplateVariableQuerySet
      */
     _getFilterNames() {
         return ['key', 'value'];
-    };
+    }
 };
 
 /**
@@ -1283,7 +1307,7 @@ guiModels.TemplateOptionModel = class TemplateOptionModel
         super(name, fields);
 
         this.pk_name = 'name';
-    };
+    }
     /**
      * Redefinition of '_onSave' method of template_sublink_model_mixin.
      */
@@ -1297,7 +1321,7 @@ guiModels.TemplateOptionModel = class TemplateOptionModel
         }
 
         template_data.options[this.getPkValue()] = instance_data;
-    };
+    }
     /**
      * Redefinition of '_onDelete' method of template_sublink_model_mixin.
      */
@@ -1305,7 +1329,7 @@ guiModels.TemplateOptionModel = class TemplateOptionModel
         if(template_data && template_data.options) {
             delete template_data.options[this.getPkValue()];
         }
-    };
+    }
 };
 
 /**
@@ -1319,7 +1343,7 @@ guiQuerySets.TemplateOptionQuerySet = class TemplateOptionQuerySet
     getDataType() {
         return this.url.replace(/^\/|\/$/g, "")
             .replace(/\/option([A-z,0-9,_,\/]*)$/, "").split("/");
-    };
+    }
     /**
      * Method, that forms instances, based on data.
      * @param {object} data Template instance data.
@@ -1334,13 +1358,15 @@ guiQuerySets.TemplateOptionQuerySet = class TemplateOptionQuerySet
         }
 
         for(let item in data.options) {
-            instances.push(
-                this.model.getInstance({name: item}, this.clone()),
-            );
+            if(data.options.hasOwnProperty(item)) {
+                instances.push(
+                    this.model.getInstance({name: item}, this.clone()),
+                );
+            }
         }
 
         return instances;
-    };
+    }
     /**
      * Method, that checks existence of instance.
      * @param {object} template_instance Template instance.
@@ -1355,7 +1381,7 @@ guiQuerySets.TemplateOptionQuerySet = class TemplateOptionQuerySet
         }
 
         return false;
-    };
+    }
     /**
      * Method, that returns Array with names of allowed filters.
      * @returns {array}
@@ -1363,7 +1389,7 @@ guiQuerySets.TemplateOptionQuerySet = class TemplateOptionQuerySet
      */
     _getFilterNames() {
         return ['name'];
-    };
+    }
     /**
      * Method, that returns option data object.
      * @param {object} template_data Data of template instance.
@@ -1382,7 +1408,7 @@ guiQuerySets.TemplateOptionQuerySet = class TemplateOptionQuerySet
         }
 
         return $.extend(true, {}, option_data, tmp, {name: option_name});
-    };
+    }
 };
 
 /**
@@ -1534,7 +1560,7 @@ guiModels.TemplateOptionVariableModel = class TemplateOptionVariableModel
         }
 
         template_data.options[option].vars[instance_data.key] = instance_data.value;
-    };
+    }
     /**
      * Redefinition of '_onDelete' method of template_sublink_model_mixin.
      */
@@ -1547,7 +1573,7 @@ guiModels.TemplateOptionVariableModel = class TemplateOptionVariableModel
             template_data.options[option].vars) {
             delete template_data.options[option].vars[this.getPkValue()];
         }
-    };
+    }
 };
 
 /**
@@ -1562,7 +1588,7 @@ guiQuerySets.TemplateOptionVariableQuerySet = class TemplateOptionVariableQueryS
         return this.url.replace(/^\/|\/$/g, "")
             .replace(/\/option([A-z,0-9,_,\/]+)\/variables([A-z,0-9,_,\/]*)$/, "")
             .split("/");
-    };
+    }
     getOptionName() {
         try {
             return this.url.split("/option")[1].split("/")[1];
@@ -1570,7 +1596,7 @@ guiQuerySets.TemplateOptionVariableQuerySet = class TemplateOptionVariableQueryS
             debugger;
             throw new StatusError(404, 'Instance was not found');
         }
-    };
+    }
     /**
      * Method, that forms instances, based on data.
      * @param {object} data Template instance data.
@@ -1582,24 +1608,26 @@ guiQuerySets.TemplateOptionVariableQuerySet = class TemplateOptionVariableQueryS
         let option_name = this.getOptionName();
 
         if(!(data && data.options && data.options[option_name] &&
-                data.options[option_name].vars)) {
+            data.options[option_name].vars)) {
             return instances;
         }
 
         for(let item in data.options[option_name].vars) {
-            instances.push(
-                this.model.getInstance(
-                    {
-                        kind: data.kind, inventory: data.data.inventory,
-                        key: item, value: data.options[option_name].vars[item],
-                    },
-                    this.clone(),
-                ),
-            );
+            if(data.options[option_name].vars.hasOwnProperty(item)) {
+                instances.push(
+                    this.model.getInstance(
+                        {
+                            kind: data.kind, inventory: data.data.inventory,
+                            key: item, value: data.options[option_name].vars[item],
+                        },
+                        this.clone(),
+                    ),
+                );
+            }
         }
 
         return instances;
-    };
+    }
     /**
      * Method, that checks existence of instance.
      * @param {object} template_instance Template instance.
@@ -1618,7 +1646,7 @@ guiQuerySets.TemplateOptionVariableQuerySet = class TemplateOptionVariableQueryS
         }
 
         return false;
-    };
+    }
     /**
      * Method, that returns option data object.
      * @param {object} template_data Data of template instance.
@@ -1634,7 +1662,7 @@ guiQuerySets.TemplateOptionVariableQuerySet = class TemplateOptionVariableQueryS
             key: instance_name,
             value: template_data.options[option_name].vars[instance_name],
         };
-    };
+    }
     /**
      * Method, that returns Array with names of allowed filters.
      * @returns {array}
@@ -1642,7 +1670,7 @@ guiQuerySets.TemplateOptionVariableQuerySet = class TemplateOptionVariableQueryS
      */
     _getFilterNames() {
         return ['key', 'value'];
-    };
+    }
 };
 
 /**

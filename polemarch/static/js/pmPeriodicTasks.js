@@ -3,7 +3,7 @@
  * @param {object} parent_values Values of parent fields.
  */
 function OnePeriodictask_inventory_callback(parent_values={}) {
-    let kind = parent_values['kind'];
+    let kind = parent_values.kind;
 
     if(kind && (kind.toLowerCase() == "playbook" || kind.toLowerCase() == "module")) {
         return {
@@ -14,7 +14,7 @@ function OnePeriodictask_inventory_callback(parent_values={}) {
                 list_paths: ['/project/{' + path_pk_key + '}/inventory/'],
             },
             save_value: true,
-        }
+        };
     }
 }
 
@@ -23,7 +23,7 @@ function OnePeriodictask_inventory_callback(parent_values={}) {
  * @param {object} parent_values Values of parent fields.
  */
 function OnePeriodictask_mode_callback(parent_values={}) {
-    let kind = parent_values['kind'];
+    let kind = parent_values.kind;
 
     if(kind) {
         kind = kind.toLowerCase();
@@ -38,7 +38,7 @@ function OnePeriodictask_mode_callback(parent_values={}) {
                 list_paths: ['/project/{' + path_pk_key + '}/playbook/'],
             },
             required: true,
-        }
+        };
     } else if(kind == "module") {
         return {
             format: 'module_autocomplete',
@@ -49,7 +49,7 @@ function OnePeriodictask_mode_callback(parent_values={}) {
                 list_paths: ['/project/{' + path_pk_key + '}/module/'],
             },
             required: true,
-        }
+        };
     }
 }
 
@@ -58,7 +58,7 @@ function OnePeriodictask_mode_callback(parent_values={}) {
  * @param {object} parent_values Values of parent fields.
  */
 function OnePeriodictask_template_callback(parent_values={}) {
-    let kind = parent_values['kind'];
+    let kind = parent_values.kind;
 
     if(kind) {
         kind = kind.toLowerCase();
@@ -96,7 +96,7 @@ function OnePeriodictask_template_opt_callback() {
      * @param {object} parent_values Values of parent fields.
      */
     return function(parent_values) {
-        let kind = parent_values['kind'];
+        let kind = parent_values.kind;
 
         if(kind && kind.toLowerCase() !== 'template') {
             return {
@@ -104,7 +104,7 @@ function OnePeriodictask_template_opt_callback() {
             };
         }
 
-        let template = parent_values['template'];
+        let template = parent_values.template;
 
         if(template && typeof template == 'object' && template.value !== undefined) {
             template = template.value;
@@ -171,12 +171,14 @@ function OnePeriodictask_template_opt_callback() {
  * Changes 'kind' filter type to 'choices'.
  */
 tabSignal.connect("views[/project/{" + path_pk_key + "}/periodic_task/].filters.beforeInit", filters => {
-    for(let index in filters) {
-        let filter = filters[index];
+    for(let key in filters) {
+        if(filters.hasOwnProperty(key)) {
+            let filter = filters[key];
 
-        if(filter.name == 'kind') {
-            filter.type = 'choices';
-            filter.enum = [''].concat(app.models['Periodictask'].fields.kind.options.enum);
+            if (filter.name == 'kind') {
+                filter.type = 'choices';
+                filter.enum = [''].concat(app.models.Periodictask.fields.kind.options.enum);
+            }
         }
     }
 });
@@ -191,7 +193,7 @@ tabSignal.connect('allViews.inited', obj => {
         '/project/{' + path_pk_key + '}/periodic_task/',
         '/project/{' + path_pk_key + '}/periodic_task/{periodic_task_id}/',
     ].forEach(path => {
-        views[path].getViewSublinkButtons = function(type, buttons, instance) {
+        views[path].getViewSublinkButtons = function(type, buttons, instance) { /* jshint unused: false */
             let data = instance.data;
             let btns = $.extend(true, {}, buttons);
 
@@ -199,12 +201,12 @@ tabSignal.connect('allViews.inited', obj => {
                 return btns;
             }
 
-            if(data['kind'] == 'TEMPLATE' && btns['variables']) {
-                btns['variables'].hidden = true;
+            if(data.kind == 'TEMPLATE' && btns.variables) {
+                btns.variables.hidden = true;
             }
 
             return btns;
-        }
+        };
     });
 });
 ////////////////////////////////////////////////////////////////////////////////////
@@ -247,7 +249,7 @@ guiModels.OnePeriodicTaskVariableModel = class OnePeriodicTaskVariableModel exte
             debugger;
             throw error;
         });
-    };
+    }
 };
 
 /**
@@ -260,7 +262,7 @@ guiQuerySets.OnePeriodicTaskVariableQuerySet = class OnePeriodicTaskVariableQuer
     getParentInstanceDataType() {
         return this.url.replace(/^\/|\/$/g, "")
             .replace(/\/variables([A-z,0-9,_,\/]*)$/, "").split("/");
-    };
+    }
     /**
      * Method, that returns promise, that returns parent instance.
      */
@@ -275,15 +277,16 @@ guiQuerySets.OnePeriodicTaskVariableQuerySet = class OnePeriodicTaskVariableQuer
         };
 
         return this.sendQuery(bulk).then(response => {
-            return this.parent_instance = app.models.OnePeriodictask.getInstance(
+            this.parent_instance = app.models.OnePeriodictask.getInstance(
                 response.data,
                 this.clone({url: this.url.replace(/\/variables([A-z,0-9,_,\/]*)$/, "") }),
             );
+            return this.parent_instance;
         }).catch(error => {
             debugger;
             throw error;
         });
-    };
+    }
     /**
      * Redefinition of 'get' method of guiQuerySets.QuerySet class.
      */
@@ -307,7 +310,7 @@ guiQuerySets.OnePeriodicTaskVariableQuerySet = class OnePeriodicTaskVariableQuer
             debugger;
             throw error;
         });
-    };
+    }
     /**
      * Method, that returns periodic task variable data object.
      * @param {object} parent_data Data of periodic task instance.
@@ -318,7 +321,7 @@ guiQuerySets.OnePeriodicTaskVariableQuerySet = class OnePeriodicTaskVariableQuer
         return Object.assign(
             {}, instance_data, {kind: parent_data.kind, inventory: parent_data.inventory},
         );
-    };
+    }
 };
 
 tabSignal.connect('openapi.loaded', (openapi) => {
@@ -356,14 +359,14 @@ tabSignal.connect("models[OnePeriodicTaskVariable].fields.beforeInit", function(
     fields.key.format = 'dynamic';
     fields.key.additionalProperties = {
         field: ['kind'],
-        callback: OneTemplateVariable_key_callback,
+        callback: OneTemplateVariable_key_callback, /* globals OneTemplateVariable_key_callback */
     };
 
     fields.value.format = 'dynamic';
     fields.value.additionalProperties = {
         field: ['inventory', 'key'],
-        types: template_vars.value.types,
-        callback: OneTemplateVariable_value_callback(),
+        types: template_vars.value.types, /* globals template_vars */
+        callback: OneTemplateVariable_value_callback(), /* globals OneTemplateVariable_value_callback */
     };
 });
 

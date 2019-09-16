@@ -1,7 +1,7 @@
 /**
  * Mixin, that extends guiSkins.default.
  */
-var pmSkinDefaultMixin = {
+const pmSkinDefaultMixin = {
     history_status_ok: {
         color_var:"--history-status-ok",
         title:'History status ok',
@@ -121,7 +121,7 @@ guiSkins.default = $.extend(true, guiSkins.default, pmSkinDefaultMixin);
 /**
  * Mixin, that extends guiSkins.dark.
  */
-var pmSkinDarkMixin = {
+const pmSkinDarkMixin = {
     history_status_ok: {
         default:"#56E401",
     },
