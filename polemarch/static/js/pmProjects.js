@@ -223,7 +223,7 @@ const gui_project_page_additional = Vue.component('gui_project_page_additional',
             let buttons = {};
 
             for(let key in data.playbooks) {
-                 if(data.playbook.hasOwnProperty(key)) {
+                 if(data.playbooks.hasOwnProperty(key)) {
                      let val = data.playbooks[key];
 
                      buttons[key] = {

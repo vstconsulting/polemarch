@@ -386,3 +386,7 @@ body {
 .clear-btn-title {
     display: none;
 }
+
+.details .form-group {
+    margin-bottom: 0;
+}

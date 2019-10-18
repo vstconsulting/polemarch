@@ -8,13 +8,13 @@
             </div>
         </div>
 
-        <div class="content-wrapper" v-if="error">
+        <div class="content-wrapper-2" v-if="error">
             <section class="content-header">
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-lg-6">
                             <h1>
-                        <span @click="goToHistoryRecord(-1)" class="btn btn-default">
+                        <span @click="goToHistoryRecord(-1)" class="btn btn-default btn-previous-page">
                             <span class="fa fa-arrow-left"></span>
                         </span>
                                 <span class="h1-header" > Error {{ error.status }} </span>
@@ -32,18 +32,12 @@
                         <div class="col-lg-12">
                         </div>
                     </div>
-                    <br>
                     <div class="row">
-                        <section class="col-lg-12">
-                            <div class="card card-info">
-                                <div class="card-header with-border">
-                                    <br>
-                                </div>
-                                <div class="card-body">
-                                    {{ error_data }}
-                                </div>
+                        <div class="col-lg-12">
+                            <div class="error-text-wrapper">
+                                <p class="text-center error-p">{{ error_data }}</p>
                             </div>
-                        </section>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -55,7 +49,7 @@
                     <div class="row">
                         <div class="col-lg-6">
                             <h1>
-                                <span @click="goToHistoryRecord(-1)" class="btn btn-default">
+                                <span @click="goToHistoryRecord(-1)" class="btn btn-default btn-previous-page">
                                     <span class="fa fa-arrow-left"></span>
                                 </span>
                                 <span class="h1-header" > {{ title  | capitalize | split }}</span>
@@ -80,7 +74,7 @@
                             <!-- Section with Inventory fields -->
                             <section>
                                 <div class="card card-info">
-                                    <div class="card-header with-border" style="min-height: 50px;">
+                                    <div class="card-header with-border card-header-custom">
                                         <field_fk_just_value :field="inventory_field"
                                                              :wrapper_opt="inventory_field_wrapper_opt"
                                                              :prop_data="inventory_field_prop_data"
@@ -94,7 +88,7 @@
                                         </button>
                                     </div>
                                     <transition name="fade">
-                                        <div class="card-body" v-show="inventory_toggle">
+                                        <div class="card-body card-body-custom" v-show="inventory_toggle">
                                             <field_one_history_raw_inventory :field="raw_inventory_field"
                                                                              :wrapper_opt="inventory_field_wrapper_opt"
                                                                              :prop_data="inventory_field_prop_data"
@@ -108,7 +102,7 @@
                             <!-- Section with output information -->
                             <section>
                                 <div class="card card-info">
-                                    <div class="card-header with-border" style="min-height: 50px;">
+                                    <div class="card-header with-border card-header-custom">
                                         <span>Execution output</span>
 
 
@@ -126,7 +120,7 @@
 
                                     </div>
                                     <transition name="fade">
-                                        <div class="card-body" v-show="output_toggle">
+                                        <div class="card-body card-body-custom" style="padding: 0 7.5px;" v-show="output_toggle">
                                             <history_stdout :instance="data.instance" :url="url" :cleared="was_cleared"></history_stdout>
                                         </div>
                                     </transition>
@@ -145,7 +139,7 @@
                         <!--<section class="col-lg-8 col-xl-3 col-lg-8">-->
                         <section class="col-lg-12 col-xl-3">
                             <div class="card card-info">
-                                <div class="card-header with-border" style="min-height: 50px;">
+                                <div class="card-header with-border card-header-custom">
                                     <span>Details</span>
                                     <!-- Button for collapse  and expand this section -->
                                     <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon"
@@ -155,7 +149,7 @@
                                     </button>
                                 </div>
                                 <transition name="fade">
-                                    <div class="card-body" v-show="information_toggle">
+                                    <div class="card-body card-body-custom details" v-show="information_toggle">
                                         <component :is="content_body_component" :data="data" :view="view" :opt="opt"></component>
                                     </div>
                                 </transition>
