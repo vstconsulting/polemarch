@@ -250,14 +250,17 @@ class PeriodicTask(AbstractModel):
 
     @inventory.setter
     def inventory(self, inventory: InvOrString) -> NoReturn:
-        if isinstance(inventory, Inventory):
-            self._inventory = inventory  # nocv
-        elif isinstance(inventory, (six.string_types, six.text_type, int)):
+        if isinstance(inventory, Inventory):  # nocv
+            self._inventory = inventory
+            self.inventory_file = None
+        elif isinstance(inventory, (str, int)):
             try:
                 self._inventory = self.project.inventories.get(pk=int(inventory))
+                self.inventory_file = None
             except (ValueError, Inventory.DoesNotExist):
                 self.project.check_path(inventory)
                 self.inventory_file = inventory
+                self._inventory = None
 
     @property
     def crontab_kwargs(self) -> Dict:

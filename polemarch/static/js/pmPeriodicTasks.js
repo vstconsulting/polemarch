@@ -45,7 +45,7 @@ function OnePeriodictask_mode_callback(parent_values={}) {
             additionalProperties: {
                 // there is no 'name' filters
                 view_field: 'path',
-                value_field: 'path',
+                value_field: 'name',
                 list_paths: ['/project/{' + path_pk_key + '}/module/'],
             },
             required: true,
