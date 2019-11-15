@@ -189,6 +189,8 @@ class AnsibleCommand(PMObject):
 
     def __init__(self, *args, **kwargs):
         self.args = args
+        if 'verbose' in kwargs:
+            kwargs['verbose'] = int(float(kwargs.get('verbose', 0)))
         self.kwargs = kwargs
         self.__will_raise_exception = False
         self.ref_type = self.ref_types[self.command_type]
@@ -436,5 +438,5 @@ class AnsibleModule(AnsibleCommand):
         super(AnsibleModule, self).__init__(*pargs, **kwargs)
         self.ansible_ref['module-name'] = {'type': 'string'}
 
-    def execute(self, group: Text, *args, **extra_args):
+    def execute(self, group: Text = 'all', *args, **extra_args):
         return super(AnsibleModule, self).execute(group, *args, **extra_args)
