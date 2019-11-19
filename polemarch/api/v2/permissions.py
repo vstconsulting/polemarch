@@ -8,6 +8,8 @@ class ModelPermission(permissions.IsAuthenticated):
 
     def get_user_permission(self, request, view, obj):  # nocv
         # pylint: disable=unused-argument
+        if hasattr(obj, 'owner') and obj.owner == request.user:
+            return True
         return False
 
     def has_object_permission(self, request, view, obj):

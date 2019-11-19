@@ -171,14 +171,14 @@ class _WithPermissionsSerializer(_SignalSerializer):
 
     def is_valid(self, *args, **kwargs):
         result = super(_WithPermissionsSerializer, self).is_valid(*args, **kwargs)
-        if not hasattr(self, 'instance'):  # nocv
+        if not hasattr(self, 'instance') or self.instance is None:  # noce
             self.validated_data['owner'] = self.validated_data.get(
                 'owner', self.current_user()
             )
         return result
 
     def current_user(self) -> User:
-        return self.context['request'].user  # nocv
+        return self.context['request'].user  # noce
 
 
 class UserSerializer(vst_serializers.UserSerializer):
@@ -770,7 +770,7 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
                   'owner',)
 
 
-class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer):
+class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer, _WithPermissionsSerializer):
     types = models.list_to_choices(models.Project.repo_handlers.keys())
     auth_types = ['NONE', 'KEY', 'PASSWORD']
     branch_auth_types = {t: "hidden" for t in models.Project.repo_handlers.keys()}
@@ -884,7 +884,7 @@ class ProjectTemplateCreateSerializer(vst_serializers.VSTSerializer):
             repo_auth=instance.repo_auth,
             auth_data=instance.auth_data or '',
         )
-        serializer = ProjectCreateMasterSerializer(data=data)
+        serializer = ProjectCreateMasterSerializer(data=data, context=self.context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return serializer.instance
