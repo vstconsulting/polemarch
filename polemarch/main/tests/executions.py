@@ -617,15 +617,20 @@ class BaseExecutionsTestCase(BaseTestCase):
         )
         bulk_data = self.project_bulk_sync_and_playbooks(prj['id'])
         bulk_data += [
+            self.get_mod_bulk('project', prj['id'], {}, 'playbook', 'get', filters='pb_filter='+_exec['playbook']),
+        ]
+        bulk_data += [
             self.get_mod_bulk('project', prj['id'], _exec, 'execute_playbook'),
         ] if execute else []
         results = self.make_bulk(bulk_data, 'put')
         self.assertEqual(results[0]['status'], 200)
         self.assertEqual(results[1]['status'], 200)
         self.assertEqual(results[1]['data']['count'], playbook_count)
+        self.assertEqual(results[2]['data']['count'], 1)
+        self.assertEqual(results[2]['data']['results'][0]['playbook'], results[1]['data']['results'][0]['playbook'])
         if not execute:
             return
-        self.assertEqual(results[2]['status'], 201)
+        self.assertEqual(results[3]['status'], 201)
 
     def module_tests(self, prj):
         bulk_data = [
@@ -634,6 +639,9 @@ class BaseExecutionsTestCase(BaseTestCase):
             ),
             self.get_mod_bulk(
                 'project', prj['id'], {}, 'module', 'get', filters='path=s3_website'
+            ),
+            self.get_mod_bulk(
+                'project', prj['id'], {}, 'module', 'get', filters='name=ping'
             ),
             self.get_mod_bulk(
                 'project', prj['id'], {}, 'module/<1[data][results][0][id]>', 'get'
@@ -645,7 +653,8 @@ class BaseExecutionsTestCase(BaseTestCase):
         self.assertTrue(results[0]['data']['count'] > 1000)
         self.assertEqual(results[1]['data']['count'], 1)
         self.assertEqual(results[1]['data']['results'][0]['name'], 's3_website')
-        self.assertEqual(results[2]['data']['data']['module'], 's3_website')
+        self.assertEqual(results[2]['data']['results'][0]['name'], 'ping')
+        self.assertEqual(results[3]['data']['data']['module'], 's3_website')
 
     def get_complex_bulk(self, item, op='add', **kwargs):
         return self.get_bulk(item, kwargs, op)

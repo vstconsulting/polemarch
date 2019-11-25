@@ -1872,6 +1872,7 @@ class OApiTestCase(BaseTestCase):
         params = [
             dict(name='playbook', description=True, required=False, type='string'),
             dict(name='playbook__not', description=True, required=False, type='string'),
+            dict(name='pb_filter', description=True, required=False, type='string'),
         ] + self.pm_filters + self.pm_name_filter + self.default_filters
         responses = dict(
             description=True,
@@ -1971,6 +1972,7 @@ class OApiTestCase(BaseTestCase):
         params = [
             dict(name='path', description=True, required=False, type='string'),
             dict(name='path__not', description=True, required=False, type='string'),
+            dict(name='name', description=True, required=False, type='string'),
         ] + self.default_filters
         responses = dict(
             description=True,
