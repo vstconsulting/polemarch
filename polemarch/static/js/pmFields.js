@@ -105,9 +105,95 @@ guiFields.module_autocomplete = class ModuleAutocompleteField extends guiFields.
 guiFields.group_autocomplete = class GroupAutocompleteField extends guiFields.playbook_autocomplete {};
 
 /**
+ * Mixin for classes of fields, that depended on project field value.
+ * These fields should format queryset urls containing project id.
+ * Project id can be either in instance's data or in route's url params.
+ */
+const field_depended_on_project_mixin = (Class_name) => class extends Class_name {
+    /**
+     * Redefinition of 'formatQuerySetUrl' method of fk guiField.
+     */
+    formatQuerySetUrl(url="", data={}, params={}) { /* jshint unused: false */
+        if(url.indexOf('{') == -1) {
+            return url;
+        }
+
+        let project = data.project || app.application.$route.params[path_pk_key];
+
+        if(project && typeof project == 'object' && project.value) {
+            project = project.value;
+        }
+
+        return url.format({[path_pk_key]: project});
+    }
+};
+
+/**
+ * History Mode guiField class.
+ */
+guiFields.history_mode = class HistoryModeField extends field_depended_on_project_mixin(guiFields.fk) {
+    /**
+     * Redefinition of 'getPrefetchValue' method of fk guiField.
+     */
+    getPrefetchValue(data={}, prefetch_data={}) {
+        return {
+            value: prefetch_data[this.options.additionalProperties.value_field],
+            prefetch_value: data[this.options.name],
+        };
+    }
+    /**
+     * Method returns string with value of instance's 'mode' field (playbook or module).
+     * @param data {object} Object with instance data.
+     * @return {string}
+     */
+    getMode(data={}) {
+        return data.kind.toLowerCase();
+    }
+    /**
+     * Method returns true, is instance's 'mode' field value equals to 'playbook', otherwise, returns false.
+     * @param data {object} Object with instance data.
+     * @return {boolean}
+     */
+    isPlaybookMode(data={}) {
+        return this.getMode(data) === 'playbook';
+    }
+    /**
+     * Redefinition of 'getPrefetchFilterName' method of fk guiField.
+     */
+    getPrefetchFilterName(data={}) {
+        return this.isPlaybookMode(data) ? 'pb_filter' : 'name';
+    }
+    /**
+     * Redefinition of 'isPrefetchDataForMe' method of fk guiField.
+     */
+    isPrefetchDataForMe(data={}, prefetch_data={}) {
+        let field_name = this.isPlaybookMode(data) ? 'playbook' : 'name';
+
+        return data[this.options.name] == prefetch_data[field_name];
+    }
+    /**
+     * Redefinition of 'getAppropriateQuerySet' method of fk guiField.
+     */
+    getAppropriateQuerySet(data={}, querysets=null) {
+        let qs = querysets || this.options.additionalProperties.querysets;
+
+        return qs.filter(item => item.url.indexOf(this.getMode(data)) !== -1)[0];
+    }
+};
+
+/**
+ * One History Mode guiField class.
+ */
+guiFields.one_history_mode = class OneHistoryModeField extends guiFields.history_mode {
+    static get mixins() {
+        return super.mixins.concat(gui_fields_mixins.one_history_string, gui_fields_mixins.one_history_fk);
+    }
+};
+
+/**
  * History Initiator guiField class.
  */
-guiFields.history_initiator = class HistoryInitiatorField extends guiFields.fk {
+guiFields.history_initiator = class HistoryInitiatorField extends field_depended_on_project_mixin(guiFields.fk) {
     static get initiatorTypes() {
         return history_initiator_types; /* globals history_initiator_types */
     }
@@ -143,25 +229,6 @@ guiFields.history_initiator = class HistoryInitiatorField extends guiFields.fk {
         }
 
         return selected;
-    }
-    /**
-     * Redefinition of 'formatQuerySetUrl' method of fk guiField.
-     */
-    formatQuerySetUrl(url="", data={}, params={}) { /* jshint unused: false */
-        if(url.indexOf('{') == -1) {
-            return url;
-        }
-
-        let project = data.project || app.application.$route.params[path_pk_key];
-
-        if(project && typeof project == 'object' && project.value) {
-            project = project.value;
-        }
-
-        let f_obj = {};
-        f_obj[path_pk_key] = project;
-
-        return url.format(f_obj);
     }
 };
 
@@ -295,7 +362,7 @@ guiFields.one_history_date_time = class OneHistoryDateTime extends guiFields.dat
             return;
         }
 
-         return moment(moment.tz(value, window.timeZone)).tz(moment.tz.guess()).format("YYYY-MM-DD HH:mm:ss");
+        return moment(moment.tz(value, window.timeZone)).tz(moment.tz.guess()).format("YYYY-MM-DD HH:mm:ss");
     }
 
 };

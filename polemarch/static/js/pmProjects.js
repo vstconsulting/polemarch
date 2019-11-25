@@ -435,3 +435,18 @@ tabSignal.connect("models[ProjectVariable].fields.beforeInit", (fields) => {
         fields.value.additionalProperties.callback = ProjectVariable_value_callback;
     }
 });
+
+/**
+ * Hides 'pb_filter' filter on the playbook list view.
+ */
+tabSignal.connect("views[/project/{" + path_pk_key + "}/playbook/].filters.beforeInit", filters => {
+    for(let key in filters) {
+        if(filters.hasOwnProperty(key)) {
+            let filter = filters[key];
+
+            if (filter.name == 'pb_filter') {
+                filter.hidden = true;
+            }
+        }
+    }
+});
