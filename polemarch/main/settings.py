@@ -17,7 +17,7 @@ INSTALLED_APPS += [
 ]
 
 # Additional middleware and auth
-MIDDLEWARE_CLASSES += [
+MIDDLEWARE += [
     '{}.main.middleware.PolemarchHeadersMiddleware'.format(VST_PROJECT_LIB_NAME),
 ]
 
