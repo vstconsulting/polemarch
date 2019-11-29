@@ -230,6 +230,8 @@ def save_to_beat(instance: PeriodicTask, **kwargs) -> NoReturn:
     elif instance.type == "CRONTAB":
         cron_data = instance.crontab_kwargs
         schedule, _ = CrontabSchedule.objects.get_or_create(**cron_data)
+        schedule.timezone = settings.TIME_ZONE
+        schedule.save()
         manager.create(crontab=schedule,
                        name=str(instance.id),
                        task=task,
