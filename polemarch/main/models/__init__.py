@@ -361,7 +361,7 @@ def cancel_task_on_delete_history(instance: History, **kwargs) -> NoReturn:
 
 
 @receiver(signals.post_migrate)
-def update_crontab_timezone_for_periodic_tasks(*args, **kwargs):
+def update_crontab_timezone_ptasks(*args, **kwargs):
     qs = CrontabSchedule.objects.exclude(timezone=settings.TIME_ZONE)
     qs.filter(periodictask__name__startswith='polemarch').update(timezone=settings.TIME_ZONE)
     qs.filter(periodictask__name__startswith='pmlib').update(timezone=settings.TIME_ZONE)
