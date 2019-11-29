@@ -7,7 +7,7 @@ import logging
 from collections import OrderedDict
 import django_celery_beat
 from django_celery_beat.models import IntervalSchedule, CrontabSchedule
-from django.db.models import signals, IntegerField
+from django.db.models import signals, IntegerField, Q
 from django.dispatch import receiver
 from django.db.models.functions import Cast
 from django.core.validators import ValidationError
@@ -356,3 +356,10 @@ def update_ptasks_with_templates(instance: Template, **kwargs) -> NoReturn:
 def cancel_task_on_delete_history(instance: History, **kwargs) -> NoReturn:
     exchange = KVExchanger(CmdExecutor.CANCEL_PREFIX + str(instance.id))
     exchange.send(True, 60) if instance.working else None
+
+
+@receiver(signals.post_migrate)
+def update_crontab_timezone_for_periodic_tasks(*args, **kwargs):
+    qs = CrontabSchedule.objects.exclude(timezone=settings.TIME_ZONE)
+    qs.filter(periodictask__name__startswith='polemarch').update(timezone=settings.TIME_ZONE)
+    qs.filter(periodictask__name__startswith='pmlib').update(timezone=settings.TIME_ZONE)
