@@ -27,6 +27,17 @@ const history_paths = [
 ];
 
 /**
+ * Variable, that stores object with additional properties for history_mode field's options.
+ */
+const history_mode_additionalProperties = {
+    list_paths: [
+        "/project/{" + path_pk_key + "}/playbook/",
+        "/project/{" + path_pk_key + "}/module/",
+    ],
+    value_field: 'id',
+};
+
+/**
  * Function, that adds signal for some history model's fields.
  * @param {string} model
  */
@@ -49,24 +60,21 @@ function historyModelsFieldsHandler(model) {
             fields.executor.format = 'history_executor';
             fields.executor.additionalProperties = {
                 model: {$ref: "#/definitions/User"},
-                // list_paths: ["/user/"],
                 value_field: "id",
                 view_field: "username",
             };
         }
 
-        if(fields.project) {
-            fields.project.format = 'fk';
-            fields.project.additionalProperties = {
-                model: {$ref: "#/definitions/Project"},
-                value_field: "id",
-                view_field: "name",
-            };
-        }
-
-        if(fields.options) {
-            fields.options.hidden = true;
-        }
+        [
+            'options',
+            'initiator_type',
+            'kind',
+            'project'
+        ].forEach(field => {
+            if(fields[field]) {
+                fields[field].hidden = true;
+            }
+        });
 
         if(fields.initiator) {
             fields.initiator.format = 'history_initiator';
@@ -77,12 +85,14 @@ function historyModelsFieldsHandler(model) {
             };
         }
 
-        if(fields.initiator_type) {
-            fields.initiator_type.hidden = true;
-        }
 
         if(fields.revision) {
             fields.revision.format = 'one_history_revision';
+        }
+
+        if(fields.mode) {
+            fields.mode.format = 'history_mode';
+            fields.mode.additionalProperties = {...history_mode_additionalProperties};
         }
     });
 }
@@ -92,8 +102,9 @@ function historyModelsFieldsHandler(model) {
  */
 function OneHistory_kind_mode_callback(parent_values={}) {
     let obj = {
-        format: 'one_history_string',
         save_value: true,
+        format: 'one_history_mode',
+        additionalProperties: {...history_mode_additionalProperties},
     };
 
     if(parent_values.kind) {
@@ -123,7 +134,6 @@ function OneHistoryFieldsHandler(model) {
 
         fields.executor.format = 'one_history_executor';
         fields.initiator.format = 'one_history_initiator';
-        fields.project.format = 'one_history_fk';
         fields.inventory.format = 'one_history_fk';
         fields.inventory.hidden = true;
         fields.execute_args.format = 'one_history_execute_args';

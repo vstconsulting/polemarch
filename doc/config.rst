@@ -367,9 +367,9 @@ Installation of additional packages to Polemarch
 ------------------------------------------------
 
 .. warning::
-    .rpm or .dep installation methods are depracated.
+    .rpm or .deb installation methods are depracated.
 
-If you want to install some additional package to Polemarch from .rpm or .dep,
+If you want to install some additional package to Polemarch from .rpm or .deb,
 you should run next command:
 
 .. sourcecode:: bash

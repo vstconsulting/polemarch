@@ -389,6 +389,7 @@ class GroupViewSet(_BaseGroupViewSet, _GroupMixin):
     __doc__ = _BaseGroupViewSet.__doc__
 
     def nested_allow_check(self):
+        # pylint: disable=no-member
         exception = _BaseGroupViewSet.serializer_class_one.ValidationException
         if not self.nested_parent_object.children and self.nested_name == 'group':
             raise exception("Group is not children.")
@@ -428,6 +429,7 @@ class InventoryViewSet(_GroupMixin):
 
     @deco.action(methods=["post"], detail=no)
     def import_inventory(self, request, **kwargs):
+        # pylint: disable=no-member
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(True)
         serializer.save()

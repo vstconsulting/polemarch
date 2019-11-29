@@ -765,7 +765,7 @@ const tmp_vars_list_mixin = {
 
                 return qs.formQueryAndSend('patch', template_instance.data)
                     .then(response => { /* jshint unused: false */
-                        return this.removeInstances_callback(selected);
+                        return this.removeInstances_callback_custom(selected);
                     });
             }).catch(error => {
                 debugger;
@@ -784,7 +784,7 @@ const tmp_vars_list_mixin = {
         /**
          * Redefinition of 'removeInstances_callback' method of list view.
          */
-        removeInstances_callback(selected) {
+        removeInstances_callback_custom(selected) {
             selected.forEach(item => {
                 guiPopUp.success(pop_up_msg.instance.success.remove.format(
                     [item, this.view.schema.name]

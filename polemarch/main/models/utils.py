@@ -13,7 +13,6 @@ from pathlib import Path
 from collections import namedtuple, OrderedDict
 from subprocess import Popen
 from functools import reduce
-import six
 from django.utils import timezone
 from vstutils.utils import tmp_file, KVExchanger, raise_context
 from vstutils.tools import get_file_value
@@ -109,7 +108,7 @@ class Executor(CmdExecutor):
         pm_ansible_path = ' '.join(self.pm_ansible())
         new_cmd = list()
         for one_cmd in cmd:
-            if isinstance(one_cmd, six.string_types):
+            if isinstance(one_cmd, str):
                 with raise_context():
                     one_cmd = one_cmd.decode('utf-8')
             new_cmd.append(one_cmd)
@@ -145,7 +144,7 @@ class AnsibleCommand(PMObject):
             self.tmpdir = tmpdir
             self._file = None
             self.is_file = True
-            if isinstance(inventory, (six.string_types, six.text_type)):
+            if isinstance(inventory, str):
                 self.raw, self.keys = self.get_from_file(inventory)
             else:
                 self.raw, self.keys = self.get_from_int(inventory)
@@ -177,18 +176,20 @@ class AnsibleCommand(PMObject):
         @property
         def file_name(self) -> Text:
             # pylint: disable=no-member
-            if isinstance(self.file, (six.string_types, six.text_type)):
+            if isinstance(self.file, str):
                 return self.file
             return self.file.name
 
         def close(self) -> NoReturn:
             # pylint: disable=no-member
             map(lambda key_file: key_file.close(), self.keys) if self.keys else None
-            if not isinstance(self.file, (six.string_types, six.text_type)):
+            if not isinstance(self.file, str):
                 self._file.close()
 
     def __init__(self, *args, **kwargs):
         self.args = args
+        if 'verbose' in kwargs:
+            kwargs['verbose'] = int(float(kwargs.get('verbose', 0)))
         self.kwargs = kwargs
         self.__will_raise_exception = False
         self.ref_type = self.ref_types[self.command_type]
@@ -229,7 +230,7 @@ class AnsibleCommand(PMObject):
         # pylint: disable=unused-argument,
         if re.match(r"[-]+BEGIN .+ KEY[-]+", value):
             # Add new line if not exists and generate tmpfile for private key value
-            value = value + '/n' if value[-1] != '/n' else value
+            value = value + '\n' if value[-1] != '\n' else value
             return self.__generate_arg_file(value)
         # Return path in project if it's path
         path = (Path(self.workdir)/Path(value).expanduser()).resolve()
@@ -436,5 +437,5 @@ class AnsibleModule(AnsibleCommand):
         super(AnsibleModule, self).__init__(*pargs, **kwargs)
         self.ansible_ref['module-name'] = {'type': 'string'}
 
-    def execute(self, group: Text, *args, **extra_args):
+    def execute(self, group: Text = 'all', *args, **extra_args):
         return super(AnsibleModule, self).execute(group, *args, **extra_args)

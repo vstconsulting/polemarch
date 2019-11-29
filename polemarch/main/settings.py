@@ -17,7 +17,7 @@ INSTALLED_APPS += [
 ]
 
 # Additional middleware and auth
-MIDDLEWARE_CLASSES += [
+MIDDLEWARE += [
     '{}.main.middleware.PolemarchHeadersMiddleware'.format(VST_PROJECT_LIB_NAME),
 ]
 
@@ -146,52 +146,73 @@ OPENAPI_EXTRA_LINKS['Repository'] = {
 # Polemarch handlers
 
 # Repos
-class GitSectionConfig(SectionConfig):
-    section = 'git'
-    subsections = ['clone', 'fetch']
-    section_defaults = {
-        'fetch': {
-            "force": True,
-        }
-    }
+class GitSection(BaseAppendSection):
+    pass
+
+
+class GitFetchSection(GitSection):
     types_map = {
-        'fetch.all': SectionConfig.bool,
-        'fetch.append': SectionConfig.bool,
-        'fetch.multiple': SectionConfig.bool,
-        'fetch.unshallow': SectionConfig.bool,
-        'fetch.update-shallow': SectionConfig.bool,
-        'fetch.force': SectionConfig.bool,
-        'fetch.keep': SectionConfig.bool,
-        'fetch.prune': SectionConfig.bool,
-        'fetch.prune-tags': SectionConfig.bool,
-        'fetch.no-tags': SectionConfig.bool,
-        'fetch.tags': SectionConfig.bool,
-        'fetch.no-recurse-submodules': SectionConfig.bool,
-        'fetch.update-head-ok': SectionConfig.bool,
-        'fetch.quiet': SectionConfig.bool,
-        'fetch.verbose': SectionConfig.bool,
-        'fetch.ipv4': SectionConfig.bool,
-        'fetch.ipv6': SectionConfig.bool,
-        'fetch.depth': SectionConfig.int,
-        'fetch.deepen': SectionConfig.int,
-        'fetch.jobs': SectionConfig.int,
-        'clone.local': SectionConfig.bool,
-        'clone.no-hardlinks': SectionConfig.bool,
-        'clone.shared': SectionConfig.bool,
-        'clone.dissociate': SectionConfig.bool,
-        'clone.quiet': SectionConfig.bool,
-        'clone.verbose': SectionConfig.bool,
-        'clone.single-branch': SectionConfig.bool,
-        'clone.no-single-branch': SectionConfig.bool,
-        'clone.no-tags': SectionConfig.bool,
-        'clone.shallow-submodules': SectionConfig.bool,
-        'clone.no-shallow-submodules': SectionConfig.bool,
-        'clone.depth': SectionConfig.int,
-        'clone.jobs': SectionConfig.int,
+        'all': cconfig.BoolType(),
+        'append': cconfig.BoolType(),
+        'multiple': cconfig.BoolType(),
+        'unshallow': cconfig.BoolType(),
+        'update-shallow': cconfig.BoolType(),
+        'force': cconfig.BoolType(),
+        'keep': cconfig.BoolType(),
+        'prune': cconfig.BoolType(),
+        'prune-tags': cconfig.BoolType(),
+        'no-tags': cconfig.BoolType(),
+        'tags': cconfig.BoolType(),
+        'no-recurse-submodules': cconfig.BoolType(),
+        'update-head-ok': cconfig.BoolType(),
+        'quiet': cconfig.BoolType(),
+        'verbose': cconfig.BoolType(),
+        'ipv4': cconfig.BoolType(),
+        'ipv6': cconfig.BoolType(),
+        'depth': cconfig.IntType(),
+        'deepen': cconfig.IntType(),
+        'jobs': cconfig.IntType(),
+    }
+
+    def all(self):
+        data = super().all()
+        data['force'] = True
+        return data
+
+
+class GitCloneSection(GitSection):
+    types_map = {
+        'local': cconfig.BoolType(),
+        'no-hardlinks': cconfig.BoolType(),
+        'shared': cconfig.BoolType(),
+        'dissociate': cconfig.BoolType(),
+        'quiet': cconfig.BoolType(),
+        'verbose': cconfig.BoolType(),
+        'single-branch': cconfig.BoolType(),
+        'no-single-branch': cconfig.BoolType(),
+        'no-tags': cconfig.BoolType(),
+        'shallow-submodules': cconfig.BoolType(),
+        'no-shallow-submodules': cconfig.BoolType(),
+        'depth': cconfig.IntType(),
+        'jobs': cconfig.IntType(),
     }
 
 
-git = GitSectionConfig()
+git_fetch = {}
+git_clone = {}
+
+if TESTS_RUN:
+    config['git'] = dict(fetch=dict(), clone=dict())
+
+if 'git' in config:
+    git = config['git']
+
+    if 'fetch' in git:
+        git_fetch = GitFetchSection('git.fetch', config, git['fetch']).all()
+
+    if 'clone' in git:
+        git_clone = GitCloneSection('git.clone', config, git['clone']).all()
+
 
 REPO_BACKENDS = {
     "MANUAL": {
@@ -200,8 +221,8 @@ REPO_BACKENDS = {
     "GIT": {
         "BACKEND": "{}.main.repo.Git".format(VST_PROJECT_LIB_NAME),
         "OPTIONS": {
-            "CLONE_KWARGS": git.get('CLONE', {}),
-            "FETCH_KWARGS": git.get('FETCH', {}),
+            "CLONE_KWARGS": git_clone,
+            "FETCH_KWARGS": git_fetch,
             "GIT_ENV": {
                 "GLOBAL": {
                     "GIT_SSL_NO_VERIFY": "true"
@@ -259,10 +280,8 @@ __EXECUTOR_DEFAULT = '{INTERPRETER} -m pm_ansible'
 EXECUTOR = main.get("executor_path", fallback=__EXECUTOR_DEFAULT).strip().split(' ')
 SELFCARE = '/tmp/'
 
-MANUAL_PROJECT_VARS = SectionConfig(
-    'project_manual_vars',
-    dict(forks=4, timeout=30, fact_caching_timeout=3600, poll_interval=5)
-).all()
+MANUAL_PROJECT_VARS = config['project_manual_vars'].all() or \
+                      dict(forks=4, timeout=30, fact_caching_timeout=3600, poll_interval=5)
 
 PROJECT_REPOSYNC_WAIT_SECONDS = main.getseconds('repo_sync_on_run_timeout', fallback='1:00')
 PROJECT_CI_HANDLER_CLASS = "{}.main.ci.DefaultHandler".format(VST_PROJECT_LIB_NAME)
@@ -312,7 +331,7 @@ SPA_STATIC += [
 if "test" in sys.argv:
     REPO_BACKENDS['GIT']['OPTIONS']['CLONE_KWARGS']['local'] = True
     CLONE_RETRY = 0
-    PROJECTS_DIR = '/tmp/polemarch_projects' + str(PY_VER)
-    HOOKS_DIR = '/tmp/polemarch_hooks' + str(PY_VER)
+    PROJECTS_DIR = '/tmp/polemarch_projects' + str(KWARGS['PY_VER'])
+    HOOKS_DIR = '/tmp/polemarch_hooks' + str(KWARGS['PY_VER'])
     os.makedirs(PROJECTS_DIR) if not os.path.exists(PROJECTS_DIR) else None
     os.makedirs(HOOKS_DIR) if not os.path.exists(HOOKS_DIR) else None

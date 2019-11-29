@@ -223,7 +223,7 @@ const gui_project_page_additional = Vue.component('gui_project_page_additional',
             let buttons = {};
 
             for(let key in data.playbooks) {
-                 if(data.playbook.hasOwnProperty(key)) {
+                 if(data.playbooks.hasOwnProperty(key)) {
                      let val = data.playbooks[key];
 
                      buttons[key] = {
@@ -433,5 +433,20 @@ function ProjectVariable_value_callback(parent_values={}) {
 tabSignal.connect("models[ProjectVariable].fields.beforeInit", (fields) => {
     if(fields.value && fields.value.additionalProperties) {
         fields.value.additionalProperties.callback = ProjectVariable_value_callback;
+    }
+});
+
+/**
+ * Hides 'pb_filter' filter on the playbook list view.
+ */
+tabSignal.connect("views[/project/{" + path_pk_key + "}/playbook/].filters.beforeInit", filters => {
+    for(let key in filters) {
+        if(filters.hasOwnProperty(key)) {
+            let filter = filters[key];
+
+            if (filter.name == 'pb_filter') {
+                filter.hidden = true;
+            }
+        }
     }
 });

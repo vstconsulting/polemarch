@@ -617,15 +617,20 @@ class BaseExecutionsTestCase(BaseTestCase):
         )
         bulk_data = self.project_bulk_sync_and_playbooks(prj['id'])
         bulk_data += [
+            self.get_mod_bulk('project', prj['id'], {}, 'playbook', 'get', filters='pb_filter='+_exec['playbook']),
+        ]
+        bulk_data += [
             self.get_mod_bulk('project', prj['id'], _exec, 'execute_playbook'),
         ] if execute else []
         results = self.make_bulk(bulk_data, 'put')
         self.assertEqual(results[0]['status'], 200)
         self.assertEqual(results[1]['status'], 200)
         self.assertEqual(results[1]['data']['count'], playbook_count)
+        self.assertEqual(results[2]['data']['count'], 1)
+        self.assertEqual(results[2]['data']['results'][0]['playbook'], results[1]['data']['results'][0]['playbook'])
         if not execute:
             return
-        self.assertEqual(results[2]['status'], 201)
+        self.assertEqual(results[3]['status'], 201)
 
     def module_tests(self, prj):
         bulk_data = [
@@ -634,6 +639,9 @@ class BaseExecutionsTestCase(BaseTestCase):
             ),
             self.get_mod_bulk(
                 'project', prj['id'], {}, 'module', 'get', filters='path=s3_website'
+            ),
+            self.get_mod_bulk(
+                'project', prj['id'], {}, 'module', 'get', filters='name=ping'
             ),
             self.get_mod_bulk(
                 'project', prj['id'], {}, 'module/<1[data][results][0][id]>', 'get'
@@ -645,7 +653,8 @@ class BaseExecutionsTestCase(BaseTestCase):
         self.assertTrue(results[0]['data']['count'] > 1000)
         self.assertEqual(results[1]['data']['count'], 1)
         self.assertEqual(results[1]['data']['results'][0]['name'], 's3_website')
-        self.assertEqual(results[2]['data']['data']['module'], 's3_website')
+        self.assertEqual(results[2]['data']['results'][0]['name'], 'ping')
+        self.assertEqual(results[3]['data']['data']['module'], 's3_website')
 
     def get_complex_bulk(self, item, op='add', **kwargs):
         return self.get_bulk(item, kwargs, op)
@@ -1602,3 +1611,113 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(results[8]['status'], 201)
         self.assertEqual(results[9]['status'], 409)
         self.assertEqual(results[-1]['status'], 204)
+
+    def test_periodic_task_edit(self):
+        results = self.make_bulk([
+            # 0
+            dict(
+                data_type=['project'], method='post',
+                data=dict(name='test_pt_errors', repo_type='MANUAL')
+            ),
+            # 1
+            dict(
+                data_type=['inventory'], method='post',
+                data=dict(name='test_inv')
+            ),
+            # 2
+            dict(data_type=['project', '<0[data][id]>', 'sync'], method='post'),
+            # 3
+            dict(
+                data_type=['project', '<0[data][id]>', 'inventory'], method='post',
+                data=dict(id='<1[data][id]>')
+            ),
+            # 4
+            dict(
+                data_type=['project', '<0[data][id]>', 'periodic_task'], method='post',
+                data=dict(
+                    mode="shell", schedule="* * * * *", type="CRONTAB",
+                    inventory='./localhost,', save_result=False,
+                    kind="MODULE", name="test_pt", enabled=True
+                )
+            ),
+            # 5
+            dict(data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>'], method='get'),
+            # 6
+            dict(
+                data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>', 'variables'], method='post',
+                data=dict(key='args', value='ls')
+            ),
+            # 7
+            dict(
+                data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>'], method='put',
+                data=dict(
+                    mode="shell", schedule="* * * * *", type="CRONTAB",
+                    inventory='<1[data][id]>', save_result=True,
+                    kind="MODULE", name="test_pt", enabled=True
+                )
+            ),
+            # 8
+            dict(data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>'], method='get'),
+            # 9
+            dict(
+                data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>'], method='put',
+                data=dict(
+                    mode="shell", schedule="* * * * *", type="CRONTAB",
+                    inventory='', save_result=True,
+                    kind="MODULE", name="test_pt", enabled=True
+                )
+            ),
+            # 10
+            dict(data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>'], method='get'),
+            # 11
+            dict(
+                data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>'], method='put',
+                data=dict(
+                    mode="shell", schedule="* * * * *", type="CRONTAB",
+                    inventory='./localhost, ', save_result=True,
+                    kind="MODULE", name="test_pt", enabled=True
+                )
+            ),
+            # 12
+            dict(data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>'], method='get'),
+            # 13
+            dict(
+                data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>', 'variables'], method='post',
+                data=dict(key='connection', value='local')
+            ),
+            # 14
+            dict(
+                data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>', 'variables'], method='post',
+                data=dict(key='verbose', value='4')
+            ),
+            # 15
+            dict(data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>', 'execute'], method='post'),
+            # 16
+            dict(data_type=['project', '<0[data][id]>', 'history', '<15[data][history_id]>'], method='get'),
+            # 17
+            dict(data_type=['project', '<0[data][id]>'], method='delete'),
+        ], 'put')
+
+        for result in results:
+            self.assertIn(result['status'], [200, 201, 204])
+
+        # Grouped request indexes by response code
+        statuses = {
+            200: (2, 5, 7, 8, 9, 10, 11, 12, 16,),
+            201: (0, 1, 3, 4, 6, 13, 14, 15),
+            204: (17,)
+        }
+        for status, indexes in statuses.items():
+            for i in indexes:
+                self.assertEqual(
+                    results[i]['status'], status,
+                    msg='Bulk index: {}, Response status: `{}`!=`{}`, Response data:'.format(
+                        i, results[i]['status'], status, results[i]['data']
+                    )
+                )
+
+        self.assertEqual(results[5]['data']['inventory'], './localhost,')
+        self.assertEqual(results[8]['data']['inventory'], 1)
+        self.assertEqual(results[10]['data']['inventory'], '')
+        self.assertEqual(results[12]['data']['inventory'], './localhost, ')
+        self.assertEqual(results[-2]['data']['status'], 'OK')

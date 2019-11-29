@@ -78,6 +78,19 @@ def clear_old_extentions(extensions_list, packages):
             os.remove(filename)
 
 
+def make_extention(module_name, files, extra_compile_args, main_include_dir=os.path.join(os.getcwd(), 'include')):
+    include_dirs = list(filter(
+        lambda f: bool(f) and os.path.exists(f) and os.path.isdir(f),
+        [os.path.join(module_name.split('.')[0], 'include'), main_include_dir]
+    ))
+
+    return Extension(
+        module_name, files,
+        extra_compile_args=extra_compile_args,
+        include_dirs=include_dirs
+    )
+
+
 def make_extensions(extensions_list, packages):
     if not isinstance(extensions_list, list):
         raise Exception("Extension list should be `list`.")
@@ -107,7 +120,7 @@ def make_extensions(extensions_list, packages):
         "-pipe", "-std=c99"
     ]
     ext_modules = list(
-        Extension(m, f, extra_compile_args=extra_compile_args)
+        make_extention(m, f, extra_compile_args)
         for m, f in extensions_dict.items()
     )
     ext_count = len(ext_modules)
@@ -318,32 +331,7 @@ def make_setup(**opts):
 ########################################################################################
 # end block
 
-
-ext_list = [
-    "polemarch.api.v2.filters",
-    "polemarch.api.v2.permissions",
-    "polemarch.api.v2.serializers",
-    "polemarch.api.v2.swagger",
-    "polemarch.api.v2.views",
-    "polemarch.api.signals",
-    "polemarch.main.models.base",
-    "polemarch.main.models.hooks",
-    "polemarch.main.models.hosts",
-    "polemarch.main.models.projects",
-    "polemarch.main.models.tasks",
-    "polemarch.main.models.users",
-    "polemarch.main.models.utils",
-    "polemarch.main.models.vars",
-    'polemarch.main.settings',
-    'polemarch.main.hooks.base',
-    'polemarch.main.hooks.http',
-    'polemarch.main.hooks.script',
-    'polemarch.main.repo._base',
-    'polemarch.main.repo.manual',
-    'polemarch.main.repo.tar',
-    'polemarch.main.repo.vcs',
-    'polemarch.main.validators',
-]
+ext_list = []
 
 if 'develop' in sys.argv:
     ext_list = []

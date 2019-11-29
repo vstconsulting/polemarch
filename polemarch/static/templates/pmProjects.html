@@ -1,18 +1,16 @@
 <!-- template of content_additional of project page_type view -->
 <script type="text/x-template" id="template_project_page_additional">
     <div class="card card-info quick-playbook-run-form">
-        <div class="card-header with-border" style="min-height: 50px;">
+        <div class="card-header with-border card-header-custom">
             Quick playbook execution form
-            <div class="card-tools pull-right" v-if="card_collapsed_button">
-                <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon"
-                        @click="toggleCardCollapsed"
-                >
-                    <i class="fa" :class="card_collapsed ? 'fa-plus' : 'fa-minus'"></i>
-                </button>
-            </div>
+            <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon btn-right"
+                    @click="toggleCardCollapsed" v-if="card_collapsed_button"
+            >
+                <i class="fa" :class="card_collapsed ? 'fa-plus' : 'fa-minus'"></i>
+            </button>
         </div>
         <transition name="fade">
-            <div class="card-body" v-show="!card_collapsed">
+            <div class="card-body card-body-custom card-body-page" v-show="!card_collapsed">
                 <field_form :field="base_fields" :wrapper_opt="{use_prop_data: true}"
                             :prop_data="{base_fields: base_fields_value}"
                             @setValueInStore="formOnChangeHandler('base_fields_value', $event)"
