@@ -221,21 +221,23 @@ def save_to_beat(instance: PeriodicTask, **kwargs) -> NoReturn:
     if instance.type == "INTERVAL":
         units = IntervalSchedule.SECONDS
         secs = instance.get_schedule()
-        schedule, _ = IntervalSchedule.objects.get_or_create(every=secs,
-                                                             period=units)
-        manager.create(interval=schedule,
-                       name=str(instance.id),
-                       task=task,
-                       args=json.dumps([instance.id]))
+        schedule, _ = IntervalSchedule.objects.get_or_create(every=secs, period=units)
+        manager.create(
+            interval=schedule,
+            name=str(instance.id),
+            task=task,
+            args=json.dumps([instance.id])
+        )
     elif instance.type == "CRONTAB":
         cron_data = instance.crontab_kwargs
+        cron_data['timezone'] = settings.TIME_ZONE
         schedule, _ = CrontabSchedule.objects.get_or_create(**cron_data)
-        schedule.timezone = settings.TIME_ZONE
-        schedule.save()
-        manager.create(crontab=schedule,
-                       name=str(instance.id),
-                       task=task,
-                       args=json.dumps([instance.id]))
+        manager.create(
+            crontab=schedule,
+            name=str(instance.id),
+            task=task,
+            args=json.dumps([instance.id])
+        )
 
 
 @receiver(signals.post_delete, sender=PeriodicTask)
@@ -244,18 +246,22 @@ def delete_from_beat(instance: PeriodicTask, **kwargs) -> NoReturn:
         return
     manager = django_celery_beat.models.PeriodicTask.objects
     celery_tasks = manager.filter(name=str(instance.id))
+    types_dict = {
+        'crontab_id': CrontabSchedule,
+        'interval_id': IntervalSchedule
+    }
+    qs_dict = {i: [] for i in types_dict}
     for task in celery_tasks:
-        qs_dict = {
-            'crontab_id': CrontabSchedule.objects.all(),
-            'interval_id': IntervalSchedule.objects.all(),
-        }
-        for field in ['crontab_id', 'interval_id']:
+        for field in qs_dict:
             pk = getattr(task, field)
             if pk is None:
                 continue
             others = manager.filter(**{field: pk}).exclude(pk=task.id)
             if not others.exists():
-                qs_dict[field].get(id=pk).delete()
+                qs_dict[field].append(pk)
+    for key, values in qs_dict.items():
+        if values:
+            types_dict[key].objects.filter(id__in=values).delete()
     celery_tasks.delete()
 
 

@@ -1,4 +1,4 @@
-PY = python2
+PY = python
 PIP = $(PY) -m pip
 PY_VERSION = $(shell $(PY) --version 2>&1 | tail -c +8)
 PYTHON_BIN = $(shell $(PY) -c 'import sys, os; print(os.path.dirname(sys.executable))')
@@ -12,7 +12,7 @@ TESTS =
 NAMEBASE = polemarch
 USER = $(NAMEBASE)
 NAME = $(NAMEBASE)
-VER = $(shell $(PY) -c 'import $(NAME); print($(NAME).__version__)')
+VER = $(shell $(PY) setup.py --version | tr -d '\n')
 PROJECT_CTL = $(NAME)ctl
 MAIN_APP = main
 VSTUTILS_REQ = $(shell cat requirements-doc.txt | grep vstutils | sed 's/\[.*\]/[doc]/')
@@ -86,7 +86,7 @@ pylint:
 	tox -e pylint
 
 build: build-clean print_vars
-	-rm -rf dist
+	# -rm -rf dist
 	$(PY) setup.py sdist -v
 
 pre_compile: build-clean print_vars
@@ -95,7 +95,7 @@ pre_compile: build-clean print_vars
 	$(PIP) install -U $(VSTUTILS)
 
 compile: pre_compile
-	-rm -rf dist
+	# -rm -rf dist
 	$(PY) setup.py compile -v
 
 wheel: pre_compile
@@ -208,3 +208,9 @@ deploy:
 
 destroy:
 	ansible-playbook destroy-openstack.yml -v --private-key $(OPENSTACK_KEY) $(DEPLOY_ARGS)
+
+twine:
+	for file in $(shell find dist/*.{tar.gz,whl} | grep ${NAME} | grep ${VER}); do \
+		echo $$file; \
+		twine upload -u $(PYPI_UPLOAD_NAME) -p $(PYPI_UPLOAD_PASSWORD) $$file || echo "Filed to upload ${file}"; \
+	done
