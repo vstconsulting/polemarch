@@ -2,11 +2,10 @@
 image: onegreyonewhite/tox:tox
 
 variables:
-  TESTS: "polemarch.main.tests"
   GET_SOURCES_ATTEMPTS: 3
   ARTIFACT_DOWNLOAD_ATTEMPTS: 3
   RESTORE_CACHE_ATTEMPTS: 3
-  DJANGO_LOG_LEVEL: 'ERROR'
+  DJANGO_LOG_LEVEL: 'DEBUG'
   TOX_ARGS: "--workdir /cache/.tox_polemarch_${CI_BUILD_REF_NAME}"
   CCACHE_DIR: /cache/.ccache
   CC: ccache gcc
@@ -98,7 +97,6 @@ master_coverage:
   <<: *branch_tests
   variables:
     TOX_ENVS: "py37-coverage"
-  except:
   only:
     refs:
       - master
@@ -202,7 +200,7 @@ publish_pypi:
       - $PYPI_UPLOAD_PASSWORD
       - $PYPI_UPLOAD_NAME
   script:
-  - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz dist/*.whl
+  - make twine
 
 
 publish_release:
@@ -220,6 +218,6 @@ publish_release:
   before_script:
   - git config --global user.name "${GITLAB_USER_NAME}"
   - git config --global user.email "${GITLAB_USER_EMAIL}"
-  - git push https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/vstconsulting/polemarch.git "${CI_COMMIT_TAG}"
+  - git push https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/vstconsulting/polemarch.git ${CI_COMMIT_TAG} || echo "Failed to upload to github."
   script:
   - make test ENVS=release
