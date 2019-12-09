@@ -312,8 +312,7 @@ const gui_project_page_additional = Vue.component('gui_project_page_additional',
          * @param {object} value New form value.
          */
         formOnChangeHandler(prop, value) {
-            this[prop] = value;
-            this[prop] = { ...this[prop] };
+            this[prop] = { ...this[prop], ...value };
         },
     },
 });
