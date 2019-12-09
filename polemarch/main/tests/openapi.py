@@ -8,6 +8,7 @@ openapi_schema_yaml = Path(__file__).parent.parent.parent.parent / 'doc' / 'api_
 
 
 class OApiTestCase(BaseTestCase):
+    maxDiff = None
 
     @skipUnless(openapi_schema_yaml.is_file(), "OpenApi schema file doesn't exist")
     def test_openapi_schema(self):
@@ -19,7 +20,6 @@ class OApiTestCase(BaseTestCase):
         openapi_schema_yml['host'] = self.server_name
         openapi_schema_yml['schemes'][0] = 'https'
         openapi_schema_yml['info']['contact'] = schema['info']['contact']
-        openapi_schema_yml['info']['x-versions']['vstutils'] = schema['info']['x-versions']['vstutils']
-        openapi_schema_yml['info']['x-versions']['ansible'] = schema['info']['x-versions']['ansible']
+        openapi_schema_yml['info']['x-versions'] = schema['info']['x-versions']
 
         self.assertDictEqual(openapi_schema_yml, schema)

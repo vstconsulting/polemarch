@@ -86,7 +86,6 @@ py37-coverage:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
-  allow_failure: true
 
 py36-install:
   <<: *branch_tests
