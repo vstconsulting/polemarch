@@ -14,7 +14,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.db.models import functions as dbfunc, Count
 from django.utils.timezone import now
 from django.test import Client
@@ -30,6 +30,7 @@ from .projects import Project, HISTORY_ID
 
 logger = logging.getLogger("polemarch")
 InvOrString = TypeVar('InvOrString', str, int, Inventory, None)
+User = get_user_model()
 
 
 # Block of real models

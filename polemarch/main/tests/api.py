@@ -3,12 +3,7 @@ from datetime import timedelta
 from django.test import Client
 from django.contrib.auth.hashers import make_password
 from django.utils.timezone import now
-
-try:
-    from mock import patch
-except ImportError:  # nocv
-    from unittest.mock import patch
-
+from unittest.mock import patch
 from vstutils.utils import redirect_stdany
 from ._base import BaseTestCase, json
 from .hosts import InventoriesTestCase, InvBaseTestCase  # noqa: F401

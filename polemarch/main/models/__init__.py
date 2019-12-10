@@ -17,7 +17,7 @@ from vstutils.utils import raise_context, KVExchanger
 from .vars import Variable
 from .hosts import Host, Group, Inventory
 from .projects import Project, Task, Module, ProjectTemplate, list_to_choices
-from .users import BaseUser, UserGroup, ACLPermission, UserSettings
+from .users import get_user_model, UserGroup, ACLPermission, UserSettings
 from .tasks import PeriodicTask, History, HistoryLines, Template
 from .hooks import Hook
 from ..validators import RegexValidator, validate_hostname
@@ -26,6 +26,7 @@ from ..utils import AnsibleArgumentsReference, CmdExecutor
 
 
 logger = logging.getLogger('polemarch')
+BaseUser = get_user_model()
 
 
 #####################################

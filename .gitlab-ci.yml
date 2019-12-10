@@ -86,7 +86,6 @@ py37-coverage:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
-  allow_failure: true
 
 py36-install:
   <<: *branch_tests
@@ -184,23 +183,24 @@ release_pypi:
     TOX_ARGS: ""
   script:
    - make test ENVS=build
+   - make twine
   allow_failure: true
   artifacts:
-    name: "release-rpm-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
+    name: "release-packages-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
     paths:
     - dist/
 
-publish_pypi:
-  stage: publish
-  image: onegreyonewhite/tox:tox
-  only:
-    refs:
-      - tags
-    variables:
-      - $PYPI_UPLOAD_PASSWORD
-      - $PYPI_UPLOAD_NAME
-  script:
-  - make twine
+#publish_pypi:
+#  stage: publish
+#  image: onegreyonewhite/tox:tox
+#  only:
+#    refs:
+#      - tags
+#    variables:
+#      - $PYPI_UPLOAD_PASSWORD
+#      - $PYPI_UPLOAD_NAME
+#  script:
+#  - make twine
 
 
 publish_release:

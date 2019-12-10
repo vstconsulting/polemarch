@@ -110,6 +110,7 @@ class AbstractModel(ACLModel):
         'ansible_ssh_pass',
         'ansible_ssh_private_key_file',
         'ansible_become_pass',
+        'ansible_become_password',
         'ansible_password'
     ]
 
