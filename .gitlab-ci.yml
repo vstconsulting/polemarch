@@ -71,15 +71,7 @@ code_style:
     refs:
       - merge_requests
       - web
-    changes:
-    - polemarch/main/**/*
-    - polemarch/api/**/*
-    - polemarch/static/js/*
-    - requirements.txt
-    - Makefile
-    - tox.ini
-    - .pylintrc
-    - .pep8
+      - master
   retry: 2
 
 py37-coverage:
@@ -91,14 +83,6 @@ py36-install:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
-
-master_coverage:
-  <<: *branch_tests
-  variables:
-    TOX_ENVS: "py37-coverage"
-  only:
-    refs:
-      - master
 
 # Realese
 ###########################################
