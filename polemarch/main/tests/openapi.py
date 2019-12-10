@@ -4,7 +4,9 @@ import yaml
 from ._base import BaseTestCase
 
 
-openapi_schema_yaml = Path(__file__).parent.parent.parent.parent / 'doc' / 'api_schema.yaml'
+openapi_schema_yaml = Path.cwd().parent.parent / 'doc' / 'api_schema.yaml'
+if not openapi_schema_yaml.exists():
+    openapi_schema_yaml = Path(__file__).parent.parent.parent.parent / 'doc' / 'api_schema.yaml'
 
 
 class OApiTestCase(BaseTestCase):

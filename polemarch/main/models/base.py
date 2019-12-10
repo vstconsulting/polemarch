@@ -3,14 +3,14 @@ from __future__ import unicode_literals
 from typing import Callable, Any
 from django.db import models
 from django.conf import settings
-from django.contrib.auth.models import User as BaseUser
+from django.contrib.auth import get_user_model
 from django.utils.module_loading import import_string
 from vstutils.utils import classproperty
 from vstutils.models import BQuerySet as _BQSet, BaseModel as _BM, Manager as _BManager
 
 
 def first_staff_user() -> int:
-    return BaseUser.objects.filter(is_staff=True).first().id
+    return get_user_model().objects.filter(is_staff=True).first().id
 
 
 class BQuerySet(_BQSet):

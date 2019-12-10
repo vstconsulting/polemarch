@@ -5,7 +5,6 @@ import logging
 import json
 
 from django.contrib.auth.models import Group as BaseGroup
-from django.contrib.auth.models import User as BaseUser
 from django.contrib.auth import get_user_model
 from .base import models, BModel, ACLModel, BQuerySet
 
@@ -50,7 +49,7 @@ class UserGroup(BaseGroup, ACLModel):
 
 class UserSettings(BModel):
     settings = models.TextField(default="{}")
-    user     = models.OneToOneField(BaseUser, on_delete=models.CASCADE,
+    user     = models.OneToOneField(get_user_model(), on_delete=models.CASCADE,
                                     related_query_name="settings",
                                     related_name="settings")
 
