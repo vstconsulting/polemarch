@@ -40,9 +40,11 @@ stages:
     refs:
       - merge_requests
       - web
+      - master
     changes:
       - polemarch/main/**/*
       - polemarch/api/**/*
+      - polemarch/__init__.py
       - tests.py
       - setup.{py,cfg}
       - MANIFEST.in
@@ -86,57 +88,6 @@ py36-install:
 
 # Realese
 ###########################################
-review_environment:
-  stage: release
-  image: onegreyonewhite/tox:tox
-  variables:
-    INSTANCE_NAME: "${CI_COMMIT_REF_NAME}"
-    TOX_ARGS: "--workdir /cache/.tox_polemarch"
-  before_script:
-    - source $OPENSTACKRC
-    - chmod 0600 $OPENSTACK_KEY
-    - chmod 0600 $CI_PROJECT_DIR
-  script:
-    - make test ENVS=deploy
-  environment:
-    name: "${CI_COMMIT_REF_NAME}"
-    on_stop: delete_environment
-  only:
-    variables:
-      - $OPENSTACKRC
-      - $OPENSTACK_KEY
-  when: manual
-
-delete_environment:
-  stage: release
-  image: onegreyonewhite/tox:tox
-  variables:
-    INSTANCE_NAME: "${CI_COMMIT_REF_NAME}"
-    INSTANCE_DELETE: "yes"
-    TOX_ARGS: "--workdir /cache/.tox_polemarch"
-  before_script:
-    - source $OPENSTACKRC
-  script:
-    - make test ENVS=destroy
-  environment:
-    name: "${CI_COMMIT_REF_NAME}"
-    action: stop
-  when: manual
-
-
-pages:
-  stage: release
-  script:
-    - make test ENVS=builddoc
-    - mv doc/_build/html public
-  artifacts:
-    paths:
-    - public
-  only:
-    refs:
-      - developer
-  when: always
-
 release:
   stage: release
   image: onegreyonewhite/tox:tox
@@ -154,6 +105,21 @@ release:
   script:
     - bash autorelease.sh
 
+pages:
+  stage: release
+  script:
+    - make test ENVS=builddoc
+    - mv doc/_build/html public
+  artifacts:
+    paths:
+    - public
+  only:
+    refs:
+      - developer
+      - tags
+  when: always
+
+
 release_pypi:
   stage: release
   image: onegreyonewhite/tox:centos6
@@ -167,30 +133,30 @@ release_pypi:
     TOX_ARGS: ""
   script:
    - make test ENVS=build
-   - make twine
   allow_failure: true
   artifacts:
     name: "release-packages-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
     paths:
     - dist/
 
-#publish_pypi:
-#  stage: publish
-#  image: onegreyonewhite/tox:tox
-#  only:
-#    refs:
-#      - tags
-#    variables:
-#      - $PYPI_UPLOAD_PASSWORD
-#      - $PYPI_UPLOAD_NAME
-#  script:
-#  - make twine
-
+publish_pypi:
+  stage: publish
+  image: onegreyonewhite/tox:tox
+  needs: ["release_pypi"]
+  only:
+    refs:
+      - tags
+    variables:
+      - $PYPI_UPLOAD_PASSWORD
+      - $PYPI_UPLOAD_NAME
+  script:
+  - make twine
 
 publish_release:
   stage: publish
   image: onegreyonewhite/tox:ubuntu
   allow_failure: true
+  needs: ["release_pypi"]
   only:
     refs:
     - tags
