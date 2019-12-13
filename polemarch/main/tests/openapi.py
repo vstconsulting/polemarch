@@ -14,6 +14,19 @@ class OApiTestCase(BaseTestCase):
 
     @skipUnless(openapi_schema_yaml.is_file(), "OpenApi schema file doesn't exist")
     def test_openapi_schema(self):
+        '''
+        Regenerate new doc schema:
+
+        Examples:
+        .. sourcecode:: bash
+
+            python -m polemarch generate_swagger \
+                                    --format yaml \
+                                    --overwrite \
+                                    --url 'http://localhost:8080/' \
+                                    --user admin \
+                                    -m doc/api_schema.yaml
+        '''
         schema = self.get_result('get', '/api/openapi/?format=openapi')
 
         with openapi_schema_yaml.open('r') as fin:
@@ -23,5 +36,17 @@ class OApiTestCase(BaseTestCase):
         openapi_schema_yml['schemes'][0] = 'https'
         openapi_schema_yml['info']['contact'] = schema['info']['contact']
         openapi_schema_yml['info']['x-versions'] = schema['info']['x-versions']
+        openapi_schema_yml['info']['x-links'] = schema['info']['x-links']
 
-        self.assertDictEqual(openapi_schema_yml, schema)
+        for key in list(filter(lambda x: 'Ansible' in x, openapi_schema_yml['definitions'].keys())):
+            del openapi_schema_yml['definitions'][key]
+            del schema['definitions'][key]
+
+        for key, value in openapi_schema_yml.items():
+            cmp_value = schema.get(key, None)
+            if isinstance(value, dict):
+                self.assertDictEqual(value, cmp_value, key)
+            elif isinstance(value, list):
+                self.assertListEqual(value, cmp_value, key)
+            else:
+                self.assertEqual(value, cmp_value, key)

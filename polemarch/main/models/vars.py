@@ -1,6 +1,6 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
-from typing import Any, NoReturn, Tuple, Dict, List, Text
+from typing import Any, NoReturn, Tuple, Dict, List, Text, Union
 import logging
 import uuid
 
@@ -137,7 +137,7 @@ class AbstractModel(ACLModel):
         for key, value in other_vars.items():
             self.variables.create(key=key, value=value)
 
-    def get_vars(self) -> [OrderedDict, Dict]:
+    def get_vars(self) -> Union[OrderedDict, Dict]:
         qs = self.variables.all().sort_by_key().values_list('key', 'value')
         return reduce(update_boolean, self.BOOLEAN_VARS, OrderedDict(qs))
 

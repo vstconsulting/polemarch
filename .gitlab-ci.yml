@@ -73,7 +73,6 @@ code_style:
     refs:
       - merge_requests
       - web
-      - master
   retry: 2
 
 py37-coverage:

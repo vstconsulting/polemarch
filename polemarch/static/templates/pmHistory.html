@@ -103,7 +103,7 @@
                             <section>
                                 <div class="card card-info">
                                     <div class="card-header with-border card-header-custom">
-                                        <span>Execution output</span>
+                                        <span>{{ $t('execution output') | capitalize }}</span>
 
 
                                         <!-- Button for collapse  and expand this section -->
@@ -140,7 +140,7 @@
                         <section class="col-lg-12 col-xl-3">
                             <div class="card card-info">
                                 <div class="card-header with-border card-header-custom">
-                                    <span>Details</span>
+                                    <span>{{ $t('detail') | capitalize }}</span>
                                     <!-- Button for collapse  and expand this section -->
                                     <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon"
                                             @click="information_toggle = !information_toggle" style="float: right;"
@@ -173,7 +173,7 @@
 <script type="text/x-template" id="template_history_stdout">
     <div>
         <span>
-            <b>stdout</b> (<a :href="raw_stdout_link" target="_blank" class="revers-color">Full raw stdout</a>)
+            <b>{{ $t('stdout') }}</b> (<a :href="raw_stdout_link" target="_blank" class="revers-color">{{ $t('full raw stdout') | capitalize }}</a>)
             <i class="fa fa-spinner fa-pulse fa-fw" v-show="loading"></i>
         </span>
         <pre class="history-stdout" v-html="linesHTML" @scroll="scrollHandler"></pre>

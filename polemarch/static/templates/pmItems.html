@@ -37,7 +37,7 @@
                         <span @click="goToHistoryRecord(-1)" class="btn btn-default btn-previous-page">
                             <span class="fa fa-arrow-left"></span>
                         </span>
-                                <span class="h1-header" > Error {{ error.status }} </span>
+                                <span class="h1-header" > {{ $t('error') | capitalize }} {{ error.status }} </span>
                             </h1>
                         </div>
                     </div>
@@ -71,7 +71,7 @@
             <section class="content-header">
                 <div class="container-fluid">
                     <h1>
-                        <span class="h1-header" > {{ title }} </span>
+                        <span class="h1-header" > {{ $t(title.toLowerCase()) | capitalize }} </span>
                     </h1>
                 </div>
             </section>
@@ -92,16 +92,16 @@
 <script type="text/x-template" id="template_w_history_chart_content_header">
     <div style="display: contents;">
         <transition name="fade">
-            <div class="pull-right" id="period-list" style="width:215px; min-width:145px;" v-if="!item.collapsed">
+            <div class="pull-right" id="period-list" style="" v-if="!item.collapsed">
                 <div class="chart-period-select-wrapper">
-                    <label style="float:left; margin-right:10px; line-height:26px;" id="chart-period-label">Period</label>
+                    <label style="float:left; margin-right:10px; line-height:26px;" id="chart-period-label">{{ $t('period') | capitalize }}</label>
                     <select id="chart-period" class="form-control chart-period-select" aria-label="Chart Period"
                             @change="onChangeHandler($event.target.value)" aria-labelledby="chart-period-label"
                     >
                         <option v-for="option in period_options" :value="option.value"
                                 :selected="isOptionSelected(option)"
                         >
-                            {{ option.title }}
+                            {{ $t(option.title) }}
                         </option>
                     </select>
                 </div>
@@ -120,11 +120,11 @@
         </div>
         <div class="col-lg-4">
             <div style="width: 100%;" class="text-data" id="chart_progress_bars">
-                <h5 class="text-center" style="margin-top:25px;">Statistic</h5>
+                <h5 class="text-center" style="margin-top:25px;">{{ $t('statistic') | capitalize }}</h5>
                 <template v-for="line in item.lines">
                     <template v-if="line.active && progressBarsData[line.name]">
                         <div class="progress-group">
-                            {{ line.name }}
+                            {{ $t(line.name) }}
                             <span class="float-right">
                                 <b> {{ progressBarsData[line.name].sum }} </b>/ {{ progressBarsData[line.name].all }}
                             </span>

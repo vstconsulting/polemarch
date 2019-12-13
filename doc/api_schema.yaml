@@ -58,7 +58,7 @@ info:
     library: 1.5.2
     vstutils: 2.11.2
     django: 2.2.7
-    ansible: 2.8.7
+    ansible: 2.9.2
   version: v2
 host: localhost:8080
 schemes:
@@ -11423,7 +11423,7 @@ definitions:
           view_field: path
       args:
         title: Args
-        description: module arguments
+        description: host pattern
         type: string
       background:
         title: Background
@@ -11436,7 +11436,7 @@ definitions:
         default: false
       become_method:
         title: Become method
-        description: privilege escalation method to use (default=%default), use `ansible-doc
+        description: privilege escalation method to use (default=sudo), use `ansible-doc
           -t become -l` to list valid choices.
         type: string
       become_user:
@@ -11479,11 +11479,6 @@ definitions:
             $ref: '#/definitions/Inventory'
           value_field: id
           view_field: name
-      key_file:
-        title: Key file
-        description: use this file to authenticate the connection
-        type: string
-        format: secretfile
       limit:
         title: Limit
         description: further limit selected hosts to an additional pattern
@@ -11602,6 +11597,10 @@ definitions:
             $ref: '#/definitions/Playbook'
           value_field: playbook
           view_field: name
+      args:
+        title: Args
+        description: Playbook(s)
+        type: string
       become:
         title: Become
         description: run operations with become (does not imply password prompting)
@@ -11609,7 +11608,7 @@ definitions:
         default: false
       become_method:
         title: Become method
-        description: privilege escalation method to use (default=%default), use `ansible-doc
+        description: privilege escalation method to use (default=sudo), use `ansible-doc
           -t become -l` to list valid choices.
         type: string
       become_user:
@@ -11662,11 +11661,6 @@ definitions:
             $ref: '#/definitions/Inventory'
           value_field: id
           view_field: name
-      key_file:
-        title: Key file
-        description: use this file to authenticate the connection
-        type: string
-        format: secretfile
       limit:
         title: Limit
         description: further limit selected hosts to an additional pattern
