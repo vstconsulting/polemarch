@@ -349,21 +349,32 @@ body {
     display: block;
 }
 
+
+
+.chart-period-select-wrapper {
+    display: flex;
+    margin-right: 10px;
+}
+
+.chart-period-select {
+    width: 100%;
+    height: 30px!important;
+    line-height: 30px;
+    padding: 3px 12px;
+    display: inline-block;
+    float: left;
+}
+
 @media (max-width: 452px) {
     #period-list {
         width: 100%!important;
         margin-top: 10px;
     }
 
-}
+    .chart-period-select-wrapper {
+        margin-right: 0;
+    }
 
-.chart-period-select {
-    max-width: 145px;
-    height: 30px!important;
-    line-height: 30px;
-    padding: 3px 12px;
-    display: inline-block;
-    float: left;
 }
 
 .guifield-one_history_boolean .boolean-true, .guifield-one_history_boolean .boolean-false{

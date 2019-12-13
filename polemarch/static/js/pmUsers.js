@@ -26,7 +26,7 @@ const user_settings_page_edit_mixin = {
 
                 guiDashboard.updateSettings(instance.data);
 
-                guiPopUp.success('User settings were successfully saved.');
+                guiPopUp.success(this.$t('User settings were successfully saved.'));
 
                 let url = this.getRedirectUrl({instance:instance});
 
@@ -99,6 +99,17 @@ function prepareUserSettingsViews(base_path) {
 }
 
 /**
+ * Signal, that adds 'lang' field to UserSettings model's fields.
+ * It supposed to be first during rendering.
+ */
+tabSignal.connect('openapi.loaded', openapi => {
+    openapi.definitions.UserSettings.properties = {
+        lang: {format: 'choices', title: 'language', description: 'application interface language'},
+        ...openapi.definitions.UserSettings.properties,
+    };
+});
+
+/**
  * Signal, that edits options of UserSettings model's fields.
  */
 tabSignal.connect("models[UserSettings].fields.beforeInit", (fields => {
@@ -124,8 +135,9 @@ tabSignal.connect("models[UserSettings].fields.beforeInit", (fields => {
         title: 'Skin settings',
         format: 'hidden',
     };
-}));
 
+    fields.lang.enum = app.languages.map(lang => lang.code);
+}));
 /**
  * Emits signals for UserSettings views.
  */

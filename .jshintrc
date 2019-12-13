@@ -17,6 +17,7 @@
   "devel": true,
 
   "globals": {
+    "_translate": true,
     "addCssClassesToElement": true,
     "ApiConnector": true,
     "api_connector_config": true,
