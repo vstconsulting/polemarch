@@ -36,6 +36,11 @@ class OApiTestCase(BaseTestCase):
         openapi_schema_yml['schemes'][0] = 'https'
         openapi_schema_yml['info']['contact'] = schema['info']['contact']
         openapi_schema_yml['info']['x-versions'] = schema['info']['x-versions']
+        openapi_schema_yml['info']['x-links'] = schema['info']['x-links']
+
+        for key in list(filter(lambda x: 'Ansible' in x, openapi_schema_yml['definitions'].keys())):
+            del openapi_schema_yml['definitions'][key]
+            del schema['definitions'][key]
 
         for key, value in openapi_schema_yml.items():
             cmp_value = schema.get(key, None)
