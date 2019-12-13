@@ -205,7 +205,7 @@ guiWidgets.history_chart = class HistoryChart extends guiWidgets.line_chart {
                 }
 
                 datasets.push({
-                    label: line.title || line.name,
+                    label: _translate((line.title || line.name).toLowerCase()).toUpperCase(),
                     data: this._formChartDataDatasets_oneLine(line, raw_data, labels),
                     borderColor: this._getChartLineColor(line),
                     backgroundColor: this._getChartLineColor(line, true),
@@ -338,12 +338,12 @@ guiWidgets.history_chart = class HistoryChart extends guiWidgets.line_chart {
  * Sets Dashboard counter widgets.
  */
 [
-    {name: 'pmwTemplatesCounter',   title: 'template',    sort: 1, active: true,},
-    {name: 'pmwProjectsCounter',    title: 'projects',    sort: 2, active: true, url: '/project'},
-    {name: 'pmwInventoriesCounter', title: 'inventories', sort: 3, active: true, url: '/inventory'},
-    {name: 'pmwGroupsCounter',      title: 'groups',      sort: 4, active: true, url: '/group'},
-    {name: 'pmwHostsCounter',       title: 'hosts',       sort: 5, active: true, url: '/host'},
-    {name: 'pmwUsersCounter',       title: 'users',       sort: 6, active: true, url: '/user'},
+    {name: 'pmwTemplatesCounter',   title: 'templates counter',   sort: 1, active: true,},
+    {name: 'pmwProjectsCounter',    title: 'projects counter',    sort: 2, active: true, url: '/project'},
+    {name: 'pmwInventoriesCounter', title: 'inventories counter', sort: 3, active: true, url: '/inventory'},
+    {name: 'pmwGroupsCounter',      title: 'groups counter',      sort: 4, active: true, url: '/group'},
+    {name: 'pmwHostsCounter',       title: 'hosts counter',       sort: 5, active: true, url: '/host'},
+    {name: 'pmwUsersCounter',       title: 'users counter',       sort: 6, active: true, url: '/user'},
 ].forEach(item => {
     guiDashboard.widgets[item.name] = new guiWidgets.counter(item);
 });
@@ -357,7 +357,7 @@ guiDashboard.widgets.pmwChartWidget = new guiWidgets.history_chart(
         lines: {
             all_tasks: {
                 name: "all_tasks",
-                title: "All tasks",
+                // title: "All tasks",
                 color: "#1f77b4",
                 bg_color: "rgba(31, 119, 180, 0.3)",
                 active: true,
@@ -485,6 +485,10 @@ guiDashboard.updateSettings = function(settings) {
     if(settings.chartLineSettings && guiDashboard.widgets.pmwChartWidget) {
         guiLocalSettings.set('chart_line_settings', settings.chartLineSettings);
         guiDashboard.updateChartLineSettings(settings.chartLineSettings);
+    }
+
+    if(settings.lang) {
+        app.setLanguage(settings.lang);
     }
 };
 

@@ -2,7 +2,7 @@
 <script type="text/x-template" id="template_project_page_additional">
     <div class="card card-info quick-playbook-run-form">
         <div class="card-header with-border card-header-custom">
-            Quick playbook execution form
+            {{ $t('quick playbook execution form') | capitalize }}
             <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon btn-right"
                     @click="toggleCardCollapsed" v-if="card_collapsed_button"
             >

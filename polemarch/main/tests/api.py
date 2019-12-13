@@ -470,3 +470,20 @@ class APITestCase(ProjectTestCase, OApiTestCase):
         self.assertIn("set", result["operations_types"])
         self.assertIn("del", result["operations_types"])
         self.assertIn("mod", result["operations_types"])
+
+    def test_lang(self):
+        bulk_data = [
+            {'data_type': ['_lang'], 'method': 'get'},
+            {'data_type': ['_lang', 'en'], 'method': 'get'},
+            {'data_type': ['_lang', 'ru'], 'method': 'get'},
+        ]
+
+        results = self.make_bulk(bulk_data)
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(results[0]['data']['count'], 2)
+        self.assertEqual(results[1]['data']['code'], 'en')
+        self.assertEqual(results[1]['data']['name'], 'English')
+        self.assertEqual(results[1]['data']['translations']['pmwuserscounter'], 'users counter')
+        self.assertEqual(results[2]['data']['code'], 'ru')
+        self.assertEqual(results[2]['data']['name'], 'Russian')
+        self.assertEqual(results[2]['data']['translations']['pmwuserscounter'], 'счетчик пользователей')

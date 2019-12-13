@@ -101,7 +101,7 @@ const pmSkinDefaultMixin = {
 
     chart_axes_text_color: {
         color_var:"--chart-axes-text-color",
-        title:'Chart legend text color',
+        title:'Chart axes text color',
         format:'color',
         default:"#666666",
         // priority: 53,
