@@ -310,7 +310,7 @@ def check_hook(instance: Hook, **kwargs) -> NoReturn:
 @receiver([signals.post_save, signals.post_delete], sender=BaseUser,
           dispatch_uid='user_add_hook')
 def user_add_hook(instance: BaseUser, **kwargs) -> NoReturn:
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     created = kwargs.get('created', None)
     when = None
@@ -349,7 +349,7 @@ def polemarch_hook(instance: Any, **kwargs) -> NoReturn:
 
 @receiver(signals.post_save, sender=BaseUser)
 def create_settings_for_user(instance: BaseUser, **kwargs) -> NoReturn:
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     UserSettings.objects.get_or_create(user=instance)
 
