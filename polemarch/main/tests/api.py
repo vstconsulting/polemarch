@@ -353,8 +353,8 @@ class APITestCase(ProjectTestCase, OApiTestCase):
 
     def test_api_versions_list(self):
         result = self.get_result("get", "/api/")
-        self.assertEqual(len(result), 3)
-        self.assertTrue(result.get(self._settings('VST_API_VERSION'), False))
+        self.assertEqual(len(result['available_versions']), 1)
+        self.assertTrue(result['available_versions'].get(self._settings('VST_API_VERSION'), False))
         self.assertTrue(result.get('openapi', False))
 
     def test_api_v1_list(self):
@@ -370,7 +370,7 @@ class APITestCase(ProjectTestCase, OApiTestCase):
 
     def test_api_router(self):
         result = self.get_result('get', "/api/?format=json")
-        url = result[self._settings('VST_API_VERSION')].replace("http://testserver", "")
+        url = result['available_versions'][self._settings('VST_API_VERSION')].replace("http://testserver", "")
         self.get_result('get', url)
 
     def _generate_history(self, days_ago, count, status="OK"):
