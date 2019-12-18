@@ -1,7 +1,7 @@
 - hosts: all
   become: yes
   vars_files:
-    - ./envirement/all.yml
+    - ./environment/all.yml
   vars:
     ansible_python_interpreter: "{{ ansible_playbook_python }}"
 

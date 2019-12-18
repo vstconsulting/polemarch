@@ -5,7 +5,7 @@ WORKDIR /usr/local/project
 COPY . .
 
 RUN tox -c tox_build.ini -e py36-build && \
-    mv dist/ envirement/docker_data/
+    mv dist/ environment/docker_data/
 
 ###############################################################
 
@@ -13,7 +13,7 @@ FROM alpine:3.10
 
 ENV WORKER=ENABLE
 
-COPY --from=build /usr/local/project/envirement/docker_data/ /etc/polemarch/
+COPY --from=build /usr/local/project/environment/docker_data/ /etc/polemarch/
 
 RUN cat /etc/polemarch/system_requirements.txt | xargs apk --update add && \
     cat /etc/polemarch/system_requirements_build.txt | xargs apk add --virtual .build-deps && \

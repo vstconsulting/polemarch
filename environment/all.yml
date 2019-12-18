@@ -1,6 +1,6 @@
 ---
 ##### VARS FOR REGISTRY / DOCKER / DOCKERHUB
-k8s_path_deployment_template: "{{ lookup('env', 'PATH_DEPLOYMENT_TEMPLATE') or './envirement/deployment_pm.yml.j2' }}"
+k8s_path_deployment_template: "{{ lookup('env', 'PATH_DEPLOYMENT_TEMPLATE') or './environment/deployment_pm.yml.j2' }}"
 k8s_registry_image_name: "{{ lookup('env', 'REGISTRY_IMAGE') }}"
 k8s_registry_image_tag: "{{ lookup('env', 'REGISTRY_IMAGE_TAG') }}"
 k8s_registry_user: "{{ lookup('env', 'REGISTRY_USER') }}"
