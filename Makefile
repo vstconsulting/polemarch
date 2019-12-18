@@ -203,12 +203,6 @@ deb: print_vars
 	# cleanup
 	rm -rf debian
 
-deploy:
-	ansible-playbook deploy-openstack.yml -v --private-key $(OPENSTACK_KEY) $(DEPLOY_ARGS)
-
-destroy:
-	ansible-playbook destroy-openstack.yml -v --private-key $(OPENSTACK_KEY) $(DEPLOY_ARGS)
-
 twine:
 	for file in $(shell find dist/*.{tar.gz,whl} | grep ${NAME} | grep ${VER}); do \
 		echo $$file; \

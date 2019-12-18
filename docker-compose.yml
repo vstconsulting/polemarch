@@ -1,0 +1,34 @@
+version: '3'
+services:
+  polemarch:
+    build: .
+    environment:
+      POLEMARCH_DB_TYPE: mysql
+      POLEMARCH_DB_NAME: project-db
+      POLEMARCH_DB_USER: project-user
+      POLEMARCH_DB_PASSWORD: project-pas
+      POLEMARCH_DB_PORT: 3306
+      POLEMARCH_DB_HOST: mysql
+      DB_INIT_CMD: "SET sql_mode='STRICT_TRANS_TABLES', default_storage_engine=INNODB, NAMES 'utf8', CHARACTER SET 'utf8', SESSION collation_connection = 'utf8_unicode_ci'"
+      CACHE_LOCATION: 'redis://redis:6379/0'
+      RPC_CONNECTION: 'redis://redis:6379/1'
+      RPC_CONCURRENCY: 15
+      POLEMARCH_LOG_LEVEL: DEBUG
+      POLEMARCH_DEBUG: 'true'
+      TIMEZONE: 'Asia/Vladivostok'
+    ports:
+      - "8080:8080"
+  redis:
+    image: "redis:alpine"
+  mysql:
+    image: "mysql:5.7"
+    environment:
+      MYSQL_USER: project-user
+      MYSQL_PASSWORD: project-pas
+      MYSQL_DATABASE: project-db
+      MYSQL_ROOT_PASSWORD: project-root
+    volumes:
+      - data-volume:/var/lib/mysql
+
+volumes:
+  data-volume:
