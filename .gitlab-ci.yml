@@ -50,19 +50,19 @@ stages:
       - merge_requests
       - web
       - master
-    changes:
-      - polemarch/main/**/*
-      - polemarch/api/**/*
-      - polemarch/__init__.py
-      - tests.py
-      - setup.{py,cfg}
-      - MANIFEST.in
-      - requirements.txt
-      - requirements-test.txt
-      - Makefile
-      - tox.ini
-      - .coveragerc
-      - .gitlab-ci.yml
+#    changes:
+#      - polemarch/main/**/*
+#      - polemarch/api/**/*
+#      - polemarch/__init__.py
+#      - tests.py
+#      - setup.{py,cfg}
+#      - MANIFEST.in
+#      - requirements.txt
+#      - requirements-test.txt
+#      - Makefile
+#      - tox.ini
+#      - .coveragerc
+#      - .gitlab-ci.yml
   retry: 2
 
 # Branch tests
@@ -195,6 +195,9 @@ release_pypi:
 publish_docker:
   stage: publish
   image: python:2-slim-jessie
+  services:
+    - name: 'docker:19.03-dind'
+      alias: 'docker_service_host'
   script:
     - pip install tox
     - tox -e release-docker
