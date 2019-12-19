@@ -59,13 +59,13 @@
     - meta: flush_handlers
 
     - name: Get latest release tag
-      shell: echo -ne $(git describe --tags `git rev-list --tags --max-count=1`)
+      shell: git describe --tags `git rev-list --tags --max-count=1`
       register: release_latest_version
 
     - name: Set latest tag
       set_fact:
         docker_tag: 'latest'
-      changed_when: release_latest_version.tag == tag
+      changed_when: release_latest_version.stdout == tag
       notify:
         - "build registry"
         - "build dockerhub"
