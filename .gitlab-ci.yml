@@ -41,28 +41,25 @@ stages:
    - make build-clean
   except:
     refs:
-      - GUI
-      - master
       - tags
-      - issue_building
   only:
     refs:
       - merge_requests
       - web
       - master
-#    changes:
-#      - polemarch/main/**/*
-#      - polemarch/api/**/*
-#      - polemarch/__init__.py
-#      - tests.py
-#      - setup.{py,cfg}
-#      - MANIFEST.in
-#      - requirements.txt
-#      - requirements-test.txt
-#      - Makefile
-#      - tox.ini
-#      - .coveragerc
-#      - .gitlab-ci.yml
+    changes:
+      - polemarch/main/**/*
+      - polemarch/api/**/*
+      - polemarch/__init__.py
+      - tests.py
+      - setup.{py,cfg}
+      - MANIFEST.in
+      - requirements.txt
+      - requirements-test.txt
+      - Makefile
+      - tox.ini
+      - .coveragerc
+      - .gitlab-ci.yml
   retry: 2
 
 # Branch tests
@@ -93,14 +90,6 @@ py36-install:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
-
-master:
-  <<: *branch_tests
-  variables:
-    TOX_ENVS: "py37-coverage"
-  only:
-    refs:
-      - master
 
 # Realese
 ###########################################
