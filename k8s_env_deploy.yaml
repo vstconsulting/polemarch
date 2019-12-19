@@ -1,0 +1,43 @@
+- hosts: all
+  become: yes
+  vars_files:
+    - ./environment/all.yml
+
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+
+  tasks:
+  
+    - name: GitLab registry LoginIN
+      docker_login:
+        username: "{{ k8s_registry_user }}"
+        password: "{{ k8s_registry_password }}"
+        registry_url: "{{ k8s_registry_url }}"
+        docker_host: "{{ k8s_docker_host }}"
+        reauthorize: yes
+
+    - name: Build Docker image to registry
+      docker_image:
+        build:
+          path: ./
+          pull: yes
+          dockerfile: ./Dockerfile
+        source: build
+        docker_host: "{{ k8s_docker_host }}"
+        name: "{{ k8s_registry_image_name }}"
+        tag: "{{ k8s_registry_image_tag }}"
+        push: yes 
+
+    - name: Check docker image to registry
+      docker_image_info:
+        name: "{{ k8s_registry_image_name }}:{{ k8s_registry_image_tag }}"
+        docker_host: "{{ k8s_docker_host }}"
+        timeout: 300
+
+    - name: Create template YAML file - Polemarch
+      k8s:
+        kubeconfig: "{{ k8s_kubeconfig }}"
+        namespace: "{{ k8s_env_namespace }}"
+        state: present
+        definition: "{{ k8s_pm_playbook_template }}"
+        wait: yes

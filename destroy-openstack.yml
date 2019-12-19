@@ -1,9 +1,0 @@
----
-- name: Start playbook (Delete instance in OpenStack)
-  hosts: localhost
-  tasks:
-
-    - name: Delete instance in OpenStack
-      os_server:
-        name: "{{ instance_name }}"
-        state: absent

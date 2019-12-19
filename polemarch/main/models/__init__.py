@@ -1,13 +1,15 @@
 # pylint: disable=unused-argument,no-member
 from __future__ import absolute_import
-from typing import Any, Text, NoReturn, Iterable
+from typing import Any, Text, NoReturn, Iterable, Union
 import sys
 import json
 import logging
 from collections import OrderedDict
+from pytz import timezone
 import django_celery_beat
 from django_celery_beat.models import IntervalSchedule, CrontabSchedule
-from django.db.models import signals, IntegerField, Q
+from django.db.models import signals, IntegerField
+from django.db import transaction
 from django.dispatch import receiver
 from django.db.models.functions import Cast
 from django.core.validators import ValidationError
@@ -210,60 +212,121 @@ def clean_dirs(instance: Project, **kwargs) -> None:
     instance.repo_class.delete()
 
 
+def compare_schedules(new_schedule_data: OrderedDict, old_schedule: Union[CrontabSchedule, IntervalSchedule]):
+    """
+    Method for compare parameters for Schedule from instance and current Periodic Task Schedule Params
+    :param new_schedule_data: Dictionary contains data for new Schedule
+    :param old_schedule: Schedule object from Periodic Task
+    :return: Boolean result of compare args
+    """
+    for key, value in new_schedule_data.items():
+        if value != getattr(old_schedule, key, None):
+            return False
+    return True
+
+
 @receiver(signals.post_save, sender=PeriodicTask)
+@transaction.atomic()
 def save_to_beat(instance: PeriodicTask, **kwargs) -> NoReturn:
+    """
+    Signal handle create and edit for Polemarch Periodic Task objects
+    :param instance: Polemarch Periodic Task object
+    :param kwargs:
+    :return:
+    """
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
         return
-    task = settings.TASKS_HANDLERS["SCHEDUER"]["BACKEND"]
-    manager = django_celery_beat.models.PeriodicTask.objects
-    delete_from_beat(instance)
+
     if not instance.enabled:
-        return #nocv
-    if instance.type == "INTERVAL":
-        units = IntervalSchedule.SECONDS
-        secs = instance.get_schedule()
-        schedule, _ = IntervalSchedule.objects.get_or_create(every=secs, period=units)
-        manager.create(
-            interval=schedule,
-            name=str(instance.id),
-            task=task,
-            args=json.dumps([instance.id])
+        delete_from_beat(instance)
+        return
+
+    instance_pt_type = instance.type.lower()
+    types_dict = dict(
+        interval=IntervalSchedule,
+        crontab=CrontabSchedule,
+    )
+    manager = django_celery_beat.models.PeriodicTask.objects
+
+    # Try get Celery Periodic Task, that linked with Polemarch Periodic Task
+    celery_task = manager.filter(
+        name=str(instance.id), task=settings.TASKS_HANDLERS["SCHEDUER"]["BACKEND"]
+    ).last()
+
+    # Prepare data for Schedule
+    if instance_pt_type == 'interval':
+        schedule_data = dict(
+            every=instance.get_schedule(),
+            period=types_dict[instance_pt_type].SECONDS
         )
-    elif instance.type == "CRONTAB":
-        cron_data = instance.crontab_kwargs
-        cron_data['timezone'] = settings.TIME_ZONE
-        schedule, _ = CrontabSchedule.objects.get_or_create(**cron_data)
+    elif instance_pt_type == 'crontab':
+        schedule_data = instance.crontab_kwargs
+        schedule_data['timezone'] = settings.TIME_ZONE
+
+
+    if celery_task:
+        # Check changed schedule or not
+        schedule_old = getattr(celery_task, instance_pt_type, None)
+        if compare_schedules(schedule_data, schedule_old):
+            return
+
+        # Create new Schedule from data
+        schedule_new, _ = types_dict[instance_pt_type].objects.get_or_create(**schedule_data)
+
+        if schedule_old is None:
+            # Get old Schedule and it type.
+            for type_name in filter(lambda k: k != instance_pt_type, types_dict.keys()):
+                schedule_old = getattr(celery_task, type_name, None)
+                if schedule_old is not None:
+                    schedule_old_type = type_name
+                    break
+
+            # Update data for old schedule type and new schedule type
+            setattr(celery_task, instance_pt_type, schedule_new)
+            setattr(celery_task, schedule_old_type, None)
+        else:
+            # Update celery periodic task schedule
+            setattr(celery_task, instance_pt_type, schedule_new)
+
+        celery_task.save()
+        # Delete old schedule if it doesn't have any linked Celery Periodic Tasks
+        if schedule_old is not None and not schedule_old.periodictask_set.exists():
+            schedule_old.delete()
+    else:
+        # Create new Celery Periodic Task, if it doesn't  exist
         manager.create(
-            crontab=schedule,
             name=str(instance.id),
-            task=task,
-            args=json.dumps([instance.id])
+            task=settings.TASKS_HANDLERS["SCHEDUER"]["BACKEND"],
+            args=json.dumps([instance.id]),
+            **{instance_pt_type: types_dict[instance_pt_type].objects.get_or_create(**schedule_data)[0]}
         )
 
 
 @receiver(signals.post_delete, sender=PeriodicTask)
+@transaction.atomic()
 def delete_from_beat(instance: PeriodicTask, **kwargs) -> NoReturn:
+    """
+    Signal handle delete or disable for Polemarch Periodic Task objects
+    :param instance: Polemarch Periodic Task object
+    :param kwargs:
+    :return:
+    """
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
-    manager = django_celery_beat.models.PeriodicTask.objects
-    celery_tasks = manager.filter(name=str(instance.id))
-    types_dict = {
-        'crontab_id': CrontabSchedule,
-        'interval_id': IntervalSchedule
-    }
-    qs_dict = {i: [] for i in types_dict}
-    for task in celery_tasks:
-        for field in qs_dict:
-            pk = getattr(task, field)
-            if pk is None:
-                continue
-            others = manager.filter(**{field: pk}).exclude(pk=task.id)
-            if not others.exists():
-                qs_dict[field].append(pk)
-    for key, values in qs_dict.items():
-        if values:
-            types_dict[key].objects.filter(id__in=values).delete()
-    celery_tasks.delete()
+
+    # Get Celery Periodic Task
+    celery_task = django_celery_beat.models.PeriodicTask.objects.filter(
+        name=str(instance.id), task=settings.TASKS_HANDLERS["SCHEDUER"]["BACKEND"]
+    ).last()
+
+    if celery_task:
+        # Check links to this celery task Schedule, and delete if it linked only with this periodic task
+        for field in ['crontab', 'interval']:
+            schedule = getattr(celery_task, field, None)
+            if schedule is not None and not schedule.periodictask_set.exclude(id=celery_task.id).exists():
+                schedule.delete()
+                break
+        celery_task.delete()
 
 
 @receiver(signals.m2m_changed, sender=Project.inventories.through)
@@ -310,7 +373,7 @@ def check_hook(instance: Hook, **kwargs) -> NoReturn:
 @receiver([signals.post_save, signals.post_delete], sender=BaseUser,
           dispatch_uid='user_add_hook')
 def user_add_hook(instance: BaseUser, **kwargs) -> NoReturn:
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     created = kwargs.get('created', None)
     when = None
@@ -349,7 +412,7 @@ def polemarch_hook(instance: Any, **kwargs) -> NoReturn:
 
 @receiver(signals.post_save, sender=BaseUser)
 def create_settings_for_user(instance: BaseUser, **kwargs) -> NoReturn:
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     UserSettings.objects.get_or_create(user=instance)
 
@@ -370,5 +433,5 @@ def cancel_task_on_delete_history(instance: History, **kwargs) -> NoReturn:
 @receiver(signals.post_migrate)
 def update_crontab_timezone_ptasks(*args, **kwargs):
     qs = CrontabSchedule.objects.exclude(timezone=settings.TIME_ZONE)
-    qs.filter(periodictask__name__startswith='polemarch').update(timezone=settings.TIME_ZONE)
-    qs.filter(periodictask__name__startswith='pmlib').update(timezone=settings.TIME_ZONE)
+    qs.filter(periodictask__task__startswith='polemarch').update(timezone=settings.TIME_ZONE)
+    qs.filter(periodictask__task__startswith='pmlib').update(timezone=settings.TIME_ZONE)

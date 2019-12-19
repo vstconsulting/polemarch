@@ -1,0 +1,15 @@
+- hosts: all
+  become: yes
+  vars_files:
+    - ./environment/all.yml
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+
+  tasks:
+
+    - name: Destroy template YAML file - Polemarch
+      k8s:
+        kubeconfig: "{{ k8s_kubeconfig }}"
+        namespace: "{{ k8s_env_namespace }}"
+        state: absent
+        definition: "{{ k8s_pm_playbook_template }}"

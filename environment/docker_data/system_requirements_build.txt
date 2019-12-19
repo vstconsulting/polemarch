@@ -1,0 +1,9 @@
+build-base
+linux-headers
+python3-dev
+libffi-dev
+krb5-dev
+openldap-dev
+yaml-dev
+zlib-dev
+postgresql-dev

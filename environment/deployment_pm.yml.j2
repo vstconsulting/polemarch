@@ -1,0 +1,302 @@
+##### FAQ
+# 1. Namespace is indicated when the playbook starts
+# 2. For stable work in Rancher, additional annotations and labels are used
+# 3. The next step will need to deal with NFS and PV
+#####   MySQL
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+{% if k8s_kube_in_rancher=="true" %}
+  annotations:
+    field.cattle.io/targetWorkloadIds: '["deployment:{{ k8s_env_namespace }}:mysql"]'
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-{{ k8s_env_namespace}}-mysql
+{% endif %}
+spec:
+  selector:
+    matchLabels:
+{% if k8s_kube_in_rancher=="true" %}
+      workload.user.cattle.io/workloadselector: deployment-{{ k8s_env_namespace}}-mysql
+{% elif k8s_kube_in_rancher=="false" or  k8s_kube_in_rancher is not defined %}
+      app: polemarch
+{% endif %}
+  template:
+    metadata:
+      labels:
+{% if k8s_kube_in_rancher=="true" %}
+        workload.user.cattle.io/workloadselector: deployment-{{ k8s_env_namespace}}-mysql
+{% elif k8s_kube_in_rancher=="false" or  k8s_kube_in_rancher is not defined %}
+        app: polemarch
+{% endif %}
+    spec:
+      containers:
+        - image: mysql:5.7
+          name: mysql
+          env:
+            - name: MYSQL_USER
+              value: 'polemarch-user'
+            - name: MYSQL_PASSWORD
+              value: 'polemarch-pas'
+            - name: MYSQL_DATABASE
+              value: 'polemarch-db'
+            - name: MYSQL_ROOT_PASSWORD
+              value: 'polemarch-root'
+          ports:
+            - containerPort: 3306
+          tty: true
+          stdin: true
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+{% if k8s_kube_in_rancher=="true" %}
+  annotations:
+    field.cattle.io/targetWorkloadIds: '["deployment:{{ k8s_env_namespace }}:mysql"]'
+{% endif %}
+  name: mysql-svc
+spec:
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306
+      protocol: TCP
+{% if k8s_kube_in_rancher=="false" or k8s_kube_in_rancher is not defined %}
+  selector:
+    app: polemarch
+{% endif %}
+  sessionAffinity: None
+  clusterIP: None
+
+######   Redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+{% if k8s_kube_in_rancher=="true" %}
+  annotations:
+    field.cattle.io/targetWorkloadIds: '["deployment:{{ k8s_env_namespace }}:redis"]'
+  labels:
+    workload.user.cattle.io/workloadselector: deployment-{{ k8s_env_namespace}}-redis
+{% endif %}
+  name: redis
+spec:
+  selector:
+    matchLabels:
+{% if k8s_kube_in_rancher=="true" %}
+      workload.user.cattle.io/workloadselector: deployment-{{ k8s_env_namespace}}-redis
+{% elif k8s_kube_in_rancher=="false" or  k8s_kube_in_rancher is not defined %}
+      app: polemarch
+{% endif %}
+  template:
+    metadata:
+      labels:
+{% if k8s_kube_in_rancher=="true" %}
+        workload.user.cattle.io/workloadselector: deployment-{{ k8s_env_namespace}}-redis
+{% elif k8s_kube_in_rancher=="false" or  k8s_kube_in_rancher is not defined %}
+        app: polemarch
+{% endif %}
+    spec:
+      containers:
+        - image: redis:latest
+          name: redis
+          ports:
+            - containerPort: 6379
+              name: redis
+          tty: true
+          stdin: true
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+{% if k8s_kube_in_rancher=="true" %}
+  annotations:
+    field.cattle.io/targetWorkloadIds: '["deployment:{{ k8s_env_namespace }}:redis"]'
+{% elif k8s_kube_in_rancher=="false" or  k8s_kube_in_rancher is not defined %}
+  labels:
+    app: polemarch
+{% endif %}
+  name: redis-svc
+spec:
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: 6379
+      protocol: TCP
+{% if k8s_kube_in_rancher=="false" or  k8s_kube_in_rancher is not defined %}
+  selector:
+    app: polemarch
+{% endif %}
+  sessionAffinity: None
+  clusterIP: None
+
+#####   Polemarch
+---
+apiVersion: v1
+data:
+  .dockerconfigjson: "{{ k8s_registry_dockerconfig_base64 | to_json | b64encode  }}"
+kind: Secret
+metadata:
+  name: gitlab-registry
+  labels:
+    appselector: polemarch
+type: kubernetes.io/dockerconfigjson
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secretkeyvst
+data:
+  tls.crt: "{{ k8s_tls_crt }}"
+  tls.key: "{{ k8s_tls_key }}"
+type: kubernetes.io/tls
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: polemarch
+  labels:
+{% if k8s_kube_in_rancher=="true" %}
+    workload.user.cattle.io/workloadselector: deployment-{{ k8s_env_namespace}}-polemarch
+{% elif k8s_kube_in_rancher=="false" or  k8s_kube_in_rancher is not defined %}
+    app: polemarch
+{% endif %}
+    appselector: polemarch
+    comshort: "{{ kube_pm_label }}"
+{% if k8s_kube_in_rancher=="true" %}
+  annotations:
+    field.cattle.io/targetWorkloadIds: '["deployment:{{ k8s_env_namespace }}:polemarch"]'
+{% endif %}
+spec:
+  replicas: {{ kube_pm_replilica_vol }}
+  selector:
+    matchLabels:
+{% if k8s_kube_in_rancher=="true" %}
+      workload.user.cattle.io/workloadselector: deployment-{{ k8s_env_namespace}}-polemarch
+{% elif k8s_kube_in_rancher=="false" or  k8s_kube_in_rancher is not defined %}
+      app: polemarch
+{% endif %}
+  template:
+    metadata:
+      labels:
+{% if k8s_kube_in_rancher=="true" %}
+        workload.user.cattle.io/workloadselector: deployment-{{ k8s_env_namespace}}-polemarch
+{% elif k8s_kube_in_rancher=="false" or  k8s_kube_in_rancher is not defined %}
+        app: polemarch
+{% endif %}
+        appselector: polemarch
+        comshort: "{{ kube_pm_label }}"
+    spec:
+{% if (k8s_registry_user is defined) and (k8s_registry_password is defined) and (k8s_registry_url is defined) %}
+      imagePullSecrets:
+        - name: gitlab-registry
+{% endif %}
+      containers:
+        - name: polemarch
+{% if (k8s_registry_user is defined) and (k8s_registry_password is defined) and (k8s_registry_url is defined) %}
+          image: {{ k8s_registry_image_name }}:{{ k8s_registry_image_tag }}
+{% endif %}
+          imagePullPolicy: Always
+          env:
+            - name: POLEMARCH_DB_TYPE
+              value: 'mysql'
+            - name: POLEMARCH_DB_NAME
+              value: 'polemarch-db'
+            - name: POLEMARCH_DB_USER
+              value: 'polemarch-user'
+            - name: POLEMARCH_DB_PASSWORD
+              value: 'polemarch-pas'
+            - name: POLEMARCH_DB_PORT
+              value: '3306'
+            - name: POLEMARCH_DB_HOST
+              value: 'mysql-svc'
+            - name: DB_INIT_CMD
+              value: "SET sql_mode='STRICT_TRANS_TABLES', default_storage_engine=INNODB, NAMES 'utf8', CHARACTER SET 'utf8', SESSION collation_connection = 'utf8_unicode_ci'"
+            - name: CACHE_LOCATION
+              value: 'redis://redis:6379/0'
+            - name: RPC_ENGINE
+              value: 'redis://redis:6379/1'
+            - name: RPC_CONCURRENCY
+              value: '15'
+            - name: POLEMARCH_LOG_LEVEL
+              value: '{{ kube_pm_log_level }}'
+            - name: POLEMARCH_DEBUG
+              value: '{{ kube_pm_debug }}'
+            - name: TIMEZONE
+              value: '{{ kube_pm_timezone }}'
+          ports:
+            - containerPort: 8080
+              name: 8080tcp
+              protocol: TCP
+          tty: true
+          stdin: true
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+{% if k8s_kube_in_rancher=="true" %}
+  annotations:
+    field.cattle.io/targetWorkloadIds: '["deployment:{{ k8s_env_namespace }}:polemarch"]'
+{% endif %}
+  name: polemarch-svc
+spec:
+  ports:
+    - name: 8080tcp
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    appselector: polemarch
+  sessionAffinity: None
+  type: ClusterIP
+
+#####   Ingress
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+{% if k8s_kube_in_rancher=="true" %}
+  annotations:
+    field.cattle.io/targetWorkloadIds: '["deployment:{{ k8s_env_namespace }}:polemarch"]'
+{% endif %}
+  name: polemarch-ingress
+spec:
+  tls:
+  - hosts: 
+    - {{ k8s_kube_pm_ingress_domain }}
+    secretName: secretkeyvst
+  rules:
+    - host: {{ k8s_kube_pm_ingress_domain }}
+      http:
+        paths:
+          - path: /
+            backend:
+{% if k8s_kube_in_rancher=="true" %}
+              serviceName: polemarch-ingress-svc
+{% elif k8s_kube_in_rancher=="false" or  k8s_kube_in_rancher is not defined %}
+              serviceName: polemarch-svc
+{% endif %}
+              servicePort: 8080
+
+{% if k8s_kube_in_rancher=="true" %}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    field.cattle.io/targetWorkloadIds: '["deployment:{{ k8s_env_namespace }}:polemarch"]'
+  name: polemarch-ingress-svc
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+  type: ClusterIP
+  sessionAffinity: None
+{% endif %}

@@ -2,6 +2,7 @@ import shutil
 import uuid
 import tempfile
 import logging
+from pytz import timezone
 from pathlib import Path
 from collections import OrderedDict
 from datetime import timedelta
@@ -11,6 +12,8 @@ import requests
 import six
 from django.conf import settings
 from django.utils.timezone import now
+from django.core.management import call_command
+from django_celery_beat.models import CrontabSchedule, IntervalSchedule, PeriodicTask
 from yaml import dump, load as from_yaml, Loader
 
 from ._base import BaseTestCase, os
@@ -1069,6 +1072,93 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(results['results'][-1]['status'], 'OK')
         self.assertEqual(results['results'][-2]['status'], 'ERROR')
 
+    def test_periodic_task_extended(self):
+        results = self.make_bulk([
+            dict(data_type=['project'], data=dict(name='pt_proj'), method='post')
+        ])
+        proj_id = results[0]['data']['id']
+        pt_data = dict(
+            mode="MODULE", schedule="* * * * *", type="CRONTAB",
+            project=proj_id,
+            inventory='localhost', name="one",
+        )
+        bulk_data = dict(data_type=['project', str(proj_id), 'periodic_task'], data=pt_data, method='post')
+        crontab_manager = CrontabSchedule.objects
+
+        with self.settings(TIME_ZONE='UTC'):
+            results = self.make_bulk([
+                bulk_data,
+                dict(data_type=['project', str(proj_id), 'periodic_task'], data=pt_data, method='post'),
+                dict(data_type=['project', str(proj_id), 'periodic_task'], data=pt_data, method='post'),
+                dict(
+                    data_type=['project', str(proj_id), 'periodic_task', '<2[data][id]>'],
+                    data=dict(type='INTERVAL', schedule="10"),
+                    method='patch'),
+                dict(
+                    data_type=['project', str(proj_id), 'periodic_task', '<2[data][id]>'],
+                    data=dict(enabled=False),
+                    method='patch'
+                ),
+                dict(data_type=['project', str(proj_id), 'periodic_task', '<2[data][id]>'], method='delete')
+            ])
+            self.assertEqual(results[0]['status'], 201)
+            self.assertEqual(
+                crontab_manager.get(periodictask__id=results[0]['data']['id']).timezone,
+                timezone('UTC')
+            )
+            self.assertEqual(results[1]['status'], 201)
+            static_pt_id = results[1]['data']['id']
+            self.assertEqual(crontab_manager.get(periodictask__id=static_pt_id).timezone, timezone('UTC'))
+            self.assertEqual(crontab_manager.all().count(), 1)
+            self.assertEqual(IntervalSchedule.objects.filter(periodictask__id=results[2]['data']['id']).count(), 0)
+            self.assertEqual(PeriodicTask.objects.all().count(), 2)
+
+        with self.settings(TIME_ZONE='Europe/Moscow'):
+            bulk_data['method'] = 'patch'
+            bulk_data['data_type'].append((results[0]['data']['id']))
+            results = self.make_bulk([bulk_data])
+            self.assertEqual(results[0]['status'], 200)
+            self.assertEqual(
+                crontab_manager.get(periodictask__id=results[0]['data']['id']).timezone,
+                timezone('Europe/Moscow')
+            )
+            self.assertEqual(crontab_manager.get(periodictask__id=static_pt_id).timezone, timezone('UTC'))
+            self.assertEqual(crontab_manager.all().count(), 2)
+
+        with self.settings(TIME_ZONE='Asia/Vladivostok'):
+            results = self.make_bulk([bulk_data])
+            self.assertEqual(results[0]['status'], 200)
+            self.assertEqual(
+                crontab_manager.get(periodictask__id=results[0]['data']['id']).timezone,
+                timezone('Asia/Vladivostok')
+            )
+            self.assertEqual(crontab_manager.get(periodictask__id=static_pt_id).timezone, timezone('UTC'))
+            self.assertEqual(crontab_manager.all().count(), 2)
+
+        with self.settings(TIME_ZONE='America/Chicago'):
+            self.assertEqual(
+                crontab_manager.get(periodictask__id=results[0]['data']['id']).timezone,
+                timezone('Asia/Vladivostok')
+            )
+            self.assertEqual(crontab_manager.get(periodictask__id=static_pt_id).timezone, timezone('UTC'))
+            self.assertEqual(crontab_manager.all().count(), 2)
+            call_command('migrate')
+            self.assertEqual(
+                crontab_manager.get(periodictask__id=results[0]['data']['id']).timezone,
+                timezone('America/Chicago')
+            )
+            self.assertEqual(crontab_manager.get(periodictask__id=static_pt_id).timezone, timezone('America/Chicago'))
+            self.assertEqual(crontab_manager.all().count(), 2)
+            pt_data['enabled'] = False
+
+        with self.settings(TIME_ZONE='America/Detroit'):
+            bulk_data['method'] = 'delete'
+            results = self.make_bulk([bulk_data])
+            self.assertEqual(results[0]['status'], 204)
+            self.assertEqual(crontab_manager.get(periodictask__id=static_pt_id).timezone, timezone('America/Chicago'))
+            self.assertEqual(crontab_manager.all().count(), 1)
+            self.assertEqual(PeriodicTask.objects.all().count(), 1)
+
     def make_test_readme(self, project_data):
         project = self.get_model_filter("Project", pk=project_data['id']).get()
 
@@ -1699,7 +1789,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         ], 'put')
 
         for result in results:
-            self.assertIn(result['status'], [200, 201, 204])
+            self.assertIn(result['status'], [200, 201, 204], msg=result['data'])
 
         # Grouped request indexes by response code
         statuses = {
