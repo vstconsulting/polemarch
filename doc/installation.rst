@@ -184,6 +184,111 @@ If you need to stop Polemarch use following command:
 If you use another directory for storing Polemarch pid file, use path to this file.
 
 
+Install from PyPI
+-----------------
+
+
+## Run image
+
+For run Polemarch docker image use command:
+
+    .. sourcecode:: bash
+
+        docker run -d --name polemarch --restart always -v /opt/polemarch/projects:/projects -v /opt/polemarch/hooks:/hooks vstconsulting/polemarch
+
+Using this command download official docker image and run it with default settings.
+
+Polemarch will be run with web interface on port `8080`
+
+
+## Settings
+
+### Main section
+
+* **POLEMARCH_DEBUG** - status of debug mode. Default value: `false`.
+
+* **POLEMARCH_LOG_LEVEL** - log level. Default value: `WARNING`.
+
+* **TIMEZONE** - timezone. Default value: `UTC`.
+
+### Database section
+
+If you not set **POLEMARCH_DB_HOST**, default database would be SQLite3, path to database file: `/db.sqlite3`. If you set **POLEMARCH_DB_HOST**, Polemarch would be use MYSQL with next variabls:
+
+* **POLEMARCH_DB_TYPE** - name of database type. Support: `mysql` and `postgres` database. Needed only with **POLEMARCH_DB_HOST** option.
+
+* **POLEMARCH_DB_NAME** - name of database.
+
+* **POLEMARCH_DB_USER** - user connected to database.
+
+* **POLEMARCH_DB_PASSWORD** - password for connection to database.
+
+* **POLEMARCH_DB_HOST** - host for connection to database.
+
+* **POLEMARCH_DB_PORT** - port for connection to database.
+
+### Database.Options section
+
+* **DB_INIT_CMD** - command to start your database
+
+### Cache
+
+* **CACHE_LOCATION** - path to cache, if you use `/tmp/polemarch_django_cache` path, then cache engine would be `FileBasedCache`, else `MemcacheCache`. Default value: ``/tmp/polemarch_django_cache`
+
+### RPC section
+
+* **RPC_ENGINE** - connection to rpc service. If not set, not used.
+
+* **RPC_HEARTBEAT** - Timeout for RPC. Default value: `5`.
+
+* **RPC_CONCURRENCY** - Number of
+concurrently tasks. Default value: `4`.
+
+### Web section
+
+* **POLEMARCH_WEB_REST_PAGE_LIMIT** - Limit elements in answer, when send REST request. Default value: `1000`.
+
+### UWSGI section
+
+* **POLEMARCH_UWSGI_PROCESSES** - number of uwsgi processes. Default value: `4`.
+
+### Other settings:
+
+If you set `WORKER` to `ENABLE` state, uwsgi run worker as daemon.
+
+If you set `SECRET_KEY`,value of `SECRET_KEY` variable would be written to `secret`
+
+Examples
+---------------------
+
+Run latest version of Polemarch in docker and connect to MySQL on server:
+
+    .. sourcecode:: bash
+
+        docker run -d --name polemarch --restart always -v /opt/polemarch/projects:/projects -v /opt/polemarch/hooks:/hooks --env POLEMARCH_DB_TYPE=mysql --env POLEMARCH_DB_NAME=polemarch --env POLEMARCH_DB_USER=polemarch --env POLEMARCH_DB_PASSWORD=polemarch --env POLEMARCH_DB_PORT=3306 --env POLEMARCH_DB_HOST=polemarch_db vstconsulting/polemarch
+
+Run Polemarch with Memcache and RabbitMQ and SQLite3. Polemarch log-level=INFO, secret-key=mysecretkey
+
+    .. sourcecode:: bash
+
+        docker run -d --name polemarch --restart always -v /opt/polemarch/projects:/projects -v /opt/polemarch/hooks:/hooks --env RPC_ENGINE=amqp://polemarch:polemarch@rabbitmq-server:5672/polemarch --env CACHE_LOCATION=memcached-server:11211 --env POLEMARCH_LOG_LEVEL=INFO --env SECRET_KEY=mysecretkey vstconsulting/polemarch
+
+
+Also you can use `.env` file with all variable you want use on run docker:
+
+    .. sourcecode:: bash
+
+        docker run -d --name polemarch --restart always -v /opt/polemarch/projects:/projects -v /opt/polemarch/hooks:/hooks --env-file /path/to/file vstconsulting/polemarch
+
+
+Run from the sources with docker-compose (PoleMarch+MySQL+Redis):
+
+    .. sourcecode:: bash
+
+        docker-compose up -d --build
+
+
+
 Quickstart
 ----------
 

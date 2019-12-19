@@ -1,0 +1,73 @@
+---
+- hosts: docker[0]
+  vars:
+    ansible_python_interpreter: "/usr/bin/env python"
+    registry_image: "{{ registry_url }}/{{ registry_image_name }}"
+    polemarch_version: "{{tag}}"
+    dockerhost: "{% if docker_host %}{{docker_host}}{% else %}unix:///var/run/docker.sock{% endif %}"
+
+  handlers:
+  - name: build registry
+    docker_image:
+      path: ./
+      name: "{{ registry_image }}"
+      tag: "{{ docker_tag }}"
+      docker_host: "{{dockerhost}}"
+      timeout: 600
+      push: yes
+    listen: "build registry"
+  - name: build dockerhub
+    docker_image:
+      path: ./
+      name: "{{ dockerhub_image_name }}"
+      tag: "{{ docker_tag }}"
+      docker_host: "{{dockerhost}}"
+      timeout: 600
+      push: yes
+    listen: "build dockerhub"
+
+  tasks:
+    - name: Set Docker image tag
+      set_fact:
+        docker_tag: "{{tag}}"
+
+    - name: Login into git registry
+      docker_login:
+         username: "{{ registry_username }}"
+         password: "{{ registry_password }}"
+         registry: "{{ registry_url }}"
+         docker_host: "{{dockerhost}}"
+         reauthorize: yes
+         timeout: 600
+      notify:
+        - "build registry"
+
+    - meta: flush_handlers
+
+    - name: Login into dockerhub
+      docker_login:
+         username: "{{ dockerhub_username }}"
+         password: "{{ dockerhub_password }}"
+         email: "{{ dockerhub_email }}"
+         docker_host: "{{dockerhost}}"
+         reauthorize: yes
+         timeout: 600
+      changed_when: true
+      notify:
+        - "build dockerhub"
+
+    - meta: flush_handlers
+
+    - name: Get latest release tag
+      shell: echo -ne $(git describe --tags `git rev-list --tags --max-count=1`)
+      register: release_latest_version
+
+    - name: Set latest tag
+      set_fact:
+        docker_tag: 'latest'
+      changed_when: release_latest_version.tag == tag
+      notify:
+        - "build registry"
+        - "build dockerhub"
+
+    - meta: flush_handlers

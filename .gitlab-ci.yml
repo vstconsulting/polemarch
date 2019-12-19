@@ -172,24 +172,40 @@ release_pypi:
     TOX_ARGS: ""
   script:
    - make test ENVS=build
+   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} $(find dist/*.{tar.gz,whl})
   allow_failure: true
   artifacts:
     name: "release-packages-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
     paths:
     - dist/
 
-publish_pypi:
+#publish_pypi:
+#  stage: publish
+#  image: onegreyonewhite/tox:tox
+#  needs: ["release_pypi"]
+#  only:
+#    refs:
+#      - tags
+#    variables:
+#      - $PYPI_UPLOAD_PASSWORD
+#      - $PYPI_UPLOAD_NAME
+#  script:
+#  - make twine
+
+publish_docker:
   stage: publish
-  image: onegreyonewhite/tox:tox
-  needs: ["release_pypi"]
+  image: python:2-slim-jessie
+  script:
+    - pip install tox
+    - tox -e release-docker
   only:
     refs:
       - tags
     variables:
-      - $PYPI_UPLOAD_PASSWORD
-      - $PYPI_UPLOAD_NAME
-  script:
-  - make twine
+      - $POLEMARCH_DOCKER_USER
+      - $POLEMARCH_DOCKER_PASSWORD
+      - $POLEMARCH_DOCKER_EMAIL
+      - $POLEMARCH_DOCKER_IMAGE_NAME
 
 publish_release:
   stage: publish
