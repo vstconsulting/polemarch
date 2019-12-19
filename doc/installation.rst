@@ -184,11 +184,12 @@ If you need to stop Polemarch use following command:
 If you use another directory for storing Polemarch pid file, use path to this file.
 
 
-Install from PyPI
------------------
+Install from docker
+-------------------
 
 
-## Run image
+Run image
+~~~~~~~~~
 
 For run Polemarch docker image use command:
 
@@ -201,9 +202,11 @@ Using this command download official docker image and run it with default settin
 Polemarch will be run with web interface on port `8080`
 
 
-## Settings
+Settings
+~~~~~~~~
 
-### Main section
+Main section
+~~~~~~~~~~~~
 
 * **POLEMARCH_DEBUG** - status of debug mode. Default value: `false`.
 
@@ -211,7 +214,8 @@ Polemarch will be run with web interface on port `8080`
 
 * **TIMEZONE** - timezone. Default value: `UTC`.
 
-### Database section
+Database section
+~~~~~~~~~~~~~~~~
 
 If you not set **POLEMARCH_DB_HOST**, default database would be SQLite3, path to database file: `/db.sqlite3`. If you set **POLEMARCH_DB_HOST**, Polemarch would be use MYSQL with next variabls:
 
@@ -227,15 +231,18 @@ If you not set **POLEMARCH_DB_HOST**, default database would be SQLite3, path to
 
 * **POLEMARCH_DB_PORT** - port for connection to database.
 
-### Database.Options section
+Database.Options section
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 * **DB_INIT_CMD** - command to start your database
 
-### Cache
+Cache
+~~~~~
 
 * **CACHE_LOCATION** - path to cache, if you use `/tmp/polemarch_django_cache` path, then cache engine would be `FileBasedCache`, else `MemcacheCache`. Default value: ``/tmp/polemarch_django_cache`
 
-### RPC section
+RPC section
+~~~~~~~~~~~
 
 * **RPC_ENGINE** - connection to rpc service. If not set, not used.
 
@@ -244,15 +251,18 @@ If you not set **POLEMARCH_DB_HOST**, default database would be SQLite3, path to
 * **RPC_CONCURRENCY** - Number of
 concurrently tasks. Default value: `4`.
 
-### Web section
+Web section
+~~~~~~~~~~~
 
 * **POLEMARCH_WEB_REST_PAGE_LIMIT** - Limit elements in answer, when send REST request. Default value: `1000`.
 
-### UWSGI section
+UWSGI section
+~~~~~~~~~~~~~
 
 * **POLEMARCH_UWSGI_PROCESSES** - number of uwsgi processes. Default value: `4`.
 
-### Other settings:
+Other settings
+~~~~~~~~~~~~~~
 
 If you set `WORKER` to `ENABLE` state, uwsgi run worker as daemon.
 
