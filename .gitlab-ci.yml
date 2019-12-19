@@ -178,7 +178,7 @@ release_pypi:
 
 publish_docker:
   stage: publish
-  image: python:2-slim-jessie
+  image: onegreyonewhite/tox:tox
   services:
     - name: 'docker:19.03-dind'
       alias: 'docker_service_host'
