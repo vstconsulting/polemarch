@@ -7,7 +7,6 @@ import logging
 import traceback
 import time
 import uuid
-import six
 import requests
 from docutils.core import publish_parts as rst_gen
 from markdown2 import Markdown
@@ -278,7 +277,7 @@ class Project(AbstractModel):
         return view_data
 
     def check_path(self, inventory) -> NoReturn:
-        if not isinstance(inventory, (six.string_types, six.text_type)):  # nocv
+        if not isinstance(inventory, str):  # nocv
             return
         path = "{}/{}".format(self.path, inventory)
         path = os.path.abspath(os.path.expanduser(path))

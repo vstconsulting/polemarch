@@ -1,4 +1,4 @@
-import six
+import io
 from django.test import TestCase
 from django.core.management import call_command
 from ..utils import AnsibleInventoryParser
@@ -72,7 +72,7 @@ valid_inventory = {
 
 class AnsibleTestCase(TestCase):
     def test_modules(self):
-        out = six.StringIO()
+        out = io.StringIO()
         call_command('update_ansible_modules', interactive=False, stdout=out)
         self.assertEqual(
             'The modules have been successfully updated.\n',

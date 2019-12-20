@@ -9,7 +9,6 @@ from datetime import timedelta
 
 import git
 import requests
-import six
 from django.conf import settings
 from django.utils.timezone import now
 from django.core.management import call_command
@@ -537,7 +536,7 @@ class BaseExecutionsTestCase(BaseTestCase):
             if not execute:
                 return
             kwargs = getattr(self, 'wip_{}'.format(repo_type.lower()), str)(project_data)
-            kwargs = kwargs if not isinstance(kwargs, six.string_types) else dict()
+            kwargs = kwargs if not isinstance(kwargs, str) else dict()
             self.change_owner(project_data)
             self.playbook_tests(project_data, **kwargs)
             self.module_tests(project_data)
@@ -749,7 +748,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
             for required_field in ['title', 'default', 'format', 'help']:
                 self.assertIn(required_field, field.keys())
             self.assertEqual(field_name.split('_')[-1], field['format'], field)
-            default_type = (six.string_types, six.text_type)
+            default_type = str
             if field['format'] == 'boolean':
                 default_type = bool
             elif field['format'] == 'integer':

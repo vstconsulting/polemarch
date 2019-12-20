@@ -1,13 +1,11 @@
-# pylint: disable=unused-argument,no-member
+# pylint: disable=unused-argument
 from __future__ import absolute_import
-from typing import Any, Text, NoReturn, Iterable, Union
+from typing import Any, Text, NoReturn, Iterable, Dict, Union
 import sys
 import json
 import logging
 from collections import OrderedDict
-from pytz import timezone
-import django_celery_beat
-from django_celery_beat.models import IntervalSchedule, CrontabSchedule
+from django_celery_beat.models import IntervalSchedule, CrontabSchedule, PeriodicTask as CPTask
 from django.db.models import signals, IntegerField
 from django.db import transaction
 from django.dispatch import receiver
@@ -212,7 +210,7 @@ def clean_dirs(instance: Project, **kwargs) -> None:
     instance.repo_class.delete()
 
 
-def compare_schedules(new_schedule_data: OrderedDict, old_schedule: Union[CrontabSchedule, IntervalSchedule]):
+def compare_schedules(new_schedule_data: Dict, old_schedule: Union[CrontabSchedule, IntervalSchedule]):
     """
     Method for compare parameters for Schedule from instance and current Periodic Task Schedule Params
     :param new_schedule_data: Dictionary contains data for new Schedule
@@ -246,10 +244,9 @@ def save_to_beat(instance: PeriodicTask, **kwargs) -> NoReturn:
         interval=IntervalSchedule,
         crontab=CrontabSchedule,
     )
-    manager = django_celery_beat.models.PeriodicTask.objects
 
     # Try get Celery Periodic Task, that linked with Polemarch Periodic Task
-    celery_task = manager.filter(
+    celery_task = CPTask.objects.filter(
         name=str(instance.id), task=settings.TASKS_HANDLERS["SCHEDUER"]["BACKEND"]
     ).last()
 
@@ -262,6 +259,8 @@ def save_to_beat(instance: PeriodicTask, **kwargs) -> NoReturn:
     elif instance_pt_type == 'crontab':
         schedule_data = instance.crontab_kwargs
         schedule_data['timezone'] = settings.TIME_ZONE
+    else:
+        raise ValidationError("Unknown periodic task type `{}`.".format(instance.type))  # nocv
 
 
     if celery_task:
@@ -278,12 +277,11 @@ def save_to_beat(instance: PeriodicTask, **kwargs) -> NoReturn:
             for type_name in filter(lambda k: k != instance_pt_type, types_dict.keys()):
                 schedule_old = getattr(celery_task, type_name, None)
                 if schedule_old is not None:
-                    schedule_old_type = type_name
+                    setattr(celery_task, type_name, None)
                     break
 
             # Update data for old schedule type and new schedule type
             setattr(celery_task, instance_pt_type, schedule_new)
-            setattr(celery_task, schedule_old_type, None)
         else:
             # Update celery periodic task schedule
             setattr(celery_task, instance_pt_type, schedule_new)
@@ -294,7 +292,7 @@ def save_to_beat(instance: PeriodicTask, **kwargs) -> NoReturn:
             schedule_old.delete()
     else:
         # Create new Celery Periodic Task, if it doesn't  exist
-        manager.create(
+        CPTask.objects.create(
             name=str(instance.id),
             task=settings.TASKS_HANDLERS["SCHEDUER"]["BACKEND"],
             args=json.dumps([instance.id]),
@@ -315,7 +313,7 @@ def delete_from_beat(instance: PeriodicTask, **kwargs) -> NoReturn:
         return
 
     # Get Celery Periodic Task
-    celery_task = django_celery_beat.models.PeriodicTask.objects.filter(
+    celery_task = CPTask.objects.filter(
         name=str(instance.id), task=settings.TASKS_HANDLERS["SCHEDUER"]["BACKEND"]
     ).last()
 

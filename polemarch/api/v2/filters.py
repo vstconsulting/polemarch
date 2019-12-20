@@ -2,7 +2,7 @@
 from functools import reduce
 from operator import or_
 from django.db.models import Q
-from django_filters import (CharFilter, NumberFilter, IsoDateTimeFilter)
+from django_filters import CharFilter, NumberFilter, IsoDateTimeFilter
 from vstutils.api.filters import DefaultIDFilter, extra_filter, name_filter, filters
 from ...main import models
 
