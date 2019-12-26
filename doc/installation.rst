@@ -133,8 +133,14 @@ Install from PyPI
            threads = 4
            harakiri = 120
            vacuum = True
+           http-keepalive = true
+           http-auto-chunked = true
+           thread-stacksize = 512
            pidfile = /opt/polemarch/pid/polemarch.pid
            log_file = /opt/polemarch/logs/{PROG_NAME}_web.log
+           # Uncomment it for HTTPS and install `uwsgi` pypi package to env:
+           # addrport = 127.0.0.1:8080
+           # https = 0.0.0.0:443,/etc/polemarch/polemarch.crt,/etc/polemarch/polemarch.key
 
            [worker]
            # output will be /opt/polemarch/logs/polemarch_worker.log
