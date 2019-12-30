@@ -528,7 +528,14 @@ customRoutesComponentsTemplates.home = { /* globals customRoutesComponentsTempla
             this.setWidgetsData().then(data => {
                 this.widgets_data = data;
             });
-        }
+        },
+        /**
+         * Saves widgets' data, when chart widget was collapsed/uncollapsed.
+         * @param value
+         */
+        'widgets.pmwChartWidget.collapse': function(value) {
+            this.saveWidgetSettingToApi('pmwChartWidget', 'collapse', value);
+        },
     },
     created() {
         this.fetchData();
@@ -598,18 +605,7 @@ customRoutesComponentsTemplates.home = { /* globals customRoutesComponentsTempla
          */
         setWidgetsData() {
             return this.loadStats().then(response => {
-                let exclude_stats = ['jobs'];
-                let w_data = {};
-
-                for(let key in response.data) {
-                    if (response.data.hasOwnProperty(key)) {
-                        if (exclude_stats.includes(key)) {
-                            w_data.pmwChartWidget = response.data[key];
-                        }
-
-                        w_data['pmw' + capitalizeString(key) + 'Counter'] = response.data[key];
-                    }
-                }
+                let w_data = this.statsResponseToWidgetData(response);
 
                 this.$store.commit('setWidgets', {
                     url: this.$route.path,
@@ -631,9 +627,71 @@ customRoutesComponentsTemplates.home = { /* globals customRoutesComponentsTempla
         formBulkStats() {
             return {
                 type: 'get',
-                item: 'stats',
+                data_type: ['stats'],
                 filters: "last=" + this.widgets.pmwChartWidget.period.query_amount,
             };
+        },
+        /**
+         * Method, that transforms API response with stats to widgets data.
+         * @param {object} response API response object
+         */
+        statsResponseToWidgetData(response) {
+            let w_data = {};
+            let exclude_stats = ['jobs'];
+
+            for(let key in response.data) {
+                if (response.data.hasOwnProperty(key)) {
+                    if (exclude_stats.includes(key)) {
+                        w_data.pmwChartWidget = response.data[key];
+                    }
+
+                    w_data['pmw' + capitalizeString(key) + 'Counter'] = response.data[key];
+                }
+            }
+
+            return w_data;
+        },
+        /**
+         * Method, that updates some property of widget and sends API request for saving updated User Settings.
+         * @param {string} widget Widget name
+         * @param {string} prop Widget's property name
+         * @param {any} value New value of widget's property name
+         */
+        saveWidgetSettingToApi(widget, prop, value) {
+            let qs = app.application.$store.state.objects["user/" + my_user_id + "/settings"];
+
+            if(!qs) {
+                return;
+            }
+
+            let instance = qs.cache;
+
+            if(!instance) {
+                return;
+            }
+
+            if(!instance.data) {
+                return;
+            }
+
+            if(!instance.data.widgetSettings) {
+                instance.data.widgetSettings = {};
+            }
+
+            if(!instance.data.widgetSettings[widget]) {
+                instance.data.widgetSettings[widget] = {};
+            }
+
+            let widget_setting_backup = {...instance.data.widgetSettings[widget]};
+
+            instance.data.widgetSettings[widget][prop] = value;
+
+            let view = app.views["/user/{" + path_pk_key + "}/settings/edit/"];
+            instance.save(view.schema.query_type).then(instance => {
+                guiDashboard.updateSettings(instance.data);
+            }).catch(error => {  /*jshint unused:false*/
+                instance.data.widgetSettings[widget] = widget_setting_backup;
+            });
         },
     },
 };
@@ -642,10 +700,7 @@ tabSignal.connect('app.afterInit', (obj) => {
     let app = obj.app;
     let setting_view = app.views["/profile/settings/"];
     let qs = setting_view.objects.clone();
-    let f_obj = {};
-    f_obj[path_pk_key] = my_user_id;
-    // qs.url = qs.url.format({pk:my_user_id}).replace(/^\/|\/$/g, "");
-    qs.url = qs.url.format(f_obj).replace(/^\/|\/$/g, "");
+    qs.url = qs.url.format({[path_pk_key]: my_user_id}).replace(/^\/|\/$/g, "");
 
     qs.get().then(instance => {
         guiDashboard.updateSettings(instance.data);

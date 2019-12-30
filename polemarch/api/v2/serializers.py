@@ -12,12 +12,15 @@ from vstutils.api import serializers as vst_serializers, fields as vst_fields
 from vstutils.api.serializers import DataSerializer, EmptySerializer
 from vstutils.api.base import Response
 from ...main.utils import AnsibleArgumentsReference, AnsibleInventoryParser
+from ...main.settings import LANGUAGES
 
 from ...main import models
 from ..signals import api_post_save, api_pre_save
 
 
 User = get_user_model()
+
+LANG_CHOICES = [item[0] for item in LANGUAGES]
 
 
 # NOTE: we can freely remove that because according to real behaviour all our
@@ -244,9 +247,12 @@ class WidgetSettingsSerializer(vst_serializers.JsonObjectSerializer):
 
 
 class UserSettingsSerializer(vst_serializers.JsonObjectSerializer):
+    lang = serializers.ChoiceField(choices=LANG_CHOICES, default=LANG_CHOICES[0])
     autoupdateInterval = serializers.IntegerField(default=15000)
     chartLineSettings = ChartLineSettingsSerializer()
     widgetSettings = WidgetSettingsSerializer()
+    selectedSkin = serializers.CharField(required=False)
+    skinsSettings = vst_serializers.DataSerializer(required=False)
 
 
 class TeamSerializer(_WithPermissionsSerializer):
