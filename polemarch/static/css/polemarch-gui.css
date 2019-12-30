@@ -180,39 +180,26 @@ body {
     --chart-axes-lines-color: #bababa;
 }
 
-
-.tr-status-offline .td-history-status,
-.tr-status-offline .td-project_history-status,
 .field-status-offline {
     color: var(--history-status-offline);
 }
 
-.tr-status-interrupted .td-history-status,
-.tr-status-interrupted .td-project_history-status,
 .field-status-interrupted {
     color: var(--history-status-interrupted);
 }
 
-.tr-status-run .td-history-status,
-.tr-status-run .td-project_history-status,
 .field-status-run {
     color: var(--history-status-run);
 }
 
-.tr-status-error .td-history-status,
-.tr-status-error .td-project_history-status,
 .field-status-error {
     color: var(--history-status-error);
 }
 
-.tr-status-delay .td-history-status,
-.tr-status-delay .td-project_history-status,
 .field-status-delay {
     color: var(--history-status-delay);
 }
 
-.tr-status-ok .td-history-status,
-.tr-status-ok .td-project_history-status,
 .field-status-ok {
     color: var(--history-status-ok);
 }
@@ -223,28 +210,22 @@ body {
     vertical-align: middle;
 }
 
-
-.tr-status-sync .td-project-status,
 .field-status-sync {
     color: var(--project-status-sync);
 }
 
-.tr-status-wait_sync .td-project-status,
 .field-status-wait_sync {
     color: var(--project-status-wait-sync);
 }
 
-.tr-status-new .td-project-status,
 .field-status-new {
     color: var(--project-status-new);
 }
 
-.tr-status-error .td-project-status,
 .field-status-error {
     color: var(--project-status-error);
 }
 
-.tr-status-ok .td-project-status,
 .field-status-ok {
     color: var(--project-status-ok);
 }
@@ -365,7 +346,7 @@ body {
     float: left;
 }
 
-@media (max-width: 452px) {
+@media (max-width: 540px) {
     #period-list {
         width: 100%!important;
         margin-top: 10px;

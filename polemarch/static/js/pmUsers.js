@@ -9,7 +9,9 @@ const user_settings_page_edit_mixin = {
                 return;
             }
 
-            if(this.qs_url.replace(/^\/|\/$/g, "") == 'user/' + my_user_id + '/settings') {
+            let is_current_user_settings = this.qs_url.replace(/^\/|\/$/g, "") == 'user/' + my_user_id + '/settings';
+
+            if(is_current_user_settings) {
                 data.selectedSkin = guiCustomizer.skin.name;
                 data.skinsSettings = guiCustomizer.skins_custom_settings;
             }
@@ -24,7 +26,9 @@ const user_settings_page_edit_mixin = {
                 qs.cache = instance;
                 this.setQuerySet(this.view, this.qs_url, qs);
 
-                guiDashboard.updateSettings(instance.data);
+                if(is_current_user_settings) {
+                    guiDashboard.updateSettings(instance.data);
+                }
 
                 guiPopUp.success(this.$t('User settings were successfully saved.'));
 
@@ -99,45 +103,63 @@ function prepareUserSettingsViews(base_path) {
 }
 
 /**
- * Signal, that adds 'lang' field to UserSettings model's fields.
- * It supposed to be first during rendering.
+ * Function prepares fields of User Settings Model.
+ * @param {string} model name of model.
  */
-tabSignal.connect('openapi.loaded', openapi => {
-    openapi.definitions.UserSettings.properties = {
-        lang: {format: 'choices', title: 'language', description: 'application interface language'},
-        ...openapi.definitions.UserSettings.properties,
-    };
-});
+function prepareUserSettingsModelFields(model) {
+    /**
+     * Signal, that edits options of UserSettings model's fields.
+     */
+    tabSignal.connect("models[" + model + "].fields.beforeInit", (fields => {
+        if(fields.lang) {
+            fields.lang.title = 'language';
+            fields.lang.description = 'application interface language';
+        }
+
+        if(fields.autoupdateInterval) {
+            fields.autoupdateInterval.format = 'time_interval';
+            fields.autoupdateInterval.required = true;
+            fields.autoupdateInterval.title = 'Auto update interval';
+            fields.autoupdateInterval.description = 'application automatically updates pages data' +
+                ' with following interval (time in seconds)';
+        }
+
+        [
+            {name: 'chartLineSettings', title: "Dashboard chart lines settings", },
+            {name: 'widgetSettings', title: "Dashboard widgets settings"},
+        ].forEach((item) => {
+            if(fields[item.name]) {
+                fields[item.name].format = 'inner_api_object';
+                fields[item.name].title = item.title;
+            }
+        });
+
+        if(fields.selectedSkin) {
+            fields.selectedSkin = {
+                title: 'Selected skin',
+                format: 'hidden',
+            };
+        }
+
+        if(fields.skinsSettings) {
+            fields.skinsSettings = {
+                title: 'Skin settings',
+                format: 'hidden',
+            };
+        }
+    }));
+}
 
 /**
- * Signal, that edits options of UserSettings model's fields.
+ * Variable, that stores name of user Settings model.
  */
-tabSignal.connect("models[UserSettings].fields.beforeInit", (fields => {
-    [
-        {name: 'chartLineSettings', title: "Dashboard chart lines settings", },
-        {name: 'widgetSettings', title: "Dashboard widgets settings"},
-    ].forEach((item) => {
-        fields[item.name].format = 'inner_api_object';
-        fields[item.name].title = item.title;
-    });
+let user_settings_model_name = 'UserSettings';
 
-    fields.autoupdateInterval.format = 'time_interval';
-    fields.autoupdateInterval.required = true;
-    fields.autoupdateInterval.title = 'Auto update interval';
-    fields.autoupdateInterval.description = 'application automatically updates pages data' +
-        ' with following interval (time in seconds)';
+/**
+ * Prepares fields of user settings model.
+ */
+prepareUserSettingsModelFields(user_settings_model_name);
 
-    fields.selectedSkin = {
-        title: 'Selected skin',
-        format: 'hidden',
-    };
-    fields.skinsSettings = {
-        title: 'Skin settings',
-        format: 'hidden',
-    };
-
-    fields.lang.enum = app.languages.map(lang => lang.code);
-}));
 /**
  * Emits signals for UserSettings views.
  */
