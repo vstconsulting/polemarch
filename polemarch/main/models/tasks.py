@@ -8,7 +8,7 @@ from functools import partial
 import json
 
 import re
-import six
+import io
 from celery.schedules import crontab
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -117,7 +117,7 @@ class Template(ACLModel):
         self.execute(self.project.owner)
 
     def _convert_to_data(self, value):
-        if isinstance(value, (six.string_types, six.text_type)):
+        if isinstance(value, str):
             return json.loads(value)  # nocv
         elif isinstance(value, (dict, OrderedDict, list)):
             return value
@@ -321,7 +321,7 @@ class HistoryQuerySet(BQuerySet):
             sum_by_date[hist_stat[grouped_by]] = (
                 sum_by_date.get(hist_stat[grouped_by], 0) + hist_stat['sum']
             )
-        for hist_stat in qs.order_by(grouped_by):
+        for hist_stat in qs.order_by(grouped_by, 'status'):
             hist_stat.update({'all': sum_by_date[hist_stat[grouped_by]]})
             values.append(hist_stat)
         return values
@@ -361,7 +361,7 @@ class HistoryQuerySet(BQuerySet):
             executor=extra_options['executor'], hidden=project.hidden,
             options=self.__get_additional_options(extra_options)
         )
-        if isinstance(inventory, (six.string_types, six.text_type)):
+        if isinstance(inventory, str):
             history_kwargs['inventory'] = None
         elif isinstance(inventory, int):
             history_kwargs['inventory'] = project.inventories.get(pk=inventory)  # nocv
@@ -531,7 +531,7 @@ class History(BModel):
         )
 
     def __bulking_lines(self, value: str, number: int, endl: str) -> Generator:
-        out = six.StringIO(value)
+        out = io.StringIO(value)
         nline = 0
         for line in iter(partial(out.read, 2 * 1024 - 100), ''):
             nline += 1

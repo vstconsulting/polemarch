@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 from typing import Any, List, Tuple, Dict, Text
 import logging
-import six
 from django.db.models import Q
 try:
     from yaml import dump as to_yaml, CDumper as Dumper, ScalarNode
@@ -26,7 +25,7 @@ class InventoryDumper(Dumper):
     yaml_representers[type(None)] = lambda dumper, value: (
         ScalarNode(tag=u'tag:yaml.org,2002:null', value='')
     )
-    yaml_representers[six.text_type] = lambda dumper, value: (
+    yaml_representers[str] = lambda dumper, value: (
         ScalarNode(tag=u'tag:yaml.org,2002:str', value=value)
     )
 

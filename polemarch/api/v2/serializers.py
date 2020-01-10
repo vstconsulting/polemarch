@@ -3,24 +3,24 @@ from __future__ import unicode_literals
 from typing import Dict, List
 import json
 import uuid
-try:
-    from ruamel.ordereddict import ordereddict as OrderedDict
-except ImportError:  # nocv
-    from collections import OrderedDict
-import six
-from django.contrib.auth.models import User
+from collections import OrderedDict
+from django.contrib.auth import get_user_model
 from django.utils.functional import cached_property
 from django.db import transaction
 from rest_framework import serializers, exceptions, status
-from rest_framework.exceptions import PermissionDenied
 from vstutils.api import serializers as vst_serializers, fields as vst_fields
 from vstutils.api.serializers import DataSerializer, EmptySerializer
 from vstutils.api.base import Response
 from ...main.utils import AnsibleArgumentsReference, AnsibleInventoryParser
+from ...main.settings import LANGUAGES
 
-from ...main.models import Inventory
 from ...main import models
 from ..signals import api_post_save, api_pre_save
+
+
+User = get_user_model()
+
+LANG_CHOICES = [item[0] for item in LANGUAGES]
 
 
 # NOTE: we can freely remove that because according to real behaviour all our
@@ -33,7 +33,7 @@ class DictField(serializers.CharField):
     def to_internal_value(self, data):  # nocv
         return (
             data
-            if isinstance(data, (six.string_types, six.text_type, dict, list))
+            if isinstance(data, (str, dict, list))
             else self.fail("Unknown type.")
         )
 
@@ -51,7 +51,7 @@ class MultiTypeField(serializers.CharField):
 
     def to_representation(self, value):
         return (
-            value if not isinstance(value, six.class_types)
+            value if not isinstance(value, type)
             else str(value)
         )
 
@@ -68,10 +68,12 @@ class InventoryAutoCompletionField(vst_fields.AutoCompletionField):
     def to_internal_value(self, data):
         inventory = super(InventoryAutoCompletionField, self).to_internal_value(data)
         try:
-            inventory = Inventory.objects.get(id=int(inventory))
+            inventory = models.Inventory.objects.get(id=int(inventory))
             user = self.context['request'].user
             if not inventory.acl_handler.viewable_by(user):
-                raise PermissionDenied("You don't have permission to inventory.")  # noce
+                raise exceptions.PermissionDenied(
+                    "You don't have permission to inventory."
+                )  # noce
         except (ValueError, KeyError):
             self.check_path(inventory)
         return inventory
@@ -120,7 +122,7 @@ class SetOwnerSerializer(DataSerializer):
 
     def update(self, instance, validated_data):
         if not self.instance.acl_handler.owned_by(self.current_user()):  # noce
-            raise PermissionDenied(self.perms_msg)
+            raise exceptions.PermissionDenied(self.perms_msg)
         user = self.get_user(validated_data)
         self.instance.acl_handler.set_owner(user)
         return user
@@ -132,7 +134,7 @@ class SetOwnerSerializer(DataSerializer):
         return self.context['request'].user
 
     def to_representation(self, value: User):
-        return dict(user_id=value.id)
+        return dict(user_id=value.pk)
 
     def to_internal_value(self, data: dict):
         return dict(pk=data['user_id'])
@@ -245,9 +247,12 @@ class WidgetSettingsSerializer(vst_serializers.JsonObjectSerializer):
 
 
 class UserSettingsSerializer(vst_serializers.JsonObjectSerializer):
+    lang = serializers.ChoiceField(choices=LANG_CHOICES, default=LANG_CHOICES[0])
     autoupdateInterval = serializers.IntegerField(default=15000)
     chartLineSettings = ChartLineSettingsSerializer()
     widgetSettings = WidgetSettingsSerializer()
+    selectedSkin = serializers.CharField(required=False)
+    skinsSettings = vst_serializers.DataSerializer(required=False)
 
 
 class TeamSerializer(_WithPermissionsSerializer):
@@ -1050,8 +1055,7 @@ class AnsibleSerializerMetaclass(serializers.SerializerMetaclass):
         return super(AnsibleSerializerMetaclass, cls).__new__(cls, name, bases, attrs)
 
 
-@six.add_metaclass(AnsibleSerializerMetaclass)
-class _AnsibleSerializer(serializers.Serializer):
+class _AnsibleSerializer(serializers.Serializer, metaclass=AnsibleSerializerMetaclass):
     # pylint: disable=abstract-method
     pass
 
@@ -1116,7 +1120,7 @@ class InventoryImportSerializer(DataSerializer):
         parser = AnsibleInventoryParser()
         inv_json = parser.get_inventory_data(validated_data['raw_data'])
 
-        inventory = Inventory.objects.create(name=validated_data['name'])
+        inventory = models.Inventory.objects.create(name=validated_data['name'])
         inventory.vars = inv_json['vars']
         created_hosts, created_groups = dict(), dict()
 

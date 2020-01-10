@@ -70,8 +70,8 @@ vst_vue_components.widgets.w_history_chart = Vue.component('w_history_chart', {
                 };
             },
             watch: {
-                'customizer.skin.name': function(value) { /* jshint unused: false */ /* TODO ask about args*/
-                    this.generateChart();
+                'customizer.skin.name': function(value) { /* jshint unused: false */
+                    this.updateChartData();
                 }
             },
             computed: {

@@ -13,4 +13,5 @@ TRANSLATION = {
     'groups counter': 'groups | group | groups',
     'hosts counter': 'hosts | host | hosts',
     'users counter': 'users | user | users',
+    'all_tasks': 'all tasks',
 }
