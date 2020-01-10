@@ -126,7 +126,19 @@
                         <div class="progress-group">
                             {{ $t(line.name) }}
                             <span class="float-right">
-                                <b> {{ progressBarsData[line.name].sum }} </b>/ {{ progressBarsData[line.name].all }}
+                                <span>
+                                    <transition name="slide-fade" mode="out-in">
+                                    <span :key="progressBarsData[line.name].sum">
+                                        <b> {{ progressBarsData[line.name].sum }} </b>
+                                    </span>
+                                    </transition>
+                                </span>
+                                <span>/</span>
+                                <span>
+                                    <span>
+                                        {{ progressBarsData[line.name].all }}
+                                    </span>
+                                </span>
                             </span>
                             <div class="progress progress-sm">
                                 <div class="progress-bar"

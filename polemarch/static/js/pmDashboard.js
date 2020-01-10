@@ -102,7 +102,10 @@ guiWidgets.history_chart = class HistoryChart extends guiWidgets.line_chart {
                                 color: guiCustomizer.skin.settings.chart_axes_lines_color,
                             }
                         }]
-                    }
+                    },
+                    tooltips: {
+                        mode: 'index',
+                    },
                 };
             }
         });
@@ -571,12 +574,6 @@ customRoutesComponentsTemplates.home = { /* globals customRoutesComponentsTempla
             });
         },
         /**
-         * Redefinition of 'getAutoUpdateInterval' method of view_with_autoupdate_mixin.
-         */
-        getAutoUpdateInterval() {
-            return 15000;
-        },
-        /**
          * Redefinition of 'updateData' method of view_with_autoupdate_mixin.
          */
         updateData() {
@@ -640,13 +637,16 @@ customRoutesComponentsTemplates.home = { /* globals customRoutesComponentsTempla
             let exclude_stats = ['jobs'];
 
             for(let key in response.data) {
-                if (response.data.hasOwnProperty(key)) {
-                    if (exclude_stats.includes(key)) {
-                        w_data.pmwChartWidget = response.data[key];
-                    }
-
-                    w_data['pmw' + capitalizeString(key) + 'Counter'] = response.data[key];
+                if (!response.data.hasOwnProperty(key)) {
+                    continue;
                 }
+
+                if (exclude_stats.includes(key)) {
+                    w_data.pmwChartWidget = response.data[key];
+                    continue;
+                }
+
+                w_data['pmw' + capitalizeString(key) + 'Counter'] = response.data[key];
             }
 
             return w_data;

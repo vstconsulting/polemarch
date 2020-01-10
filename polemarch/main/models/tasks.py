@@ -321,7 +321,7 @@ class HistoryQuerySet(BQuerySet):
             sum_by_date[hist_stat[grouped_by]] = (
                 sum_by_date.get(hist_stat[grouped_by], 0) + hist_stat['sum']
             )
-        for hist_stat in qs.order_by(grouped_by):
+        for hist_stat in qs.order_by(grouped_by, 'status'):
             hist_stat.update({'all': sum_by_date[hist_stat[grouped_by]]})
             values.append(hist_stat)
         return values
