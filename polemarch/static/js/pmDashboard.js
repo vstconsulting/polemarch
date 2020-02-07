@@ -3,7 +3,7 @@
  * Function, that returns QuerySet for profile/setting page.
  */
 function getProfileSettingQsFromStore() {
-    let qs = app.application.$store.getters.getQuerySet('user/' + my_user_id + '/settings');
+    let qs = app.application.$store.getters.getQuerySet('user/' + app.api.getUserId() + '/settings');
 
     if(!qs) {
         return;
@@ -138,7 +138,7 @@ guiWidgets.history_chart = class HistoryChart extends guiWidgets.line_chart {
         }
 
         return Number(
-            moment(startTimeOrg).subtract(this.period.amount - 1, this.period.type).tz(window.timeZone).format("x"),
+            moment(startTimeOrg).subtract(this.period.amount - 1, this.period.type).tz(app.api.getTimeZone()).format("x"),
         );
     }
     /**
@@ -152,8 +152,8 @@ guiWidgets.history_chart = class HistoryChart extends guiWidgets.line_chart {
 
         for(let i = -1; i< this.period.amount; i++) {
             // period up
-            let time =+ moment(start_time).add(i, this.period.type).tz(window.timeZone).format("x");
-            time = moment(time).tz(window.timeZone).format(this.date_format);
+            let time =+ moment(start_time).add(i, this.period.type).tz(app.api.getTimeZone()).format("x");
+            time = moment(time).tz(app.api.getTimeZone()).format(this.date_format);
             labels.push(time);
         }
 
@@ -173,8 +173,8 @@ guiWidgets.history_chart = class HistoryChart extends guiWidgets.line_chart {
         for(let index = 0; index < raw_data[this.period.type].length; index++) {
             let item = raw_data[this.period.type][index];
 
-            let time =+ moment(item[this.period.type]).tz(window.timeZone).format("x");
-            time = moment(time).tz(window.timeZone).format(this.date_format);
+            let time =+ moment(item[this.period.type]).tz(app.api.getTimeZone()).format("x");
+            time = moment(time).tz(app.api.getTimeZone()).format(this.date_format);
 
             if(data[time] === undefined) {
                 continue;
@@ -658,7 +658,7 @@ customRoutesComponentsTemplates.home = { /* globals customRoutesComponentsTempla
          * @param {any} value New value of widget's property name
          */
         saveWidgetSettingToApi(widget, prop, value) {
-            let qs = app.application.$store.state.objects["user/" + my_user_id + "/settings"];
+            let qs = app.application.$store.state.objects["user/" + app.api.getUserId() + "/settings"];
 
             if(!qs) {
                 return;
@@ -700,7 +700,7 @@ tabSignal.connect('app.afterInit', (obj) => {
     let app = obj.app;
     let setting_view = app.views["/profile/settings/"];
     let qs = setting_view.objects.clone();
-    qs.url = qs.url.format({[path_pk_key]: my_user_id}).replace(/^\/|\/$/g, "");
+    qs.url = qs.url.format({[path_pk_key]: app.api.getUserId()}).replace(/^\/|\/$/g, "");
 
     qs.get().then(instance => {
         guiDashboard.updateSettings(instance.data);

@@ -69,13 +69,13 @@ class InvBaseTestCase(BaseTestCase):
             getattr(obj, name).create()
         bulk_data = [
             self.get_mod_bulk(bulk_name, obj.id, {'name': 'copied'}, 'copy'),
-            self.get_mod_bulk(bulk_name, '<0[data][id]>', {}, 'variables', method='GET'),
+            self.get_mod_bulk(bulk_name, '<<0[data][id]>>', {}, 'variables', method='GET'),
         ]
         bulk_data += [
-            self.get_mod_bulk(bulk_name, '<0[data][id]>', {}, name, method='GET')
+            self.get_mod_bulk(bulk_name, '<<0[data][id]>>', {}, name, method='GET')
             for name in copy_checks.keys()
         ]
-        bulk_data.append(self.get_bulk(bulk_name, {}, 'del', pk='<0[data][id]>'))
+        bulk_data.append(self.get_bulk(bulk_name, {}, 'del', pk='<<0[data][id]>>'))
         results = self.make_bulk(bulk_data)
         self.assertEqual(results[1]['data']['count'], len(obj.vars))
         for value in results[1]['data']['results']:
@@ -134,14 +134,14 @@ class InventoriesTestCase(InvBaseTestCase):
             self.get_bulk('host', dict(name='some-valid'), 'add'),
             self.get_bulk('host', dict(name='some^invalid'), 'add'),
             self.get_mod_bulk(
-                'host', "<0[data][id]>", dict(key='ansible_host', value='valid')
+                'host', "<<0[data][id]>>", dict(key='ansible_host', value='valid')
             ),
             self.get_mod_bulk(
-                'host', "<0[data][id]>", dict(key='ansible_host', value='^invalid')
+                'host', "<<0[data][id]>>", dict(key='ansible_host', value='^invalid')
             ),
             self.get_bulk('host', dict(name='some^invalid', type="RANGE"), 'add'),
             self.get_bulk('host', dict(name='host', type="UNKNOWN"), 'add'),
-            self.get_bulk('host', {}, 'del', pk="<0[data][id]>"),
+            self.get_bulk('host', {}, 'del', pk="<<0[data][id]>>"),
         ]
         # additionaly test hooks
         self.hook_model.objects.all().delete()
@@ -198,7 +198,7 @@ class InventoriesTestCase(InvBaseTestCase):
         ]
         bulk_data += [
             self.get_mod_bulk(
-                'group', '<0[data][id]>', dict(id='<{}[data][id]>'.format(i)), 'group'
+                'group', '<<0[data][id]>>', dict(id='<<{}[data][id]>>'.format(i)), 'group'
             )
             for i in range(1, 4)
         ]
