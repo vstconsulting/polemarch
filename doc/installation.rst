@@ -247,6 +247,7 @@ Cache
 
 * **CACHE_LOCATION** - path to cache, if you use `/tmp/polemarch_django_cache` path, then cache engine would be `FileBasedCache`, else `MemcacheCache`. Default value: ``/tmp/polemarch_django_cache`
 
+
 RPC section
 ~~~~~~~~~~~
 
@@ -254,8 +255,7 @@ RPC section
 
 * **RPC_HEARTBEAT** - Timeout for RPC. Default value: `5`.
 
-* **RPC_CONCURRENCY** - Number of
-concurrently tasks. Default value: `4`.
+* **RPC_CONCURRENCY** - Number of concurrently tasks. Default value: `4`.
 
 Web section
 ~~~~~~~~~~~
