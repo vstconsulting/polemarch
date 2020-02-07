@@ -246,7 +246,7 @@ class BaseExecutionsTestCase(BaseTestCase):
                 self.get_mod_bulk('project', pk, template_playbook, 'template'),
             ] +
             self.get_periodic_task_data(
-                pk, '<{}[data][id]>'.format(template_module_index)
+                pk, '<<{}[data][id]>>'.format(template_module_index)
             )
         )
 
@@ -277,91 +277,91 @@ class BaseExecutionsTestCase(BaseTestCase):
         ]
         # Set vars
         bulk_data += [
-            self.get_mod_bulk('host', "<3[data][id]>", dict(key=k, value=v))
+            self.get_mod_bulk('host', "<<3[data][id]>>", dict(key=k, value=v))
             for k, v in hostlocl_v.items()
         ]
         bulk_data += [
-            self.get_mod_bulk('group', "<6[data][id]>", dict(key=k, value=v))
+            self.get_mod_bulk('group', "<<6[data][id]>>", dict(key=k, value=v))
             for k, v in groups1_v.items()
         ]
         bulk_data += [
-            self.get_mod_bulk('inventory', "<9[data][id]>", dict(key=k, value=v))
+            self.get_mod_bulk('inventory', "<<9[data][id]>>", dict(key=k, value=v))
             for k, v in complex_inventory_v.items()
         ]
         # Add children
         bulk_data += [
             # to hosts1
             self.get_mod_bulk(
-                'group', "<4[data][id]>", dict(id="<0[data][id]>"), 'host',
+                'group', "<<4[data][id]>>", dict(id="<<0[data][id]>>"), 'host',
             ),
             self.get_mod_bulk(
-                'group', "<4[data][id]>", dict(id="<3[data][id]>"), 'host',
+                'group', "<<4[data][id]>>", dict(id="<<3[data][id]>>"), 'host',
             ),
             # to hosts2
             self.get_mod_bulk(
-                'group', "<5[data][id]>", dict(id="<1[data][id]>"), 'host',
+                'group', "<<5[data][id]>>", dict(id="<<1[data][id]>>"), 'host',
             ),
             self.get_mod_bulk(
-                'group', "<5[data][id]>", dict(id="<2[data][id]>"), 'host',
+                'group', "<<5[data][id]>>", dict(id="<<2[data][id]>>"), 'host',
             ),
             # to groups1
             self.get_mod_bulk(
-                'group', "<6[data][id]>", dict(id="<7[data][id]>"), 'group',
+                'group', "<<6[data][id]>>", dict(id="<<7[data][id]>>"), 'group',
             ),
             self.get_mod_bulk(
-                'group', "<6[data][id]>", dict(id="<8[data][id]>"), 'group',
+                'group', "<<6[data][id]>>", dict(id="<<8[data][id]>>"), 'group',
             ),
             # to groups2
             self.get_mod_bulk(
-                'group', "<7[data][id]>", dict(id="<8[data][id]>"), 'group',
+                'group', "<<7[data][id]>>", dict(id="<<8[data][id]>>"), 'group',
             ),
             # to groups3
             self.get_mod_bulk(
-                'group', "<8[data][id]>", dict(id="<4[data][id]>"), 'group',
+                'group', "<<8[data][id]>>", dict(id="<<4[data][id]>>"), 'group',
             ),
             self.get_mod_bulk(
-                'group', "<8[data][id]>", dict(id="<5[data][id]>"), 'group',
+                'group', "<<8[data][id]>>", dict(id="<<5[data][id]>>"), 'group',
             ),
             # to inventory
             self.get_mod_bulk(
-                'inventory', "<9[data][id]>", dict(id="<6[data][id]>"), 'group',
+                'inventory', "<<9[data][id]>>", dict(id="<<6[data][id]>>"), 'group',
             ),
             self.get_mod_bulk(
-                'inventory', "<9[data][id]>", dict(id="<0[data][id]>"), 'host',
+                'inventory', "<<9[data][id]>>", dict(id="<<0[data][id]>>"), 'host',
             ),
             self.get_mod_bulk(
-                'inventory', "<9[data][id]>", dict(id="<1[data][id]>"), 'host',
+                'inventory', "<<9[data][id]>>", dict(id="<<1[data][id]>>"), 'host',
             ),
             self.get_mod_bulk(
-                'inventory', "<9[data][id]>", dict(id="<3[data][id]>"), 'host',
+                'inventory', "<<9[data][id]>>", dict(id="<<3[data][id]>>"), 'host',
             ),
             # to project
             self.get_mod_bulk(
-                'project', "<10[data][id]>", dict(id="<9[data][id]>"), 'inventory'
+                'project', "<<10[data][id]>>", dict(id="<<9[data][id]>>"), 'inventory'
             ),
         ]
         bulk_data = (
-            self.get_templates_data(bulk_data, "<10[data][id]>", "<9[data][id]>")
+            self.get_templates_data(bulk_data, "<<10[data][id]>>", "<<9[data][id]>>")
             if with_subs else bulk_data
         )
         # Execute actions
         _exec = dict(
-            connection="local", inventory="<9[data][id]>",
+            connection="local", inventory="<<9[data][id]>>",
             module="ping", group="127.0.1.1", args="", forks=1, verbose=4
         )
         bulk_data += [
             self.get_mod_bulk(
-                'project', "<10[data][id]>", {}, 'sync',
+                'project', "<<10[data][id]>>", {}, 'sync',
             ),
             self.get_mod_bulk(
-                'project', "<10[data][id]>", _exec, 'execute_module',
+                'project', "<<10[data][id]>>", _exec, 'execute_module',
             ),
             self.get_bulk(
                 'history', {}, 'get',
-                pk="<{}[data][history_id]>".format(len(bulk_data) + 1)
+                pk="<<{}[data][history_id]>>".format(len(bulk_data) + 1)
             ),
             self.get_mod_bulk(
-                'history', "<{}[data][history_id]>".format(len(bulk_data) + 1), {},
+                'history', "<<{}[data][history_id]>>".format(len(bulk_data) + 1), {},
                 'raw', 'get', filters='color=yes'
             ),
         ]
@@ -514,8 +514,8 @@ class BaseExecutionsTestCase(BaseTestCase):
         obj = self.get_model_filter('Project', pk=id).get()
         bulk_data = [
             self.get_mod_bulk('project', obj.id, {'name': 'copied'}, 'copy'),
-            self.get_mod_bulk('project', '<0[data][id]>', {}, 'variables', method='GET'),
-            self.get_bulk('project', {}, 'del', pk='<0[data][id]>'),
+            self.get_mod_bulk('project', '<<0[data][id]>>', {}, 'variables', method='GET'),
+            self.get_bulk('project', {}, 'del', pk='<<0[data][id]>>'),
         ]
         results = self.make_bulk(bulk_data)
         self.assertEqual(results[0]['data']['status'], 'NEW')
@@ -607,14 +607,14 @@ class BaseExecutionsTestCase(BaseTestCase):
                 'project', project_data['id'], exec_data, 'execute_{}'.format(type)
             ),
             self.get_mod_bulk(
-                'project', project_data['id'], {}, 'history/<0[data][history_id]>', 'get'
+                'project', project_data['id'], {}, 'history/<<0[data][history_id]>>', 'get'
             ),
         ], 'put')
 
     def playbook_tests(self, prj, playbook_count=1, execute=None, inventory="localhost"):
         _exec = dict(
             connection="local", limit="docker",
-            playbook="<1[data][results][0][playbook]>", inventory=inventory,
+            playbook="<<1[data][results][0][playbook]>>", inventory=inventory,
             private_key=ssh_key_pattern
         )
         bulk_data = self.project_bulk_sync_and_playbooks(prj['id'])
@@ -646,7 +646,7 @@ class BaseExecutionsTestCase(BaseTestCase):
                 'project', prj['id'], {}, 'module', 'get', filters='name=ping'
             ),
             self.get_mod_bulk(
-                'project', prj['id'], {}, 'module/<1[data][results][0][id]>', 'get'
+                'project', prj['id'], {}, 'module/<<1[data][results][0][id]>>', 'get'
             ),
         ]
         results = self.make_bulk(bulk_data, 'put')
@@ -790,11 +790,11 @@ class ProjectTestCase(BaseExecutionsTestCase):
         bulk_data = [
             self.get_mod_bulk('project', pk, template_module, 'template'),
             self.get_mod_bulk('project', pk, template_playbook, 'template'),
-            self.get_mod_bulk('project', pk, {}, 'template/<0[data][id]>/execute'),
-            self.get_mod_bulk('project', pk, {}, 'template/<1[data][id]>/execute'),
-            self.get_mod_bulk('project', pk, m_opts, 'template/<0[data][id]>/execute'),
-            self.get_mod_bulk('project', pk, p_opts, 'template/<1[data][id]>/execute'),
-            self.get_mod_bulk('project', pk, {}, 'template/<1[data][id]>', 'get'),
+            self.get_mod_bulk('project', pk, {}, 'template/<<0[data][id]>>/execute'),
+            self.get_mod_bulk('project', pk, {}, 'template/<<1[data][id]>>/execute'),
+            self.get_mod_bulk('project', pk, m_opts, 'template/<<0[data][id]>>/execute'),
+            self.get_mod_bulk('project', pk, p_opts, 'template/<<1[data][id]>>/execute'),
+            self.get_mod_bulk('project', pk, {}, 'template/<<1[data][id]>>', 'get'),
         ]
         results = self.make_bulk(bulk_data)
         for result in results:
@@ -849,7 +849,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         bulk_data = [
             self.get_mod_bulk('project', pk, data, 'periodic_task'),
             self.get_mod_bulk(
-                'project', pk, new_data, 'periodic_task/<0[data][id]>', 'patch'
+                'project', pk, new_data, 'periodic_task/<<0[data][id]>>', 'patch'
             ),
         ]
         results = self.make_bulk(bulk_data)
@@ -959,11 +959,11 @@ class ProjectTestCase(BaseExecutionsTestCase):
         bulk_data += [
             self.get_mod_bulk(
                 'project', project_data['id'], dict(key='connection', value='local'),
-                'periodic_task/<0[data][id]>/variables'
+                'periodic_task/<<0[data][id]>>/variables'
             ),
             self.get_mod_bulk(
                 'project', project_data['id'], dict(key='forks', value='5'),
-                'periodic_task/<0[data][id]>/variables'
+                'periodic_task/<<0[data][id]>>/variables'
             ),
         ]
         results = self.make_bulk(bulk_data)
@@ -1017,24 +1017,24 @@ class ProjectTestCase(BaseExecutionsTestCase):
             self.get_mod_bulk('project', project_data['id'], data, 'periodic_task'),
             self.get_mod_bulk(
                 'project', project_data['id'], data,
-                'periodic_task/<0[data][id]>/execute',
+                'periodic_task/<<0[data][id]>>/execute',
                 'post'
             ),
             self.get_mod_bulk(
-                'project', project_data['id'], {}, 'history/<1[data][history_id]>', 'get'
+                'project', project_data['id'], {}, 'history/<<1[data][history_id]>>', 'get'
             ),
             self.get_mod_bulk(
                 'project', project_data['id'], dict(save_result=False),
-                'periodic_task/<0[data][id]>', 'patch'
+                'periodic_task/<<0[data][id]>>', 'patch'
             ),
             self.get_mod_bulk(
                 'project', project_data['id'], data,
-                'periodic_task/<0[data][id]>/execute',
+                'periodic_task/<<0[data][id]>>/execute',
                 'post'
             ),
             self.get_mod_bulk(
                 'project', project_data['id'], dict(save_result=True),
-                'periodic_task/<0[data][id]>', 'patch'
+                'periodic_task/<<0[data][id]>>', 'patch'
             ),
         ], 'put')
         self.assertEqual(results[0]['status'], 201)
@@ -1090,15 +1090,15 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 dict(data_type=['project', str(proj_id), 'periodic_task'], data=pt_data, method='post'),
                 dict(data_type=['project', str(proj_id), 'periodic_task'], data=pt_data, method='post'),
                 dict(
-                    data_type=['project', str(proj_id), 'periodic_task', '<2[data][id]>'],
+                    data_type=['project', str(proj_id), 'periodic_task', '<<2[data][id]>>'],
                     data=dict(type='INTERVAL', schedule="10"),
                     method='patch'),
                 dict(
-                    data_type=['project', str(proj_id), 'periodic_task', '<2[data][id]>'],
+                    data_type=['project', str(proj_id), 'periodic_task', '<<2[data][id]>>'],
                     data=dict(enabled=False),
                     method='patch'
                 ),
-                dict(data_type=['project', str(proj_id), 'periodic_task', '<2[data][id]>'], method='delete')
+                dict(data_type=['project', str(proj_id), 'periodic_task', '<<2[data][id]>>'], method='delete')
             ])
             self.assertEqual(results[0]['status'], 201)
             self.assertEqual(
@@ -1192,7 +1192,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
     def make_test_restrict_sync(self, project_data):
         self.get_model_filter('Project', pk=project_data['id']).get().set_status('NEW')
         data = dict(
-            connection="local", inventory="<9[data][id]>",
+            connection="local", inventory="<<9[data][id]>>",
             module="ping", group="127.0.1.1", args="", forks=1, verbose=4
         )
         result = self.make_bulk([
@@ -1340,7 +1340,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         project_data = result[0]['data']
         results = self.make_bulk([
             self.get_bulk('project', {}, 'get', pk=project_data['id']),
-            self.get_mod_bulk('project', '<0[data][id]>', {}, 'sync'),
+            self.get_mod_bulk('project', '<<0[data][id]>>', {}, 'sync'),
             self.get_bulk('project', {}, 'get', pk=project_data['id']),
         ], 'put')
         project_data = results[2]['data']
@@ -1461,10 +1461,10 @@ class ProjectTestCase(BaseExecutionsTestCase):
             self.get_complex_bulk('project', name='project_req', repository='MANUAL'),
             # to project
             self.get_mod_bulk(
-                'project', "<1[data][id]>", dict(id="<0[data][id]>"), 'inventory'
+                'project', "<<1[data][id]>>", dict(id="<<0[data][id]>>"), 'inventory'
             ),
         ]
-        bulk_data = self.get_templates_data(bulk_data, "<1[data][id]>", "<0[data][id]>")
+        bulk_data = self.get_templates_data(bulk_data, "<<1[data][id]>>", "<<0[data][id]>>")
         subs = self.generate_subs(self.make_bulk(bulk_data))
         subs['project'][0] = self.sync_project(subs['project'][0]['id'])
         prj_id = subs['project'][0]['id']
@@ -1547,36 +1547,36 @@ class ProjectTestCase(BaseExecutionsTestCase):
         bulk_data = [
             dict(data_type=['project'], method='post', data=dict(name='testProj')),
             self.get_mod_bulk(
-                'project', '<0[data][id]>',
+                'project', '<<0[data][id]>>',
                 {'name': 'test-inventory', 'raw_data': inventory_data},
                 ['inventory', 'import_inventory'],
             ),
             self.get_mod_bulk(
                 'inventory',
-                '<1[data][inventory_id]>',
+                '<<1[data][inventory_id]>>',
                 {},
                 'all_hosts',
                 method='get'
             ),
             self.get_mod_bulk(
                 'inventory',
-                '<1[data][inventory_id]>',
+                '<<1[data][inventory_id]>>',
                 {},
                 'all_groups',
                 method='get'
             ),
             self.get_mod_bulk(
                 'inventory',
-                '<1[data][inventory_id]>',
+                '<<1[data][inventory_id]>>',
                 {},
                 'variables',
                 method='get'
             ),
             self.get_mod_bulk(
                 'project',
-                '<0[data][id]>',
+                '<<0[data][id]>>',
                 {},
-                ['inventory', '<1[data][inventory_id]>'],
+                ['inventory', '<<1[data][inventory_id]>>'],
                 method='get'
             ),
         ]
@@ -1616,7 +1616,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
             dict(data_type=['community_template', 2], method='get'),
             dict(data_type=['community_template', 3], method='get'),
             dict(data_type=['community_template', 3, 'use_it'], method='post'),
-            dict(data_type=['project', '<4[data][project_id]>'], method='get'),
+            dict(data_type=['project', '<<4[data][project_id]>>'], method='get'),
         ]
         response = requests.Response()
         response.status_code = 200
@@ -1648,44 +1648,44 @@ class ProjectTestCase(BaseExecutionsTestCase):
             dict(data_type=['project'], method='post', data=dict(name='testProjCI')),
             # 1
             dict(
-                data_type=['project', '<0[data][id]>', 'template'],
+                data_type=['project', '<<0[data][id]>>', 'template'],
                 method='post', data=self.template_module
             ),
             # 2
             dict(
-                data_type=['project', '<0[data][id]>', 'variables'],
+                data_type=['project', '<<0[data][id]>>', 'variables'],
                 method='post', data=dict(key='ci_template', value='100')
             ),
             # 3
             dict(
-                data_type=['project', '<0[data][id]>', 'variables'],
-                method='post', data=dict(key='ci_template', value='<1[data][id]>')
+                data_type=['project', '<<0[data][id]>>', 'variables'],
+                method='post', data=dict(key='ci_template', value='<<1[data][id]>>')
             ),
             # 4
-            dict(data_type=['project', '<0[data][id]>', 'sync'], method='post'),
+            dict(data_type=['project', '<<0[data][id]>>', 'sync'], method='post'),
             # 5
-            dict(data_type=['project', '<0[data][id]>', 'history'], method='get'),
+            dict(data_type=['project', '<<0[data][id]>>', 'history'], method='get'),
             # 6
             dict(
-                data_type=['project', '<0[data][id]>', 'variables'],
+                data_type=['project', '<<0[data][id]>>', 'variables'],
                 method='post', data=dict(key='repo_sync_on_run', value=True)
             ),
             # 7
             dict(
-                data_type=['project', '<0[data][id]>', 'variables', '<3[data][id]>'],
+                data_type=['project', '<<0[data][id]>>', 'variables', '<<3[data][id]>>'],
                 method='delete'
             ),
             # 8
             dict(
-                data_type=['project', '<0[data][id]>', 'variables'],
+                data_type=['project', '<<0[data][id]>>', 'variables'],
                 method='post', data=dict(key='repo_sync_on_run', value=True)
             ),
             # 9
             dict(
-                data_type=['project', '<0[data][id]>', 'variables'],
-                method='post', data=dict(key='ci_template', value='<1[data][id]>')
+                data_type=['project', '<<0[data][id]>>', 'variables'],
+                method='post', data=dict(key='ci_template', value='<<1[data][id]>>')
             ),
-            dict(data_type=['project', '<0[data][id]>'], method='delete'),
+            dict(data_type=['project', '<<0[data][id]>>'], method='delete'),
         ]
         results = self.make_bulk(bulk_data, 'put')
         self.assertEqual(results[0]['status'], 201)
@@ -1714,15 +1714,15 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 data=dict(name='test_inv')
             ),
             # 2
-            dict(data_type=['project', '<0[data][id]>', 'sync'], method='post'),
+            dict(data_type=['project', '<<0[data][id]>>', 'sync'], method='post'),
             # 3
             dict(
-                data_type=['project', '<0[data][id]>', 'inventory'], method='post',
-                data=dict(id='<1[data][id]>')
+                data_type=['project', '<<0[data][id]>>', 'inventory'], method='post',
+                data=dict(id='<<1[data][id]>>')
             ),
             # 4
             dict(
-                data_type=['project', '<0[data][id]>', 'periodic_task'], method='post',
+                data_type=['project', '<<0[data][id]>>', 'periodic_task'], method='post',
                 data=dict(
                     mode="shell", schedule="* * * * *", type="CRONTAB",
                     inventory='./localhost,', save_result=False,
@@ -1730,26 +1730,26 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 )
             ),
             # 5
-            dict(data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>'], method='get'),
+            dict(data_type=['project', '<<0[data][id]>>', 'periodic_task', '<<4[data][id]>>'], method='get'),
             # 6
             dict(
-                data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>', 'variables'], method='post',
-                data=dict(key='args', value='ls')
+                data_type=['project', '<<0[data][id]>>', 'periodic_task', '<<4[data][id]>>', 'variables'],
+                method='post', data=dict(key='args', value='ls')
             ),
             # 7
             dict(
-                data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>'], method='put',
+                data_type=['project', '<<0[data][id]>>', 'periodic_task', '<<4[data][id]>>'], method='put',
                 data=dict(
                     mode="shell", schedule="* * * * *", type="CRONTAB",
-                    inventory='<1[data][id]>', save_result=True,
+                    inventory='<<1[data][id]>>', save_result=True,
                     kind="MODULE", name="test_pt", enabled=True
                 )
             ),
             # 8
-            dict(data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>'], method='get'),
+            dict(data_type=['project', '<<0[data][id]>>', 'periodic_task', '<<4[data][id]>>'], method='get'),
             # 9
             dict(
-                data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>'], method='put',
+                data_type=['project', '<<0[data][id]>>', 'periodic_task', '<<4[data][id]>>'], method='put',
                 data=dict(
                     mode="shell", schedule="* * * * *", type="CRONTAB",
                     inventory='', save_result=True,
@@ -1757,10 +1757,10 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 )
             ),
             # 10
-            dict(data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>'], method='get'),
+            dict(data_type=['project', '<<0[data][id]>>', 'periodic_task', '<<4[data][id]>>'], method='get'),
             # 11
             dict(
-                data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>'], method='put',
+                data_type=['project', '<<0[data][id]>>', 'periodic_task', '<<4[data][id]>>'], method='put',
                 data=dict(
                     mode="shell", schedule="* * * * *", type="CRONTAB",
                     inventory='./localhost, ', save_result=True,
@@ -1768,23 +1768,26 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 )
             ),
             # 12
-            dict(data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>'], method='get'),
+            dict(data_type=['project', '<<0[data][id]>>', 'periodic_task', '<<4[data][id]>>'], method='get'),
             # 13
             dict(
-                data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>', 'variables'], method='post',
-                data=dict(key='connection', value='local')
+                data_type=['project', '<<0[data][id]>>', 'periodic_task', '<<4[data][id]>>', 'variables'],
+                method='post', data=dict(key='connection', value='local')
             ),
             # 14
             dict(
-                data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>', 'variables'], method='post',
-                data=dict(key='verbose', value='4')
+                data_type=['project', '<<0[data][id]>>', 'periodic_task', '<<4[data][id]>>', 'variables'],
+                method='post', data=dict(key='verbose', value='4')
             ),
             # 15
-            dict(data_type=['project', '<0[data][id]>', 'periodic_task', '<4[data][id]>', 'execute'], method='post'),
+            dict(
+                data_type=['project', '<<0[data][id]>>', 'periodic_task', '<<4[data][id]>>', 'execute'],
+                method='post'
+            ),
             # 16
-            dict(data_type=['project', '<0[data][id]>', 'history', '<15[data][history_id]>'], method='get'),
+            dict(data_type=['project', '<<0[data][id]>>', 'history', '<<15[data][history_id]>>'], method='get'),
             # 17
-            dict(data_type=['project', '<0[data][id]>'], method='delete'),
+            dict(data_type=['project', '<<0[data][id]>>'], method='delete'),
         ], 'put')
 
         for result in results:

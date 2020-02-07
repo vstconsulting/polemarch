@@ -9,7 +9,7 @@ const user_settings_page_edit_mixin = {
                 return;
             }
 
-            let is_current_user_settings = this.qs_url.replace(/^\/|\/$/g, "") == 'user/' + my_user_id + '/settings';
+            let is_current_user_settings = this.qs_url.replace(/^\/|\/$/g, "") == 'user/' + app.api.getUserId() + '/settings';
 
             if(is_current_user_settings) {
                 data.selectedSkin = guiCustomizer.skin.name;

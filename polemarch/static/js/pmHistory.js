@@ -344,7 +344,7 @@ const history_pk_mixin = {
                 raw_stdout_link() {
                     let url = this.url.replace(/^\/|\/$/g, "");
 
-                    return '/api/' + api_version + '/' + url + '/raw'; /* globals api_version */
+                    return '/api/' + app.api.openapi.info.version + '/' + url + '/raw';
                 },
                 /**
                  * Property, that returns url for getting stdout lines.

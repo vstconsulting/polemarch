@@ -362,7 +362,7 @@ guiFields.one_history_date_time = class OneHistoryDateTime extends guiFields.dat
             return;
         }
 
-        return moment(moment.tz(value, window.timeZone)).tz(moment.tz.guess()).format("YYYY-MM-DD HH:mm:ss");
+        return moment(moment.tz(value, app.api.getTimeZone())).tz(moment.tz.guess()).format("YYYY-MM-DD HH:mm:ss");
     }
 
 };
