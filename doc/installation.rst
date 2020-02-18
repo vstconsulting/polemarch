@@ -203,7 +203,7 @@ For run Polemarch docker image use command:
 
         docker run -d --name polemarch --restart always -v /opt/polemarch/projects:/projects -v /opt/polemarch/hooks:/hooks vstconsulting/polemarch
 
-Using this command download official docker image and run it with default settings.
+Using this command download official docker image and run it with default settings. Dont use default SQLite installation with filecache in production.
 
 Polemarch will be run with web interface on port `8080`
 
