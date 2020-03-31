@@ -1,8 +1,8 @@
 /**
  * Redefinition of logo Vue component.
  */
-vst_vue_components.items.logo = Vue.component('logo', {
-    props: ['title'],
+vst_vue_components.items.logo = spa.globalComponentsRegistrator.add({
+    name: 'logo',
     template: "#template_logo_pm",
     computed: {
         /**
