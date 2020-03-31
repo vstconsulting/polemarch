@@ -65,6 +65,7 @@
     "vst_vue_components": true,
     "Vue": true,
     "XRegExp": true,
-    "$": true
+    "$": true,
+    "spa": true
   }
 }
