@@ -1,5 +1,6 @@
 # set to local images because too long execution
-image: onegreyonewhite/tox:tox
+default:
+  image: vstconsulting/images:build
 
 variables:
   GET_SOURCES_ATTEMPTS: 3
@@ -31,7 +32,7 @@ stages:
 ###########################################
 .branch_tests_template: &branch_tests
   stage: test
-  image: onegreyonewhite/tox:tox
+  image: vstconsulting/images:tox
   variables:
     TOX_ENVS: ""
   before_script:
@@ -66,7 +67,6 @@ stages:
 ###########################################
 code_style:
   stage: code_standarts
-  image: onegreyonewhite/tox:tox
   variables:
     TOX_ARGS: "--workdir /cache/.tox_polemarch_code"
   script:
@@ -95,7 +95,7 @@ py36-install:
 ###########################################
 deploy_environment:
   stage: release
-  image: onegreyonewhite/tox:tox
+  image: vstconsulting/images:tox
   services:
     - name: "docker:19.03-dind"
       alias: "docker_service_host"
@@ -113,7 +113,7 @@ deploy_environment:
 
 delete_environment:
   stage: release
-  image: onegreyonewhite/tox:tox
+  image: vstconsulting/images:tox
   script:
     - tox -e destroy_env
   environment:
@@ -127,7 +127,7 @@ delete_environment:
 
 release:
   stage: release
-  image: onegreyonewhite/tox:tox
+  image: vstconsulting/images:tox
   only:
     refs:
       - master
@@ -158,7 +158,7 @@ pages:
 
 release_pypi:
   stage: release
-  image: onegreyonewhite/tox:centos6
+  image: vstconsulting/images:build
   only:
     refs:
     - tags
@@ -178,7 +178,7 @@ release_pypi:
 
 publish_docker:
   stage: publish
-  image: onegreyonewhite/tox:tox
+  image: vstconsulting/images:tox
   services:
     - name: 'docker:19.03-dind'
       alias: 'docker_service_host'
@@ -196,7 +196,7 @@ publish_docker:
 
 publish_release:
   stage: publish
-  image: onegreyonewhite/tox:ubuntu
+  image: vstconsulting/images:tox
   allow_failure: true
   needs: ["release_pypi"]
   only:
