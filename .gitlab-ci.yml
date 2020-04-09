@@ -1,24 +1,23 @@
 # set to local images because too long execution
 default:
   image: vstconsulting/images:build
-
-variables:
-  GET_SOURCES_ATTEMPTS: 3
-  ARTIFACT_DOWNLOAD_ATTEMPTS: 3
-  RESTORE_CACHE_ATTEMPTS: 3
-  DJANGO_LOG_LEVEL: 'DEBUG'
-  TOX_ARGS: "--workdir /cache/.tox_polemarch_${CI_BUILD_REF_NAME}"
-  CCACHE_DIR: /cache/.ccache
-  CC: ccache gcc
-  DOCKER_DRIVER: "overlay2"
-  REGISTRY_IMAGE: "${CI_REGISTRY_IMAGE}"
-  REGISTRY_IMAGE_TAG: "${KUBE_NAMESPACE}"
-  REGISTRY_USER: "${CI_REGISTRY_USER}"
-  REGISTRY_PASSWORD: "${CI_REGISTRY_PASSWORD}"
-  REGISTRY_URL: "${CI_REGISTRY}"
-  DOCKER_TLS_CERTDIR: ""
-  DOCKER_HOST: "tcp://docker_service_host:2375"
-  K8S_INGRESS_DOMAIN: "polemarch-$KUBE_NAMESPACE.$KUBE_INGRESS_BASE_DOMAIN"
+  variables:
+    GET_SOURCES_ATTEMPTS: 3
+    ARTIFACT_DOWNLOAD_ATTEMPTS: 3
+    RESTORE_CACHE_ATTEMPTS: 3
+    DJANGO_LOG_LEVEL: 'DEBUG'
+    TOX_ARGS: "--workdir /cache/.tox_polemarch_${CI_BUILD_REF_NAME}"
+    CCACHE_DIR: /cache/.ccache
+    CC: ccache gcc
+    DOCKER_DRIVER: "overlay2"
+    REGISTRY_IMAGE: "${CI_REGISTRY_IMAGE}"
+    REGISTRY_IMAGE_TAG: "${KUBE_NAMESPACE}"
+    REGISTRY_USER: "${CI_REGISTRY_USER}"
+    REGISTRY_PASSWORD: "${CI_REGISTRY_PASSWORD}"
+    REGISTRY_URL: "${CI_REGISTRY}"
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: "tcp://docker_service_host:2375"
+    K8S_INGRESS_DOMAIN: "polemarch-$KUBE_NAMESPACE.$KUBE_INGRESS_BASE_DOMAIN"
 
 stages:
   - code_standarts
