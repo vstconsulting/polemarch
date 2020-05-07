@@ -132,3 +132,8 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Frontend
+node_modules
+polemarch/static/polemarch
+yarn-error.log

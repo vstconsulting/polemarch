@@ -27,7 +27,7 @@ class OApiTestCase(BaseTestCase):
                                     --user admin \
                                     -m doc/api_schema.yaml
         '''
-        schema = self.get_result('get', '/api/openapi/?format=openapi')
+        schema = self.get_result('get', '/api/endpoint/?format=openapi')
 
         with openapi_schema_yaml.open('r') as fin:
             openapi_schema_yml = yaml.load(fin, Loader=yaml.SafeLoader)

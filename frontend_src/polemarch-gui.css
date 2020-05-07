@@ -1,4 +1,5 @@
-.pt-enabled, .hook-enable {
+.pt-enabled,
+.hook-enable {
     font-weight: bold;
     text-align: center;
     vertical-align: middle;
@@ -10,13 +11,11 @@
 }
 
 @media (max-width: 1200px) {
-
     .add-existing-item {
         margin-right: 0px;
         margin-top: 10px;
     }
 }
-
 
 @media (min-width: 1200px) {
     .readme_content img {
@@ -25,13 +24,15 @@
     }
 }
 
-.td-history-start_time, .td-history-stop_time,
-.td-project_history-start_time, .td-project_history-stop_time{
-    width:180px;
+.td-history-start_time,
+.td-history-stop_time,
+.td-project_history-start_time,
+.td-project_history-stop_time {
+    width: 180px;
 }
 
 .td-history-status,
-.td-project_history-status{
+.td-project_history-status {
     width: 140px;
 }
 
@@ -113,12 +114,10 @@
 
 @media (max-width: 480px) {
     .td-hook-type,
-
     .td-group-children,
     .td-inventory_group-children,
     .td-project_group-children,
     .td-project_inventory_group-children,
-
     .td-host-type,
     .td-group_host-type,
     .td-inventory_host-type,
@@ -160,20 +159,19 @@ body {
     --chart-axes-lines-color: efefef;
 }
 
-
 .gui-skin-dark {
-    --history-status-ok: #56E401;
-    --history-status-error: #F61328;
-    --history-status-interrupted: #B68CF3;
-    --history-status-delay: #DBEA10;
-    --history-status-offline: #90C1C0;
-    --history-status-run: #00D7FF;
+    --history-status-ok: #56e401;
+    --history-status-error: #f61328;
+    --history-status-interrupted: #b68cf3;
+    --history-status-delay: #dbea10;
+    --history-status-offline: #90c1c0;
+    --history-status-run: #00d7ff;
 
-    --project-status-new: #D48CCA;
-    --project-status-error: #F61328;
-    --project-status-ok: #56E401;
-    --project-status-wait-sync: #00D7FF;
-    --project-status-sync: #FF9600;
+    --project-status-new: #d48cca;
+    --project-status-error: #f61328;
+    --project-status-ok: #56e401;
+    --project-status-wait-sync: #00d7ff;
+    --project-status-sync: #ff9600;
 
     --chart-legend-text-color: #cccccc;
     --chart-axes-text-color: #cccccc;
@@ -204,7 +202,7 @@ body {
     color: var(--history-status-ok);
 }
 
-.project-status{
+.project-status {
     font-weight: bold;
     text-align: center;
     vertical-align: middle;
@@ -252,58 +250,48 @@ body {
     }
 }
 
-.stdout-line .S{color:red}/* red - lines */
-.stdout-line .func{color:blue}/* blue - user-functions */
-.stdout-line .C{color:orange}/* comments - orange */
-.stdout-line .kwrd{font-weight:bold}/* bold - keywords */
-.stdout-line .R{color:gray} /* grey - regexps */
-.stdout-line.fatal{
+.stdout-line .S {
+    color: red;
+} /* red - lines */
+.stdout-line .func {
+    color: blue;
+} /* blue - user-functions */
+.stdout-line .C {
+    color: orange;
+} /* comments - orange */
+.stdout-line .kwrd {
+    font-weight: bold;
+} /* bold - keywords */
+.stdout-line .R {
+    color: gray;
+} /* grey - regexps */
+.stdout-line.fatal {
     background: #ffe7e7;
 }
 
-.history-stdout{
-    overflow: auto;
-    max-height: calc(100vh - 338px);
-    min-height: 400px;
-    background: #000;
-    padding-left: 15px;
-    padding-right: 15px;
-    font-weight: normal!important;
-}
-
-@media (min-width: 767px) {
-    .history-stdout{
-        max-height: calc(100vh - 414px);
-    }
-}
-
-
-.history-mode.history-fullsize .history-LeftInfo{
+.history-mode.history-fullsize .history-LeftInfo {
     width: 100%;
 }
 
-.history-mode.history-fullsize .history-RightInfo{
+.history-mode.history-fullsize .history-RightInfo {
     display: none;
 }
 
-.history-mode .history-LeftInfo .btn-history-resize .fa-expand{
+.history-mode .history-LeftInfo .btn-history-resize .fa-expand {
     display: block;
 }
 
-.history-mode.history-fullsize .history-LeftInfo .btn-history-resize .fa-expand{
+.history-mode.history-fullsize .history-LeftInfo .btn-history-resize .fa-expand {
     display: none;
 }
 
-
-
-.history-mode .history-LeftInfo .btn-history-resize .fa-compress{
+.history-mode .history-LeftInfo .btn-history-resize .fa-compress {
     display: none;
 }
 
-.history-mode.history-fullsize .history-LeftInfo .btn-history-resize .fa-compress{
+.history-mode.history-fullsize .history-LeftInfo .btn-history-resize .fa-compress {
     display: block;
 }
-
 
 .text-logo {
     margin-left: auto;
@@ -326,7 +314,7 @@ body {
 
 .chart-period-select {
     width: 100%;
-    height: 30px!important;
+    height: 30px !important;
     line-height: 30px;
     padding: 3px 12px;
     display: inline-block;
@@ -335,17 +323,17 @@ body {
 
 @media (max-width: 540px) {
     #period-list {
-        width: 100%!important;
+        width: 100% !important;
         margin-top: 10px;
     }
 
     .chart-period-select-wrapper {
         margin-right: 0;
     }
-
 }
 
-.guifield-one_history_boolean .boolean-true, .guifield-one_history_boolean .boolean-false{
+.guifield-one_history_boolean .boolean-true,
+.guifield-one_history_boolean .boolean-false {
     font-size: 24px;
 }
 

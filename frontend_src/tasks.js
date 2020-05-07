@@ -1,11 +1,18 @@
+import {
+    OneTemplateVariable_key_callback,
+    OneTemplateVariable_value_callback,
+    template_vars,
+} from './templates.js';
+const path_pk_key = spa.utils.path_pk_key;
+
 /**
  * Function - onchange callback of dynamic field -  OnePeriodictask.fields.inventory.
  * @param {object} parent_values Values of parent fields.
  */
-function OnePeriodictask_inventory_callback(parent_values={}) {
+function OnePeriodictask_inventory_callback(parent_values = {}) {
     let kind = parent_values.kind;
 
-    if(kind && (kind.toLowerCase() == "playbook" || kind.toLowerCase() == "module")) {
+    if (kind && (kind.toLowerCase() == 'playbook' || kind.toLowerCase() == 'module')) {
         return {
             format: 'inventory_autocomplete',
             additionalProperties: {
@@ -22,14 +29,14 @@ function OnePeriodictask_inventory_callback(parent_values={}) {
  * Function - onchange callback of dynamic field -  OnePeriodictask.fields.mode.
  * @param {object} parent_values Values of parent fields.
  */
-function OnePeriodictask_mode_callback(parent_values={}) {
+function OnePeriodictask_mode_callback(parent_values = {}) {
     let kind = parent_values.kind;
 
-    if(kind) {
+    if (kind) {
         kind = kind.toLowerCase();
     }
 
-    if(kind == "playbook") {
+    if (kind == 'playbook') {
         return {
             format: 'playbook_autocomplete',
             additionalProperties: {
@@ -39,7 +46,7 @@ function OnePeriodictask_mode_callback(parent_values={}) {
             },
             required: true,
         };
-    } else if(kind == "module") {
+    } else if (kind == 'module') {
         return {
             format: 'module_autocomplete',
             additionalProperties: {
@@ -57,14 +64,14 @@ function OnePeriodictask_mode_callback(parent_values={}) {
  * Function - onchange callback of dynamic field -  OnePeriodictask.fields.template.
  * @param {object} parent_values Values of parent fields.
  */
-function OnePeriodictask_template_callback(parent_values={}) {
+function OnePeriodictask_template_callback(parent_values = {}) {
     let kind = parent_values.kind;
 
-    if(kind) {
+    if (kind) {
         kind = kind.toLowerCase();
     }
 
-    if(kind == 'template') {
+    if (kind == 'template') {
         return {
             format: 'fk',
             additionalProperties: {
@@ -95,10 +102,10 @@ function OnePeriodictask_template_opt_callback() {
      * Function - onchange callback of dynamic field - OnePeriodictask.fields.template_opt.
      * @param {object} parent_values Values of parent fields.
      */
-    return function(parent_values) {
+    return function (parent_values) {
         let kind = parent_values.kind;
 
-        if(kind && kind.toLowerCase() !== 'template') {
+        if (kind && kind.toLowerCase() !== 'template') {
             return {
                 format: 'hidden',
             };
@@ -106,26 +113,26 @@ function OnePeriodictask_template_opt_callback() {
 
         let template = parent_values.template;
 
-        if(template && typeof template == 'object' && template.value !== undefined) {
+        if (template && typeof template == 'object' && template.value !== undefined) {
             template = template.value;
         }
 
         let save_value = false;
 
-        if(previous_template === undefined || previous_template == template) {
+        if (previous_template === undefined || previous_template == template) {
             save_value = true;
         }
 
         previous_template = template;
 
-        if(template) {
+        if (template) {
             return {
                 format: 'fk',
                 additionalProperties: {
                     view_field: 'name',
                     value_field: 'name',
                     list_paths: ['/project/{' + path_pk_key + '}/template/{template_id}/option/'],
-                    url_params: {template_id: template},
+                    url_params: { template_id: template },
                 },
                 save_value: save_value,
             };
@@ -139,11 +146,11 @@ function OnePeriodictask_template_opt_callback() {
 ////////////////////////////////////////////////////////////////////////////////////
 // Block of extensions for PERIODIC TASK entity
 ////////////////////////////////////////////////////////////////////////////////////
-['Periodictask','OnePeriodictask'].forEach(model => {
-    let str = "models[{0}].fields.beforeInit".format([model]);
-    tabSignal.connect(str, (fields => {
-        if(model == 'Periodictask') {
-            ['mode', 'inventory', 'template', 'template_opt'].forEach(field => {
+['Periodictask', 'OnePeriodictask'].forEach((model) => {
+    let str = 'models[{0}].fields.beforeInit'.format([model]);
+    tabSignal.connect(str, (fields) => {
+        if (model == 'Periodictask') {
+            ['mode', 'inventory', 'template', 'template_opt'].forEach((field) => {
                 fields[field].hidden = true;
             });
         }
@@ -160,19 +167,19 @@ function OnePeriodictask_template_opt_callback() {
         };
 
         fields.template_opt.additionalProperties.field = ['template'];
-        fields.template_opt.additionalProperties.types.TEMPLATE = "fk";
+        fields.template_opt.additionalProperties.types.TEMPLATE = 'fk';
         fields.template_opt.additionalProperties.callback = OnePeriodictask_template_opt_callback();
 
         fields.schedule.additionalProperties.types.INTERVAL = 'uptime';
-    }));
+    });
 });
 
 /**
  * Changes 'kind' filter type to 'choices'.
  */
-tabSignal.connect("views[/project/{" + path_pk_key + "}/periodic_task/].filters.beforeInit", filters => {
-    for(let key in filters) {
-        if(filters.hasOwnProperty(key)) {
+tabSignal.connect('views[/project/{' + path_pk_key + '}/periodic_task/].filters.beforeInit', (filters) => {
+    for (let key in filters) {
+        if (filters.hasOwnProperty(key)) {
             let filter = filters[key];
 
             if (filter.name == 'kind') {
@@ -186,22 +193,23 @@ tabSignal.connect("views[/project/{" + path_pk_key + "}/periodic_task/].filters.
 /**
  * Hides 'variables' button from periodic_task views, where data.kind == 'TEMPLATE'.
  */
-tabSignal.connect('allViews.inited', obj => {
+tabSignal.connect('allViews.inited', (obj) => {
     let views = obj.views;
 
     [
         '/project/{' + path_pk_key + '}/periodic_task/',
         '/project/{' + path_pk_key + '}/periodic_task/{periodic_task_id}/',
-    ].forEach(path => {
-        views[path].getViewSublinkButtons = function(type, buttons, instance) { /* jshint unused: false */
+    ].forEach((path) => {
+        views[path].getViewSublinkButtons = function (type, buttons, instance) {
+            /* jshint unused: false */
             let data = instance.data;
             let btns = $.extend(true, {}, buttons);
 
-            if(!data) {
+            if (!data) {
                 return btns;
             }
 
-            if(data.kind == 'TEMPLATE' && btns.variables) {
+            if (data.kind == 'TEMPLATE' && btns.variables) {
                 btns.variables.hidden = true;
             }
 
@@ -213,14 +221,14 @@ tabSignal.connect('allViews.inited', obj => {
 // EndBlock of extensions for PERIODIC TASK entity
 ////////////////////////////////////////////////////////////////////////////////////
 
-
 ////////////////////////////////////////////////////////////////////////////////////
 // Block of extensions for PERIODIC TASK VARIABLE entity
 ////////////////////////////////////////////////////////////////////////////////////
 /**
  * Model class for OnePeriodicTaskVariable model.
  */
-guiModels.OnePeriodicTaskVariableModel = class OnePeriodicTaskVariableModel extends guiModels.Model {
+spa.models.guiModels.OnePeriodicTaskVariableModel = class OnePeriodicTaskVariableModel extends spa.models
+    .Model {
     /**
      * Redefinition of guiModels.Model class's 'constructor'.
      */
@@ -230,86 +238,93 @@ guiModels.OnePeriodicTaskVariableModel = class OnePeriodicTaskVariableModel exte
         this.view_name = 'key';
     }
 
-    save(method="patch") {
-        return this.queryset.getParentInstance().then(parent_instance => {
-            let instance_data = this.toInner(this.data);
+    save(method = 'patch') {
+        return this.queryset
+            .getParentInstance()
+            .then((parent_instance) => {
+                let instance_data = this.toInner(this.data);
 
-            delete instance_data.kind;
-            delete instance_data.inventory;
+                delete instance_data.kind;
+                delete instance_data.inventory;
 
-            return this.queryset.formQueryAndSend(method, instance_data).then(response => {
-                return this.queryset.model.getInstance(
-                    this.queryset._formInstanceData(
-                        parent_instance.data, response.data,
-                    ),
-                    this.queryset,
-                );
+                return this.queryset.formQueryAndSend(method, instance_data).then((response) => {
+                    return this.queryset.model.getInstance(
+                        this.queryset._formInstanceData(parent_instance.data, response.data),
+                        this.queryset,
+                    );
+                });
+            })
+            .catch((error) => {
+                debugger;
+                throw error;
             });
-        }).catch(error => {
-            debugger;
-            throw error;
-        });
     }
 };
 
 /**
  * QuerySet class for OnePeriodicTaskVariable model's QuerySet.
  */
-guiQuerySets.OnePeriodicTaskVariableQuerySet = class OnePeriodicTaskVariableQuerySet extends guiQuerySets.QuerySet {
+spa.querySet.guiQuerySets.OnePeriodicTaskVariableQuerySet = class OnePeriodicTaskVariableQuerySet extends spa
+    .querySet.QuerySet {
     /**
      * Method, that returns data_type for parent instance bulk requests.
      */
     getParentInstanceDataType() {
-        return this.url.replace(/^\/|\/$/g, "")
-            .replace(/\/variables([A-z,0-9,_,\/]*)$/, "").split("/");
+        return this.url
+            .replace(/^\/|\/$/g, '')
+            .replace(/\/variables([A-z,0-9,_,\/]*)$/, '')
+            .split('/');
     }
     /**
      * Method, that returns promise, that returns parent instance.
      */
     getParentInstance() {
-        if(this.parent_instance) {
+        if (this.parent_instance) {
             return Promise.resolve(this.parent_instance);
         }
 
         let bulk = {
-            data_type: this.getParentInstanceDataType(),
+            path: this.getParentInstanceDataType(),
             method: 'get',
         };
 
-        return this.sendQuery(bulk).then(response => {
-            this.parent_instance = app.models.OnePeriodictask.getInstance(
-                response.data,
-                this.clone({url: this.url.replace(/\/variables([A-z,0-9,_,\/]*)$/, "") }),
-            );
-            return this.parent_instance;
-        }).catch(error => {
-            debugger;
-            throw error;
-        });
+        return this.sendQuery(bulk)
+            .then((response) => {
+                this.parent_instance = app.models.OnePeriodictask.getInstance(
+                    response.data,
+                    this.clone({ url: this.url.replace(/\/variables([A-z,0-9,_,\/]*)$/, '') }),
+                );
+                return this.parent_instance;
+            })
+            .catch((error) => {
+                debugger;
+                throw error;
+            });
     }
     /**
      * Redefinition of 'get' method of guiQuerySets.QuerySet class.
      */
     get() {
-        if(this.cache) {
+        if (this.cache) {
             return Promise.resolve(this.cache);
         }
 
-        return this.getParentInstance().then(parent_instance => {
-            return this.formQueryAndSend('get').then(response => {
-                let instance = this.model.getInstance(
-                    this._formInstanceData(parent_instance.data, response.data),
-                    this,
-                );
+        return this.getParentInstance()
+            .then((parent_instance) => {
+                return this.formQueryAndSend('get').then((response) => {
+                    let instance = this.model.getInstance(
+                        this._formInstanceData(parent_instance.data, response.data),
+                        this,
+                    );
 
-                this.cache = instance;
-                return instance;
+                    this.cache = instance;
+                    return instance;
+                });
+            })
+            .catch((error) => {
+                debugger;
+                throw error;
             });
-
-        }).catch(error => {
-            debugger;
-            throw error;
-        });
     }
     /**
      * Method, that returns periodic task variable data object.
@@ -318,9 +333,7 @@ guiQuerySets.OnePeriodicTaskVariableQuerySet = class OnePeriodicTaskVariableQuer
      * @private
      */
     _formInstanceData(parent_data, instance_data) {
-        return Object.assign(
-            {}, instance_data, {kind: parent_data.kind, inventory: parent_data.inventory},
-        );
+        return Object.assign({}, instance_data, { kind: parent_data.kind, inventory: parent_data.inventory });
     }
 };
 
@@ -329,21 +342,22 @@ tabSignal.connect('openapi.loaded', (openapi) => {
 
     openapi.definitions.OnePeriodicTaskVariable = copy;
 
-
     let list = openapi.paths['/project/{' + path_pk_key + '}/periodic_task/{periodic_task_id}/variables/'];
-    list.post.parameters[0].schema.$ref = "#/definitions/OnePeriodicTaskVariable";
-    list.post.responses[201].schema.$ref = "#/definitions/OnePeriodicTaskVariable";
+    list.post.parameters[0].schema.$ref = '#/definitions/OnePeriodicTaskVariable';
+    list.post.responses[201].schema.$ref = '#/definitions/OnePeriodicTaskVariable';
 
-    let page = openapi.paths['/project/{' + path_pk_key + '}/periodic_task/{periodic_task_id}/variables/{variables_id}/'];
-    page.get.responses[200].schema.$ref = "#/definitions/OnePeriodicTaskVariable";
-    page.patch.responses[200].schema.$ref = "#/definitions/OnePeriodicTaskVariable";
-    page.put.responses[200].schema.$ref = "#/definitions/OnePeriodicTaskVariable";
-    page.patch.parameters[0].schema.$ref = "#/definitions/OnePeriodicTaskVariable";
-    page.put.parameters[0].schema.$ref = "#/definitions/OnePeriodicTaskVariable";
-
+    let page =
+        openapi.paths[
+            '/project/{' + path_pk_key + '}/periodic_task/{periodic_task_id}/variables/{variables_id}/'
+        ];
+    page.get.responses[200].schema.$ref = '#/definitions/OnePeriodicTaskVariable';
+    page.patch.responses[200].schema.$ref = '#/definitions/OnePeriodicTaskVariable';
+    page.put.responses[200].schema.$ref = '#/definitions/OnePeriodicTaskVariable';
+    page.patch.parameters[0].schema.$ref = '#/definitions/OnePeriodicTaskVariable';
+    page.put.parameters[0].schema.$ref = '#/definitions/OnePeriodicTaskVariable';
 });
 
-tabSignal.connect("models[OnePeriodicTaskVariable].fields.beforeInit", function(fields) {
+tabSignal.connect('models[OnePeriodicTaskVariable].fields.beforeInit', function (fields) {
     fields.kind = {
         title: 'Kind',
         type: 'hidden',
@@ -359,44 +373,52 @@ tabSignal.connect("models[OnePeriodicTaskVariable].fields.beforeInit", function(
     fields.key.format = 'dynamic';
     fields.key.additionalProperties = {
         field: ['kind'],
-        callback: OneTemplateVariable_key_callback, /* globals OneTemplateVariable_key_callback */
+        callback: OneTemplateVariable_key_callback,
     };
 
     fields.value.format = 'dynamic';
     fields.value.additionalProperties = {
         field: ['inventory', 'key'],
-        types: template_vars.value.types, /* globals template_vars */
-        callback: OneTemplateVariable_value_callback(), /* globals OneTemplateVariable_value_callback */
+        types: template_vars.value.types,
+        callback: OneTemplateVariable_value_callback(),
     };
 });
 
-tabSignal.connect("views[/project/{" + path_pk_key + "}/periodic_task/{periodic_task_id}/variables/new/].afterInit", (obj) => {
-    obj.view.mixins = obj.view.mixins.concat({
-        methods: {
-            fetchData() {
-                this.initLoading();
-                let qs = this.setAndGetQuerySetFromSandBox(this.view, this.qs_url);
-                qs.getParentInstance().then(parent_instance => {
-                    this.data.instance = qs.cache = qs.model.getInstance(
-                        this._formInstanceData(parent_instance), qs,
-                    );
-                    this.setLoadingSuccessful();
-                    this.getParentInstancesForPath();
-                }).catch(error => {
-                    debugger;
-                    throw error;
-                });
-            },
+tabSignal.connect(
+    'views[/project/{' + path_pk_key + '}/periodic_task/{periodic_task_id}/variables/new/].afterInit',
+    (obj) => {
+        obj.view.mixins = obj.view.mixins.concat({
+            methods: {
+                fetchData() {
+                    this.initLoading();
+                    let qs = this.setAndGetQuerySetFromSandBox(this.view, this.qs_url);
+                    qs.getParentInstance()
+                        .then((parent_instance) => {
+                            this.data.instance = qs.cache = qs.model.getInstance(
+                                this._formInstanceData(parent_instance),
+                                qs,
+                            );
+                            this.setLoadingSuccessful();
+                            this.getParentInstancesForPath();
+                        })
+                        .catch((error) => {
+                            debugger;
+                            throw error;
+                        });
+                },
 
-            _formInstanceData(parent_instance) {
-                return {
-                    kind: parent_instance.data.kind,
-                    inventory: parent_instance.data.inventory,
-                };
+                _formInstanceData(parent_instance) {
+                    return {
+                        kind: parent_instance.data.kind,
+                        inventory: parent_instance.data.inventory,
+                    };
+                },
             },
-        },
-    });
-});
+        });
+    },
+);
 ////////////////////////////////////////////////////////////////////////////////////
 // EndBlock of extensions for PERIODIC TASK VARIABLE entity
 ////////////////////////////////////////////////////////////////////////////////////
+
+export { OnePeriodictask_template_opt_callback };
