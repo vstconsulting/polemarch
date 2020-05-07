@@ -38,7 +38,7 @@ class _VariablesCopyMixin(base.CopyMixin):
         return new_instance
 
 
-class OwnedView(base.ModelViewSetSet, base.CopyMixin):
+class OwnedView(base.ModelViewSet, base.CopyMixin):
     POST_WHITE_LIST = []
 
     @deco.action(methods=["post"], detail=True, serializer_class=sers.SetOwnerSerializer)
@@ -55,7 +55,7 @@ class OwnedView(base.ModelViewSetSet, base.CopyMixin):
         return base.Response(serializer.data, status.HTTP_201_CREATED).resp
 
 
-class __VarsViewSet(base.ModelViewSetSet):
+class __VarsViewSet(base.ModelViewSet):
     '''
     Instance execution variables.
 
@@ -349,7 +349,7 @@ class HostViewSet(OwnedView, _VariablesCopyMixin):
 
 
 @deco.nested_view('variables', 'id', view=__InvVarsViewSet)
-class _BaseGroupViewSet(OwnedView, base.ModelViewSetSet):
+class _BaseGroupViewSet(OwnedView, base.ModelViewSet):
     '''
     retrieve:
         Return a group instance.
@@ -432,13 +432,10 @@ class InventoryViewSet(_GroupMixin):
         # pylint: disable=no-member
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(True)
-        serializer.save()
+        instance = serializer.save()
         if hasattr(self, 'nested_manager'):
-            data = {self.lookup_field: serializer.data['inventory_id']}
-            self._data_create(
-                self.prepare_request_data(data, False),
-                self.lookup_field
-            )
+            self.nested_manager.add(instance)
+
         return base.Response(serializer.data, status.HTTP_201_CREATED).resp
 
 
@@ -477,7 +474,7 @@ class __ModuleViewSet(base.ReadOnlyModelViewSet):
 
 
 @deco.nested_view('variables', 'id', view=__PeriodicTaskVarsViewSet)
-class __PeriodicTaskViewSet(base.ModelViewSetSet):
+class __PeriodicTaskViewSet(base.ModelViewSet):
     '''
     retrieve:
         Return a perodic task instance.
@@ -513,7 +510,7 @@ class __PeriodicTaskViewSet(base.ModelViewSetSet):
         return serializer.execute().resp
 
 
-class __TemplateViewSet(base.ModelViewSetSet):
+class __TemplateViewSet(base.ModelViewSet):
     '''
     retrieve:
         Return a execute template instance.
@@ -643,7 +640,7 @@ class ProjectTemplateViewSet(base.ReadOnlyModelViewSet):
         return base.Response(serializer.data, status=status.HTTP_201_CREATED).resp
 
 
-class HookViewSet(base.ModelViewSetSet):
+class HookViewSet(base.ModelViewSet):
     '''
     retrieve:
         Return a hook instance.

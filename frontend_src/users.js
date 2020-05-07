@@ -1,3 +1,5 @@
+import { updateSettings } from './dashboard';
+
 /**
  * Mixin for UserSettings page_edit view.
  */
@@ -5,48 +7,53 @@ const user_settings_page_edit_mixin = {
     methods: {
         saveInstance() {
             let data = this.getValidData();
-            if(!data) {
+            if (!data) {
                 return;
             }
 
-            let is_current_user_settings = this.qs_url.replace(/^\/|\/$/g, "") == 'user/' + app.api.getUserId() + '/settings';
+            let is_current_user_settings =
+                this.qs_url.replace(/^\/|\/$/g, '') == 'user/' + app.api.getUserId() + '/settings';
 
-            if(is_current_user_settings) {
-                data.selectedSkin = guiCustomizer.skin.name;
-                data.skinsSettings = guiCustomizer.skins_custom_settings;
+            if (is_current_user_settings) {
+                data.selectedSkin = spa.guiCustomizer.guiCustomizer.skin.name;
+                data.skinsSettings = spa.guiCustomizer.guiCustomizer.skins_custom_settings;
             }
 
             let instance = this.data.instance;
             instance.data = data;
             let method = this.view.schema.query_type;
             this.loading = true;
-            instance.save(method).then(instance => {
-                this.loading = false;
-                let qs = this.getQuerySet(this.view, this.qs_url).clone();
-                qs.cache = instance;
-                this.setQuerySet(this.view, this.qs_url, qs);
+            instance
+                .save(method)
+                .then((instance) => {
+                    this.loading = false;
+                    let qs = this.getQuerySet(this.view, this.qs_url).clone();
+                    qs.cache = instance;
+                    this.setQuerySet(this.view, this.qs_url, qs);
 
-                if(is_current_user_settings) {
-                    guiDashboard.updateSettings(instance.data);
-                }
+                    if (is_current_user_settings) {
+                        updateSettings(instance.data);
+                    }
 
-                guiPopUp.success(this.$t('User settings were successfully saved.'));
+                    spa.popUp.guiPopUp.success(this.$t('User settings were successfully saved.'));
 
-                let url = this.getRedirectUrl({instance:instance});
+                    let url = this.getRedirectUrl({ instance: instance });
 
-                this.$router.push({path: url});
+                    this.$router.push({ path: url });
+                })
+                .catch((error) => {
+                    this.loading = false;
+                    let str = app.error_handler.errorToString(error);
 
-            }).catch(error => {
-                this.loading = false;
-                let str = app.error_handler.errorToString(error);
+                    let srt_to_show = spa.popUp.pop_up_msg.instance.error.save.format([
+                        'settings',
+                        this.view.schema.name,
+                        str,
+                    ]);
 
-                let srt_to_show = pop_up_msg.instance.error.save.format(
-                    ['settings', this.view.schema.name, str],
-                );
-
-                app.error_handler.showError(srt_to_show, str);
-                debugger;
-            });
+                    app.error_handler.showError(srt_to_show, str);
+                    debugger;
+                });
         },
 
         getRedirectUrl() {
@@ -71,11 +78,11 @@ function editUserSettingsPageInOpenApi(path) {
  * @param {string} path /user/{pk}/settings/edit/.
  */
 function editUserSettingsPageEditView(path) {
-    tabSignal.connect("views[" + path + "].beforeInit", function(obj){
-        obj.schema.query_type = "post";
+    tabSignal.connect('views[' + path + '].beforeInit', function (obj) {
+        obj.schema.query_type = 'post';
     });
 
-    tabSignal.connect("views[" + path + "].afterInit", function(obj) {
+    tabSignal.connect('views[' + path + '].afterInit', function (obj) {
         obj.view.mixins.push(user_settings_page_edit_mixin);
     });
 }
@@ -85,7 +92,7 @@ function editUserSettingsPageEditView(path) {
  * @param {string} path /user/{pk}/settings/new/.
  */
 function deleteUserSettingsPageNewView(path) {
-    tabSignal.connect("allViews.inited", function(obj){
+    tabSignal.connect('allViews.inited', function (obj) {
         delete obj.views[path];
     });
 }
@@ -110,57 +117,61 @@ function prepareUserSettingsModelFields(model) {
     /**
      * Signal, that edits options of UserSettings model's fields.
      */
-    tabSignal.connect("models[" + model + "].fields.beforeInit", (fields => {
-        if(fields.lang) {
+    tabSignal.connect('models[' + model + '].fields.beforeInit', (fields) => {
+        if (fields.lang) {
             fields.lang.title = 'language';
             fields.lang.description = 'application interface language';
         }
 
-        if(fields.autoupdateInterval) {
+        if (fields.autoupdateInterval) {
             fields.autoupdateInterval.format = 'time_interval';
             fields.autoupdateInterval.required = true;
             fields.autoupdateInterval.title = 'Auto update interval';
-            fields.autoupdateInterval.description = 'application automatically updates pages data' +
-                ' with following interval (time in seconds)';
+            fields.autoupdateInterval.description =
+                'application automatically updates pages data' + ' with following interval (time in seconds)';
         }
 
         [
-            {name: 'chartLineSettings', title: "Dashboard chart lines settings", },
-            {name: 'widgetSettings', title: "Dashboard widgets settings"},
+            { name: 'chartLineSettings', title: 'Dashboard chart lines settings' },
+            { name: 'widgetSettings', title: 'Dashboard widgets settings' },
         ].forEach((item) => {
-            if(fields[item.name]) {
+            if (fields[item.name]) {
                 fields[item.name].format = 'inner_api_object';
                 fields[item.name].title = item.title;
             }
         });
 
-        if(fields.selectedSkin) {
+        if (fields.selectedSkin) {
             fields.selectedSkin = {
                 title: 'Selected skin',
                 format: 'hidden',
             };
         }
 
-        if(fields.skinsSettings) {
+        if (fields.skinsSettings) {
             fields.skinsSettings = {
                 title: 'Skin settings',
                 format: 'hidden',
             };
         }
-    }));
+    });
 }
 
 /**
  * Variable, that stores name of user Settings model.
  */
-let user_settings_model_name = 'UserSettings';
+const user_model_settings = {
+    name: 'UserSettings',
+};
 
 /**
  * Prepares fields of user settings model.
  */
-prepareUserSettingsModelFields(user_settings_model_name);
+prepareUserSettingsModelFields(user_model_settings.name);
 
 /**
  * Emits signals for UserSettings views.
  */
-prepareUserSettingsViews('/user/{' + path_pk_key + '}/settings/');
+prepareUserSettingsViews('/user/{' + spa.utils.path_pk_key + '}/settings/');
+
+export { prepareUserSettingsViews, prepareUserSettingsModelFields, user_model_settings };
