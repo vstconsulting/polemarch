@@ -26,7 +26,8 @@ function setMode() {
 const config = {
   mode: setMode(),
   entry: {
-    pmlib: entrypoints_dir + "/main.js"
+    pmlib: entrypoints_dir + "/main.js",
+    doc: entrypoints_dir + "/doc.js"
   },
   output: {
     path: __dirname + "/polemarch/static/polemarch",
