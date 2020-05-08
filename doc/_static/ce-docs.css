@@ -1,0 +1,29 @@
+.text-logo {
+    margin-left: auto;
+    width: 165px;
+    float: inherit;
+}
+
+.sidebar-collapse .text-logo {
+    display: none;
+}
+
+.sidebar-collapse .main-sidebar:hover .text-logo {
+    display: inline-block;
+}
+
+#indices-and-tables > h1 {
+    font-size: 140%;
+}
+.post {
+    border-bottom: none;
+}
+
+.main-footer {
+    display: flex;
+    justify-content: space-between;
+}
+
+.social {
+    font-size: 20px;
+}

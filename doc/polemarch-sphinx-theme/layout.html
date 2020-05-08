@@ -1,8 +1,8 @@
 {% extends "vst-sphinx-theme/layout.html" %}
 
-{%- block scripts %}
-        {{- super() }}
-        <script src="{{ pathto('_static/polemarch/doc.js', 1) }}"></script>
+{%- block css %}
+    {{- super() }}
+    <link rel="stylesheet" href="{{ pathto('_static/ce-docs.css', 1) }}" type="text/css" />
 {%- endblock %}
 
 {% block logo %}

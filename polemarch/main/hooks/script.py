@@ -23,9 +23,13 @@ class Backend(BaseHook):
             )
         except BaseException as err:
             logger.error(traceback.format_exc())
-            logger.error("Details:\nSCRIPT:{}\nWHEN:{}\nCWD:{}\n".format(
-                script, when, self.conf['HOOKS_DIR']
-            ))
+            logger.error(
+                f'Details:\n'
+                f'SCRIPT:{script}\n'
+                f'WHEN:{when}\n'
+                f'CWD:{self.conf["HOOKS_DIR"]}\n'
+                f'ERR:{str(err)}\n'
+            )
             return str(err)
 
     def setup(self, **kwargs):

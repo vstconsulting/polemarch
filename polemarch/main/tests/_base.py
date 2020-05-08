@@ -1,11 +1,16 @@
 import json  # noqa: F401
 
 import os
+import stat
+from pathlib import Path
 from vstutils.tests import BaseTestCase as VSTBaseTestCase
 from ...main import models
 
-hook_data = '''
-echo "OK"
+hook_data = '''#!/bin/bash
+
+echo "OK";
+echo $(cat -);
+# exit 1;
 '''
 
 
@@ -32,8 +37,10 @@ class BaseTestCase(VSTBaseTestCase):
                     pass
 
     def create_hook(self, hook):
-        with open(self.get_hook_path(hook), 'w') as hook_fd:
+        hook_path = Path(self.get_hook_path(hook))
+        with hook_path.open('w') as hook_fd:
             hook_fd.write(hook_data)
+        hook_path.chmod(hook_path.stat().st_mode | stat.S_IEXEC)
         self.hooks.append(hook)
 
     def generate_hooks(self, hooks):

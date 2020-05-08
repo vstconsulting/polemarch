@@ -208,7 +208,7 @@ class AnsibleCommand(PMObject):
     def _get_tmp_name(self) -> Text:
         return os.path.join(self.cwd, 'project_sources')
 
-    def _send_hook(self, when: Text) -> NoReturn:
+    def _send_hook(self, when: Text, **kwargs) -> NoReturn:
         msg = OrderedDict()
         msg['execution_type'] = self.history.kind
         msg['when'] = when
@@ -220,6 +220,7 @@ class AnsibleCommand(PMObject):
         msg['target']['inventory'] = inventory
         msg['target']['project'] = self.project.get_hook_data(when)
         msg['history'] = self.history.get_hook_data(when)
+        msg['extra'] = kwargs
         self.project.hook(when, msg)
 
     def __generate_arg_file(self, value: Text) -> Tuple[Text, List[tmp_file]]:
@@ -391,11 +392,12 @@ class AnsibleCommand(PMObject):
     def execute(self, target: Text, inventory: Any, history: History, project: Project, **extra_args) -> NoReturn:
         try:
             self.prepare(target, inventory, history, project)
-            self._send_hook('on_execution')
             self.history.status = "OK"
             extra = self.__parse_extra_args(**extra_args)
             args = self.get_args(self.target, extra.args)
-            self.executor.execute(args, **self.get_kwargs(self.target, extra.args))
+            kwargs = self.get_kwargs(self.target, extra.args)
+            self._send_hook('on_execution', args=args, kwargs=kwargs)
+            self.executor.execute(args, **kwargs)
         except Exception as exception:
             logger.error(traceback.format_exc())
             self.error_handler(exception)
