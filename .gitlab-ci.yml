@@ -38,8 +38,7 @@ stages:
   before_script:
     - if [ "${CI_BUILD_REF_NAME}" != "master" -a "${CI_BUILD_REF_NAME}" != "developer" ]; then export TOX_ARGS="--workdir /tmp/.tox_polemarchplus_${CI_BUILD_REF_NAME}"; fi
   script:
-   - make test ENVS=$TOX_ENVS
-   - make build-clean
+   - tox -e $TOX_ENVS $TOX_ARGS
   rules:
     - if: '$CI_COMMIT_BRANCH == "master"'
       when: on_success
@@ -52,11 +51,10 @@ stages:
 # Branch tests
 ###########################################
 code_style:
+  <<: *branch_tests
   stage: code_standarts
   variables:
-    TOX_ARGS: "--workdir /cache/.tox_polemarch_code"
-  script:
-   - make test ENVS=flake,pylint,jshint
+    TOX_ENVS: "flake,pylint,jshint"
 
 py38-coverage:
   <<: *branch_tests
@@ -120,7 +118,7 @@ release:
 pages:
   stage: release
   script:
-    - make test ENVS=builddoc
+    - tox -e builddoc $TOX_ARGS
     - mv doc/_build/html public
   artifacts:
     paths:
@@ -141,7 +139,7 @@ release_pypi:
   variables:
     TOX_ARGS: ""
   script:
-   - make test ENVS=build
+   - tox -e build $TOX_ARGS
    - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} $(find dist/*.{tar.gz,whl})
   artifacts:
     name: "release-packages-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
@@ -171,11 +169,9 @@ publish_release:
     - if: '$CI_COMMIT_TAG && $PYPI_UPLOAD_PASSWORD && $PYPI_UPLOAD_NAME'
       when: on_success
     - when: never
-  variables:
-    TOX_ARGS: ""
   before_script:
   - git config --global user.name "${GITLAB_USER_NAME}"
   - git config --global user.email "${GITLAB_USER_EMAIL}"
   - git push https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/vstconsulting/polemarch.git ${CI_COMMIT_TAG} || echo "Failed to upload to github."
   script:
-  - make test ENVS=release
+  - tox -e release
