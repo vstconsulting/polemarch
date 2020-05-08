@@ -138,8 +138,8 @@ window.qunitTestsArray['guiFields[field].{toInner, toRepresent}() - PM'] = {
                     {
                         input: {test_field: '2019-05-08T07:08:07'},
                         output: {
-                            toInner: '2019-05-08T07:08:07' + (window.timeZone == 'UTC' ? 'Z' : moment.tz(window.timeZone).format('Z')),
-                            toRepresent: moment(moment.tz('2019-05-08T07:08:07', window.timeZone)).tz(moment.tz.guess()).format('YYYY-MM-DD HH:mm:ss'),
+                            toInner: '2019-05-08T07:08:07' + (app.api.getTimeZone() == 'UTC' ? 'Z' : moment.tz(app.api.getTimeZone()).format('Z')),
+                            toRepresent: moment(moment.tz('2019-05-08T07:08:07', app.api.getTimeZone())).tz(moment.tz.guess()).format('YYYY-MM-DD HH:mm:ss'),
                         },
                     }
                 ],

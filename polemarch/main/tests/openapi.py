@@ -27,7 +27,7 @@ class OApiTestCase(BaseTestCase):
                                     --user admin \
                                     -m doc/api_schema.yaml
         '''
-        schema = self.get_result('get', '/api/openapi/?format=openapi')
+        schema = self.get_result('get', '/api/endpoint/?format=openapi')
 
         with openapi_schema_yaml.open('r') as fin:
             openapi_schema_yml = yaml.load(fin, Loader=yaml.SafeLoader)
@@ -37,6 +37,7 @@ class OApiTestCase(BaseTestCase):
         openapi_schema_yml['info']['contact'] = schema['info']['contact']
         openapi_schema_yml['info']['x-versions'] = schema['info']['x-versions']
         openapi_schema_yml['info']['x-links'] = schema['info']['x-links']
+        openapi_schema_yml['info']['x-user-id'] = schema['info']['x-user-id']
 
         for key in list(filter(lambda x: 'Ansible' in x, openapi_schema_yml['definitions'].keys())):
             del openapi_schema_yml['definitions'][key]

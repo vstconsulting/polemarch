@@ -1147,8 +1147,12 @@ class InventoryImportSerializer(DataSerializer):
                     g_subs.append(created_hosts[name])
                 inv_group.hosts.add(*g_subs)
 
+        inventory.raw_data = validated_data['raw_data']
+        return inventory
+
+    def to_representation(self, instance):
         return dict(
-            inventory_id=inventory.id,
-            name=inventory.name,
-            raw_data=validated_data['raw_data']
+            inventory_id=instance.id,
+            name=instance.name,
+            raw_data=getattr(instance, 'raw_data', '')
         )

@@ -203,7 +203,7 @@ For run Polemarch docker image use command:
 
         docker run -d --name polemarch --restart always -v /opt/polemarch/projects:/projects -v /opt/polemarch/hooks:/hooks vstconsulting/polemarch
 
-Using this command download official docker image and run it with default settings.
+Using this command download official docker image and run it with default settings. Dont use default SQLite installation with filecache in production.
 
 Polemarch will be run with web interface on port `8080`
 
@@ -247,6 +247,7 @@ Cache
 
 * **CACHE_LOCATION** - path to cache, if you use `/tmp/polemarch_django_cache` path, then cache engine would be `FileBasedCache`, else `MemcacheCache`. Default value: ``/tmp/polemarch_django_cache`
 
+
 RPC section
 ~~~~~~~~~~~
 
@@ -254,8 +255,7 @@ RPC section
 
 * **RPC_HEARTBEAT** - Timeout for RPC. Default value: `5`.
 
-* **RPC_CONCURRENCY** - Number of
-concurrently tasks. Default value: `4`.
+* **RPC_CONCURRENCY** - Number of concurrently tasks. Default value: `4`.
 
 Web section
 ~~~~~~~~~~~

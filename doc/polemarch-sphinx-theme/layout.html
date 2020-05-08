@@ -1,9 +1,8 @@
 {% extends "vst-sphinx-theme/layout.html" %}
 
-{%- block css %}
-    {{ super() }}
-    <link rel="stylesheet" href="{{ pathto('_static/css/polemarch-gui.css', 1) }}" type="text/css" />
-    <link rel="stylesheet" href="{{ pathto('_static/custom.css', 1) }}" type="text/css" />
+{%- block scripts %}
+        {{- super() }}
+        <script src="{{ pathto('_static/polemarch/doc.js', 1) }}"></script>
 {%- endblock %}
 
 {% block logo %}
@@ -14,16 +13,23 @@
     </a>
 {% endblock %}
 
-{% block additional_information %}
-<a href="https://twitter.com/polemarchio">
-   <span class="fa fa-twitter-square"></span>
-</a>
-<span>|</span>
-<a href="https://polemarch-users.slack.com/">
-   <span class="fa fa-slack"></span>
-</a>
-<span>|</span>
-<a href="https://stackoverflow.com/questions/tagged/polemarch">
-    <span class="fa fa-stack-overflow"></span>
-</a>
+{% block footer %}
+    <footer class="main-footer">
+        <div class="social">
+            <a href="https://twitter.com/polemarchio">
+                <span class="fab fa-twitter-square"></span>
+            </a>
+            <span>|</span>
+            <a href="https://polemarch-users.slack.com/">
+                <span class="fab fa-slack"></span>
+            </a>
+            <span>|</span>
+            <a href="https://stackoverflow.com/questions/tagged/polemarch">
+                <span class="fab fa-stack-overflow"></span>
+            </a>
+        </div>
+        <div class="pull-right d-none d-sm-block">
+            &copy; {{ copyright }}
+        </div>
+    </footer>
 {% endblock %}

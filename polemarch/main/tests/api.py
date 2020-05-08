@@ -296,10 +296,10 @@ class ApiUsersTestCase(ApiBaseTestCase):
             self.get_bulk('team', dict(name='test_team'), 'add'),
             self.get_bulk('user', dict(username='test_user', **test_user_data), 'add'),
             self.get_mod_bulk(
-                'team', '<0[data][id]>', dict(username='te', **test_user_data), 'user'
+                'team', '<<0[data][id]>>', dict(username='te', **test_user_data), 'user'
             ),
             self.get_mod_bulk(
-                'team', '<0[data][id]>', dict(id='<1[data][id]>'), 'user'
+                'team', '<<0[data][id]>>', dict(id='<<1[data][id]>>'), 'user'
             ),
         ]
         results = self.make_bulk(bulk_data)
@@ -316,9 +316,9 @@ class ApiUsersTestCase(ApiBaseTestCase):
         # Test copy
         bulk_data = [
             self.get_mod_bulk('user', results[1]['data']['id'], {}, 'copy'),
-            self.get_bulk('user', {}, 'get', pk='<0[data][id]>'),
+            self.get_bulk('user', {}, 'get', pk='<<0[data][id]>>'),
             self.get_mod_bulk(
-                'team', results[0]['data']['id'], {}, 'user/<0[data][id]>', method='get'
+                'team', results[0]['data']['id'], {}, 'user/<<0[data][id]>>', method='get'
             ),
             self.get_mod_bulk('team', results[0]['data']['id'], {"name": "new"}, 'copy'),
             self.get_mod_bulk(
@@ -355,7 +355,6 @@ class APITestCase(ProjectTestCase, OApiTestCase):
         result = self.get_result("get", "/api/")
         self.assertEqual(len(result['available_versions']), 1)
         self.assertTrue(result['available_versions'].get(self._settings('VST_API_VERSION'), False))
-        self.assertTrue(result.get('openapi', False))
 
     def test_api_v1_list(self):
         result = self.get_result('get', self.get_url())

@@ -58,7 +58,7 @@ class BaseTestCase(VSTBaseTestCase):
         )
 
     def _get_bulk_mod(self, item, index, data, mtype='variables'):
-        return self.get_mod_bulk(item, "<{}[data][id]>".format(index), data, mtype)
+        return self.get_mod_bulk(item, "<<{}[data][id]>>".format(index), data, mtype)
 
     def mass_create_bulk(self, item, data):
         bulk_data = list()

@@ -1,5 +1,6 @@
 # set to local images because too long execution
-image: onegreyonewhite/tox:tox
+default:
+  image: vstconsulting/images:build
 
 variables:
   GET_SOURCES_ATTEMPTS: 3
@@ -31,57 +32,31 @@ stages:
 ###########################################
 .branch_tests_template: &branch_tests
   stage: test
-  image: onegreyonewhite/tox:tox
+  image: vstconsulting/images:tox
   variables:
     TOX_ENVS: ""
   before_script:
     - if [ "${CI_BUILD_REF_NAME}" != "master" -a "${CI_BUILD_REF_NAME}" != "developer" ]; then export TOX_ARGS="--workdir /tmp/.tox_polemarchplus_${CI_BUILD_REF_NAME}"; fi
   script:
-   - make test ENVS=$TOX_ENVS
-   - make build-clean
-  except:
-    refs:
-      - tags
-  only:
-    refs:
-      - merge_requests
-      - web
-      - master
-    changes:
-      - polemarch/main/**/*
-      - polemarch/api/**/*
-      - polemarch/__init__.py
-      - tests.py
-      - setup.{py,cfg}
-      - MANIFEST.in
-      - requirements.txt
-      - requirements-test.txt
-      - Makefile
-      - tox.ini
-      - .coveragerc
-      - .gitlab-ci.yml
-  retry: 2
+   - tox -e $TOX_ENVS $TOX_ARGS
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "external_pull_request_event"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_TAG == null'
+      when: on_success
+    - when: never
 
 # Branch tests
 ###########################################
 code_style:
+  <<: *branch_tests
   stage: code_standarts
-  image: onegreyonewhite/tox:tox
   variables:
-    TOX_ARGS: "--workdir /cache/.tox_polemarch_code"
-  script:
-   - make test ENVS=flake,pylint,jshint
-  except:
-    refs:
-      - tags
-      - issue_building
-  only:
-    refs:
-      - merge_requests
-      - web
-  retry: 2
+    TOX_ENVS: "flake,pylint,jshint"
 
-py37-coverage:
+py38-coverage:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
@@ -93,47 +68,45 @@ py36-install:
 
 # Realese
 ###########################################
-deploy_environment:
-  stage: release
-  image: onegreyonewhite/tox:tox
-  services:
-    - name: "docker:19.03-dind"
-      alias: "docker_service_host"
-  script:
-    - tox -e deploy_env
-  environment:
-    name: review/$CI_COMMIT_REF_NAME
-    on_stop: delete_environment
-    url: http://polemarch-$KUBE_NAMESPACE.$KUBE_INGRESS_BASE_DOMAIN
-  only:
-    kubernetes: active
-    refs:
-      - branches
-  when: manual
-
-delete_environment:
-  stage: release
-  image: onegreyonewhite/tox:tox
-  script:
-    - tox -e destroy_env
-  environment:
-    name: review/$CI_COMMIT_REF_NAME
-    action: stop
-  only:
-    kubernetes: active
-    refs:
-      - branches
-  when: manual
+#deploy_environment:
+#  stage: release
+#  image: vstconsulting/images:tox
+#  services:
+#    - name: "docker:19.03-dind"
+#      alias: "docker_service_host"
+#  script:
+#    - tox -e deploy_env
+#  environment:
+#    name: review/$CI_COMMIT_REF_NAME
+#    on_stop: delete_environment
+#    url: http://polemarch-$KUBE_NAMESPACE.$KUBE_INGRESS_BASE_DOMAIN
+#  only:
+#    kubernetes: active
+#    refs:
+#      - branches
+#  when: manual
+#
+#delete_environment:
+#  stage: release
+#  image: vstconsulting/images:tox
+#  script:
+#    - tox -e destroy_env
+#  environment:
+#    name: review/$CI_COMMIT_REF_NAME
+#    action: stop
+#  only:
+#    kubernetes: active
+#    refs:
+#      - branches
+#  when: manual
 
 release:
   stage: release
-  image: onegreyonewhite/tox:tox
-  only:
-    refs:
-      - master
-    variables:
-      - $GIT_ACCESS_USER
-      - $GIT_ACCESS_PASSWORD
+  image: vstconsulting/images:tox
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $GIT_ACCESS_USER && $GIT_ACCESS_PASSWORD'
+      when: on_success
+    - when: never
   before_script:
     - url_host=`echo "${CI_REPOSITORY_URL}" | sed -e "s/https:\/\/gitlab-ci-token:.*@//g"`
     - git config --global user.name "${GITLAB_USER_NAME}"
@@ -145,32 +118,29 @@ release:
 pages:
   stage: release
   script:
-    - make test ENVS=builddoc
+    - tox -e builddoc $TOX_ARGS
     - mv doc/_build/html public
   artifacts:
     paths:
     - public
-  only:
-    refs:
-      - developer
-      - tags
-  when: always
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "developer" && $GIT_ACCESS_USER && $GIT_ACCESS_PASSWORD'
+      when: always
+    - when: never
 
 release_pypi:
   stage: release
-  image: onegreyonewhite/tox:centos6
-  only:
-    refs:
-    - tags
-    variables:
-    - $PYPI_UPLOAD_PASSWORD
-    - $PYPI_UPLOAD_NAME
+  image: vstconsulting/images:build
+  rules:
+    - if: '$CI_COMMIT_TAG && $PYPI_UPLOAD_PASSWORD && $PYPI_UPLOAD_NAME'
+      when: on_success
+      allow_failure: true
+    - when: never
   variables:
     TOX_ARGS: ""
   script:
-   - make test ENVS=build
+   - tox -e build $TOX_ARGS
    - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} $(find dist/*.{tar.gz,whl})
-  allow_failure: true
   artifacts:
     name: "release-packages-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
     paths:
@@ -178,38 +148,30 @@ release_pypi:
 
 publish_docker:
   stage: publish
-  image: onegreyonewhite/tox:tox
+  image: vstconsulting/images:tox
   services:
     - name: 'docker:19.03-dind'
       alias: 'docker_service_host'
   script:
     - pip install tox
     - tox -e release-docker
-  only:
-    refs:
-      - tags
-    variables:
-      - $POLEMARCH_DOCKER_USER
-      - $POLEMARCH_DOCKER_PASSWORD
-      - $POLEMARCH_DOCKER_EMAIL
-      - $POLEMARCH_DOCKER_IMAGE_NAME
+  rules:
+    - if: '$CI_COMMIT_TAG && $POLEMARCH_DOCKER_USER && $POLEMARCH_DOCKER_PASSWORD && $POLEMARCH_DOCKER_EMAIL && $POLEMARCH_DOCKER_IMAGE_NAME'
+      when: on_success
+    - when: never
 
 publish_release:
   stage: publish
-  image: onegreyonewhite/tox:ubuntu
+  image: vstconsulting/images:tox
   allow_failure: true
   needs: ["release_pypi"]
-  only:
-    refs:
-    - tags
-    variables:
-    - $PYPI_UPLOAD_PASSWORD
-    - $PYPI_UPLOAD_NAME
-  variables:
-    TOX_ARGS: ""
+  rules:
+    - if: '$CI_COMMIT_TAG && $PYPI_UPLOAD_PASSWORD && $PYPI_UPLOAD_NAME'
+      when: on_success
+    - when: never
   before_script:
   - git config --global user.name "${GITLAB_USER_NAME}"
   - git config --global user.email "${GITLAB_USER_EMAIL}"
   - git push https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/vstconsulting/polemarch.git ${CI_COMMIT_TAG} || echo "Failed to upload to github."
   script:
-  - make test ENVS=release
+  - tox -e release

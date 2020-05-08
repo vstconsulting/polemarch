@@ -1,10 +1,12 @@
 # Compilation block
 ########################################################################################
+import re
 import os
 import sys
 import fnmatch
 import codecs
 import gzip
+import glob
 import shutil
 
 # allow setup.py to be run from any path
@@ -32,6 +34,8 @@ except ImportError:
 
 ignored_keys = ['-h', '--help', '--version']
 is_help = any([a for a in ignored_keys if a in sys.argv])
+is_develop = 'develop' in sys.argv
+is_build = (any([a for a in ['compile', 'bdist_wheel', 'bdist'] if a in sys.argv]) or is_develop) and not is_help
 
 
 def get_discription(file_path='README.rst', folder=os.getcwd()):
@@ -117,7 +121,7 @@ def make_extensions(extensions_list, packages):
         '-g0', '-ggdb1',
         "-fno-strict-aliasing",
         "-fno-var-tracking-assignments",
-        "-pipe", "-std=c99"
+        "-pipe", "-std=c99", '-Werror=sign-compare'
     ]
     ext_modules = list(
         make_extention(m, f, extra_compile_args)
@@ -161,23 +165,51 @@ def minify_static_files(base_dir, files, exclude=None):
     except:
         pass
 
+    regex_exclude = [re.compile(r, re.MULTILINE) for r in exclude]
+
     for fnext, funcs in patterns.items():
         for fext_file in filter(lambda f: fnmatch.fnmatch(f, fnext), files):
             if fnmatch.fnmatch(fext_file, '*.min.*'):
                 continue
-            if any(filter(lambda fp: fext_file.endswith(fp), exclude)):
-                continue
             fext_file = os.path.join(base_dir, fext_file)
             if os.path.exists(fext_file):
-                func, subfunc = funcs
-                with codecs.open(fext_file, 'r', encoding='utf-8') as static_file_fd:
-                    minified = func(static_file_fd.read(), subfunc)
-                with codecs.open(fext_file, 'w', encoding='utf-8') as static_file_fd:
-                    static_file_fd.write(minified)
+                if not any(filter(lambda fp: bool(fp.search(fext_file)), regex_exclude)):
+                    func, subfunc = funcs
+                    with codecs.open(fext_file, 'r', encoding='utf-8') as static_file_fd:
+                        minified = func(static_file_fd.read(), subfunc)
+                    with codecs.open(fext_file, 'w', encoding='utf-8') as static_file_fd:
+                        static_file_fd.write(minified)
+                    print('Minfied file {fext_file}.'.format(fext_file=fext_file))
                 with open(fext_file, 'rb') as f_in:
                     with gzip.open("{}.gz".format(fext_file), 'wb') as f_out:
                         shutil.copyfileobj(f_in, f_out)
-                print('Minfied file {}.'.format(fext_file))
+                print('Compressed file {fext_file}.'.format(fext_file=fext_file))
+
+
+def compile_py_func(fullname, compile_file_func):
+    if compile_file_func(fullname, ddir=os.path.dirname(fullname), legacy=True, optimize=0):
+        os.remove(fullname)
+
+
+def compile_python_sources(base_dir, files, exclude=None):
+    exclude = exclude or []
+    patterns = dict()
+    try:
+        from compileall import compile_file
+        patterns['*.py'] = (compile_py_func, compile_file)
+    except:
+        pass
+
+    regex_exclude = [re.compile(r, re.MULTILINE) for r in exclude]
+
+    for fnext, funcs in patterns.items():
+        for fext_file in filter(lambda f: fnmatch.fnmatch(f, fnext), files):
+            fext_file = os.path.join(base_dir, fext_file)
+            if os.path.exists(fext_file):
+                if not any(filter(lambda fp: bool(fp.search(fext_file)), regex_exclude)):
+                    func, subfunc = funcs
+                    funcs[0](fext_file, funcs[1])
+                    print('Compiled {fext_file}.'.format(fext_file=fext_file))
 
 
 class _Compile(_sdist):
@@ -275,6 +307,7 @@ class build_py(build_py_orig):
 class install_lib(_install_lib):
     exclude = []
     static_exclude = []
+    compile_exclude = []
 
     def _filter_files_with_ext(self, filename):
         _filename, _fext = os.path.splitext(filename)
@@ -292,6 +325,8 @@ class install_lib(_install_lib):
                 print('Removing extention sources [{}].'.format(source))
                 os.remove(source)
         minify_static_files('', files, self.static_exclude)
+        if os.getenv('BUILD_COMPILE', '') == 'true':
+            compile_python_sources('', files, self.compile_exclude)
         return result
 
 
@@ -317,6 +352,7 @@ def make_setup(**opts):
     if has_cython:
         build_py.exclude = ext_modules_list
         install_lib.static_exclude = static_exclude
+        install_lib.compile_exclude = opts.pop('compile_modules_exclude', list())
         cmdclass.update({
             'build_ext': _build_ext,
             'build_py': build_py,
@@ -326,6 +362,16 @@ def make_setup(**opts):
         cmdclass['build_sphinx'] = BuildDoc
     cmdclass['githubrelease'] = GithubRelease
     opts['cmdclass'] = cmdclass
+
+    webpack_path = os.path.join(os.getcwd(), 'webpack.config.js')
+    if os.path.exists(webpack_path) and is_build and os.environ.get('DONT_YARN', "") != 'true':
+        yarn_build_command = 'devBuild' if is_develop else 'build'
+        try:
+            os.system('yarn install --pure-lockfile')
+            os.system('yarn ' + yarn_build_command)
+        except Extension as err:
+            print(err)
+
     setup(**opts)
 
 ########################################################################################
