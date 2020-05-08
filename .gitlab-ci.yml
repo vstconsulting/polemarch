@@ -40,28 +40,14 @@ stages:
   script:
    - make test ENVS=$TOX_ENVS
    - make build-clean
-  except:
-    refs:
-      - tags
-  only:
-    refs:
-      - merge_requests
-      - web
-      - master
-    changes:
-      - polemarch/main/**/*
-      - polemarch/api/**/*
-      - polemarch/__init__.py
-      - tests.py
-      - setup.{py,cfg}
-      - MANIFEST.in
-      - requirements.txt
-      - requirements-test.txt
-      - Makefile
-      - tox.ini
-      - .coveragerc
-      - .gitlab-ci.yml
-  retry: 2
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "external_pull_request_event"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_TAG == null'
+      when: on_success
+    - when: never
 
 # Branch tests
 ###########################################
@@ -71,17 +57,8 @@ code_style:
     TOX_ARGS: "--workdir /cache/.tox_polemarch_code"
   script:
    - make test ENVS=flake,pylint,jshint
-  except:
-    refs:
-      - tags
-      - issue_building
-  only:
-    refs:
-      - merge_requests
-      - web
-  retry: 2
 
-py37-coverage:
+py38-coverage:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
@@ -93,47 +70,45 @@ py36-install:
 
 # Realese
 ###########################################
-deploy_environment:
-  stage: release
-  image: vstconsulting/images:tox
-  services:
-    - name: "docker:19.03-dind"
-      alias: "docker_service_host"
-  script:
-    - tox -e deploy_env
-  environment:
-    name: review/$CI_COMMIT_REF_NAME
-    on_stop: delete_environment
-    url: http://polemarch-$KUBE_NAMESPACE.$KUBE_INGRESS_BASE_DOMAIN
-  only:
-    kubernetes: active
-    refs:
-      - branches
-  when: manual
-
-delete_environment:
-  stage: release
-  image: vstconsulting/images:tox
-  script:
-    - tox -e destroy_env
-  environment:
-    name: review/$CI_COMMIT_REF_NAME
-    action: stop
-  only:
-    kubernetes: active
-    refs:
-      - branches
-  when: manual
+#deploy_environment:
+#  stage: release
+#  image: vstconsulting/images:tox
+#  services:
+#    - name: "docker:19.03-dind"
+#      alias: "docker_service_host"
+#  script:
+#    - tox -e deploy_env
+#  environment:
+#    name: review/$CI_COMMIT_REF_NAME
+#    on_stop: delete_environment
+#    url: http://polemarch-$KUBE_NAMESPACE.$KUBE_INGRESS_BASE_DOMAIN
+#  only:
+#    kubernetes: active
+#    refs:
+#      - branches
+#  when: manual
+#
+#delete_environment:
+#  stage: release
+#  image: vstconsulting/images:tox
+#  script:
+#    - tox -e destroy_env
+#  environment:
+#    name: review/$CI_COMMIT_REF_NAME
+#    action: stop
+#  only:
+#    kubernetes: active
+#    refs:
+#      - branches
+#  when: manual
 
 release:
   stage: release
   image: vstconsulting/images:tox
-  only:
-    refs:
-      - master
-    variables:
-      - $GIT_ACCESS_USER
-      - $GIT_ACCESS_PASSWORD
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $GIT_ACCESS_USER && $GIT_ACCESS_PASSWORD'
+      when: on_success
+    - when: never
   before_script:
     - url_host=`echo "${CI_REPOSITORY_URL}" | sed -e "s/https:\/\/gitlab-ci-token:.*@//g"`
     - git config --global user.name "${GITLAB_USER_NAME}"
@@ -150,27 +125,24 @@ pages:
   artifacts:
     paths:
     - public
-  only:
-    refs:
-      - developer
-      - tags
-  when: always
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "developer" && $GIT_ACCESS_USER && $GIT_ACCESS_PASSWORD'
+      when: always
+    - when: never
 
 release_pypi:
   stage: release
   image: vstconsulting/images:build
-  only:
-    refs:
-    - tags
-    variables:
-    - $PYPI_UPLOAD_PASSWORD
-    - $PYPI_UPLOAD_NAME
+  rules:
+    - if: '$CI_COMMIT_TAG && $PYPI_UPLOAD_PASSWORD && $PYPI_UPLOAD_NAME'
+      when: on_success
+      allow_failure: true
+    - when: never
   variables:
     TOX_ARGS: ""
   script:
    - make test ENVS=build
    - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} $(find dist/*.{tar.gz,whl})
-  allow_failure: true
   artifacts:
     name: "release-packages-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
     paths:
@@ -185,26 +157,20 @@ publish_docker:
   script:
     - pip install tox
     - tox -e release-docker
-  only:
-    refs:
-      - tags
-    variables:
-      - $POLEMARCH_DOCKER_USER
-      - $POLEMARCH_DOCKER_PASSWORD
-      - $POLEMARCH_DOCKER_EMAIL
-      - $POLEMARCH_DOCKER_IMAGE_NAME
+  rules:
+    - if: '$CI_COMMIT_TAG && $POLEMARCH_DOCKER_USER && $POLEMARCH_DOCKER_PASSWORD && $POLEMARCH_DOCKER_EMAIL && $POLEMARCH_DOCKER_IMAGE_NAME'
+      when: on_success
+    - when: never
 
 publish_release:
   stage: publish
   image: vstconsulting/images:tox
   allow_failure: true
   needs: ["release_pypi"]
-  only:
-    refs:
-    - tags
-    variables:
-    - $PYPI_UPLOAD_PASSWORD
-    - $PYPI_UPLOAD_NAME
+  rules:
+    - if: '$CI_COMMIT_TAG && $PYPI_UPLOAD_PASSWORD && $PYPI_UPLOAD_NAME'
+      when: on_success
+    - when: never
   variables:
     TOX_ARGS: ""
   before_script:
