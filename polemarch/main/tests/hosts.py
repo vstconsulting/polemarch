@@ -1,4 +1,9 @@
+import logging
+from subprocess import check_output
 from ._base import BaseTestCase, json
+
+
+logger = logging.getLogger('polemarch')
 
 
 class InvBaseTestCase(BaseTestCase):
@@ -155,9 +160,15 @@ class InventoriesTestCase(InvBaseTestCase):
         self.generate_hooks(scripts)
         self.mass_create_bulk('hook', data)
         ##
+
+        def side_effect_for_hooks(*args, **kwargs):
+            result = check_output(*args, **kwargs)
+            logger.debug(result)
+            return result
+
         with self.patch('subprocess.check_output') as mock:
             iterations = 3 * len(scripts)
-            mock.side_effect = [''] * iterations
+            mock.side_effect = side_effect_for_hooks
             results = self.make_bulk(bulk_data, 'put')
             self.assertEqual(mock.call_count, iterations)
         self.assertEqual(results[0]['status'], 201)
