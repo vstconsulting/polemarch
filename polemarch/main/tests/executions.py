@@ -1803,7 +1803,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
             for i in indexes:
                 self.assertEqual(
                     results[i]['status'], status,
-                    msg='Bulk index: {}, Response status: `{}`!=`{}`, Response data:'.format(
+                    msg='Bulk index: {}, Response status: `{}`!=`{}`, Response data: {}'.format(
                         i, results[i]['status'], status, results[i]['data']
                     )
                 )
