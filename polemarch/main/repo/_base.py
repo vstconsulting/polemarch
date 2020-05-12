@@ -79,8 +79,10 @@ class _Base:
         :param template_data: Template data
         :return: created Template object
         '''
-        self.message('Loading template[{}] into the project.'.format(template_name))
-        return self.proj.template.create(name=template_name, **template_data)
+        self.message(f'Loading template[{template_name}] into the project.')
+        obj, created = self.proj.template.update_or_create(name=template_name, defaults=template_data)
+        self.message(f'Template[{obj.name}] {"created" if created else "updated"} in the project.')
+        return obj
 
     def pm_handle_templates(self, feature: Text, data: Dict) -> NoReturn:
         '''
