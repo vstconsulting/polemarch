@@ -1286,7 +1286,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         pm_yaml['sync_on_run'] = True
         # templates
         pm_yaml['templates'] = test_yaml_templates
-        pm_yaml['templates_rewrite'] = False
+        pm_yaml['templates_rewrite'] = True
         # fast task widget
         pm_yaml['view'] = test_yaml_view
         # Prepare repo
