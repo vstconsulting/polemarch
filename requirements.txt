@@ -1,7 +1,7 @@
 # Main
 vstutils[rpc,ldap,doc,prod]~=3.0.13
-docutils==0.15.2
-markdown2==2.3.8
+docutils~=0.16.0
+markdown2==2.3.9
 
 # Repo types
 gitpython==3.1.0
