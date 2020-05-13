@@ -2,6 +2,7 @@ version: '3'
 services:
   polemarch:
     build: .
+    restart: unless-stopped
     environment:
       POLEMARCH_DB_TYPE: mysql
       POLEMARCH_DB_NAME: project-db
