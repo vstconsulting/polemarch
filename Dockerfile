@@ -1,4 +1,4 @@
-FROM onegreyonewhite/tox:python AS build
+FROM vstconsulting/images:tox AS build
 
 WORKDIR /usr/local/project
 
@@ -9,7 +9,7 @@ RUN tox -c tox_build.ini -e py36-build && \
 
 ###############################################################
 
-FROM alpine:3.10
+FROM alpine:3.11
 
 ENV WORKER=ENABLE
 
@@ -21,7 +21,7 @@ RUN cat /etc/polemarch/system_requirements.txt | xargs apk --update add && \
     /opt/polemarch/bin/pip3 install -U pip wheel setuptools && \
     /opt/polemarch/bin/pip3 install -U -r /etc/polemarch/system_requirements_pip.txt && \
     mkdir -p /projects /hooks && \
-    /opt/polemarch/bin/pip3 install -U /etc/polemarch/dist/$(ls /etc/polemarch/dist/ | grep "\.tar\.gz" | tail -1)[mysql,postgresql,uwsgi] && \
+    /opt/polemarch/bin/pip3 install -U /etc/polemarch/dist/$(ls /etc/polemarch/dist/ | grep "\.tar\.gz" | tail -1)[mysql,postgresql] && \
     mkdir -p /run/openldap && \
     apk --purge del .build-deps && \
     rm -rf ~/.cache/pip/* && \
