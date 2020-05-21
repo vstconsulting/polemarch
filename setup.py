@@ -133,11 +133,17 @@ def make_extensions(extensions_list, packages):
     language_level = 3
     if is_help:
         pass
-    elif has_cython and ('compile' in sys.argv or 'bdist_wheel' in sys.argv):
+    elif has_cython and ('compile' in sys.argv or 'bdist_wheel' in sys.argv or 'build_ext' in sys.argv):
         cy_kwargs = dict(
             nthreads=nthreads,
             force=True,
-            language_level=language_level
+            language_level=language_level,
+            compiler_directives=dict(
+                linetrace='CYTHON_TRACE_NOGIL' in sys.argv,
+                profile=True,
+                c_string_type='str',
+                c_string_encoding='utf8'
+            ),
         )
         return cythonize(ext_modules, **cy_kwargs), extensions_dict
     return ext_modules, extensions_dict
