@@ -59,29 +59,21 @@ class BaseTestCase(VSTBaseTestCase):
         with open(self.get_test_filepath(name), 'r') as fd:
             return fd.read()
 
-    def get_mod_bulk(self, item, pk, data, mtype="variables", *args, **kwargs):
-        return super(BaseTestCase, self).get_mod_bulk(
-            item, pk, data, mtype, *args, **kwargs
-        )
-
-    def _get_bulk_mod(self, item, index, data, mtype='variables'):
-        return self.get_mod_bulk(item, "<<{}[data][id]>>".format(index), data, mtype)
-
     def mass_create_bulk(self, item, data):
         bulk_data = list()
         counter = 0
         for dt in [dict(i) for i in data]:
             variables = dt.pop('variables', None)
-            bulk_data.append({'type': "add", 'item': item, 'data': dt})
+            bulk_data.append(dict(method='post', path=item, data=dt))
             if variables:
                 inner_counter = 0
                 for k, v in variables.items():
                     md = dict(key=k, value=v)
-                    bulk_data.append(self._get_bulk_mod(item, counter, md))
+                    bulk_data.append(dict(method='post', path=[item, f'<<{counter}[data][id]>>', 'variables'], data=md))
                     inner_counter += 1
                 counter += inner_counter
             counter += 1
-        result = self.make_bulk(bulk_data)
+        result = self.bulk_transactional(bulk_data)
         for res in result:
             self.assertEqual(res['status'], 201, res)
         return result
