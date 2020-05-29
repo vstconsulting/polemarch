@@ -293,7 +293,7 @@ body {
     display: block;
 }
 
-.text-logo {
+.main-sidebar .app-logo .text-logo {
     margin-left: auto;
     width: 165px;
     float: inherit;
