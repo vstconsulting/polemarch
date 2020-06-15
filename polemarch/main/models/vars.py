@@ -52,7 +52,7 @@ class Variable(BModel):
     object_id      = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
     key            = models.CharField(max_length=512)
-    value          = models.CharField(max_length=2*1024, null=True)
+    value          = models.TextField(null=True)
 
     variables_keys = [
         "ansible_host",

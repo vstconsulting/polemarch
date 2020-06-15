@@ -1,6 +1,6 @@
 # pylint: disable=unused-argument
 from __future__ import absolute_import
-from typing import Any, Text, NoReturn, Iterable, Dict, Union
+from typing import Any, Text, Iterable, Dict, Union
 import sys
 import json
 import logging
@@ -32,7 +32,7 @@ BaseUser = get_user_model()
 #####################################
 # FUNCTIONS
 #####################################
-def send_hook(when: Text, target: Any) -> NoReturn:
+def send_hook(when: Text, target: Any) -> None:
     msg = OrderedDict(when=when)
     msg['target'] = target
     if 'loaddata' not in sys.argv:
@@ -64,7 +64,7 @@ def raise_linked_error(exception_class=ValidationError, **kwargs):
 # SIGNALS
 #####################################
 @receiver(signals.post_save, sender=Variable)
-def remove_existed(instance: Variable, **kwargs) -> NoReturn:
+def remove_existed(instance: Variable, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     Variable.objects.filter(
@@ -75,7 +75,7 @@ def remove_existed(instance: Variable, **kwargs) -> NoReturn:
 
 
 @receiver(signals.pre_save, sender=Variable)
-def check_variables_values(instance: Variable, *args, **kwargs) -> NoReturn:
+def check_variables_values(instance: Variable, *args, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     content_object = instance.content_object
@@ -88,7 +88,7 @@ def check_variables_values(instance: Variable, *args, **kwargs) -> NoReturn:
 
 
 @receiver(signals.pre_save, sender=Variable)
-def check_project_variables_values(instance: Variable, *args, **kwargs) -> NoReturn:
+def check_project_variables_values(instance: Variable, *args, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     if not isinstance(instance.content_object, Project):
@@ -114,7 +114,7 @@ def check_project_variables_values(instance: Variable, *args, **kwargs) -> NoRet
 
 
 @receiver(signals.pre_save, sender=Group)
-def validate_group_name(instance: Group, **kwargs) -> NoReturn:
+def validate_group_name(instance: Group, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     validate_name = RegexValidator(
@@ -125,7 +125,7 @@ def validate_group_name(instance: Group, **kwargs) -> NoReturn:
 
 
 @receiver(signals.m2m_changed, sender=Group.parents.through)
-def check_circular_deps(instance: Group, action: Text, pk_set: Iterable, *args, **kwargs) -> NoReturn:
+def check_circular_deps(instance: Group, action: Text, pk_set: Iterable, *args, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     if (action in ["pre_add", "post_add"]) and ('loaddata' not in sys.argv):
@@ -138,7 +138,7 @@ def check_circular_deps(instance: Group, action: Text, pk_set: Iterable, *args, 
 
 
 @receiver(signals.pre_save, sender=PeriodicTask)
-def validate_types(instance: PeriodicTask, **kwargs) -> NoReturn:
+def validate_types(instance: PeriodicTask, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     if (instance.kind not in instance.kinds) or (instance.type not in instance.types):
@@ -147,7 +147,7 @@ def validate_types(instance: PeriodicTask, **kwargs) -> NoReturn:
 
 
 @receiver(signals.pre_save, sender=PeriodicTask)
-def validate_crontab(instance: PeriodicTask, **kwargs) -> NoReturn:
+def validate_crontab(instance: PeriodicTask, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     try:
@@ -158,7 +158,7 @@ def validate_crontab(instance: PeriodicTask, **kwargs) -> NoReturn:
 
 
 @receiver(signals.pre_save, sender=Host)
-def validate_type_and_name(instance: Host, **kwargs) -> NoReturn:
+def validate_type_and_name(instance: Host, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     if instance.type not in instance.types:  # nocv
@@ -171,7 +171,7 @@ def validate_type_and_name(instance: Host, **kwargs) -> NoReturn:
 
 
 @receiver(signals.pre_save, sender=Template)
-def validate_template_keys(instance: Template, **kwargs) -> NoReturn:
+def validate_template_keys(instance: Template, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
         return
     # Deprecated, because moved to serializers
@@ -188,7 +188,7 @@ def validate_template_keys(instance: Template, **kwargs) -> NoReturn:
 
 
 @receiver(signals.pre_save, sender=Template)
-def validate_template_args(instance: Template, **kwargs) -> NoReturn:
+def validate_template_args(instance: Template, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
         return
     if instance.kind in ["Host", "Group"]:
@@ -225,7 +225,7 @@ def compare_schedules(new_schedule_data: Dict, old_schedule: Union[CrontabSchedu
 
 @receiver(signals.post_save, sender=PeriodicTask)
 @transaction.atomic()
-def save_to_beat(instance: PeriodicTask, **kwargs) -> NoReturn:
+def save_to_beat(instance: PeriodicTask, **kwargs) -> None:
     """
     Signal handle create and edit for Polemarch Periodic Task objects
     :param instance: Polemarch Periodic Task object
@@ -302,7 +302,7 @@ def save_to_beat(instance: PeriodicTask, **kwargs) -> NoReturn:
 
 @receiver(signals.post_delete, sender=PeriodicTask)
 @transaction.atomic()
-def delete_from_beat(instance: PeriodicTask, **kwargs) -> NoReturn:
+def delete_from_beat(instance: PeriodicTask, **kwargs) -> None:
     """
     Signal handle delete or disable for Polemarch Periodic Task objects
     :param instance: Polemarch Periodic Task object
@@ -328,7 +328,7 @@ def delete_from_beat(instance: PeriodicTask, **kwargs) -> NoReturn:
 
 
 @receiver(signals.m2m_changed, sender=Project.inventories.through)
-def check_if_inventory_linked(instance: Inventory, action: Text, **kwargs) -> NoReturn:
+def check_if_inventory_linked(instance: Inventory, action: Text, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     if action != "pre_remove":
@@ -349,7 +349,7 @@ def check_if_inventory_linked(instance: Inventory, action: Text, **kwargs) -> No
 
 
 @receiver(signals.pre_delete, sender=Inventory)
-def check_if_inventory_linked_project(instance: Inventory, **kwargs) -> NoReturn:
+def check_if_inventory_linked_project(instance: Inventory, **kwargs) -> None:
     # pylint: disable=invalid-name
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
@@ -360,7 +360,7 @@ def check_if_inventory_linked_project(instance: Inventory, **kwargs) -> NoReturn
 
 
 @receiver(signals.pre_save, sender=Hook)
-def check_hook(instance: Hook, **kwargs) -> NoReturn:
+def check_hook(instance: Hook, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
         return
     errors = instance.handlers.validate(instance)
@@ -370,7 +370,7 @@ def check_hook(instance: Hook, **kwargs) -> NoReturn:
 
 @receiver([signals.post_save, signals.post_delete], sender=BaseUser,
           dispatch_uid='user_add_hook')
-def user_add_hook(instance: BaseUser, **kwargs) -> NoReturn:
+def user_add_hook(instance: BaseUser, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     created = kwargs.get('created', None)
@@ -391,7 +391,7 @@ def user_add_hook(instance: BaseUser, **kwargs) -> NoReturn:
 @receiver([signals.post_save, signals.post_delete], sender=Inventory)
 @receiver([signals.post_save, signals.post_delete], sender=Group)
 @receiver([signals.post_save, signals.post_delete], sender=Host)
-def polemarch_hook(instance: Any, **kwargs) -> NoReturn:
+def polemarch_hook(instance: Any, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
         return
     created = kwargs.get('created', None)
@@ -409,21 +409,21 @@ def polemarch_hook(instance: Any, **kwargs) -> NoReturn:
 
 
 @receiver(signals.post_save, sender=BaseUser)
-def create_settings_for_user(instance: BaseUser, **kwargs) -> NoReturn:
+def create_settings_for_user(instance: BaseUser, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     UserSettings.objects.get_or_create(user=instance)
 
 
 @receiver(signals.pre_save, sender=Template)
-def update_ptasks_with_templates(instance: Template, **kwargs) -> NoReturn:
+def update_ptasks_with_templates(instance: Template, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
         return
     instance.periodic_task.all().update(project=instance.project)
 
 
 @receiver(signals.pre_delete, sender=History)
-def cancel_task_on_delete_history(instance: History, **kwargs) -> NoReturn:
+def cancel_task_on_delete_history(instance: History, **kwargs) -> None:
     exchange = KVExchanger(CmdExecutor.CANCEL_PREFIX + str(instance.id))
     exchange.send(True, 60) if instance.working else None
 
