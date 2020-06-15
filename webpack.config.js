@@ -42,6 +42,9 @@ const config = {
     new CleanWebpackPlugin(),
     new VueLoaderPlugin()
   ],
+  externals: {
+    moment: 'moment',
+  },
   module: {
     rules: [
       {

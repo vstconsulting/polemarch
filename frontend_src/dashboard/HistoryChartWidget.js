@@ -1,7 +1,9 @@
+import LineChartWidget from './LineChartWidget.js';
+
 /**
  * Class of history chart widget.
  */
-export default class HistoryChartWidget extends spa.dashboard.LineChartWidget {
+export default class HistoryChartWidget extends LineChartWidget {
     constructor(options) {
         super(options);
 
