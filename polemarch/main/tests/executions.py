@@ -153,7 +153,7 @@ test_yaml_view = {
         'main.yml': {
             'title': 'Execute title',
             'help': 'Some help text'
-        }
+        },
     }
 }
 
@@ -449,8 +449,9 @@ class BaseExecutionsTestCase(BaseTestCase):
         result = self.mass_create_bulk('project', [
             dict(
                 name=name, repository=kwargs.pop('repository', repo_type),
-                branch=kwargs.pop('branch', None),
-                variables=dict(repo_type=repo_type, **kwargs)
+                branch=kwargs.pop('branch', None), type=repo_type,
+                additional_playbook_path=kwargs.pop('playbook_path', None),
+                variables=dict(**kwargs)
             )
         ])
         project_data = result[0]['data']
@@ -508,7 +509,7 @@ class BaseExecutionsTestCase(BaseTestCase):
     def get_file_path(self, name: str, path: str) -> Path:
         return Path(path).joinpath(*name.split('/'))
 
-    def generate_playbook(self, path, name='test', count=1, data=test_playbook_content):
+    def generate_playbook(self, path, name='test', count=0, data=test_playbook_content):
         '''
         Generate playbooks in project path
 
@@ -526,7 +527,7 @@ class BaseExecutionsTestCase(BaseTestCase):
         if isinstance(name, (list, tuple)):
             _files = name[:count or len(name)]
         else:
-            _files = ['{}-{}.yml'.format(name, i) for i in range(count or 1)]
+            _files = ['{}-{}.yml'.format(name, i) for i in range(count or 1)]  # nocv
         for filename in _files:
             file_path = self.get_file_path(filename, path)
             if not file_path.parent.exists():
@@ -586,6 +587,13 @@ class BaseExecutionsTestCase(BaseTestCase):
         self.assertEqual(results[0]['status'], 200)
         self.assertEqual(results[1]['status'], 200)
         self.assertEqual(results[1]['data']['count'], playbook_count)
+        custom_path_pb_created = list(
+            filter(
+                lambda y: y == 'not_playbook_dir/additional_pb_path.yml',
+                map(lambda x: x['playbook'], results[1]['data']['results'])
+            )
+        )
+        self.assertEqual(len(custom_path_pb_created), 1, 'Playbook from additional path, doesn\'t exist')
         self.assertEqual(results[2]['data']['count'], 1)
         self.assertEqual(results[2]['data']['results'][0]['playbook'], results[1]['data']['results'][0]['playbook'])
         if not execute:
@@ -623,8 +631,8 @@ class ProjectTestCase(BaseExecutionsTestCase):
                 shutil.rmtree(submodule_dir)
 
     def wip_manual(self, project_data):
-        files = self.generate_playbook(self.get_project_dir(**project_data))
         path = self.get_project_dir(**project_data)
+        files = self.generate_playbook(path, ['test-0.yml', 'not_playbook_dir/additional_pb_path.yml'])
         self.get_model_filter('Project', pk=project_data['id']).get().set_status('NEW')
         self.sync_project(**project_data)
         # Create test ssh-key
@@ -721,7 +729,10 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(proj_module.name, 'test_module')
         self.assertEqual(proj_module.data['short_description'], 'Test module')
         self.assertTrue(os.path.exists(os.path.join(proj.path, 'sm1', 'test_module.py')))
-        return dict(playbook_count=len(self.revisions), execute=True)
+        return dict(playbook_count=3, execute=True)
+
+    def wip_tar(self, project_data):
+        return dict(playbook_count=2)
 
     def make_test_templates(self, project_data):
         pk = project_data['id']
@@ -1110,12 +1121,15 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(result['status'], 400)
 
     def test_project_manual(self):
-        self.project_workflow('MANUAL', execute=True)
+        self.project_workflow('MANUAL', execute=True, playbook_path="not_playbook_dir")
 
     def test_project_tar(self):
         with self.patch('{}.main.repo._base._ArchiveRepo._download'.format(pm_mod)) as d:
             d.side_effect = [self.tests_path + '/test_repo.tar.gz'] * 10
-            self.project_workflow('TAR', repository='http://localhost:8000/test_repo.tar.gz', execute=True)
+            self.project_workflow(
+                'TAR', repository='http://localhost:8000/test_repo.tar.gz',
+                execute=True, playbook_path='not_playbook_dir'
+            )
             d.reset_mock()
 
             # try error
@@ -1186,7 +1200,11 @@ class ProjectTestCase(BaseExecutionsTestCase):
         # Prepare repo
         self.repo_dir = tempfile.mkdtemp()
         self.submodule_dir = "{}_submodule".format(self.repo_dir)
-        self.generate_playbook(self.repo_dir, ['main.yml', 'subdir/other.yml'], 2)
+        self.generate_playbook(
+            self.repo_dir,
+            ['main.yml', 'subdir/other.yml', 'not_playbook_dir/additional_pb_path.yml'],
+            3
+        )
         self.generate_playbook(self.repo_dir, ['.polemarch.yaml'], data=dump(pm_yaml))
         self.generate_playbook(self.repo_dir, ['ansible.cfg'], data=test_ansible_cfg)
         lib_dir = self.submodule_dir
@@ -1203,7 +1221,13 @@ class ProjectTestCase(BaseExecutionsTestCase):
             'add', '../{}/.git'.format(self.submodule_dir.split('/')[-1]), 'lib'
         )
         repo.git.submodule('add', '{}/.git'.format(self.submodule_dir), 'sm1')
-        repo.index.add(["main.yml", "subdir/other.yml", ".polemarch.yaml", "ansible.cfg"])
+        repo.index.add([
+            "main.yml",
+            "subdir/other.yml",
+            ".polemarch.yaml",
+            "ansible.cfg",
+            'not_playbook_dir/additional_pb_path.yml'
+        ])
         repo.index.commit("no message")
         first_revision = repo.head.object.hexsha
         repo.create_head('new_branch')
@@ -1218,10 +1242,10 @@ class ProjectTestCase(BaseExecutionsTestCase):
         # Test project
         self.revisions = [first_revision, second_revision]
         self.project_workflow(
-            'GIT', repository=self.repo_dir, repo_password='', execute=True
+            'GIT', repository=self.repo_dir, repo_password='', execute=True, playbook_path="not_playbook_dir"
         )
         self.project_workflow(
-            'GIT', repository=self.repo_dir, repo_branch='new_branch', repo_key='key'
+            'GIT', repository=self.repo_dir, repo_branch='new_branch', repo_key='key', playbook_path="not_playbook_dir"
         )
 
         # Test invalid repo

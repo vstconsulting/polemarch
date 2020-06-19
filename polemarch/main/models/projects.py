@@ -122,7 +122,8 @@ class Project(AbstractModel):
         'repo_sync_on_run_timeout',
         'repo_branch',
         'repo_password',
-        'repo_key'
+        'repo_key',
+        'playbook_path'
     ]
 
     EXTRA_OPTIONS = {

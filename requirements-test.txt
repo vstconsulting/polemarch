@@ -3,3 +3,4 @@ coverage~=5.1
 mock~=3.0.5
 fakeldap==0.6.1
 tblib~=1.6.0
+django-test-migrations~=1.0.0
