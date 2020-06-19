@@ -808,6 +808,9 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer, _WithPermissi
                                         label='Branch for GIT(branch/tag/SHA) or TAR(subdir)',
                                         field='type',
                                         types=branch_types)
+    additional_playbook_path = vst_fields.VSTCharField(required=False,
+                                                       allow_null=True,
+                                                       label='Directory with playbooks')
 
     class Meta:
         model = models.Project
@@ -820,16 +823,19 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer, _WithPermissi
             'repo_auth',
             'auth_data',
             'branch',
+            'additional_playbook_path',
         )
         extra_kwargs = {
             'name': {'required': True}
         }
 
+    @transaction.atomic
     def create(self, validated_data: Dict) -> models.Project:
         repo_type = validated_data.pop('type')
         repo_auth_type = validated_data.pop('repo_auth')
         repo_auth_data = validated_data.pop('auth_data')
         repo_branch = validated_data.pop('branch', None)
+        playbook_path = validated_data.pop('additional_playbook_path', '')
 
         instance = super(ProjectCreateMasterSerializer, self).create(validated_data)
         instance.variables.create(key='repo_type', value=repo_type)
@@ -838,6 +844,8 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer, _WithPermissi
             instance.variables.create(key=key, value=repo_auth_data)
         if repo_branch:  # nocv
             instance.variables.create(key='repo_branch', value=repo_branch)
+        if playbook_path:
+            instance.variables.create(key='playbook_path', value=playbook_path)
         return instance
 
 

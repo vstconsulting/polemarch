@@ -6,6 +6,7 @@ import shutil
 import pathlib
 import logging
 import traceback
+from itertools import chain
 
 from six.moves.urllib.request import urlretrieve
 from django.db import transaction
@@ -180,26 +181,27 @@ class _Base:
         Find and update playbooks in project.
         :param files: list of filenames.
         '''
-        # reg = re.compile(self.regex)
-        # playbooks = filter(reg.match, files)
         self._set_tasks_list(files)
 
-    def _get_files(self, repo: Any = None) -> pathlib.Path:
-        '''
-        Get all files, where playbooks should be.
-        :param repo: Repo object
-        :type repo: object, None
-        :return: list of files in dir
-        :rtype: list
-        '''
-        # pylint: disable=unused-argument
-        return pathlib.Path(self.path)
-
     def search_files(self, repo: Any = None, pattern: Text = '**/*') -> Iterable[pathlib.Path]:
-        return self._get_files(repo).glob(pattern)
+        # pylint: disable=unused-argument
+        path = pathlib.Path(self.path)
+        return map(lambda x: x.relative_to(self.path), path.glob(pattern))
 
     def _operate(self, operation: Callable, **kwargs) -> Any:
         return operation(kwargs)
+
+    def _get_playbook_path(self, repo: Any = None) -> Iterable[pathlib.Path]:
+        path_list_additional = []
+        additional_pb_pattern = None
+
+        with raise_context():
+            additional_pb_pattern = self.proj.variables.get(key='playbook_path').value
+
+        if additional_pb_pattern and (pathlib.Path(self.path) / additional_pb_pattern).exists():
+            path_list_additional = self.search_files(repo, additional_pb_pattern  + '/*.yml')
+
+        return chain(self.search_files(repo, '*.yml'), path_list_additional)
 
     def _make_operations(self, operation: Callable) -> Any:
         '''
@@ -213,7 +215,7 @@ class _Base:
             with transaction.atomic():
                 result = self._operate(operation)
                 self._set_status("OK")
-                self._update_tasks(self.search_files(result[0], '*.yml'))
+                self._update_tasks(self._get_playbook_path(result[0]))
                 self._set_project_modules()
                 self._handle_yaml(self._load_yaml() or dict())
         except Exception as err:

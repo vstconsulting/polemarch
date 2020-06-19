@@ -93,6 +93,12 @@ def check_project_variables_values(instance: Variable, *args, **kwargs) -> None:
         return
     if not isinstance(instance.content_object, Project):
         return
+    if instance.key == 'playbook_path':
+        validate_playbook_path = RegexValidator(
+            regex=r'..',
+            message='Incompatible symbols `..`.'
+        )
+        validate_playbook_path(instance.value)
 
     project_object = instance.content_object
 
