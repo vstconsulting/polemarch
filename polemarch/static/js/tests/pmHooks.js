@@ -24,7 +24,7 @@ window.qunitTestsArray['guiViews[hook]'] = {
                     data:{
                         type : {value:"HTTP"},
                         recipients:{
-                            value:randomString(6)
+                            value:window.spa.utils.randomString(6)
                         }
                     },
                 },
@@ -40,7 +40,7 @@ window.qunitTestsArray['guiViews[hook]'] = {
                     is_valid:true,
                     data:{
                         type : {value:"HTTP"},
-                        name : {value:randomString(6)},
+                        name : {value:window.spa.utils.randomString(6)},
                     },
                 },
             ],

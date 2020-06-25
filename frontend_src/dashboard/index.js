@@ -150,7 +150,7 @@ if (guiLocalSettings.get('chart_period')) {
 
 spa.router.mixins.customRoutesComponentsTemplates.home = HomeView;
 
-tabSignal.connect('app.afterInit', (obj) => {
+spa.signals.connect('app.afterInit', (obj) => {
     let app = obj.app;
     let setting_view = app.views['/profile/settings/'];
     let qs = setting_view.objects.clone();
@@ -167,12 +167,12 @@ tabSignal.connect('app.afterInit', (obj) => {
             });
         }
 
-        tabSignal.connect('GuiCustomizer.skin.name.changed', guiCustomizerSkinOnChangeHandler);
-        tabSignal.connect(
+        spa.signals.connect('GuiCustomizer.skin.name.changed', guiCustomizerSkinOnChangeHandler);
+        spa.signals.connect(
             'GuiCustomizer.skins_custom_settings.saved',
             guiCustomizerCustomSettingsOnSaveHandler,
         );
-        tabSignal.connect(
+        spa.signals.connect(
             'GuiCustomizer.skins_custom_settings.reseted',
             guiCustomizerCustomSettingsOnSaveHandler,
         );

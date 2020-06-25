@@ -43,7 +43,7 @@
      */
     export default {
         name: 'ProjectPageAdditional',
-        mixins: [spa.components.mixins.BasePageTypeMixin, spa.router.mixins.collapsable_card_mixin],
+        mixins: [spa.components.mixins.BasePageTypeMixin, spa.router.mixins.CollapsibleCardMixin],
         data() {
             return {
                 /**
@@ -110,7 +110,7 @@
                             additionalProperties: {
                                 view_field: 'name',
                                 value_field: 'id',
-                                list_paths: ['/project/{' + path_pk_key + '}/inventory/'],
+                                list_paths: ['/project/{' + spa.utils.path_pk_key + '}/inventory/'],
                             },
                         },
                         user: {

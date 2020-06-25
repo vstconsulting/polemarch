@@ -1,4 +1,4 @@
-tabSignal.connect('app.beforeInit', ({ app }) => {
+spa.signals.connect('app.beforeInit', ({ app }) => {
     if (app && window.moment && window.moment.tz) {
         window.moment.tz.setDefault(app.api.getTimeZone());
     }

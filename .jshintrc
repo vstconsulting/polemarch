@@ -22,7 +22,6 @@
     "hostname": true,
     "IMask": true,
     "iziToast": true,
-    "tabSignal": true,
     "Vue": true,
     "XRegExp": true,
     "$": true,

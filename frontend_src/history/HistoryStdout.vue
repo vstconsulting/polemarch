@@ -15,7 +15,7 @@
 
 <script>
     export default {
-        mixins: [spa.router.mixins.view_with_autoupdate_mixin],
+        mixins: [spa.router.mixins.ViewWithAutoUpdateMixin],
         props: ['instance', 'url', 'cleared'],
         data() {
             return {

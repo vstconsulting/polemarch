@@ -11,7 +11,7 @@
 window.qunitTestsArray['guiViews[project]'] = {
     test: function() {
         let list_path = '/project/';
-        let page_path = list_path + '{' + path_pk_key + '}/';
+        let page_path = list_path + '{' + window.spa.utils.path_pk_key + '}/';
         let instances_info = guiTests.getEmptyInstancesInfo();
 
         // creates random user, data of which will be used in following tests.
@@ -54,7 +54,7 @@ window.qunitTestsArray['guiViews[project]'] = {
             is_valid: true,
             remove: true,
             data: {
-                name: {value: randomString(8),},
+                name: {value: window.spa.utils.randomString(8),},
             }
         });
 
@@ -116,7 +116,7 @@ window.qunitTestsArray['guiViews[project]'] = {
                 {
                     is_valid:true,
                     data:  {
-                        name:{value: randomString(6)},
+                        name:{value: window.spa.utils.randomString(6)},
                     },
                 },
             ],
@@ -124,14 +124,14 @@ window.qunitTestsArray['guiViews[project]'] = {
                 {
                     is_valid:true,
                     data: {
-                        name:{value: randomString(6)},
+                        name:{value: window.spa.utils.randomString(6)},
                     },
                 },
             ],
             add_child: {
                 child_path: '/inventory/',
                 data: {
-                    name: {value: 'child-inventory-' + randomString(6) + randomString(6)},
+                    name: {value: 'child-inventory-' + window.spa.utils.randomString(6) + window.spa.utils.randomString(6)},
                 },
             },
         }, false);
@@ -196,8 +196,8 @@ window.qunitTestsArray['guiViews[project]'] = {
                 {
                     is_valid: true,
                     data: {
-                        name: {value: randomString(6),},
-                        notes: {value: randomString(6),},
+                        name: {value: window.spa.utils.randomString(6),},
+                        notes: {value: window.spa.utils.randomString(6),},
                     },
                 },
             ],
@@ -205,14 +205,14 @@ window.qunitTestsArray['guiViews[project]'] = {
                 {
                     is_valid: true,
                     data: {
-                        notes: {value: randomString(6) + randomString(6)},
+                        notes: {value: window.spa.utils.randomString(6) + window.spa.utils.randomString(6)},
                     },
                 },
             ],
             add_child: {
                 child_path: '/group/',
                 data: {
-                    name: {value: 'child-group-' + randomString(6) + randomString(6)},
+                    name: {value: 'child-group-' + window.spa.utils.randomString(6) + window.spa.utils.randomString(6)},
                 },
             },
         }, false);
@@ -270,8 +270,8 @@ window.qunitTestsArray['guiViews[project]'] = {
                 {
                     is_valid: true,
                     data: {
-                        name: {value: randomString(6),},
-                        notes: {value: randomString(6),},
+                        name: {value: window.spa.utils.randomString(6),},
+                        notes: {value: window.spa.utils.randomString(6),},
                         type: {value: "RANGE",},
                     },
                 },
@@ -280,14 +280,14 @@ window.qunitTestsArray['guiViews[project]'] = {
                 {
                     is_valid: true,
                     data: {
-                        notes: {value: randomString(6) + randomString(6)},
+                        notes: {value: window.spa.utils.randomString(6) + window.spa.utils.randomString(6)},
                     },
                 },
             ],
             add_child: {
                 child_path: '/host/',
                 data: {
-                    name: {value: 'child-host-' + randomString(6) + randomString(6)},
+                    name: {value: 'child-host-' + window.spa.utils.randomString(6) + window.spa.utils.randomString(6)},
                 },
             },
             page: {
@@ -303,8 +303,8 @@ window.qunitTestsArray['guiViews[project]'] = {
                 {
                     is_valid: true,
                     data: {
-                        name: {value: randomString(6),},
-                        notes: {value: randomString(6),},
+                        name: {value: window.spa.utils.randomString(6),},
+                        notes: {value: window.spa.utils.randomString(6),},
                         type: {value: "RANGE",},
                     },
                 },
@@ -313,14 +313,14 @@ window.qunitTestsArray['guiViews[project]'] = {
                 {
                     is_valid: true,
                     data: {
-                        notes: {value: randomString(6) + randomString(6)},
+                        notes: {value: window.spa.utils.randomString(6) + window.spa.utils.randomString(6)},
                     },
                 },
             ],
             add_child: {
                 child_path: '/host/',
                 data: {
-                    name: {value: 'child-host-' + randomString(6) + randomString(6)},
+                    name: {value: 'child-host-' + window.spa.utils.randomString(6) + window.spa.utils.randomString(6)},
                 },
             },
         }, false);
@@ -392,27 +392,27 @@ window.qunitTestsArray['guiViews[project]'] = {
                 {
                     is_valid: false,
                     data:  {
-                        name:{ value: randomString(6)},
+                        name:{ value: window.spa.utils.randomString(6)},
                     },
                 },
                 {
                     is_valid: false,
                     data:  {
-                        name:{ value: randomString(6)},
+                        name:{ value: window.spa.utils.randomString(6)},
                         kind: { value: "Task"},
                     },
                 },
                 {
                     is_valid: false,
                     data:  {
-                        name:{ value: randomString(6)},
+                        name:{ value: window.spa.utils.randomString(6)},
                         kind: { value: "Module"},
                     },
                 },
                 {
                     is_valid: true,
                     data:  {
-                        name:{ value: randomString(6)},
+                        name:{ value: window.spa.utils.randomString(6)},
                         kind:{ value: "Module"},
                         module: { value: "system.ping", do_not_compare: true,},
                     },
@@ -422,7 +422,7 @@ window.qunitTestsArray['guiViews[project]'] = {
                 {
                     is_valid: true,
                     data: {
-                        name:{value: randomString(6)},
+                        name:{value: window.spa.utils.randomString(6)},
                     },
                 },
                 // {
@@ -572,14 +572,14 @@ window.qunitTestsArray['guiViews[project]'] = {
                 {
                     is_valid: false,
                     data:  {
-                        name: {value: randomString(6)},
+                        name: {value: window.spa.utils.randomString(6)},
                         kind: {value: "TEMPLATE"},
                     },
                 },
                 {
                     is_valid: false,
                     data:  {
-                        name: {value: randomString(6)},
+                        name: {value: window.spa.utils.randomString(6)},
                         kind: {value: "PLAYBOOK"},
                     },
                 },
@@ -627,21 +627,21 @@ window.qunitTestsArray['guiViews[project]'] = {
                 {
                     is_valid: false,
                     data:  {
-                        name: {value: randomString(6)},
+                        name: {value: window.spa.utils.randomString(6)},
 
                     },
                 },
                 {
                     is_valid: false,
                     data:  {
-                        name: {value: randomString(6)},
+                        name: {value: window.spa.utils.randomString(6)},
                         kind: {value: "PLAYBOOK"},
                     },
                 },
                 {
                     is_valid: true,
                     data:  {
-                        name: {value: randomString(6)},
+                        name: {value: window.spa.utils.randomString(6)},
                         kind: {value: "PLAYBOOK"},
                         mode: {value: "ping.yml", do_not_compare: true,},
                         type: {value: "CRONTAB"},
@@ -653,7 +653,7 @@ window.qunitTestsArray['guiViews[project]'] = {
                 {
                     is_valid: true,
                     data: {
-                        name:{value: randomString(6)},
+                        name:{value: window.spa.utils.randomString(6)},
                         save_result: {value: true},
                     },
                 },
@@ -747,9 +747,9 @@ window.qunitTestsArray['guiViews[project]'] = {
 window.qunitTestsArray['guiViews[community_template]'] = {
     test: function () {
         let list_path = "/community_template/";
-        let page_path = list_path + '{' + path_pk_key + '}/';
+        let page_path = list_path + '{' + window.spa.utils.path_pk_key + '}/';
         let instances_info = guiTests.getEmptyInstancesInfo();
-        instances_info.url_params[path_pk_key] = 1;
+        instances_info.url_params[window.spa.utils.path_pk_key] = 1;
 
         //////////////////////////////////////
         // Test for /community_template/ view
@@ -777,7 +777,7 @@ window.qunitTestsArray['guiViews[community_template]'] = {
         /////////////////////////////////////////////////////////////////
         // Tests sync created project and check, that sync was successful
         /////////////////////////////////////////////////////////////////
-        guiTests.testProjectSyncFromPageView("/project/{" + path_pk_key + "}/", instances_info, true);
+        guiTests.testProjectSyncFromPageView("/project/{" + window.spa.utils.path_pk_key + "}/", instances_info, true);
 
         syncQUnit.addTest('check quick playbook run form existence', function(assert) {
             let done = assert.async();
@@ -785,7 +785,7 @@ window.qunitTestsArray['guiViews[community_template]'] = {
             testdone(done);
         });
 
-        guiTests.openPage("/project/{" + path_pk_key + "}/playbook/", instances_info.url_params, true);
+        guiTests.openPage("/project/{" + window.spa.utils.path_pk_key + "}/playbook/", instances_info.url_params, true);
 
         syncQUnit.addTest('check community playbooks existence', function(assert) {
             let done = assert.async();
@@ -796,6 +796,6 @@ window.qunitTestsArray['guiViews[community_template]'] = {
         ////////////////////////////////////////////////////////////////////////////////
         // Test, that deletes created during tests project instance.
         ////////////////////////////////////////////////////////////////////////////////
-        guiTests.testRemovePageViewInstance("/project/{" + path_pk_key + "}/", instances_info, true);
+        guiTests.testRemovePageViewInstance("/project/{" + window.spa.utils.path_pk_key + "}/", instances_info, true);
     },
 };

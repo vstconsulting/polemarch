@@ -1,9 +1,6 @@
-import logging
 from django_test_migrations.contrib.unittest_case import MigratorTestCase
 from django.conf import settings
-
-
-logger = logging.getLogger('polemarch')
+from ..models import Project, Task
 
 
 class TestDirectMigration(MigratorTestCase):
@@ -12,17 +9,27 @@ class TestDirectMigration(MigratorTestCase):
 
     def prepare(self):
         """Prepare some data before the migration."""
-        Projects = self.old_state.apps.get_model('main', 'Project')
-        prj = Projects.objects.create(name='pb_test')
+        project_model = Project  # self.old_state.apps.get_model('main', 'Project')
+        task_model = Task  # self.old_state.apps.get_model('main', 'Task')
+        prj = project_model.objects.create(name='pb_test')
 
-        proj_dir =  settings.PROJECTS_DIR
-        prj.playbook.create(name=f"{proj_dir}/{prj.id}/test", playbook=f"{proj_dir}/{prj.id}/test.yml")
-        prj.playbook.create(name="test1", playbook="test1.yml")
+        project_dir = settings.PROJECTS_DIR
+
+        task_model.objects.create(
+            name=f"{project_dir}/{prj.id}/test",
+            playbook=f"{project_dir}/{prj.id}/test.yml",
+            project=prj
+        )
+        task_model.objects.create(
+            name="test1",
+            playbook="test1.yml",
+            project=prj
+        )
 
     def test_migration_main0008(self):
         """Run the test itself."""
-        Project = self.new_state.apps.get_model('main', 'Project')
-        prj = Project.objects.get(name='pb_test')
+        project_model = self.new_state.apps.get_model('main', 'Project')
+        prj = project_model.objects.get(name='pb_test')
         playbook = prj.playbook.first()
         relative_pb = prj.playbook.last()
 

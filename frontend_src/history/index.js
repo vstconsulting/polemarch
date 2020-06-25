@@ -43,7 +43,7 @@ const history_mode_additionalProperties = {
  */
 function historyModelsFieldsHandler(model) {
     let str = 'models[{0}].fields.beforeInit'.format([model]);
-    tabSignal.connect(str, (fields) => {
+    spa.signals.connect(str, (fields) => {
         fields.start_time.format = 'one_history_date_time';
         fields.stop_time.format = 'one_history_date_time';
 
@@ -113,7 +113,7 @@ function OneHistory_kind_mode_callback(parent_values = {}) {
  * @param {string} model
  */
 function OneHistoryFieldsHandler(model) {
-    tabSignal.connect('models[' + model + '].fields.beforeInit', (fields) => {
+    spa.signals.connect('models[' + model + '].fields.beforeInit', (fields) => {
         for (let field in fields) {
             if (fields.hasOwnProperty(field)) {
                 fields[field].format = 'one_history_string';
@@ -154,7 +154,7 @@ function historyPathsFiltersHandler(path) {
     /**
      * Changes 'status' filter type to 'choices'.
      */
-    tabSignal.connect('views[' + path + '].filters.beforeInit', (filters) => {
+    spa.signals.connect('views[' + path + '].filters.beforeInit', (filters) => {
         for (let key in filters) {
             if (filters.hasOwnProperty(key)) {
                 let filter = filters[key];
@@ -173,13 +173,13 @@ function historyPathsFiltersHandler(path) {
  * @param {string} path
  */
 function historyPathsViewsHandler(path) {
-    tabSignal.connect('views[' + path + '].afterInit', (obj) => {
+    spa.signals.connect('views[' + path + '].afterInit', (obj) => {
         if (obj.view.schema.type == 'page') {
             obj.view.mixins = obj.view.mixins.concat(HistoryView);
         }
     });
 
-    tabSignal.connect('views[' + path + '].created', (obj) => {
+    spa.signals.connect('views[' + path + '].created', (obj) => {
         if (obj.view.schema.type == 'list' && obj.view.schema.operations && obj.view.schema.operations.add) {
             delete obj.view.schema.operations.add;
         }
@@ -201,7 +201,7 @@ function addHistorySignals() {
 // adds signal for history models and views.
 addHistorySignals();
 
-tabSignal.connect('allViews.inited', (obj) => {
+spa.signals.connect('allViews.inited', (obj) => {
     let views = obj.views;
 
     history_paths.forEach((path) => {

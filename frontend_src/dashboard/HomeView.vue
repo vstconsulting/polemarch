@@ -58,7 +58,7 @@
                         <component
                             v-for="widget in sorted_widgets"
                             :key="widget.name"
-                            :is="'w_' + widget.format"
+                            :is="widget.componentName"
                             :item="widget"
                             :value="widgets_data[widget.name]"
                         ></component>
@@ -73,7 +73,7 @@
     import { widgets } from './widgets.js';
 
     export default {
-        mixins: [spa.router.mixins.BasestViewMixin, spa.router.mixins.view_with_autoupdate_mixin],
+        mixins: [spa.router.mixins.BasestViewMixin, spa.router.mixins.ViewWithAutoUpdateMixin],
         data() {
             return {
                 /**
@@ -145,7 +145,7 @@
              */
             updateData() {
                 return this.setWidgetsData().then((data) => {
-                    if (!deepEqual(this.widgets_data, data)) {
+                    if (!spa.utils.deepEqual(this.widgets_data, data)) {
                         this.widgets_data = data;
                     }
 
@@ -213,7 +213,7 @@
                         continue;
                     }
 
-                    w_data['pmw' + capitalizeString(key) + 'Counter'] = response.data[key];
+                    w_data['pmw' + spa.utils.capitalizeString(key) + 'Counter'] = response.data[key];
                 }
 
                 return w_data;

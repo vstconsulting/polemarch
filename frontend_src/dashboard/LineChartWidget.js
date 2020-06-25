@@ -6,7 +6,7 @@ import Chart from 'chart.js';
 export default class LineChartWidget extends spa.dashboard.BaseWidget {
     constructor(options) {
         super(options);
-        this.format = 'line_chart';
+        this.componentName = spa.components.widgets.LineChartWidgetComponent.name;
         /**
          * Property means type of ChartJS instance, that should be generated.
          */

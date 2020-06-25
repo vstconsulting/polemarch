@@ -8,7 +8,7 @@
 window.qunitTestsArray['guiViews[host]'] = {
     test: function() {
         let list_path = '/host/';
-        let page_path = list_path + '{' + path_pk_key + '}/';
+        let page_path = list_path + '{' + window.spa.utils.path_pk_key + '}/';
         let instances_info = guiTests.getEmptyInstancesInfo();
 
         // creates random user, data of which will be used in following tests.
@@ -28,8 +28,8 @@ window.qunitTestsArray['guiViews[host]'] = {
                 {
                     is_valid: true,
                     data: {
-                        name: {value: randomString(6),},
-                        notes: {value: randomString(6),},
+                        name: {value: window.spa.utils.randomString(6),},
+                        notes: {value: window.spa.utils.randomString(6),},
                         type: {value: "RANGE",},
                     },
                 },
@@ -38,7 +38,7 @@ window.qunitTestsArray['guiViews[host]'] = {
                 {
                     is_valid: true,
                     data: {
-                        name: {value: randomString(6) + randomString(6)},
+                        name: {value: window.spa.utils.randomString(6) + window.spa.utils.randomString(6)},
                     },
                 },
             ],
