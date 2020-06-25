@@ -12,10 +12,10 @@ window.qunitTestsArray['guiViews[dashboard]'] = {
             let url = "/";
             let expectation = true;
 
-            current_view._initLoadingPromise();
+            spa.utils.current_view._initLoadingPromise();
 
             if(url == app.application.$route.path) {
-                current_view.setLoadingSuccessful();
+                spa.utils.current_view.setLoadingSuccessful();
             } else {
                 app.application.$router.push({path: url});
             }
@@ -25,7 +25,7 @@ window.qunitTestsArray['guiViews[dashboard]'] = {
                 testdone(done);
             };
 
-            current_view.promise.then(() => {
+            spa.utils.current_view.promise.then(() => {
                 getTestResult(true);
             }).catch(error => {
                 getTestResult(false);

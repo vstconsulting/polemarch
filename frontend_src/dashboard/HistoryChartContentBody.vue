@@ -47,7 +47,7 @@
         data() {
             return {
                 chart_instance: undefined,
-                customizer: guiCustomizer,
+                customizer: spa.guiCustomizer.guiCustomizer,
             };
         },
         watch: {

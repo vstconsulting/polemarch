@@ -521,10 +521,6 @@ function getOpenApiPagePathQueryTypes(entity_name, operation_id, model) {
                 204: {
                     description: 'Action accepted.',
                 },
-                400: {
-                    description: 'Validation error or some data error.',
-                    schema: { $ref: '#/definitions/Error' },
-                },
             },
         },
     };
@@ -1025,7 +1021,7 @@ guiQuerySets.OneTemplateQuerySet = class OneTemplateQuerySet extends guiQuerySet
     }
 };
 
-tabSignal.connect('models[Template].fields.beforeInit', function (fields) {
+spa.signals.connect('models[Template].fields.beforeInit', function (fields) {
     ['data', 'options'].forEach((item) => {
         fields[item].hidden = true;
     });
@@ -1033,7 +1029,7 @@ tabSignal.connect('models[Template].fields.beforeInit', function (fields) {
     fields.options_list.title = 'Options';
 });
 
-tabSignal.connect('models[OneTemplate].fields.beforeInit', function (fields) {
+spa.signals.connect('models[OneTemplate].fields.beforeInit', function (fields) {
     fields.options.hidden = true;
     fields.options_list.hidden = true;
     fields.data.hidden = true;
@@ -1054,7 +1050,7 @@ tabSignal.connect('models[OneTemplate].fields.beforeInit', function (fields) {
     fields = Object.assign(fields, getTemplateCommonFields(true));
 });
 
-tabSignal.connect('models[TemplateExec].fields.beforeInit', function (fields) {
+spa.signals.connect('models[TemplateExec].fields.beforeInit', function (fields) {
     let option = fields.option;
     option.format = 'fk';
     option.default = {
@@ -1073,10 +1069,9 @@ tabSignal.connect('models[TemplateExec].fields.beforeInit', function (fields) {
  * If type of template was changed, user will see the message about deleting of vars and options,
  * and he also will se a question 'Does he really want to do it?'.
  */
-tabSignal.connect('views[/project/{' + path_pk_key + '}/template/{template_id}/edit/].afterInit', (obj) => {
+spa.signals.connect('views[/project/{' + path_pk_key + '}/template/{template_id}/edit/].afterInit', (obj) => {
     let mixins = [...obj.view.mixins].reverse();
-    let baseSaveInstance =
-        routesComponentsTemplates.page_edit.methods.saveInstance; /* globals routesComponentsTemplates */
+    let baseSaveInstance = spa.router.mixins.routesComponentsTemplates.page_edit.methods.saveInstance;
 
     for (let index = 0; index < mixins.length; index++) {
         let item = mixins[index];
@@ -1122,7 +1117,7 @@ tabSignal.connect('views[/project/{' + path_pk_key + '}/template/{template_id}/e
 /**
  * Changes 'kind' filter type to 'choices'.
  */
-tabSignal.connect('views[/project/{' + path_pk_key + '}/template/].filters.beforeInit', (filters) => {
+spa.signals.connect('views[/project/{' + path_pk_key + '}/template/].filters.beforeInit', (filters) => {
     for (let index in filters) {
         if (filters.hasOwnProperty(index)) {
             let filter = filters[index];
@@ -1277,7 +1272,7 @@ guiModels.OneTemplateVariableModel = class OneTemplateVariableModel extends guiM
  */
 guiQuerySets.OneTemplateVariableQuerySet = class OneTemplateVariableQuerySet extends guiQuerySets.TemplateVariableQuerySet {};
 
-tabSignal.connect('openapi.loaded', (openapi) => {
+spa.signals.connect('openapi.loaded', (openapi) => {
     formEnumForVariables(openapi);
 
     let template_variable = getOneTemplateVariableSchema();
@@ -1308,14 +1303,14 @@ tabSignal.connect('openapi.loaded', (openapi) => {
     );
 });
 
-tabSignal.connect(
+spa.signals.connect(
     'views[/project/{' + path_pk_key + '}/template/{template_id}/variables/].afterInit',
     (obj) => {
         obj.view.mixins = obj.view.mixins.concat(tmp_vars_list_mixin);
     },
 );
 
-tabSignal.connect(
+spa.signals.connect(
     'views[/project/{' + path_pk_key + '}/template/{template_id}/variables/new/].afterInit',
     (obj) => {
         obj.view.mixins = obj.view.mixins.concat(tmp_vars_new_mixin);
@@ -1459,7 +1454,7 @@ guiModels.OneTemplateOptionModel = class OneTemplateOptionModel extends guiModel
  */
 guiQuerySets.OneTemplateOptionQuerySet = class OneTemplateOptionQuerySet extends guiQuerySets.TemplateOptionQuerySet {};
 
-tabSignal.connect('openapi.loaded', (openapi) => {
+spa.signals.connect('openapi.loaded', (openapi) => {
     let template_option = {
         properties: {
             name: {
@@ -1531,7 +1526,7 @@ tabSignal.connect('openapi.loaded', (openapi) => {
     );
 });
 
-tabSignal.connect(
+spa.signals.connect(
     'views[/project/{' + path_pk_key + '}/template/{template_id}/option/new/].afterInit',
     (obj) => {
         obj.view.mixins = obj.view.mixins.concat(tmp_vars_new_mixin, {
@@ -1547,22 +1542,25 @@ tabSignal.connect(
     },
 );
 
-tabSignal.connect('views[/project/{' + path_pk_key + '}/template/{template_id}/option/].afterInit', (obj) => {
-    obj.view.mixins = obj.view.mixins.concat({
-        mixins: [tmp_vars_list_mixin],
-        methods: {
-            /**
-             * Method, that removes template option.
-             * @param {object} template_instance Template instance.
-             * @param {string} child_id Option name.
-             * @private
-             */
-            _removeInstance(template_instance, child_id) {
-                delete template_instance.data.options[child_id];
+spa.signals.connect(
+    'views[/project/{' + path_pk_key + '}/template/{template_id}/option/].afterInit',
+    (obj) => {
+        obj.view.mixins = obj.view.mixins.concat({
+            mixins: [tmp_vars_list_mixin],
+            methods: {
+                /**
+                 * Method, that removes template option.
+                 * @param {object} template_instance Template instance.
+                 * @param {string} child_id Option name.
+                 * @private
+                 */
+                _removeInstance(template_instance, child_id) {
+                    delete template_instance.data.options[child_id];
+                },
             },
-        },
-    });
-});
+        });
+    },
+);
 ////////////////////////////////////////////////////////////////////////////////////
 // EndBlock of extensions for TEMPLATE OPTION entity
 ////////////////////////////////////////////////////////////////////////////////////
@@ -1727,7 +1725,7 @@ guiModels.OneTemplateOptionVariableModel = class OneTemplateOptionVariableModel 
  */
 guiQuerySets.OneTemplateOptionVariableQuerySet = class OneTemplateOptionVariableQuerySet extends guiQuerySets.TemplateOptionVariableQuerySet {};
 
-tabSignal.connect('openapi.loaded', (openapi) => {
+spa.signals.connect('openapi.loaded', (openapi) => {
     formEnumForVariables(openapi);
 
     let template_option_variable = getOneTemplateVariableSchema();
@@ -1767,7 +1765,7 @@ tabSignal.connect('openapi.loaded', (openapi) => {
     );
 });
 
-tabSignal.connect(
+spa.signals.connect(
     'views[/project/{' +
         path_pk_key +
         '}/template/{template_id}/option/{option_id}/variables/new/].afterInit',
@@ -1776,7 +1774,7 @@ tabSignal.connect(
     },
 );
 
-tabSignal.connect(
+spa.signals.connect(
     'views[/project/{' + path_pk_key + '}/template/{template_id}/option/{option_id}/variables/].afterInit',
     (obj) => {
         obj.view.mixins = obj.view.mixins.concat({

@@ -112,7 +112,7 @@ class PmGuiTests extends GuiTests {
                         testdone(done);
                     }
 
-                }, guiLocalSettings.get('page_update_interval') / 2);
+                }, window.spa.utils.guiLocalSettings.get('page_update_interval') / 2);
             };
 
             waitStatus();

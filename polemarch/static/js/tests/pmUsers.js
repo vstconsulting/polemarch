@@ -8,7 +8,7 @@
 window.qunitTestsArray['guiViews[user.pm]'] = {
     test: function() {
         let list_path = '/user/';
-        let page_path = list_path + '{' + path_pk_key + '}/';
+        let page_path = list_path + '{' + window.spa.utils.path_pk_key + '}/';
         let instances_info = guiTests.getEmptyInstancesInfo();
 
         // creates random user, data of which will be used in following tests.
