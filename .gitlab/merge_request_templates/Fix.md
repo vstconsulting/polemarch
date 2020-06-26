@@ -1,4 +1,4 @@
-# [FIX|Feature|Chore|Docs] description
+# FIX description
 
 ### BREACKING CHANGES:
 *  What you should do for fix it in your projects?
