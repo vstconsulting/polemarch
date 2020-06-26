@@ -34,7 +34,7 @@ const config = {
     chunkFilename: "[name].chunk.js",
     publicPath: "/static/polemarch/",
     library: "[name]",
-    libraryTarget: "var"
+    libraryTarget: "window"
 
   },
   plugins: [
