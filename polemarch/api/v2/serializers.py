@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from typing import Dict, List
 import json
 import uuid
+from pathlib import Path
 from collections import OrderedDict
 from django.contrib.auth import get_user_model
 from django.utils.functional import cached_property
@@ -11,8 +12,9 @@ from rest_framework import serializers, exceptions, status
 from vstutils.api import serializers as vst_serializers, fields as vst_fields
 from vstutils.api.serializers import DataSerializer, EmptySerializer
 from vstutils.api.base import Response
-from ...main.utils import AnsibleArgumentsReference, AnsibleInventoryParser
+from ...main.utils import AnsibleArgumentsReference
 from ...main.settings import LANGUAGES
+from ...main.validators import path_validator
 
 from ...main import models
 from ..signals import api_post_save, api_pre_save
@@ -471,12 +473,14 @@ class HostSerializer(_WithVariablesSerializer):
         required=False,
         default='HOST'
     )
+    from_project = serializers.BooleanField(read_only=True, label='Project Based')
 
     class Meta:
         model = models.Host
         fields = ('id',
                   'name',
-                  'type',)
+                  'type',
+                  'from_project')
 
 
 class OneHostSerializer(HostSerializer):
@@ -725,12 +729,14 @@ class _InventoryOperations(_WithVariablesSerializer):
 
 class GroupSerializer(_WithVariablesSerializer):
     children = serializers.BooleanField(read_only=True)
+    from_project = serializers.BooleanField(read_only=True, label='Project Based')
 
     class Meta:
         model = models.Group
         fields = ('id',
                   'name',
-                  'children',)
+                  'children',
+                  'from_project')
 
 
 class OneGroupSerializer(GroupSerializer, _InventoryOperations):
@@ -756,11 +762,13 @@ class GroupCreateMasterSerializer(OneGroupSerializer):
 
 
 class InventorySerializer(_WithVariablesSerializer):
+    from_project = serializers.BooleanField(read_only=True, label='Project Based')
 
     class Meta:
         model = models.Inventory
         fields = ('id',
-                  'name',)
+                  'name',
+                  'from_project',)
 
 
 class OneInventorySerializer(InventorySerializer, _InventoryOperations):
@@ -1118,45 +1126,14 @@ class DashboardStatisticSerializer(DataSerializer):
     jobs = DashboardJobsSerializer()
 
 
-class InventoryImportSerializer(DataSerializer):
-    inventory_id = vst_fields.RedirectIntegerField(default=None, allow_null=True)
+class InventoryImportSerializer(serializers.Serializer):
+    # pylint: disable=abstract-method
+    inventory_id = vst_fields.RedirectIntegerField(default=None, allow_null=True, read_only=True)
     name = serializers.CharField(required=True)
     raw_data = vst_fields.VSTCharField()
 
-    @transaction.atomic()
     def create(self, validated_data: Dict) -> Dict:
-        parser = AnsibleInventoryParser()
-        inv_json = parser.get_inventory_data(validated_data['raw_data'])
-
-        inventory = models.Inventory.objects.create(name=validated_data['name'])
-        inventory.vars = inv_json['vars']
-        created_hosts, created_groups = dict(), dict()
-
-        for host in inv_json['hosts']:
-            inv_host = inventory.hosts.create(name=host['name'])
-            inv_host.vars = host['vars']
-            created_hosts[inv_host.name] = inv_host
-
-        for group in inv_json['groups']:
-            children = not len(group['groups']) == 0
-            inv_group = inventory.groups.create(name=group['name'], children=children)
-            inv_group.vars = group['vars']
-            created_groups[inv_group.name] = inv_group
-
-        for group in inv_json['groups']:
-            inv_group = created_groups[group['name']]
-            g_subs = list()
-            if inv_group.children:
-                for name in group['groups']:
-                    g_subs.append(created_groups[name])
-                inv_group.groups.add(*g_subs)
-            else:
-                for name in group['hosts']:
-                    g_subs.append(created_hosts[name])
-                inv_group.hosts.add(*g_subs)
-
-        inventory.raw_data = validated_data['raw_data']
-        return inventory
+        return models.Inventory.import_inventory_from_string(**validated_data)
 
     def to_representation(self, instance):
         return dict(
@@ -1164,3 +1141,20 @@ class InventoryImportSerializer(DataSerializer):
             name=instance.name,
             raw_data=getattr(instance, 'raw_data', '')
         )
+
+
+class InventoryFileImportSerializer(InventoryImportSerializer):
+    name = serializers.CharField(required=True, validators=[path_validator])
+    raw_data = vst_fields.VSTCharField(read_only=True)
+
+    def update(self, instance, validated_data: Dict) -> Dict:
+        inventory_path = Path(instance.path) / Path(validated_data['name'])
+        inventory, _ = instance.slave_inventory.get_or_create(name=inventory_path.stem)
+        inventory.variables.update_or_create(key='inventory_extension', value=inventory_path.suffix, hidden=True)
+        inventory.import_inventory_from_string(
+            raw_data=inventory_path.read_text(),
+            master_project=instance,
+            inventory_instance=inventory,
+            **validated_data
+        )
+        return inventory

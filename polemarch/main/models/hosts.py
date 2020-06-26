@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from typing import Any, List, Tuple, Dict, Text
 import logging
 from django.db.models import Q
+from django.db import transaction
 try:
     from yaml import dump as to_yaml, CDumper as Dumper, ScalarNode
 except ImportError:  # nocv
@@ -11,10 +12,25 @@ except ImportError:  # nocv
 from .base import models
 from .base import ManyToManyFieldACL, ManyToManyFieldACLReverse
 from .vars import AbstractModel, AbstractVarsQuerySet
-from ...main import exceptions as ex
+from ...main import exceptions as ex, utils
 from ..validators import RegexValidator
 
+
 logger = logging.getLogger("polemarch")
+
+
+def _delete_not_existing_objects(queryset, object_dict):
+    queryset.exclude(name__in=[n['name'] for n in object_dict]).delete()
+
+
+# Helpfull methods
+def _get_dict(objects: AbstractVarsQuerySet, keys: List = None, tmp_dir: Text = '/tmp') -> Tuple[Dict, List]:
+    keys = keys if keys else list()
+    result = dict()
+    for obj in objects:
+        result[obj.name], obj_keys = obj.toDict(tmp_dir)
+        keys += obj_keys
+    return result, keys
 
 
 class InventoryDumper(Dumper):
@@ -30,16 +46,6 @@ class InventoryDumper(Dumper):
     )
 
 
-# Helpfull methods
-def _get_dict(objects: AbstractVarsQuerySet, keys: List = None, tmp_dir: Text = '/tmp') -> Tuple[Dict, List]:
-    keys = keys if keys else list()
-    result = dict()
-    for obj in objects:
-        result[obj.name], obj_keys = obj.toDict(tmp_dir)
-        keys += obj_keys
-    return result, keys
-
-
 # Helpfull exceptions
 class CiclicDependencyError(ex.PMException):
     _def_message = "A cyclic dependence was found. {}"
@@ -50,12 +56,26 @@ class CiclicDependencyError(ex.PMException):
 
 
 # Block of models
+class InventoryItems(AbstractModel):
+    master_project = models.ForeignKey(blank=True, default=None, null=True,
+                                       on_delete=models.CASCADE,
+                                       related_name='slave_%(class)s',
+                                       to='main.Project')
+
+    class Meta:
+        abstract = True
+
+    @property
+    def from_project(self):
+        return bool(self.master_project)
+
+
 class HostQuerySet(AbstractVarsQuerySet):
     # pylint: disable=no-member
     pass
 
 
-class Host(AbstractModel):
+class Host(InventoryItems):
     objects     = HostQuerySet.as_manager()
     type        = models.CharField(max_length=5, default="HOST")
 
@@ -98,7 +118,7 @@ class GroupQuerySet(AbstractVarsQuerySet):
         return self.model.objects.filter(id__in=self.get_subgroups_id(tp="childrens"))
 
 
-class Group(AbstractModel):
+class Group(InventoryItems):
     CiclicDependencyError = CiclicDependencyError
     objects     = GroupQuerySet.as_manager()
     hosts       = ManyToManyFieldACL(Host, related_query_name="groups")
@@ -131,7 +151,7 @@ class Group(AbstractModel):
         return result, keys
 
 
-class Inventory(AbstractModel):
+class Inventory(InventoryItems):
     hosts       = ManyToManyFieldACL(Host)
     groups      = ManyToManyFieldACL(Group)
 
@@ -142,6 +162,7 @@ class Inventory(AbstractModel):
         default_flow_style=False,
         allow_unicode=True
     )
+    parser_class = utils.AnsibleInventoryParser
 
     class Meta:
         default_related_name = "inventories"
@@ -192,3 +213,42 @@ class Inventory(AbstractModel):
         return Host.objects.filter(
             Q(groups__in=self.groups_list) | Q(pk__in=self.hosts_list)
         ).distinct()
+
+    @classmethod
+    def parse_inventory_from_str(cls, data):
+        return cls.parser_class().get_inventory_data(data)
+
+    @classmethod
+    @transaction.atomic()
+    def import_inventory_from_string(cls, name, raw_data, **kwargs):
+        inv_json = cls.parse_inventory_from_str(raw_data)
+
+        inventory = kwargs.pop('inventory_instance', None)
+        if inventory is None:
+            inventory = cls.objects.create(name=name, **kwargs)
+
+        inventory.vars = inv_json['vars']
+        created_hosts, created_groups = dict(), dict()
+
+        _delete_not_existing_objects(inventory.hosts, inv_json['hosts'])
+        for host in inv_json['hosts']:
+            inv_host, _ = inventory.hosts.get_or_create(name=host['name'], **kwargs)
+            inv_host.vars = host['vars']
+            created_hosts[inv_host.name] = inv_host
+
+        _delete_not_existing_objects(inventory.groups, inv_json['groups'])
+        for group in inv_json['groups']:
+            children = not len(group['groups']) == 0
+            inv_group, _ = inventory.groups.get_or_create(name=group['name'], children=children, **kwargs)
+            inv_group.vars = group['vars']
+            created_groups[inv_group.name] = inv_group
+
+        for group in inv_json['groups']:
+            inv_group = created_groups[group['name']]
+            if inv_group.children:
+                inv_group.groups.set((created_groups[n] for n in group['groups']))
+            else:
+                inv_group.hosts.set((created_hosts[n] for n in group['hosts']))
+
+        inventory.raw_data = raw_data
+        return inventory

@@ -176,6 +176,61 @@ project_template_response = '''
 '''
 
 
+imported_inventory_data = {
+    'all':
+    {
+        'children':
+        {
+            'child-group':
+            {
+                'hosts':
+                {
+                    'test-nested-group-host':
+                    {
+                        'ansible_host': '10.10.10.10'
+                    }
+                },
+                'vars':
+                {
+                    'ansible_user': 'ubuntu'
+                }
+            },
+            'parent-group':
+            {
+                'children':
+                {
+                    'child-group':
+                    {
+                        'hosts':
+                        {
+                            'test-nested-group-host':
+                            {
+                                'ansible_host': '10.10.10.10'
+                            }
+                        },
+                        'vars':
+                        {
+                            'ansible_user': 'ubuntu'
+                        }
+                    }
+                }
+            }
+        },
+        'hosts':
+        {
+            'test-nested-group-host':
+            {
+                'ansible_host': '10.10.10.10'
+            }
+        },
+        'vars':
+        {
+            'ansible_connection': 'ssh'
+        }
+    }
+}
+
+
 class Object(object):
     pass
 
@@ -1466,6 +1521,144 @@ class ProjectTestCase(BaseExecutionsTestCase):
             self.assertIn(group['name'], valid_inventory['groups'].keys())
         for variable in results[4]['data']['results']:
             self.assertIn(variable['key'], valid_inventory['vars'].keys())
+
+    def test_import_project_inventories(self):
+        results = self.bulk([
+            dict(method='post', path=['project'], data=dict(name='testProj')),
+            dict(method='post', path=['project', '<<0[data][id]>>', 'sync']),
+        ])
+
+        self.assertEqual(results[0]['status'], 201)
+        prj_id = results[0]['data']['id']
+
+        # with self.assertRaises(ValidationError):
+        results = self.bulk([
+            dict(
+                method='post',
+                path=['project', prj_id, 'inventory', 'file_import_inventory'],
+                data={'name': 'validator/../error/..'}
+            ),
+        ])
+
+        self.assertEqual(results[0]['status'], 400)
+        path_to_inventory_file = 'inventory.yml'
+
+        def update_inv_file_data(prj_id):
+            (Path(settings.PROJECTS_DIR)/str(prj_id)/path_to_inventory_file).write_text(str(imported_inventory_data))
+
+        update_inv_file_data(prj_id)
+        file_for_remove = Path(settings.PROJECTS_DIR)/str(prj_id)/'remove.yml'
+        test_remove_inv = "all: { 'children': {}}"
+        file_for_remove.write_text(test_remove_inv)
+
+        results = self.bulk([
+            dict(
+                method='post', path=['inventory'], data={'name': path_to_inventory_file}
+            )
+        ])
+        self.assertEqual(results[0]['status'], 201)
+        global_inventory = self.get_model_filter('Inventory', id=results[0]['data']['id']).get()
+        global_inv_data = from_yaml(global_inventory.get_inventory()[0], Loader=Loader)
+
+        # Test for create Imported Inventory
+        results = self.bulk([
+            dict(
+                method='post',
+                path=['project', prj_id, 'inventory', 'file_import_inventory'],
+                data={'name': path_to_inventory_file}
+            ),
+            dict(method='get', path=['inventory', '<<0[data][inventory_id]>>', 'all_hosts']),
+            dict(method='get', path=['inventory', '<<0[data][inventory_id]>>', 'all_groups']),
+            dict(method='get', path=['inventory', '<<0[data][inventory_id]>>', 'variables']),
+            dict(
+                method='post',
+                path=['project', prj_id, 'inventory', 'file_import_inventory'],
+                data={'name': 'remove.yml'}
+            ),
+        ])
+
+        self.assertEqual(results[0]['status'], 201)
+        self.assertDictEqual(from_yaml(global_inventory.get_inventory()[0], Loader=Loader), global_inv_data)
+
+        inv_id = results[0]['data']['inventory_id']
+        remove_inv_id = results[4]['data']['inventory_id']
+
+        # assert block
+        test_inv = self.get_model_filter('Inventory', id=inv_id).get()
+        imported_inv_data = from_yaml(test_inv.get_inventory()[0], Loader=Loader)
+        self.assertDictEqual(imported_inv_data, imported_inventory_data)
+
+        # Test for change Imported Inventories data was applied
+        nested_host = dict(ansible_host='10.10.10.10')
+
+        imported_inventory_data['all']['children']['child-group']['vars']['ansible_port'] = 8888
+        imported_inventory_data['all']['children']['another-group'] = dict(
+                                                                        hosts=dict(
+                                                                            nestedHost=nested_host
+                                                                        )
+                                                                    )
+        imported_inventory_data['all']['hosts']['test-nested-group-host']['ansible_host'] = '20.20.20.20'
+        imported_inventory_data['all']['hosts']['nestedHost'] = nested_host
+        imported_inventory_data['all']['hosts']['edit-host'] = dict(ansible_port=22)
+        imported_inventory_data['all']['vars']['ansible_become'] = 'True'
+
+        update_inv_file_data(prj_id)
+        results = self.bulk([
+            dict(method='post', path=['project', prj_id, 'sync']),
+        ])
+        file_for_remove.unlink()
+        results = self.bulk([
+            dict(method='post', path=['project', prj_id, 'sync']),
+            dict(method='get', path=['inventory', inv_id, 'host']),
+            dict(method='get', path=['inventory', inv_id, 'group']),
+            dict(method='get', path=['inventory', inv_id, 'variables']),
+            dict(method='get', path=['inventory', remove_inv_id]),
+        ])
+
+        def compare_imported_items(for_check, corrected):
+            for inst in for_check:
+                self.assertIn(inst['name'], corrected)
+
+        # Assert block
+        self.assertEqual(results[1]['data']['count'], len(imported_inventory_data['all']['hosts']))
+        compare_imported_items(results[1]['data']['results'], imported_inventory_data['all']['hosts'])
+
+        self.assertEqual(results[2]['data']['count'], len(imported_inventory_data['all']['children']))
+        compare_imported_items(results[2]['data']['results'], imported_inventory_data['all']['children'])
+
+        self.assertEqual(results[3]['data']['count'], len(imported_inventory_data['all']['vars']))
+        for variable in results[3]['data']['results']:
+            self.assertIn(variable['key'], imported_inventory_data['all']['vars'])
+            self.assertEqual(variable['value'], imported_inventory_data['all']['vars'][variable['key']])
+
+        self.assertEqual(results[4]['status'], 404)
+
+        # Test for disable ability to add Imported Inventory to anther project
+        results = self.bulk([
+            dict(method='post', path=['project'], data=dict(name='testProj')),
+            dict(method='post', path=['project', '<<0[data][id]>>', 'inventory'], data=dict(id=inv_id)),
+            dict(method='post', path=['inventory', inv_id, 'variables'], data=dict(ansible_port=8888)),
+            dict(method='get', path=['inventory', inv_id, 'all_groups']),
+            dict(method='get', path=['inventory', inv_id, 'all_hosts']),
+            dict(method='put', path=['group', '<<3[data][results][0][id]>>'], data=dict(name='new-group-name')),
+            dict(method='put', path=['host', '<<4[data][results][0][id]>>'], data=dict(name='new-host-ame')),
+        ])
+        self.assertEqual(results[1]['status'], 403)
+        self.assertEqual(results[2]['status'], 403)
+        self.assertEqual(results[5]['status'], 403)
+        self.assertEqual(results[6]['status'], 403)
+
+        # Test that all Project Imported Inventories objects was deleted
+        results = self.bulk([
+            dict(method='get', path=['inventory', inv_id]),
+            dict(method='delete', path=['project', prj_id]),
+            dict(method='get', path=['inventory', inv_id]),
+            dict(method='get', path=['group']),
+            dict(method='get', path=['hosts']),
+        ])
+
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(results[2]['status'], 404)
 
     def test_project_repos(self):
         response = requests.Response()

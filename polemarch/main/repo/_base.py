@@ -203,6 +203,19 @@ class _Base:
 
         return chain(self.search_files(repo, '*.yml'), path_list_additional)
 
+    def _update_slave_inventories(self, slave_inventory_list):
+        for slave_inv in slave_inventory_list:
+            ext = getattr(slave_inv.variables.filter(key='inventory_extension').last(), 'value', '')
+            file_path = pathlib.Path(f"{settings.PROJECTS_DIR}/{self.proj.id}/{slave_inv.name}{ext}")
+            if not file_path.exists():
+                slave_inv.delete()
+                continue
+            slave_inv.import_inventory_from_string(
+                raw_data=file_path.read_text(),
+                name=slave_inv.name,
+                inventory_instance=slave_inv
+            )
+
     def _make_operations(self, operation: Callable) -> Any:
         '''
         Handle VCS operations and sync data from project.
@@ -214,10 +227,12 @@ class _Base:
         try:
             with transaction.atomic():
                 result = self._operate(operation)
-                self._set_status("OK")
+                self.proj.status = "OK"
                 self._update_tasks(self._get_playbook_path(result[0]))
                 self._set_project_modules()
                 self._handle_yaml(self._load_yaml() or dict())
+                self._update_slave_inventories(self.proj.slave_inventory.all())
+                self.proj.save()
         except Exception as err:
             logger.debug(traceback.format_exc())
             self.message('Sync error: {}'.format(err), 'error')

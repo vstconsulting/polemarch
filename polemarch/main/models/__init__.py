@@ -20,7 +20,7 @@ from .projects import Project, Task, Module, ProjectTemplate, list_to_choices
 from .users import get_user_model, UserGroup, ACLPermission, UserSettings
 from .tasks import PeriodicTask, History, HistoryLines, Template
 from .hooks import Hook
-from ..validators import RegexValidator, validate_hostname
+from ..validators import RegexValidator, validate_hostname, path_validator
 from ..exceptions import UnknownTypeException, Conflict
 from ..utils import AnsibleArgumentsReference, CmdExecutor
 
@@ -94,11 +94,7 @@ def check_project_variables_values(instance: Variable, *args, **kwargs) -> None:
     if not isinstance(instance.content_object, Project):
         return
     if instance.key == 'playbook_path':
-        validate_playbook_path = RegexValidator(
-            regex=r'..',
-            message='Incompatible symbols `..`.'
-        )
-        validate_playbook_path(instance.value)
+        path_validator(instance.value)
 
     project_object = instance.content_object
 
@@ -352,6 +348,15 @@ def check_if_inventory_linked(instance: Inventory, action: Text, **kwargs) -> No
                 linked_periodic_tasks.values_list('id', flat=True)
             ),
         )
+
+
+@receiver(signals.pre_delete, sender=Inventory)
+def delete_imported_file_inventories(instance: Inventory, **kwargs) -> None:
+    # pylint: disable=invalid-name
+    if instance.master_project is not None:
+        instance.hosts.all().delete()
+        instance.groups.all().delete()
+        instance.projects.clear()
 
 
 @receiver(signals.pre_delete, sender=Inventory)
