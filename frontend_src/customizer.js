@@ -115,7 +115,7 @@ const pmSkinDefaultMixin = {
     },
 };
 
-spa.guiCustomizer.skins = $.extend(true, spa.guiCustomizer.skins.default, pmSkinDefaultMixin);
+spa.guiCustomizer.skins.default = $.extend(true, spa.guiCustomizer.skins.default, pmSkinDefaultMixin);
 
 /**
  * Mixin, that extends guiSkins.dark.
