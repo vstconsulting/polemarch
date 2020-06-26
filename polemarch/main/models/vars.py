@@ -133,12 +133,12 @@ class AbstractModel(ACLModel):
         encr = "[~~ENCRYPTED~~]"
         encrypted_vars = {k: v for k, v in variables.items() if v == encr}
         other_vars = {k: v for k, v in variables.items() if v != encr}
-        self.variables.exclude(key__in=encrypted_vars.keys()).delete()
+        self.variables.cleared().exclude(key__in=list(encrypted_vars.keys()) + list(other_vars.keys())).delete()
         for key, value in other_vars.items():
             self.variables.create(key=key, value=value)
 
     def get_vars(self) -> Union[OrderedDict, Dict]:
-        qs = self.variables.all().sort_by_key().values_list('key', 'value')
+        qs = self.variables.cleared().sort_by_key().values_list('key', 'value')
         return reduce(update_boolean, self.BOOLEAN_VARS, OrderedDict(qs))
 
     def get_vars_prefixed(self, prefix: Text):
