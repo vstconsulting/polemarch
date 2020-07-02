@@ -1,6 +1,6 @@
 # Chore description
 
-### BREACKING CHANGES:
+### BREAKING CHANGES:
 *  What you should do for fix it in your projects?
 
 ### Changelog:
