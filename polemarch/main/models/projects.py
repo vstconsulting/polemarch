@@ -223,6 +223,8 @@ class Project(AbstractModel):
             field_format = field_data.get('format', 'string')
             if field_format not in valid_formats.keys():
                 field_format = 'unknown'
+            if field_format != 'unknown':
+                parsed_data['fields'][fieldname]['type'] = field_format
             parsed_data['fields'][fieldname]['format'] = field_format
             default_value = valid_formats[field_format](field_data.get('default', ''))
             parsed_data['fields'][fieldname]['default'] = default_value
@@ -230,6 +232,7 @@ class Project(AbstractModel):
             if enum and isinstance(enum, (list, tuple)):
                 enum = list(map(valid_formats[field_format], enum))
                 parsed_data['fields'][fieldname]['enum'] = enum
+                del parsed_data['fields'][fieldname]['format']
         # Parse playbooks for execution
         for playbook, pb_data in data['playbooks'].items():
             parsed_data['playbooks'][playbook] = dict(

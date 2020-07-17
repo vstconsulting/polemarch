@@ -752,15 +752,16 @@ class ProjectTestCase(BaseExecutionsTestCase):
         for field_name in test_yaml_view['fields']:
             self.assertIn(field_name, extra_view_data['fields'].keys())
             field = extra_view_data['fields'][field_name]
-            for required_field in ['title', 'default', 'format', 'help']:
+            for required_field in ['title', 'default', 'help']:
                 self.assertIn(required_field, field.keys())
-            self.assertEqual(field_name.split('_')[-1], field['format'], field)
+            field_type = field.get('format', field.get('type'))
+            self.assertEqual(field_name.split('_')[-1], field_type)
             default_type = str
-            if field['format'] == 'boolean':
+            if field_type == 'boolean':
                 default_type = bool
-            elif field['format'] == 'integer':
+            elif field_type == 'integer':
                 default_type = int
-            elif field['format'] == 'float':
+            elif field_type == 'float':
                 default_type = float
             self.assertTrue(isinstance(field['default'], default_type), field)
             if field_name == 'enum_string':
