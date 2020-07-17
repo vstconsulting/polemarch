@@ -78,6 +78,7 @@ TRANSLATION = {
     'facts': 'факты',
     'hook': 'хук',
     'import_inventory': 'импортировать инвенторий',
+    'file_import_inventory': 'импортировать инвенторий из файла',
     'all_groups': 'все группы',
     'all_hosts': 'все хосты',
     'execute_module': 'запустить модуль',

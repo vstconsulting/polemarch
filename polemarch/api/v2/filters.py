@@ -102,7 +102,7 @@ class HostFilter(_TypedFilter, _BaseHGIFilter):
         model = models.Host
         fields = ('id',
                   'name',
-                  'type')
+                  'type',)
 
 
 class GroupFilter(_BaseHGIFilter):

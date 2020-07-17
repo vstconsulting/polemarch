@@ -1,5 +1,5 @@
 import HistoryChart from './HistoryChart.js';
-import HomeView from './HomeView.vue';
+import HomeView from '../HomeView.vue';
 import { widgets } from './widgets.js';
 const guiLocalSettings = spa.utils.guiLocalSettings;
 
@@ -23,19 +23,16 @@ function getProfileSettingQsFromStore() {
  * and saves updated queryset in store.
  * @param {object} qs QuerySet for profile/setting page
  */
-function updateProfileSettingsQsAndSave(qs) {
-    qs.formQueryAndSend('post', qs.cache.data)
-        .then((response) => {
-            /* jshint unused: false */
-            app.application.$store.commit('setQuerySet', {
-                url: qs.url,
-                queryset: qs,
-            });
-        })
-        .catch((error) => {
-            /* jshint unused: false */
-            debugger;
+async function updateProfileSettingsQsAndSave(qs) {
+    try {
+        await qs.execute({ method: 'post', data: qs.cache.data });
+        app.application.$store.commit('setQuerySet', {
+            url: qs.url,
+            queryset: qs,
         });
+    } catch (e) {
+        console.log(e);
+    }
 }
 
 /**
@@ -150,7 +147,7 @@ if (guiLocalSettings.get('chart_period')) {
 
 spa.router.mixins.customRoutesComponentsTemplates.home = HomeView;
 
-tabSignal.connect('app.afterInit', (obj) => {
+spa.signals.connect('app.afterInit', (obj) => {
     let app = obj.app;
     let setting_view = app.views['/profile/settings/'];
     let qs = setting_view.objects.clone();
@@ -167,12 +164,12 @@ tabSignal.connect('app.afterInit', (obj) => {
             });
         }
 
-        tabSignal.connect('GuiCustomizer.skin.name.changed', guiCustomizerSkinOnChangeHandler);
-        tabSignal.connect(
+        spa.signals.connect('GuiCustomizer.skin.name.changed', guiCustomizerSkinOnChangeHandler);
+        spa.signals.connect(
             'GuiCustomizer.skins_custom_settings.saved',
             guiCustomizerCustomSettingsOnSaveHandler,
         );
-        tabSignal.connect(
+        spa.signals.connect(
             'GuiCustomizer.skins_custom_settings.reseted',
             guiCustomizerCustomSettingsOnSaveHandler,
         );

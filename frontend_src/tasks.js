@@ -128,6 +128,10 @@ function OnePeriodictask_template_opt_callback() {
         if (template) {
             return {
                 format: 'fk',
+                default: {
+                    id: '',
+                    text: 'None',
+                },
                 additionalProperties: {
                     view_field: 'name',
                     value_field: 'name',
@@ -148,7 +152,7 @@ function OnePeriodictask_template_opt_callback() {
 ////////////////////////////////////////////////////////////////////////////////////
 ['Periodictask', 'OnePeriodictask'].forEach((model) => {
     let str = 'models[{0}].fields.beforeInit'.format([model]);
-    tabSignal.connect(str, (fields) => {
+    spa.signals.connect(str, (fields) => {
         if (model == 'Periodictask') {
             ['mode', 'inventory', 'template', 'template_opt'].forEach((field) => {
                 fields[field].hidden = true;
@@ -177,7 +181,7 @@ function OnePeriodictask_template_opt_callback() {
 /**
  * Changes 'kind' filter type to 'choices'.
  */
-tabSignal.connect('views[/project/{' + path_pk_key + '}/periodic_task/].filters.beforeInit', (filters) => {
+spa.signals.connect('views[/project/{' + path_pk_key + '}/periodic_task/].filters.beforeInit', (filters) => {
     for (let key in filters) {
         if (filters.hasOwnProperty(key)) {
             let filter = filters[key];
@@ -193,7 +197,7 @@ tabSignal.connect('views[/project/{' + path_pk_key + '}/periodic_task/].filters.
 /**
  * Hides 'variables' button from periodic_task views, where data.kind == 'TEMPLATE'.
  */
-tabSignal.connect('allViews.inited', (obj) => {
+spa.signals.connect('allViews.inited', (obj) => {
     let views = obj.views;
 
     [
@@ -237,28 +241,6 @@ spa.models.guiModels.OnePeriodicTaskVariableModel = class OnePeriodicTaskVariabl
 
         this.view_name = 'key';
     }
-
-    save(method = 'patch') {
-        return this.queryset
-            .getParentInstance()
-            .then((parent_instance) => {
-                let instance_data = this.toInner(this.data);
-
-                delete instance_data.kind;
-                delete instance_data.inventory;
-
-                return this.queryset.formQueryAndSend(method, instance_data).then((response) => {
-                    return this.queryset.model.getInstance(
-                        this.queryset._formInstanceData(parent_instance.data, response.data),
-                        this.queryset,
-                    );
-                });
-            })
-            .catch((error) => {
-                debugger;
-                throw error;
-            });
-    }
 };
 
 /**
@@ -278,54 +260,64 @@ spa.querySet.guiQuerySets.OnePeriodicTaskVariableQuerySet = class OnePeriodicTas
     /**
      * Method, that returns promise, that returns parent instance.
      */
-    getParentInstance() {
+    async getParentInstance() {
         if (this.parent_instance) {
             return Promise.resolve(this.parent_instance);
         }
 
-        let bulk = {
-            path: this.getParentInstanceDataType(),
-            method: 'get',
-        };
+        const response = await this.execute({ method: 'get', path: this.getParentInstanceDataType() });
 
-        return this.sendQuery(bulk)
-            .then((response) => {
-                this.parent_instance = app.models.OnePeriodictask.getInstance(
-                    response.data,
-                    this.clone({ url: this.url.replace(/\/variables([A-z,0-9,_,\/]*)$/, '') }),
-                );
-                return this.parent_instance;
-            })
-            .catch((error) => {
-                debugger;
-                throw error;
-            });
+        this.parent_instance = app.models.OnePeriodictask.getInstance(
+            response.data,
+            this.clone({ url: this.url.replace(/\/variables([A-z,0-9,_,\/]*)$/, '') }),
+        );
+        return this.parent_instance;
     }
     /**
      * Redefinition of 'get' method of guiQuerySets.QuerySet class.
      */
-    get() {
+    async get() {
         if (this.cache) {
             return Promise.resolve(this.cache);
         }
 
-        return this.getParentInstance()
-            .then((parent_instance) => {
-                return this.formQueryAndSend('get').then((response) => {
-                    let instance = this.model.getInstance(
-                        this._formInstanceData(parent_instance.data, response.data),
-                        this,
-                    );
+        const parent_instance = await this.getParentInstance();
 
-                    this.cache = instance;
-                    return instance;
-                });
-            })
-            .catch((error) => {
-                debugger;
-                throw error;
-            });
+        const response = await this.execute({ method: 'get', path: this.getDataType(), query: this.query });
+
+        let instance = this.model.getInstance(
+            this._formInstanceData(parent_instance.data, response.data),
+            this,
+        );
+
+        this.cache = instance;
+        return instance;
     }
+
+    async update(newDataInstance, instances = undefined, method = 'patch') {
+        if (instances === undefined) {
+            instances = await this.items();
+        }
+        const parentInstance = await this.getParentInstance();
+
+        const updatePromises = instances.map(async (instance) => {
+            let instanceData = instance.toInner(instance.data);
+            delete instanceData.kind;
+            if (instanceData.inventory) delete instanceData.inventory;
+
+            const response = await this.execute({
+                method,
+                path: instance.queryset.getDataType(),
+                query: instance.queryset.query,
+                data: instanceData,
+            });
+
+            return this.model.getInstance(this._formInstanceData(parentInstance.data, response.data), this);
+        });
+
+        return Promise.all(updatePromises);
+    }
+
     /**
      * Method, that returns periodic task variable data object.
      * @param {object} parent_data Data of periodic task instance.
@@ -337,7 +329,7 @@ spa.querySet.guiQuerySets.OnePeriodicTaskVariableQuerySet = class OnePeriodicTas
     }
 };
 
-tabSignal.connect('openapi.loaded', (openapi) => {
+spa.signals.connect('openapi.loaded', (openapi) => {
     let copy = $.extend(true, {}, openapi.definitions.PeriodicTaskVariable);
 
     openapi.definitions.OnePeriodicTaskVariable = copy;
@@ -357,7 +349,7 @@ tabSignal.connect('openapi.loaded', (openapi) => {
     page.put.parameters[0].schema.$ref = '#/definitions/OnePeriodicTaskVariable';
 });
 
-tabSignal.connect('models[OnePeriodicTaskVariable].fields.beforeInit', function (fields) {
+spa.signals.connect('models[OnePeriodicTaskVariable].fields.beforeInit', function (fields) {
     fields.kind = {
         title: 'Kind',
         type: 'hidden',
@@ -384,7 +376,7 @@ tabSignal.connect('models[OnePeriodicTaskVariable].fields.beforeInit', function 
     };
 });
 
-tabSignal.connect(
+spa.signals.connect(
     'views[/project/{' + path_pk_key + '}/periodic_task/{periodic_task_id}/variables/new/].afterInit',
     (obj) => {
         obj.view.mixins = obj.view.mixins.concat({

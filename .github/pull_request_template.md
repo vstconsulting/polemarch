@@ -1,6 +1,13 @@
-Fixes vstconsulting/polemarch#issue_number .
+# [FIX|Feature|Chore|Docs] description
 
-Changes:
-* WhatWasChangedInFunctionality
+### BREAKING CHANGES:
+*  What you should do for fix it in your projects?
 
-@vstconsulting/maintainers
+### Changelog:
+*  What was done?
+
+Closes: group/project#issue
+WIP: group/project#issue
+
+### TODO:
+* What should someone do?

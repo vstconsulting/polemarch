@@ -4,7 +4,7 @@ const path_pk_key = spa.utils.path_pk_key;
  * Signal, that creates views for paths, which do not exist in API:
  * - /inventory/{pk}/group/{group_id}/group/ and all paths, that nested in /group/{pk}/group/ path.
  */
-tabSignal.connect('allViews.inited', (obj) => {
+spa.signals.connect('allViews.inited', (obj) => {
     let views = obj.views;
     let prefix = '/inventory/{' + path_pk_key + '}';
     let constr = new spa.views.SubViewWithOutApiPathConstructor(spa.api.openapi_dictionary, app.models, {
@@ -27,7 +27,7 @@ tabSignal.connect('allViews.inited', (obj) => {
  * Signal, that creates views for paths, which do not exist in API:
  * - /project/{pk}/inventory/{inventory_id}/group/{group_id}/group/ and all paths, that nested in /group/{pk}/group/ path.
  */
-tabSignal.connect('allViews.inited', (obj) => {
+spa.signals.connect('allViews.inited', (obj) => {
     let views = obj.views;
     let prefix = '/project/{' + path_pk_key + '}/inventory/{inventory_id}';
     let constr = new spa.views.SubViewWithOutApiPathConstructor(spa.api.openapi_dictionary, app.models, {
@@ -49,7 +49,7 @@ tabSignal.connect('allViews.inited', (obj) => {
 /**
  * Signal, that hides 'Host' button from children group views and hides 'Group' button from not children group views.
  */
-tabSignal.connect('allViews.inited', (obj) => {
+spa.signals.connect('allViews.inited', (obj) => {
     let views = obj.views;
     let group_views = Object.values(views).filter((view) => {
         let obj = view.schema;

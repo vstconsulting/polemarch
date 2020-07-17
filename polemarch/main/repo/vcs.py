@@ -191,9 +191,16 @@ class Git(_VCS):
         recursive = pattern.startswith('**/')
         if recursive:
             pattern = pattern.replace('**/', '')
+
+        search_parent_dir = pattern.rsplit('/')[0]
+        if search_parent_dir == pattern:
+            search_parent_dir = pathlib.Path('.')
+        else:
+            search_parent_dir = pathlib.Path(search_parent_dir)
+
         for path in dict(repo.index.entries.keys()).keys():
             result = pathlib.Path(path)
-            if not recursive and result.parent != pathlib.Path('.'):
+            if not recursive and result.parent != search_parent_dir:
                 continue
             if result.match(pattern):
                 yield result

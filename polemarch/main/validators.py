@@ -12,6 +12,12 @@ class URLValidator(OldURLValidator):
     ul = r'\u00a1-\uffff'
 
 
+path_validator = RegexValidator(
+    regex=r'(^[^\.]+?$)|(^([\.][\\//])?([\.]*[\w\d\-_]+?[\.]*[\w\d\-_]*[\\//]*)+?$)',
+    message='Incompatible symbols `..`.'
+)
+
+
 class DomainNameValidator(RegexValidator):
     message = _('Invalid domain name value.')
     surl = URLValidator.ul

@@ -2,7 +2,6 @@ import logging
 from subprocess import check_output
 from ._base import BaseTestCase, json
 
-
 logger = logging.getLogger('polemarch')
 
 
@@ -72,23 +71,18 @@ class InvBaseTestCase(BaseTestCase):
         obj = self.get_model_filter(model_name).first()
         for name in copy_checks.values():
             getattr(obj, name).create()
-        bulk_data = [
-            self.get_mod_bulk(bulk_name, obj.id, {'name': 'copied'}, 'copy'),
-            self.get_mod_bulk(bulk_name, '<<0[data][id]>>', {}, 'variables', method='GET'),
-        ]
-        bulk_data += [
-            self.get_mod_bulk(bulk_name, '<<0[data][id]>>', {}, name, method='GET')
-            for name in copy_checks.keys()
-        ]
-        bulk_data.append(self.get_bulk(bulk_name, {}, 'del', pk='<<0[data][id]>>'))
-        results = self.make_bulk(bulk_data)
+        results = self.bulk_transactional([
+            dict(method='post', path=[bulk_name, obj.id, 'copy'], data={'name': 'copied'}),
+            dict(method='get', path=[bulk_name, '<<0[data][id]>>', 'variables']),
+            *[dict(method='get', path=[bulk_name, '<<0[data][id]>>', name]) for name in copy_checks.keys()],
+            dict(method='delete', path=[bulk_name, '<<0[data][id]>>'])
+        ])
         self.assertEqual(results[1]['data']['count'], len(obj.vars))
         for value in results[1]['data']['results']:
             self.assertEqual(value['value'], obj.vars[value['key']])
-        for result in results[2:-1]:
-            item_name = result['subitem']
+        for result, item_name in zip(results[2:-1], copy_checks.values()):
             self.assertEqual(
-                result['data']['count'], getattr(obj, copy_checks[item_name]).count()
+                result['data']['count'], getattr(obj, item_name).count()
             )
 
     def _check_dependent(self, model_name, data, child_name, child_data, **kwargs):
@@ -105,14 +99,13 @@ class InvBaseTestCase(BaseTestCase):
         pk = parent['id']
         id = child['id']
         child_suburl = '{}/{}'.format(child_api_name, id)
-        bulk_data = [
-            self.get_mod_bulk(bulk_name, pk, child, child_api_name, 'post'),
-            self.get_mod_bulk(bulk_name, pk, {'name': 'g'}, child_suburl, 'patch'),
-            self.get_mod_bulk(bulk_name, pk, {}, child_suburl, 'get'),
-            self.get_mod_bulk(bulk_name, pk, child, child_suburl, 'put'),
-            self.get_mod_bulk(bulk_name, pk, {}, child_suburl, 'delete'),
-        ]
-        result = self.make_bulk(bulk_data, 'put')
+        result = self.bulk([
+            dict(method='post', path=[bulk_name, pk, child_api_name], data=child),
+            dict(method='patch', path=[bulk_name, pk, child_suburl], data={'name': 'g'}),
+            dict(method='get', path=[bulk_name, pk, child_suburl]),
+            dict(method='put', path=[bulk_name, pk, child_suburl], data=child),
+            dict(method='delete', path=[bulk_name, pk, child_suburl]),
+        ])
         if should_fail:
             for res in result:
                 self.assertIn(res['status'], [409, 400])
@@ -136,19 +129,17 @@ class InventoriesTestCase(InvBaseTestCase):
             'Host', self.hosts_data, ansible_port='222', ansible_user='one'
         )
         bulk_data = [
-            self.get_bulk('host', dict(name='some-valid'), 'add'),
-            self.get_bulk('host', dict(name='some^invalid'), 'add'),
-            self.get_mod_bulk(
-                'host', "<<0[data][id]>>", dict(key='ansible_host', value='valid')
-            ),
-            self.get_mod_bulk(
-                'host', "<<0[data][id]>>", dict(key='ansible_host', value='^invalid')
-            ),
-            self.get_bulk('host', dict(name='some^invalid', type="RANGE"), 'add'),
-            self.get_bulk('host', dict(name='host', type="UNKNOWN"), 'add'),
-            self.get_bulk('host', {}, 'del', pk="<<0[data][id]>>"),
+            dict(method='post', path='host', data=dict(name='some-valid')),
+            dict(method='post', path='host', data=dict(name='some^invalid')),
+            dict(method='post', path=['host', '<<0[data][id]>>', 'variables'],
+                 data=dict(key='ansible_host', value='valid')),
+            dict(method='post', path=['host', '<<0[data][id]>>', 'variables'],
+                 data=dict(key='ansible_host', value='^invalid')),
+            dict(method='post', path='host', data=dict(name='some^invalid', type="RANGE")),
+            dict(method='post', path='host', data=dict(name='host', type="UNKNOWN")),
+            dict(method='delete', path=['host', '<<0[data][id]>>']),
         ]
-        # additionaly test hooks
+        # additionally test hooks
         self.hook_model.objects.all().delete()
         scripts = ['one.sh', 'two.sh']
         recipients = ' | '.join(scripts)
@@ -159,6 +150,7 @@ class InventoriesTestCase(InvBaseTestCase):
         ]
         self.generate_hooks(scripts)
         self.mass_create_bulk('hook', data)
+
         ##
 
         def side_effect_for_hooks(*args, **kwargs):
@@ -169,7 +161,7 @@ class InventoriesTestCase(InvBaseTestCase):
         with self.patch('subprocess.check_output') as mock:
             iterations = 3 * len(scripts)
             mock.side_effect = side_effect_for_hooks
-            results = self.make_bulk(bulk_data, 'put')
+            results = self.bulk(bulk_data)
             self.assertEqual(mock.call_count, iterations)
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[2]['status'], 201)
@@ -180,9 +172,7 @@ class InventoriesTestCase(InvBaseTestCase):
         self.assertEqual(results[5]['status'], 400)
 
     def test_groups(self):
-        self._check_with_vars(
-            'Group', self.hosts_data, ansible_port='222', ansible_user='one'
-        )
+        self._check_with_vars('Group', self.hosts_data, ansible_port='222', ansible_user='one')
         self._check_dependent(
             'Group', dict(name='g_children', children=True),
             'Group', dict(name='g_child', children=False),
@@ -202,50 +192,33 @@ class InventoriesTestCase(InvBaseTestCase):
             'Host', dict(name='hchild'),
             should_fail=True
         )
-        # Check ciclic dependency
-        bulk_data = [
-            self.get_bulk('group', dict(name="cicl-{}".format(i), children=True), 'add')
-            for i in range(4)
-        ]
-        bulk_data += [
-            self.get_mod_bulk(
-                'group', '<<0[data][id]>>', dict(id='<<{}[data][id]>>'.format(i)), 'group'
-            )
-            for i in range(1, 4)
-        ]
-        results = self.make_bulk(bulk_data)
+        # Check cyclic dependency
+        results = self.bulk_transactional([
+            *[dict(method='post', path='group', data=dict(name=f'cicl-{i}', children=True))
+              for i in range(4)],
+            *[dict(method='post', path=['group', '<<0[data][id]>>', 'group'], data=dict(id=f'<<{i}[data][id]>>'))
+              for i in range(1, 4)]
+        ])
         for result in results:
             self.assertEqual(result['status'], 201)
 
-        bulk_data = [
-            self.get_mod_bulk(
-                'group', results[0]['data']['id'],
-                dict(id=results[0]['data']['id']), 'group'
-            ),
-            self.get_mod_bulk(
-                'group', results[1]['data']['id'],
-                dict(id=results[0]['data']['id']), 'group'
-            ),
-            self.get_mod_bulk(
-                'group', results[2]['data']['id'],
-                dict(id=results[0]['data']['id']), 'group'
-            ),
-            self.get_mod_bulk(
-                'group', results[3]['data']['id'],
-                dict(id=results[0]['data']['id']), 'group'
-            ),
-        ]
         group_id = results[0]['data']['id']
-        results = self.make_bulk(bulk_data, 'put')
+        results = self.bulk([
+            dict(method='post', path=['group', results[0]['data']['id'], 'group'],
+                 data=dict(id=results[0]['data']['id'])),
+            dict(method='post', path=['group', results[1]['data']['id'], 'group'],
+                 data=dict(id=results[0]['data']['id'])),
+            dict(method='post', path=['group', results[2]['data']['id'], 'group'],
+                 data=dict(id=results[0]['data']['id'])),
+            dict(method='post', path=['group', results[3]['data']['id'], 'group'],
+                 data=dict(id=results[0]['data']['id'])),
+        ])
         for result in results:
             self.assertEqual(result['status'], 400)
             self.assertEqual(result['data']['error_type'], "CiclicDependencyError")
 
         # Check update children
-        self.get_result(
-            'patch', self.get_url('group', group_id), 200,
-            data=json.dumps(dict(children=True))
-        )
+        self.get_result('patch', self.get_url('group', group_id), 200, data=json.dumps(dict(children=True)))
 
     def test_inventories(self):
         self._check_with_vars(

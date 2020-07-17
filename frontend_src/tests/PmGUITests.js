@@ -5,7 +5,7 @@
 /**
  * Class, that extends GuiTests Class - adds tests for Polemarch GUI.
  */
-class PmGuiTests extends GuiTests {
+class PmGUITests extends tests.GUITests {
     /**
      * Method, that creates test, that executes 'inventory_import' action from some list view.
      * This test opens list view, and then with the help of buttons executes 'inventory_import' action.
@@ -20,57 +20,66 @@ class PmGuiTests extends GuiTests {
         options.action = 'import_inventory';
         options.is_valid = true;
         options.data = {
-            name:{
-                value: "test-imported-inventory",
+            name: {
+                value: 'test-imported-inventory',
             },
             raw_data: {
-                value: "[test-imported-group]\n" +
-                "test-imported-host ansible_host=10.10.10.10\n" +
-                "\n" +
-                "[test-imported-group:vars]\n" +
-                "ansible_user=ubuntu\n" +
-                "ansible_ssh_private_key_file=example-key",
+                value:
+                    '[test-imported-group]\n' +
+                    'test-imported-host ansible_host=10.10.10.10\n' +
+                    '\n' +
+                    '[test-imported-group:vars]\n' +
+                    'ansible_user=ubuntu\n' +
+                    'ansible_ssh_private_key_file=example-key',
             },
         };
 
         // executes 'inventory_import' action.
+        // eslint-disable-next-line no-unused-vars
         this.executeActionFromSomeView(path, instances_info, options, (assert) => {
-             this.saveInstanceData(instances_info, false, 'imported_');
+            this.saveInstanceData(instances_info, false, 'imported_');
         });
 
         // checks, that imported inventory's subitems(group, host) were imported properly.
-        ['group', 'host'].forEach(entity => {
+        ['group', 'host'].forEach((entity) => {
             // checks, that subitems were added.
-            this.clickAndWaitRedirect(".btn-sublink-" + entity, true, (assert) => {
-                assert.ok($('.item-row').length == 1, 'Import inventory - only one ' + entity + ' was added');
+            this.clickAndWaitRedirect('.btn-sublink-' + entity, true, (assert) => {
+                assert.ok($('.item-row').length === 1, 'Import inventory - only one ' + entity + ' was added');
             });
 
-            this.clickAndWaitRedirect(".item-row", true, (assert) => {
+            // eslint-disable-next-line no-unused-vars
+            this.clickAndWaitRedirect('.item-row', true, (assert) => {
                 this.saveInstanceData(instances_info, false, 'imported_');
             });
 
             // checks, that variables were added to subitems.
-            this.clickAndWaitRedirect(".btn-sublink-variables", true, (assert) => {
-                let num = entity == 'group' ? 2 : 1;
-                assert.ok($('.item-row').length == num, 'Import inventory - valid variables amount was added to ' + entity);
+            this.clickAndWaitRedirect('.btn-sublink-variables', true, (assert) => {
+                let num = entity === 'group' ? 2 : 1;
+                assert.ok(
+                    $('.item-row').length === num,
+                    'Import inventory - valid variables amount was added to ' + entity,
+                );
             });
 
             // removes subitems.
-            if(options.remove) {
-                this.clickAndWaitRedirect(".btn-previous-page", true);
+            if (options.remove) {
+                this.clickAndWaitRedirect('.btn-previous-page', true);
 
-                this.clickAndWaitRedirect(".btn-operation-remove", true);
+                this.clickAndWaitRedirect('.btn-operation-remove', true);
 
-                this.testRemovePageViewInstance("/" + entity + "/{imported_" + entity + "_id}/", instances_info, true);
+                this.testRemovePageViewInstance(
+                    '/' + entity + '/{imported_' + entity + '_id}/',
+                    instances_info,
+                    true,
+                );
             }
 
-            this.openPage(path + "{imported_inventory_id}/", instances_info.url_params, true);
-
+            this.openPage(path + '{imported_inventory_id}/', instances_info.url_params, true);
         });
 
         // removes imported inventory.
-        if(options.remove) {
-            this.clickAndWaitRedirect(".btn-operation-remove", true);
+        if (options.remove) {
+            this.clickAndWaitRedirect('.btn-operation-remove', true);
         }
     }
     /**
@@ -82,19 +91,19 @@ class PmGuiTests extends GuiTests {
      * - {object} key_fields_data Object with view && values fields values of created during test Model instances.
      * @param {boolean} expectation If true - sync is expected to be successful.
      */
-    testProjectSyncFromPageView(path, instances_info, expectation=true) {
-        guiTests.openPage(path, instances_info.url_params, true);
+    testProjectSyncFromPageView(path, instances_info, expectation = true) {
+        this.openPage(path, instances_info.url_params, true);
 
-        guiTests.click(".btn-action-sync");
+        this.click('.btn-action-sync');
 
-        syncQUnit.addTest("wait project sync", function(assert) {
-            let done = assert.async();
+        tests.runner.test('wait project sync', function (assert) {
+            const done = assert.async();
 
             let stillWait = () => {
-                let url = app.application.$route.path.replace(/^\/|\/$/g, "");
+                let url = app.application.$route.path.replace(/^\/|\/$/g, '');
                 let data = app.application.$store.state.objects[url].cache.data;
 
-                if(["NEW", "SYNC", "WAIT_SYNC"].includes(data.status)) {
+                if (['NEW', 'SYNC', 'WAIT_SYNC'].includes(data.status)) {
                     return true;
                 }
 
@@ -105,14 +114,13 @@ class PmGuiTests extends GuiTests {
                 setTimeout(() => {
                     let wait = stillWait();
 
-                    if(typeof wait == 'boolean' && wait === true) {
+                    if (wait === true) {
                         waitStatus();
                     } else {
-                        assert.ok((wait == 'OK') === expectation, 'Sync was successful');
-                        testdone(done);
+                        assert.ok((wait === 'OK') === expectation, 'Sync was successful');
+                        done(done);
                     }
-
-                }, guiLocalSettings.get('page_update_interval') / 2);
+                }, window.spa.utils.guiLocalSettings.get('page_update_interval') / 2);
             };
 
             waitStatus();
@@ -123,5 +131,6 @@ class PmGuiTests extends GuiTests {
 /**
  * Redefines guiTests variable - variable, that is used for gui test generation.
  */
-guiTests = new PmGuiTests();
+const guiTests = new PmGUITests();
 
+export { PmGUITests, guiTests };

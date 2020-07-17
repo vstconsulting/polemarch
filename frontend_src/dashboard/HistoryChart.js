@@ -5,7 +5,7 @@ import HistoryChartContentBody from './HistoryChartContentBody.vue';
  * Component for guiWidgets.history_chart.
  */
 const HistoryChart = {
-    name: 'w_history_chart',
+    name: 'HistoryChartWidgetComponent',
     mixins: [spa.components.mixins.LineChartMixin],
     data() {
         return {

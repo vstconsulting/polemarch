@@ -24,7 +24,7 @@ const user_settings_page_edit_mixin = {
             let method = this.view.schema.query_type;
             this.loading = true;
             instance
-                .save(method)
+                .update({ method })
                 .then((instance) => {
                     this.loading = false;
                     let qs = this.getQuerySet(this.view, this.qs_url).clone();
@@ -67,7 +67,7 @@ const user_settings_page_edit_mixin = {
  * @param {string} path /user/{pk}/settings/.
  */
 function editUserSettingsPageInOpenApi(path) {
-    tabSignal.connect('openapi.loaded', (openapi) => {
+    spa.signals.connect('openapi.loaded', (openapi) => {
         let path_obj = openapi.paths[path];
         path_obj.post.operationId = path_obj.post.operationId.replace('_add', '_edit');
     });
@@ -78,11 +78,11 @@ function editUserSettingsPageInOpenApi(path) {
  * @param {string} path /user/{pk}/settings/edit/.
  */
 function editUserSettingsPageEditView(path) {
-    tabSignal.connect('views[' + path + '].beforeInit', function (obj) {
+    spa.signals.connect('views[' + path + '].beforeInit', function (obj) {
         obj.schema.query_type = 'post';
     });
 
-    tabSignal.connect('views[' + path + '].afterInit', function (obj) {
+    spa.signals.connect('views[' + path + '].afterInit', function (obj) {
         obj.view.mixins.push(user_settings_page_edit_mixin);
     });
 }
@@ -92,7 +92,7 @@ function editUserSettingsPageEditView(path) {
  * @param {string} path /user/{pk}/settings/new/.
  */
 function deleteUserSettingsPageNewView(path) {
-    tabSignal.connect('allViews.inited', function (obj) {
+    spa.signals.connect('allViews.inited', function (obj) {
         delete obj.views[path];
     });
 }
@@ -117,7 +117,7 @@ function prepareUserSettingsModelFields(model) {
     /**
      * Signal, that edits options of UserSettings model's fields.
      */
-    tabSignal.connect('models[' + model + '].fields.beforeInit', (fields) => {
+    spa.signals.connect('models[' + model + '].fields.beforeInit', (fields) => {
         if (fields.lang) {
             fields.lang.title = 'language';
             fields.lang.description = 'application interface language';

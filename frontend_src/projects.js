@@ -74,7 +74,7 @@ function ExecuteModulePlaybook_group_limit_callback() {
  * @param {string} model Name of model.
  */
 function ansiblePlaybookAndAnsibleModuleModelsFieldsHandler(model) {
-    tabSignal.connect(`models[${model}].fields.beforeInit`, (fields) => {
+    spa.signals.connect(`models[${model}].fields.beforeInit`, (fields) => {
         fields.inventory.format = 'inventory_autocomplete';
 
         let prop;
@@ -150,16 +150,17 @@ let project_connected_models_dict = {
     playbook: 'AnsiblePlaybook',
 };
 
-tabSignal.connect('views[/project/{' + path_pk_key + '}/].afterInit', (obj) => {
+spa.signals.connect('views[/project/{' + path_pk_key + '}/].afterInit', (obj) => {
     obj.view.mixins = obj.view.mixins.concat(project_pk_mixin);
 });
 
-tabSignal.connect('models[OneProject].fields.beforeInit', (fields) => {
+spa.signals.connect('models[OneProject].fields.beforeInit', (fields) => {
     fields.execute_view_data.format = 'hidden';
 });
 
-tabSignal.connect('models[OneModule].fields.beforeInit', (fields) => {
+spa.signals.connect('models[OneModule].fields.beforeInit', (fields) => {
     fields.data.format = 'ansible_json';
+    fields.data.readOnly = true;
 });
 
 /**
@@ -180,7 +181,7 @@ addSignalsForAnsibleModuleAndAnsiblePlaybookModels();
 /**
  * Changes 'status' filter type to 'choices'.
  */
-tabSignal.connect('views[/project/].filters.beforeInit', (filters) => {
+spa.signals.connect('views[/project/].filters.beforeInit', (filters) => {
     for (let filter of Object.values(filters)) {
         if (filter.name == 'status' || filter.name == 'status__not') {
             filter.type = 'choices';
@@ -219,7 +220,7 @@ function ProjectVariable_value_callback(parent_values = {}) {
 /**
  * Adds callback for dynamic 'value' field of ProjectVariable model.
  */
-tabSignal.connect('models[ProjectVariable].fields.beforeInit', (fields) => {
+spa.signals.connect('models[ProjectVariable].fields.beforeInit', (fields) => {
     if (fields.value && fields.value.additionalProperties) {
         fields.value.additionalProperties.callback = ProjectVariable_value_callback;
     }
@@ -228,7 +229,7 @@ tabSignal.connect('models[ProjectVariable].fields.beforeInit', (fields) => {
 /**
  * Hides 'pb_filter' filter on the playbook list view.
  */
-tabSignal.connect(`views[/project/{${path_pk_key}}/playbook/].filters.beforeInit`, (filters) => {
+spa.signals.connect(`views[/project/{${path_pk_key}}/playbook/].filters.beforeInit`, (filters) => {
     for (let filter of Object.values(filters)) {
         if (filter.name == 'pb_filter') {
             filter.hidden = true;

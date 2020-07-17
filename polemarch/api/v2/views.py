@@ -5,11 +5,13 @@ from django.utils.decorators import method_decorator
 from rest_framework import exceptions as excepts, status, permissions
 from rest_framework.authtoken import views as token_views
 from drf_yasg.utils import swagger_auto_schema
+from vstutils.api import auth as vst_auth
 from vstutils.api.permissions import StaffPermission
-from vstutils.api import base, views, serializers as vstsers, decorators as deco
+from vstutils.api import base, views, serializers as vstsers, decorators as deco, responses
 from vstutils.utils import KVExchanger
 
 from . import filters
+from .permissions import InventoryItemsPermission
 from . import serializers as sers
 from ...main import utils
 
@@ -26,6 +28,16 @@ execute_kw.update(dict(
     response_serializer=sers.ExecuteResponseSerializer,
     response_code=status.HTTP_201_CREATED
 ))
+
+
+def concat_classes(*args):
+    concated_object = list()
+    for arg in args:
+        if isinstance(arg, (list, tuple)):
+            concated_object += arg
+        else:
+            concated_object.append(arg)
+    return concated_object
 
 
 class _VariablesCopyMixin(base.CopyMixin):
@@ -171,7 +183,7 @@ class TokenView(token_views.ObtainAuthToken):
         raise excepts.ParseError("Token not found.")
 
 
-class UserViewSet(views.UserViewSet, base.CopyMixin):
+class UserViewSet(vst_auth.UserViewSet, base.CopyMixin):
     '''
     retrieve:
         Return a user instance.
@@ -346,6 +358,11 @@ class HostViewSet(OwnedView, _VariablesCopyMixin):
     serializer_class = sers.HostSerializer
     serializer_class_one = sers.OneHostSerializer
     filter_class = filters.HostFilter
+    permission_classes = concat_classes(
+        OwnedView.permission_classes,
+        _VariablesCopyMixin.permission_classes,
+        InventoryItemsPermission
+    )
 
 
 @deco.nested_view('variables', 'id', view=__InvVarsViewSet)
@@ -387,6 +404,11 @@ class _GroupMixin(OwnedView, _VariablesCopyMixin):
 
 class GroupViewSet(_BaseGroupViewSet, _GroupMixin):
     __doc__ = _BaseGroupViewSet.__doc__
+    permission_classes = concat_classes(
+        _BaseGroupViewSet.permission_classes,
+        _GroupMixin.permission_classes,
+        InventoryItemsPermission
+    )
 
     def nested_allow_check(self):
         # pylint: disable=no-member
@@ -426,6 +448,10 @@ class InventoryViewSet(_GroupMixin):
     serializer_class_import_inventory = sers.InventoryImportSerializer  # pylint: disable=invalid-name
     filter_class = filters.InventoryFilter
     copy_related = ['hosts', 'groups']
+    permission_classes = concat_classes(
+        _GroupMixin.permission_classes,
+        InventoryItemsPermission
+    )
 
     @deco.action(methods=["post"], detail=no)
     def import_inventory(self, request, **kwargs):
@@ -436,7 +462,26 @@ class InventoryViewSet(_GroupMixin):
         if hasattr(self, 'nested_manager'):
             self.nested_manager.add(instance)
 
-        return base.Response(serializer.data, status.HTTP_201_CREATED).resp
+        return responses.HTTP_201_CREATED(serializer.data)
+
+
+class __ProjectInventoryViewSet(InventoryViewSet):
+    __doc__ = InventoryViewSet.__doc__
+    serializer_class_file_import_inventory = sers.InventoryFileImportSerializer  # pylint: disable=invalid-name
+
+    @deco.action(methods=['post'], detail=no)
+    def file_import_inventory(self, request, **kwargs):
+        # pylint: disable=no-member
+
+        serializer = self.get_serializer(
+            self.nested_parent_object,
+            data=dict(name=request.data.get('name', ''))
+        )
+        serializer.is_valid(True)
+        instance = serializer.save()
+        self.nested_manager.add(instance)
+
+        return responses.HTTP_201_CREATED(serializer.data)
 
 
 class __PlaybookViewSet(base.ReadOnlyModelViewSet):
@@ -549,7 +594,7 @@ class __ProjectHistoryViewSet(HistoryViewSet):
     serializer_class = sers.ProjectHistorySerializer
 
 
-@deco.nested_view('inventory', 'id', manager_name='inventories', allow_append=yes, view=InventoryViewSet)
+@deco.nested_view('inventory', 'id', manager_name='inventories', allow_append=yes, view=__ProjectInventoryViewSet)
 @deco.nested_view('playbook', 'id', view=__PlaybookViewSet, methods=['get'])
 @deco.nested_view('module', 'id', view=__ModuleViewSet, methods=['get'])
 @deco.nested_view('template', 'id', manager_name='template', view=__TemplateViewSet)

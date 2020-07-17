@@ -18,55 +18,21 @@ const template_vars = {
 const template_sublink_model_mixin = (Class_name) =>
     class extends Class_name {
         /**
-         * Redefinition of 'save' method of guiModels.Model class.
-         */
-        save(method = 'patch') {
-            /* jshint unused: false */
-            return this.queryset
-                .getTemplateInstance()
-                .then((template_instance) => {
-                    this._onSave(template_instance.data, this.toInner(this.data));
-
-                    return this.queryset
-                        .formQueryAndSend('patch', template_instance.data)
-                        .then((response) => {
-                            /* jshint unused: false */
-                            return this.queryset.model.getInstance(
-                                this.queryset._formInstanceData(template_instance.data, this.getPkValue()),
-                                this.queryset,
-                            );
-                        });
-                })
-                .catch((error) => {
-                    debugger;
-                    throw error;
-                });
-        }
-        /**
          * Method - 'save' method callback.
          * @param {object} template_data Template instance data.
          * @param {object} instance_data Instance data.
          * @private
          */
-        _onSave(template_data, instance_data) {} /* jshint unused: false */
-        /**
-         * Redefinition of 'delete' method of guiModels.Model class.
-         */
-        delete() {
-            return this.queryset.getTemplateInstance().then((template_instance) => {
-                this._onDelete(template_instance.data);
+        // eslint-disable-next-line no-unused-vars
+        _onSave(template_data, instance_data) {}
 
-                return this.queryset.formQueryAndSend('patch', template_instance.data).then((response) => {
-                    return response;
-                });
-            });
-        }
         /**
          * Method - 'delete' method callback.
          * @param {object} template_data Template instance data.
          * @private
          */
-        _onDelete(template_data) {} /* jshint unused: false */
+        // eslint-disable-next-line no-unused-vars
+        _onDelete(template_data) {}
     };
 
 /**
@@ -75,105 +41,139 @@ const template_sublink_model_mixin = (Class_name) =>
  */
 const template_sublink_qs_mixin = (Class_name) =>
     class extends Class_name {
-        /**
-         * Redefinition of 'makeQueryString' method of guiQuerySets.QuerySet class.
-         */
-        makeQueryString(query = this.query) {
-            let filters = [];
+        filterQuery(query = this.query) {
+            let filters = {};
             let allowed_filters = ['limit'];
-            for (let key in query) {
-                if (!allowed_filters.includes(key)) {
-                    continue;
+            for (let key of allowed_filters) {
+                if (query[key] !== undefined) {
+                    filters[key] = query[key];
                 }
-                filters.push([key, query[key]].join('='));
             }
-            return filters.join('&');
+            return filters;
         }
         /**
          * Redefinition of 'items' method of guiQuerySets.QuerySet class.
          */
-        items() {
+        async items() {
             if (this.cache) {
                 return Promise.resolve(this.cache);
             }
-            return this.formQueryAndSend('get')
-                .then((response) => {
-                    let data = response.data;
-                    this.template_instance = app.models.OneTemplate.getInstance(data, this.clone());
+            const { data } = await this.execute({
+                method: 'get',
+                path: this.getDataType(),
+                query: this.filterQuery(),
+            });
+            this.template_instance = app.models.OneTemplate.getInstance(data, this.clone());
 
-                    let instances = this._formInstances(data);
+            let { filtered_instances, api_count } = this._getFilteredInstances(this._formInstances(data));
 
-                    if (instances.length == 0) {
-                        this.api_count = 0;
-                        this.cache = instances;
-                        return instances;
-                    }
-
-                    let filtered = this._getFilteredInstances(instances);
-
-                    instances = filtered.filtered_instances;
-                    this.api_count = filtered.api_count;
-                    this.cache = instances;
-                    return instances;
-                })
-                .catch((error) => {
-                    debugger;
-                    throw error;
-                });
+            this.api_count = api_count;
+            this.cache = filtered_instances;
+            return filtered_instances;
         }
-        /**
-         * Redefinition of 'get' method of guiQuerySets.QuerySet class.
-         */
-        get() {
+
+        async get() {
             if (this.cache) {
                 return Promise.resolve(this.cache);
             }
-            return this.getTemplateInstance(true)
-                .then((template_instance) => {
-                    let inst_name = this.url.split('/').last;
 
-                    if (!this._instanceExists(template_instance, inst_name)) {
-                        throw new spa.api.StatusError(404, 'Instance was not found.');
-                    }
+            const templateInstance = await this.getTemplateInstance(true);
+            const inst_name = this.url.split('/').last;
 
-                    let instance = this.model.getInstance(
-                        this._formInstanceData(template_instance.data, inst_name),
-                        this.clone(),
-                    );
+            if (!this._instanceExists(templateInstance, inst_name)) {
+                throw new spa.api.StatusError(404, 'Instance was not found.');
+            }
 
-                    this.cache = instance;
-                    return instance;
-                })
-                .catch((error) => {
-                    debugger;
-                    throw error;
-                });
+            const instance = this.model.getInstance(
+                this._formInstanceData(templateInstance.data, inst_name),
+                this.clone(),
+            );
+
+            this.cache = instance;
+            return instance;
         }
+
+        // eslint-disable-next-line no-unused-vars
+        async update(newDataInstance, instances = undefined, method = undefined) {
+            if (instances === undefined) {
+                instances = await this.items();
+            }
+
+            const templateInstance = await this.getTemplateInstance();
+
+            const updatePromises = instances.map(async (instance) => {
+                instance._onSave(templateInstance.data, instance.toInner(instance.data));
+
+                const response = await this.execute({
+                    method: 'patch',
+                    data: templateInstance.data,
+                    path: this.getDataType(),
+                    query: this.query,
+                });
+
+                return this.model.getInstance(
+                    this._formInstanceData(response.data, instance.getPkValue()),
+                    this,
+                );
+            });
+
+            return Promise.all(updatePromises);
+        }
+
+        async delete(instances = undefined) {
+            if (instances === undefined) {
+                instances = await this.items();
+            }
+
+            const templateInstance = await this.getTemplateInstance();
+
+            const deletePromises = instances.map(async (instance) => {
+                instance._onDelete(templateInstance.data);
+
+                return this.execute({
+                    method: 'patch',
+                    data: templateInstance.data,
+                    path: this.getDataType(),
+                    query: this.query,
+                });
+            });
+
+            return Promise.all(deletePromises);
+        }
+
+        async create(data, method) {
+            const instance = this.model.getInstance(data, this);
+            return (await this.update(instance, [instance], method))[0];
+        }
+
         /**
          * Method, that returns promise, that returns parent template instance.
          * @param {boolean} reload Means, that data should be updated or not.
          */
-        getTemplateInstance(reload = false) {
+        async getTemplateInstance(reload = false) {
             if (this.template_instance && !reload) {
                 return Promise.resolve(this.template_instance);
             }
 
-            return this.formQueryAndSend('get')
-                .then((response) => {
-                    this.template_instance = app.models.OneTemplate.getInstance(response.data, this.clone());
-                    return this.template_instance;
-                })
-                .catch((error) => {
-                    debugger;
-                    throw error;
-                });
+            const { data } = await this.execute({
+                method: 'get',
+                path: this.getDataType(),
+                query: this.query,
+            });
+
+            this.template_instance = app.models.OneTemplate.getInstance(data, this.clone());
+            return this.template_instance;
         }
+
         /**
          * Method, that filters instances and returns them and their api_count.
          * @param {array} instances Array of instances objects.
          * @private
          */
         _getFilteredInstances(instances) {
+            if (instances.length === 0) {
+                return { filtered_instances: instances, api_count: 0 };
+            }
             let filters = this._getFilterNames();
             let filtered_instances = [...instances];
 
@@ -521,10 +521,6 @@ function getOpenApiPagePathQueryTypes(entity_name, operation_id, model) {
                 204: {
                     description: 'Action accepted.',
                 },
-                400: {
-                    description: 'Validation error or some data error.',
-                    schema: { $ref: '#/definitions/Error' },
-                },
             },
         },
     };
@@ -762,34 +758,22 @@ const tmp_vars_list_mixin = {
         /**
          * Redefinition of 'removeInstances' method of list view.
          */
-        removeInstances() {
-            let selections = this.$store.getters.getSelections(this.qs_url.replace(/^\/|\/$/g, ''));
-
+        async removeInstances() {
+            const selections = this.$store.getters.getSelections(this.qs_url.replace(/^\/|\/$/g, ''));
             let qs = this.getQuerySet(this.view, this.qs_url);
 
-            return qs
-                .getTemplateInstance()
-                .then((template_instance) => {
-                    let selected = [];
+            const template_instance = await qs.getTemplateInstance();
 
-                    for (let key in selections) {
-                        if (!selections[key]) {
-                            continue;
-                        }
+            const selected = [];
+            for (let key in selections) {
+                if (!selections[key]) continue;
+                selected.push(key);
+                this._removeInstance(template_instance, key);
+            }
 
-                        selected.push(key);
-                        this._removeInstance(template_instance, key);
-                    }
+            await qs.execute({ method: 'patch', path: qs.getDataType(), data: template_instance.data });
 
-                    return qs.formQueryAndSend('patch', template_instance.data).then((response) => {
-                        /* jshint unused: false */
-                        return this.removeInstances_callback_custom(selected);
-                    });
-                })
-                .catch((error) => {
-                    debugger;
-                    throw error;
-                });
+            return this.removeInstances_callback_custom(selected);
         },
         /**
          * Method, that removes template variable.
@@ -948,25 +932,6 @@ guiModels.OneTemplateModel = class OneTemplateModel extends spa.models.Model {
 
         return data;
     }
-    /**
-     * Redefinition of 'save' method of guiModels.Model class.
-     * @param {string} method
-     */
-    save(method = 'patch') {
-        return this.queryset
-            .formQueryAndSend(method, this.toInner(this.data))
-            .then((response) => {
-                if (this.queryset._get_responseHandler) {
-                    response = this.queryset._get_responseHandler(response);
-                }
-
-                return this.queryset.model.getInstance(response.data, this.queryset);
-            })
-            .catch((error) => {
-                debugger;
-                throw error;
-            });
-    }
 };
 
 /**
@@ -990,42 +955,62 @@ guiQuerySets.OneTemplateQuerySet = class OneTemplateQuerySet extends guiQuerySet
 
         return response;
     }
+
     /**
      * Redefinition of 'get' method of guiQuerySets.QuerySet class.
      */
-    get() {
+    async get() {
         if (this.cache) {
             return Promise.resolve(this.cache);
         }
-        return this.formQueryAndSend('get')
-            .then((response) => {
-                if (this._get_responseHandler) {
-                    response = this._get_responseHandler(response);
-                }
 
-                let instance = this.model.getInstance(response.data, this);
-                let prefetch_fields = this._getPrefetchFields();
+        let response = await this.execute({
+            method: 'get',
+            path: this.getDataType(),
+            query: this.query,
+        });
 
-                // if prefetch fields exist, loads prefetch data.
-                if (prefetch_fields && prefetch_fields.length > 0) {
-                    return this._loadPrefetchData(prefetch_fields, [instance]).then(() => {
-                        this.cache = instance;
-                        return instance;
-                    });
-                }
+        if (this._get_responseHandler) {
+            response = this._get_responseHandler(response);
+        }
 
-                // otherwise, returns instance.
-                this.cache = instance;
-                return instance;
-            })
-            .catch((error) => {
-                debugger;
-                throw error;
+        let instance = this.model.getInstance(response.data, this);
+        let prefetch_fields = this._getPrefetchFields();
+
+        // if prefetch fields exist, loads prefetch data.
+        if (prefetch_fields && prefetch_fields.length > 0) {
+            await this._loadPrefetchData(prefetch_fields, [instance]);
+        }
+
+        this.cache = instance;
+        return instance;
+    }
+
+    async update(newDataInstance, instances = undefined, method = 'patch') {
+        if (instances === undefined) {
+            instances = await this.items();
+        }
+
+        const updatePromises = instances.map(async (instance) => {
+            let response = await this.execute({
+                method,
+                path: instance.queryset.getDataType(),
+                data: newDataInstance,
+                query: this.query,
             });
+
+            if (this._get_responseHandler) {
+                response = this._get_responseHandler(response);
+            }
+
+            return this.model.getInstance(response.data, this);
+        });
+
+        return Promise.all(updatePromises);
     }
 };
 
-tabSignal.connect('models[Template].fields.beforeInit', function (fields) {
+spa.signals.connect('models[Template].fields.beforeInit', function (fields) {
     ['data', 'options'].forEach((item) => {
         fields[item].hidden = true;
     });
@@ -1033,7 +1018,7 @@ tabSignal.connect('models[Template].fields.beforeInit', function (fields) {
     fields.options_list.title = 'Options';
 });
 
-tabSignal.connect('models[OneTemplate].fields.beforeInit', function (fields) {
+spa.signals.connect('models[OneTemplate].fields.beforeInit', function (fields) {
     fields.options.hidden = true;
     fields.options_list.hidden = true;
     fields.data.hidden = true;
@@ -1054,7 +1039,7 @@ tabSignal.connect('models[OneTemplate].fields.beforeInit', function (fields) {
     fields = Object.assign(fields, getTemplateCommonFields(true));
 });
 
-tabSignal.connect('models[TemplateExec].fields.beforeInit', function (fields) {
+spa.signals.connect('models[TemplateExec].fields.beforeInit', function (fields) {
     let option = fields.option;
     option.format = 'fk';
     option.default = {
@@ -1073,10 +1058,9 @@ tabSignal.connect('models[TemplateExec].fields.beforeInit', function (fields) {
  * If type of template was changed, user will see the message about deleting of vars and options,
  * and he also will se a question 'Does he really want to do it?'.
  */
-tabSignal.connect('views[/project/{' + path_pk_key + '}/template/{template_id}/edit/].afterInit', (obj) => {
+spa.signals.connect('views[/project/{' + path_pk_key + '}/template/{template_id}/edit/].afterInit', (obj) => {
     let mixins = [...obj.view.mixins].reverse();
-    let baseSaveInstance =
-        routesComponentsTemplates.page_edit.methods.saveInstance; /* globals routesComponentsTemplates */
+    let baseSaveInstance = spa.router.mixins.routesComponentsTemplates.page_edit.methods.saveInstance;
 
     for (let index = 0; index < mixins.length; index++) {
         let item = mixins[index];
@@ -1122,7 +1106,7 @@ tabSignal.connect('views[/project/{' + path_pk_key + '}/template/{template_id}/e
 /**
  * Changes 'kind' filter type to 'choices'.
  */
-tabSignal.connect('views[/project/{' + path_pk_key + '}/template/].filters.beforeInit', (filters) => {
+spa.signals.connect('views[/project/{' + path_pk_key + '}/template/].filters.beforeInit', (filters) => {
     for (let index in filters) {
         if (filters.hasOwnProperty(index)) {
             let filter = filters[index];
@@ -1277,7 +1261,7 @@ guiModels.OneTemplateVariableModel = class OneTemplateVariableModel extends guiM
  */
 guiQuerySets.OneTemplateVariableQuerySet = class OneTemplateVariableQuerySet extends guiQuerySets.TemplateVariableQuerySet {};
 
-tabSignal.connect('openapi.loaded', (openapi) => {
+spa.signals.connect('openapi.loaded', (openapi) => {
     formEnumForVariables(openapi);
 
     let template_variable = getOneTemplateVariableSchema();
@@ -1308,14 +1292,14 @@ tabSignal.connect('openapi.loaded', (openapi) => {
     );
 });
 
-tabSignal.connect(
+spa.signals.connect(
     'views[/project/{' + path_pk_key + '}/template/{template_id}/variables/].afterInit',
     (obj) => {
         obj.view.mixins = obj.view.mixins.concat(tmp_vars_list_mixin);
     },
 );
 
-tabSignal.connect(
+spa.signals.connect(
     'views[/project/{' + path_pk_key + '}/template/{template_id}/variables/new/].afterInit',
     (obj) => {
         obj.view.mixins = obj.view.mixins.concat(tmp_vars_new_mixin);
@@ -1459,7 +1443,7 @@ guiModels.OneTemplateOptionModel = class OneTemplateOptionModel extends guiModel
  */
 guiQuerySets.OneTemplateOptionQuerySet = class OneTemplateOptionQuerySet extends guiQuerySets.TemplateOptionQuerySet {};
 
-tabSignal.connect('openapi.loaded', (openapi) => {
+spa.signals.connect('openapi.loaded', (openapi) => {
     let template_option = {
         properties: {
             name: {
@@ -1531,7 +1515,7 @@ tabSignal.connect('openapi.loaded', (openapi) => {
     );
 });
 
-tabSignal.connect(
+spa.signals.connect(
     'views[/project/{' + path_pk_key + '}/template/{template_id}/option/new/].afterInit',
     (obj) => {
         obj.view.mixins = obj.view.mixins.concat(tmp_vars_new_mixin, {
@@ -1547,22 +1531,25 @@ tabSignal.connect(
     },
 );
 
-tabSignal.connect('views[/project/{' + path_pk_key + '}/template/{template_id}/option/].afterInit', (obj) => {
-    obj.view.mixins = obj.view.mixins.concat({
-        mixins: [tmp_vars_list_mixin],
-        methods: {
-            /**
-             * Method, that removes template option.
-             * @param {object} template_instance Template instance.
-             * @param {string} child_id Option name.
-             * @private
-             */
-            _removeInstance(template_instance, child_id) {
-                delete template_instance.data.options[child_id];
+spa.signals.connect(
+    'views[/project/{' + path_pk_key + '}/template/{template_id}/option/].afterInit',
+    (obj) => {
+        obj.view.mixins = obj.view.mixins.concat({
+            mixins: [tmp_vars_list_mixin],
+            methods: {
+                /**
+                 * Method, that removes template option.
+                 * @param {object} template_instance Template instance.
+                 * @param {string} child_id Option name.
+                 * @private
+                 */
+                _removeInstance(template_instance, child_id) {
+                    delete template_instance.data.options[child_id];
+                },
             },
-        },
-    });
-});
+        });
+    },
+);
 ////////////////////////////////////////////////////////////////////////////////////
 // EndBlock of extensions for TEMPLATE OPTION entity
 ////////////////////////////////////////////////////////////////////////////////////
@@ -1727,7 +1714,7 @@ guiModels.OneTemplateOptionVariableModel = class OneTemplateOptionVariableModel 
  */
 guiQuerySets.OneTemplateOptionVariableQuerySet = class OneTemplateOptionVariableQuerySet extends guiQuerySets.TemplateOptionVariableQuerySet {};
 
-tabSignal.connect('openapi.loaded', (openapi) => {
+spa.signals.connect('openapi.loaded', (openapi) => {
     formEnumForVariables(openapi);
 
     let template_option_variable = getOneTemplateVariableSchema();
@@ -1767,7 +1754,7 @@ tabSignal.connect('openapi.loaded', (openapi) => {
     );
 });
 
-tabSignal.connect(
+spa.signals.connect(
     'views[/project/{' +
         path_pk_key +
         '}/template/{template_id}/option/{option_id}/variables/new/].afterInit',
@@ -1776,7 +1763,7 @@ tabSignal.connect(
     },
 );
 
-tabSignal.connect(
+spa.signals.connect(
     'views[/project/{' + path_pk_key + '}/template/{template_id}/option/{option_id}/variables/].afterInit',
     (obj) => {
         obj.view.mixins = obj.view.mixins.concat({

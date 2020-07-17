@@ -1,11 +1,14 @@
+import LineChartWidget from './LineChartWidget.js';
+import HistoryChart from './HistoryChart.js';
+
 /**
  * Class of history chart widget.
  */
-export default class HistoryChartWidget extends spa.dashboard.LineChartWidget {
+export default class HistoryChartWidget extends LineChartWidget {
     constructor(options) {
         super(options);
 
-        this.format = 'history_chart';
+        this.componentName = HistoryChart.name;
         this.period = options.period;
         this.date_format = 'DD.MM.YY';
 
@@ -183,7 +186,7 @@ export default class HistoryChartWidget extends spa.dashboard.LineChartWidget {
 
         if (skin['history_status_' + line.name]) {
             if (skin['history_status_' + line.name][0] == '#') {
-                let color = hexToRgbA(skin['history_status_' + line.name], alpha); /* globals hexToRgbA */
+                let color = spa.utils.hexToRgbA(skin['history_status_' + line.name], alpha);
                 return color;
             }
 

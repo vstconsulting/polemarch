@@ -18,6 +18,7 @@ INSTALLED_APPS += [
 
 # Additional middleware and auth
 MIDDLEWARE += [
+    'vstutils.middleware.TimezoneHeadersMiddleware',
     '{}.main.middleware.PolemarchHeadersMiddleware'.format(VST_PROJECT_LIB_NAME),
 ]
 
@@ -59,7 +60,7 @@ PROJECT_GUI_MENU = [
     {
         'name': 'Projects',
         'url': '/project',
-        'span_class': 'fab fa-fort-awesome',
+        'span_class': 'fas fa-cubes',
     },
     {
         'name': 'Community',
@@ -74,12 +75,12 @@ PROJECT_GUI_MENU = [
             {
                 'name': 'Groups',
                 'url': '/group',
-                'span_class': 'fa fa-tasks',
+                'span_class': 'fas fa-server',
             },
             {
                 'name': 'Hosts',
                 'url': '/host',
-                'span_class': 'fab fa-codepen',
+                'span_class': 'fas fa-hdd',
             },
         ]
     },

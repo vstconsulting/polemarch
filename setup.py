@@ -133,11 +133,17 @@ def make_extensions(extensions_list, packages):
     language_level = 3
     if is_help:
         pass
-    elif has_cython and ('compile' in sys.argv or 'bdist_wheel' in sys.argv):
+    elif has_cython and ('compile' in sys.argv or 'bdist_wheel' in sys.argv or 'build_ext' in sys.argv):
         cy_kwargs = dict(
             nthreads=nthreads,
             force=True,
-            language_level=language_level
+            language_level=language_level,
+            compiler_directives=dict(
+                linetrace='CYTHON_TRACE_NOGIL' in sys.argv,
+                profile=True,
+                c_string_type='str',
+                c_string_encoding='utf8'
+            ),
         )
         return cythonize(ext_modules, **cy_kwargs), extensions_dict
     return ext_modules, extensions_dict
@@ -382,8 +388,25 @@ ext_list = []
 if 'develop' in sys.argv:
     ext_list = []
 
+additional_test_files = [
+    'polemarch/main/tests/facts_stdout',
+    'polemarch/main/tests/raw_stdout.txt',
+    'polemarch/main/tests/test_repo.tar.gz',
+    'polemarch/main/tests/stdout.txt'
+]
+
+exclude = []
+data_files = []
+
+if not os.environ.get('COMPILE_WITH_TESTS'):
+    exclude += ['polemarch.main.tests', 'polemarch.main.unittests']
+else:
+    data_files.append(['', additional_test_files])
+
 kwargs = dict(
     name='polemarch',
+    packages=find_packages(exclude=exclude),
+    data_files=data_files,
     ext_modules_list=ext_list,
     static_exclude_min=[
         'polemarch/templates/gui/service-worker.js',

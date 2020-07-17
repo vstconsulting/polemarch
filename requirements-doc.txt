@@ -1,2 +1,2 @@
 # Docs
-vstutils[doc]~=3.0.13
+vstutils[doc]~=4.0.0

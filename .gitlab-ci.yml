@@ -54,7 +54,7 @@ code_style:
   <<: *branch_tests
   stage: code_standarts
   variables:
-    TOX_ENVS: "flake,pylint,jshint"
+    TOX_ENVS: "flake,pylint"
 
 py38-coverage:
   <<: *branch_tests

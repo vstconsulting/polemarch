@@ -293,16 +293,12 @@ class ApiUsersTestCase(ApiBaseTestCase):
         # Add users to Team
         test_user_data = dict(password='123', password2='123')
         bulk_data = [
-            self.get_bulk('team', dict(name='test_team'), 'add'),
-            self.get_bulk('user', dict(username='test_user', **test_user_data), 'add'),
-            self.get_mod_bulk(
-                'team', '<<0[data][id]>>', dict(username='te', **test_user_data), 'user'
-            ),
-            self.get_mod_bulk(
-                'team', '<<0[data][id]>>', dict(id='<<1[data][id]>>'), 'user'
-            ),
+            dict(method='post', path='team', data=dict(name='test_team')),
+            dict(method='post', path='user', data=dict(username='test_user', **test_user_data)),
+            dict(method='post', path=['team', '<<0[data][id]>>', 'user'], data=dict(username='te', **test_user_data)),
+            dict(method='post', path=['team', '<<0[data][id]>>', 'user'], data=dict(id='<<1[data][id]>>')),
         ]
-        results = self.make_bulk(bulk_data)
+        results = self.bulk(bulk_data)
         for result in results:
             self.assertEqual(result['status'], 201)
 
@@ -315,17 +311,13 @@ class ApiUsersTestCase(ApiBaseTestCase):
 
         # Test copy
         bulk_data = [
-            self.get_mod_bulk('user', results[1]['data']['id'], {}, 'copy'),
-            self.get_bulk('user', {}, 'get', pk='<<0[data][id]>>'),
-            self.get_mod_bulk(
-                'team', results[0]['data']['id'], {}, 'user/<<0[data][id]>>', method='get'
-            ),
-            self.get_mod_bulk('team', results[0]['data']['id'], {"name": "new"}, 'copy'),
-            self.get_mod_bulk(
-                'team', results[0]['data']['id'], {}, 'user', method='get'
-            ),
+            dict(method='post', path=['user', results[1]['data']['id'], 'copy']),
+            dict(method='get', path=['user', '<<0[data][id]>>']),
+            dict(method='get', path=['team', results[0]['data']['id'], 'user', '<<0[data][id]>>']),
+            dict(method='post', path=['team', results[0]['data']['id'], 'copy'], data={"name": "new"}),
+            dict(method='get', path=['team', results[0]['data']['id'], 'user']),
         ]
-        results = self.make_bulk(bulk_data)
+        results = self.bulk(bulk_data)
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[1]['status'], 200)
         self.assertEqual(results[1]['data']['username'], 'copy-test_user')
@@ -364,7 +356,6 @@ class APITestCase(ProjectTestCase, OApiTestCase):
         self.assertTrue(result.get('inventory', False))
         self.assertTrue(result.get('project', False))
         self.assertTrue(result.get('history', False))
-        self.assertTrue(result.get('bulk', False))
         self.assertTrue(result.get('token', False))
 
     def test_api_router(self):
@@ -450,34 +441,21 @@ class APITestCase(ProjectTestCase, OApiTestCase):
         self._check_stats_history(data['day'], result['jobs']['day'])
 
     def test_bulk_unsupported(self):
-        data = dict(username="some_user", password="some_password")
         bulk_data = [
-            {'type': "add", 'item': "token", 'data': data}
+            dict(method='post', path='token', data=dict(username="some_user", password="some_password"))
         ]
-        self.get_result("post", self.get_url('_bulk'), 404, data=json.dumps(bulk_data))
-        self.get_result("put", self.get_url('_bulk'), 200, data=json.dumps(bulk_data))
 
-        result = self.get_result("get", self.get_url('_bulk'))
-        self.assertIn("host", result["allowed_types"])
-        self.assertIn("group", result["allowed_types"])
-        self.assertIn("inventory", result["allowed_types"])
-        self.assertIn("project", result["allowed_types"])
-        self.assertIn("hook", result["allowed_types"])
-        self.assertIn("user", result["allowed_types"])
-        self.assertIn("team", result["allowed_types"])
-        self.assertIn("add", result["operations_types"])
-        self.assertIn("set", result["operations_types"])
-        self.assertIn("del", result["operations_types"])
-        self.assertIn("mod", result["operations_types"])
+        self.bulk_transactional(bulk_data, 502)
+        self.bulk(bulk_data, 200)
 
     def test_lang(self):
         bulk_data = [
-            {'data_type': ['_lang'], 'method': 'get'},
-            {'data_type': ['_lang', 'en'], 'method': 'get'},
-            {'data_type': ['_lang', 'ru'], 'method': 'get'},
+            dict(method='get', path=['_lang']),
+            dict(method='get', path=['_lang', 'en']),
+            dict(method='get', path=['_lang', 'ru']),
         ]
 
-        results = self.make_bulk(bulk_data)
+        results = self.bulk(bulk_data)
         self.assertEqual(results[0]['status'], 200)
         self.assertEqual(results[0]['data']['count'], 2)
         self.assertEqual(results[1]['data']['code'], 'en')

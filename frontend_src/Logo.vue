@@ -17,7 +17,7 @@
 
 <script>
     export default {
-        name: 'logo',
+        name: 'Logo',
         mixins: [spa.components.items.Logo],
         computed: {
             /**

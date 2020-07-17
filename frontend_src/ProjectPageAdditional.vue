@@ -43,7 +43,7 @@
      */
     export default {
         name: 'ProjectPageAdditional',
-        mixins: [spa.components.mixins.BasePageTypeMixin, spa.router.mixins.collapsable_card_mixin],
+        mixins: [spa.components.mixins.BasePageTypeMixin, spa.router.mixins.CollapsibleCardMixin],
         data() {
             return {
                 /**
@@ -110,7 +110,7 @@
                             additionalProperties: {
                                 view_field: 'name',
                                 value_field: 'id',
-                                list_paths: ['/project/{' + path_pk_key + '}/inventory/'],
+                                list_paths: ['/project/{' + spa.utils.path_pk_key + '}/inventory/'],
                             },
                         },
                         user: {
@@ -202,7 +202,7 @@
              * Method, that executes playbook.
              * @param {string} playbook.
              */
-            executePlaybook(playbook) {
+            async executePlaybook(playbook) {
                 let data = this.getPolemarchYamlValidData();
 
                 if (!data) {
@@ -216,32 +216,30 @@
                 }
 
                 let qs = this.view.objects.clone();
-
                 qs.url = (qs.url + 'execute_playbook/').format(this.$route.params);
-                qs.formQueryAndSend('post', data)
-                    .then((res) => {
-                        spa.popUp.guiPopUp.success('Playbook was successfully executed.');
 
-                        if (res && res.data && res.data.history_id) {
-                            let redirect_path = '/project/{' + path_pk_key + '}/history/{history_id}/';
-                            let redirect_url;
+                const res = await qs.execute({ method: 'post', path: qs.getDataType(), data });
 
-                            try {
-                                redirect_url = redirect_path.format(
-                                    $.extend(true, {}, this.$route.params, {
-                                        history_id: res.data.history_id,
-                                    }),
-                                );
+                spa.popUp.guiPopUp.success('Playbook was successfully executed.');
 
-                                if (redirect_url) {
-                                    this.$router.push({ path: redirect_url.replace(/\/$/g, '') });
-                                }
-                            } catch (e) {}
+                if (res && res.data && res.data.history_id) {
+                    let redirect_path = '/project/{' + spa.utils.path_pk_key + '}/history/{history_id}/';
+                    let redirect_url;
+
+                    try {
+                        redirect_url = redirect_path.format(
+                            $.extend(true, {}, this.$route.params, {
+                                history_id: res.data.history_id,
+                            }),
+                        );
+
+                        if (redirect_url) {
+                            this.$router.push({ path: redirect_url.replace(/\/$/g, '') });
                         }
-                    })
-                    .catch((error) => {
-                        debugger;
-                    });
+                    } catch (e) {
+                        console.log(e);
+                    }
+                }
             },
             /**
              * Method - handler for 'base_fields' and 'extra_vars' forms onChange event.

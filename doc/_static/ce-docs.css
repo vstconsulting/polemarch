@@ -27,3 +27,9 @@
 .social {
     font-size: 20px;
 }
+
+.main-sidebar .app-logo .text-logo {
+    margin-left: auto;
+    width: 165px;
+    float: inherit;
+}

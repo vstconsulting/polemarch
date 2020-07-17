@@ -22,6 +22,7 @@ RUN cat /etc/polemarch/system_requirements.txt | xargs apk --update add && \
     /opt/polemarch/bin/pip3 install -U -r /etc/polemarch/system_requirements_pip.txt && \
     mkdir -p /projects /hooks && \
     /opt/polemarch/bin/pip3 install -U /etc/polemarch/dist/$(ls /etc/polemarch/dist/ | grep "\.tar\.gz" | tail -1)[mysql,postgresql] && \
+    /opt/polemarch/bin/pip3 install paramiko && \
     mkdir -p /run/openldap && \
     apk --purge del .build-deps && \
     rm -rf ~/.cache/pip/* && \
