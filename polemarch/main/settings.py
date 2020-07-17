@@ -18,6 +18,7 @@ INSTALLED_APPS += [
 
 # Additional middleware and auth
 MIDDLEWARE += [
+    'vstutils.middleware.TimezoneHeadersMiddleware',
     '{}.main.middleware.PolemarchHeadersMiddleware'.format(VST_PROJECT_LIB_NAME),
 ]
 
