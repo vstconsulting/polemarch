@@ -115,7 +115,7 @@ function OneHistory_kind_mode_callback(parent_values = {}) {
 function OneHistoryFieldsHandler(model) {
     spa.signals.connect('models[' + model + '].fields.beforeInit', (fields) => {
         for (let field in fields) {
-            if (fields.hasOwnProperty(field)) {
+            if (Object.prototype.hasOwnProperty.call(fields, field)) {
                 fields[field].format = 'one_history_string';
 
                 if (['kind', 'raw_args', 'raw_stdout', 'initiator_type'].includes(field)) {
@@ -130,7 +130,7 @@ function OneHistoryFieldsHandler(model) {
         fields.initiator.format = 'one_history_initiator';
         fields.inventory.format = 'one_history_fk';
         fields.inventory.hidden = true;
-        fields.execute_args.format = 'one_history_execute_args';
+        fields.execute_args.format = 'json';
         fields.execution_time.format = 'one_history_uptime';
         fields.revision.format = 'one_history_revision';
         fields.status.format = 'one_history_choices';
@@ -156,10 +156,10 @@ function historyPathsFiltersHandler(path) {
      */
     spa.signals.connect('views[' + path + '].filters.beforeInit', (filters) => {
         for (let key in filters) {
-            if (filters.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(filters, key)) {
                 let filter = filters[key];
 
-                if (filter.name == 'status') {
+                if (filter.name === 'status') {
                     filter.type = 'choices';
                     filter.enum = app.models.History.fields.status.options.enum;
                 }
@@ -174,13 +174,13 @@ function historyPathsFiltersHandler(path) {
  */
 function historyPathsViewsHandler(path) {
     spa.signals.connect('views[' + path + '].afterInit', (obj) => {
-        if (obj.view.schema.type == 'page') {
+        if (obj.view.schema.type === 'page') {
             obj.view.mixins = obj.view.mixins.concat(HistoryView);
         }
     });
 
     spa.signals.connect('views[' + path + '].created', (obj) => {
-        if (obj.view.schema.type == 'list' && obj.view.schema.operations && obj.view.schema.operations.add) {
+        if (obj.view.schema.type === 'list' && obj.view.schema.operations && obj.view.schema.operations.add) {
             delete obj.view.schema.operations.add;
         }
     });
@@ -213,12 +213,12 @@ spa.signals.connect('allViews.inited', (obj) => {
                 return btns;
             }
 
-            if (type == 'actions' || type == 'child_links') {
+            if (type === 'actions' || type === 'child_links') {
                 if (!['RUN', 'DELAY'].includes(data.status)) {
                     btns.cancel.hidden = true;
                 }
 
-                if (!(data.status == 'OK' && data.kind == 'MODULE' && data.mode == 'setup')) {
+                if (!(data.status === 'OK' && data.kind === 'MODULE' && data.mode === 'setup')) {
                     btns.facts.hidden = true;
                 }
 

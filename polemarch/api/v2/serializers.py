@@ -8,8 +8,9 @@ from collections import OrderedDict
 from django.contrib.auth import get_user_model
 from django.utils.functional import cached_property
 from django.db import transaction
-from rest_framework import serializers, exceptions, status
+from rest_framework import serializers, exceptions, status, fields
 from vstutils.api import serializers as vst_serializers, fields as vst_fields
+from vstutils.api import auth as vst_auth
 from vstutils.api.serializers import DataSerializer, EmptySerializer
 from vstutils.api.base import Response
 from ...main.utils import AnsibleArgumentsReference
@@ -185,7 +186,7 @@ class _WithPermissionsSerializer(_SignalSerializer):
         return self.context['request'].user  # noce
 
 
-class UserSerializer(vst_serializers.UserSerializer):
+class UserSerializer(vst_auth.UserSerializer):
     is_staff = serializers.HiddenField(default=True, label='Staff')
 
     @with_signals
@@ -193,14 +194,14 @@ class UserSerializer(vst_serializers.UserSerializer):
         return super(UserSerializer, self).update(instance, validated_data)
 
 
-class CreateUserSerializer(vst_serializers.CreateUserSerializer):
+class CreateUserSerializer(vst_auth.CreateUserSerializer):
 
     @with_signals
     def create(self, validated_data: Dict) -> User:
         return super().create(validated_data)
 
 
-class ChangePasswordSerializer(vst_serializers.ChangePasswordSerializer):
+class ChangePasswordSerializer(vst_auth.ChangePasswordSerializer):
 
     @with_signals
     def update(self, instance: User, validated_data: Dict) -> User:
@@ -210,7 +211,7 @@ class ChangePasswordSerializer(vst_serializers.ChangePasswordSerializer):
 class OneUserSerializer(UserSerializer):
     email = serializers.EmailField(required=False)
 
-    class Meta(vst_serializers.OneUserSerializer.Meta):
+    class Meta(vst_auth.OneUserSerializer.Meta):
         pass
 
 
@@ -525,7 +526,7 @@ class ModuleSerializer(vst_serializers.VSTSerializer):
 
 
 class OneModuleSerializer(ModuleSerializer):
-    data = DataSerializer()
+    data = fields.JSONField(read_only=True)
 
     class Meta:
         model = models.Module

@@ -1,5 +1,5 @@
 import HistoryChart from './HistoryChart.js';
-import HomeView from './HomeView.vue';
+import HomeView from '../HomeView.vue';
 import { widgets } from './widgets.js';
 const guiLocalSettings = spa.utils.guiLocalSettings;
 
@@ -23,19 +23,16 @@ function getProfileSettingQsFromStore() {
  * and saves updated queryset in store.
  * @param {object} qs QuerySet for profile/setting page
  */
-function updateProfileSettingsQsAndSave(qs) {
-    qs.formQueryAndSend('post', qs.cache.data)
-        .then((response) => {
-            /* jshint unused: false */
-            app.application.$store.commit('setQuerySet', {
-                url: qs.url,
-                queryset: qs,
-            });
-        })
-        .catch((error) => {
-            /* jshint unused: false */
-            debugger;
+async function updateProfileSettingsQsAndSave(qs) {
+    try {
+        await qs.execute({ method: 'post', data: qs.cache.data });
+        app.application.$store.commit('setQuerySet', {
+            url: qs.url,
+            queryset: qs,
         });
+    } catch (e) {
+        console.log(e);
+    }
 }
 
 /**

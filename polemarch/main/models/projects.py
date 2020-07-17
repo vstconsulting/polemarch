@@ -14,7 +14,7 @@ from django.conf import settings
 from django.db.models import Q
 from django.core.validators import ValidationError
 from django.core.cache import caches
-from vstutils.utils import ModelHandlers, raise_context, classproperty
+from vstutils.utils import ModelHandlers, raise_context_decorator_with_default, classproperty
 # pylint: disable=no-name-in-module
 from vstutils import custom_model
 from yaml import load
@@ -265,7 +265,7 @@ class Project(AbstractModel):
             return cache_data
 
     @property
-    @raise_context()
+    @raise_context_decorator_with_default()
     def execute_view_data(self) -> Dict[str, Dict[str, Dict]]:
         cached_view_data = self.get_yaml_subcache('view').get()
         if cached_view_data and self.yaml_path_exists:
@@ -348,12 +348,12 @@ class Project(AbstractModel):
         return self.repo_class.clone()
 
     @property
-    @raise_context()
+    @raise_context_decorator_with_default(default='NotReady')
     def revision(self) -> str:
         return self.repo_class.revision()
 
     @property
-    @raise_context()
+    @raise_context_decorator_with_default()
     def branch(self) -> str:
         return self.repo_class.get_branch_name()
 
@@ -361,7 +361,7 @@ class Project(AbstractModel):
     def module(self) -> BQuerySet:
         return Module.objects.filter(Q(project=self) | Q(project=None))
 
-    @raise_context()
+    @raise_context_decorator_with_default()
     def __get_readme(self) -> ReadMe:
         if not hasattr(self, 'readme'):
             self.readme = self.ReadMe(self)

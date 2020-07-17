@@ -263,19 +263,12 @@
             /**
              * Method, that sends request to API for getting stdout lines.
              */
-            sendLinesApiRequest(query = {}) {
-                let qs = this.lines_qs.clone({ query: query });
-
+            async sendLinesApiRequest(query = {}) {
+                const qs = this.lines_qs.clone({ query: query });
                 this.loading = true;
-                return qs
-                    .formQueryAndSend('get')
-                    .then((response) => {
-                        this.loading = false;
-                        return response;
-                    })
-                    .catch((error) => {
-                        throw error;
-                    });
+                const response = await qs.execute({ method: 'get', path: qs.getDataType(), query: qs.query });
+                this.loading = false;
+                return response;
             },
 
             /**

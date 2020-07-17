@@ -160,6 +160,7 @@ spa.signals.connect('models[OneProject].fields.beforeInit', (fields) => {
 
 spa.signals.connect('models[OneModule].fields.beforeInit', (fields) => {
     fields.data.format = 'ansible_json';
+    fields.data.readOnly = true;
 });
 
 /**

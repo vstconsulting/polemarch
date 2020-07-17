@@ -24,7 +24,7 @@ const user_settings_page_edit_mixin = {
             let method = this.view.schema.query_type;
             this.loading = true;
             instance
-                .save(method)
+                .update({ method })
                 .then((instance) => {
                     this.loading = false;
                     let qs = this.getQuerySet(this.view, this.qs_url).clone();

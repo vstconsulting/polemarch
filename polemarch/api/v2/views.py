@@ -5,6 +5,7 @@ from django.utils.decorators import method_decorator
 from rest_framework import exceptions as excepts, status, permissions
 from rest_framework.authtoken import views as token_views
 from drf_yasg.utils import swagger_auto_schema
+from vstutils.api import auth as vst_auth
 from vstutils.api.permissions import StaffPermission
 from vstutils.api import base, views, serializers as vstsers, decorators as deco, responses
 from vstutils.utils import KVExchanger
@@ -182,7 +183,7 @@ class TokenView(token_views.ObtainAuthToken):
         raise excepts.ParseError("Token not found.")
 
 
-class UserViewSet(views.UserViewSet, base.CopyMixin):
+class UserViewSet(vst_auth.UserViewSet, base.CopyMixin):
     '''
     retrieve:
         Return a user instance.
