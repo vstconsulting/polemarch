@@ -147,20 +147,20 @@ class _SignalSerializer(serializers.ModelSerializer):
     @cached_property
     def _writable_fields(self) -> List:
         writable_fields = super(_SignalSerializer, self)._writable_fields
-        fields = []
+        fields_of_serializer = []
         attrs = [
             'field_name', 'source_attrs', 'source',
             'read_only', 'required', 'write_only', 'default'
         ]
         for field in writable_fields:
             if not isinstance(field, DataSerializer):
-                fields.append(field)
+                fields_of_serializer.append(field)
                 continue
             field_object = serializers.DictField()
             for attr in attrs:
                 setattr(field_object, attr, getattr(field, attr, None))
-            fields.append(field_object)
-        return fields
+            fields_of_serializer.append(field_object)
+        return fields_of_serializer
 
     @with_signals
     def create(self, validated_data):
@@ -1019,7 +1019,7 @@ def generate_fileds(ansible_reference: AnsibleArgumentsReference, ansible_type: 
     if ansible_type is None:
         return OrderedDict()  # nocv
 
-    fields = OrderedDict()
+    fields_of_serializer = OrderedDict()
 
     for ref, settings in ansible_reference.raw_dict[ansible_type].items():
         if ref in ['help', 'version', ]:
@@ -1053,9 +1053,9 @@ def generate_fileds(ansible_reference: AnsibleArgumentsReference, ansible_type: 
                 kwargs['default'] = 'all'
 
         field_name = ref.replace('-', '_')
-        fields[field_name] = field(**kwargs)
+        fields_of_serializer[field_name] = field(**kwargs)
 
-    return fields
+    return fields_of_serializer
 
 
 class AnsibleSerializerMetaclass(serializers.SerializerMetaclass):
