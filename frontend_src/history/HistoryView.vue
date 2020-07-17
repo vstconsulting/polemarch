@@ -356,32 +356,29 @@
             /**
              * Method, that sends API request for cleaning of history stdout.
              */
-            clearInstance() {
+            async clearInstance() {
                 let qs = this.getQuerySet(this.view, this.qs_url).clone({ url: this.qs_url + '/clear' });
 
-                qs.formQueryAndSend('delete')
-                    .then((response) => {
-                        /* jshint unused: false */
-                        spa.popUp.guiPopUp.success(
-                            spa.popUp.pop_up_msg.instance.success.execute.format([
-                                'clear',
-                                this.view.schema.name,
-                            ]),
-                        );
-
-                        this.was_cleared = true;
-                    })
-                    .catch((error) => {
-                        let str = app.error_handler.errorToString(error);
-
-                        let srt_to_show = spa.popUp.pop_up_msg.instance.error.execute.format([
+                try {
+                    await qs.execute({ method: 'delete', path: qs.getDataType(), query: qs.query });
+                    spa.popUp.guiPopUp.success(
+                        spa.popUp.pop_up_msg.instance.success.execute.format([
                             'clear',
                             this.view.schema.name,
-                            str,
-                        ]);
+                        ]),
+                    );
+                    this.was_cleared = true;
+                } catch (error) {
+                    let str = app.error_handler.errorToString(error);
 
-                        app.error_handler.showError(srt_to_show, str);
-                    });
+                    let srt_to_show = spa.popUp.pop_up_msg.instance.error.execute.format([
+                        'clear',
+                        this.view.schema.name,
+                        str,
+                    ]);
+
+                    app.error_handler.showError(srt_to_show, str);
+                }
             },
         },
         components: {

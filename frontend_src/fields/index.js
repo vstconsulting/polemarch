@@ -4,13 +4,12 @@ import {
     OneHistoryFieldMixin,
     HistoryExecutor,
     OneHistoryExecutor,
-    AnsibleJSONFieldMixin,
     OneHistoryChoicesFieldMixin,
     OneHistoryBooleanFieldMixin,
 } from './mixins';
 import FKJustValueFieldMixin from './FKJustValueFieldMixin.vue';
 import OneHistoryRawInventory from './OneHistoryRawInventory.vue';
-import OneHistoryExecuteArgsFieldMixin from './OneHistoryExecuteArgsFieldMixin.vue';
+import SeeAlso from './SeeAlso.vue';
 const path_pk_key = spa.utils.path_pk_key;
 const guiFields = spa.fields.guiFields;
 
@@ -326,15 +325,21 @@ guiFields.one_history_executor = class OneHistoryExecutorField extends guiFields
     }
 };
 
+class AnsibleJsonMapper extends spa.fields.json.JsonMapper {
+    getComponent(value, name = undefined) {
+        if (name === 'seealso') {
+            return SeeAlso;
+        }
+        return super.getComponent(value, name);
+    }
+}
+
 /**
  * Ansible json guiField class.
  */
-guiFields.ansible_json = class AnsibleJsonField extends spa.fields.base.BaseField {
-    /**
-     * Redefinition of base guiField static property 'mixins'.
-     */
-    static get mixins() {
-        return super.mixins.concat(AnsibleJSONFieldMixin);
+guiFields.ansible_json = class AnsibleJsonField extends spa.fields.json.JSONField {
+    constructor(options = {}) {
+        super(options, new AnsibleJsonMapper());
     }
 };
 
@@ -453,36 +458,18 @@ guiFields.one_history_boolean = class OneHistoryBooleanField extends spa.fields.
 };
 
 /**
- * History ONE_HISTORY_EXECUTE_ARGS guiField class.
- * ONE_HISTORY_EXECUTE_ARGS field for views for OneHistory model.
+ * Field for array of modules names [{module: 'm1'}, {module: 'm2'}]
  */
-guiFields.one_history_execute_args = class OneHistoryExecuteArgsField extends spa.fields.json.JSONField {
-    static get mixins() {
-        return super.mixins.concat(OneHistoryExecuteArgsFieldMixin);
-    }
-    /**
-     * Method, that inits all real fields of json field.
-     */
-    generateRealFields(value = {}) {
-        let realFields = {};
+guiFields.ansibleModulesList = class AnsibleModulesListField extends spa.fields.base.BaseField {
+    toRepresent(data = {}) {
+        let value = data[this.options.name];
 
-        for (let field in value) {
-            if (value.hasOwnProperty(field)) {
-                let opt = {
-                    name: field,
-                    readOnly: this.options.readOnly || false,
-                    title: field,
-                    format: 'one_history_string',
-                };
-
-                if (typeof value[field] == 'boolean') {
-                    opt.format = 'one_history_boolean';
-                }
-
-                realFields[field] = new spa.fields.guiFields[opt.format](opt);
-            }
+        if (value) {
+            return Object.values(value)
+                .map((obj) => obj.module)
+                .join(', ');
         }
 
-        return realFields;
+        return '';
     }
 };

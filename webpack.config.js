@@ -1,6 +1,5 @@
 const webpack = require("webpack");
 const TerserPlugin = require("terser-webpack-plugin");
-const BabelMinifyPlugin = require("babel-minify-webpack-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
@@ -26,7 +25,8 @@ function setMode() {
 const config = {
   mode: setMode(),
   entry: {
-    pmlib: entrypoints_dir + "/main.js"
+    pmlib: entrypoints_dir + "/main.js",
+    pmTests: entrypoints_dir + "/tests/index.js"
   },
   output: {
     path: __dirname + "/polemarch/static/polemarch",
@@ -100,7 +100,6 @@ const config = {
       new TerserPlugin({
         parallel: true
       }),
-      new BabelMinifyPlugin(),
       new OptimizeCSSAssetsPlugin()
     ]
   }

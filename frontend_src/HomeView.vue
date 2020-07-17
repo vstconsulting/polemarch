@@ -70,7 +70,7 @@
 </template>
 
 <script>
-    import { widgets } from './widgets.js';
+    import { widgets, updateSettings } from './dashboard';
 
     export default {
         mixins: [spa.router.mixins.BasestViewMixin, spa.router.mixins.ViewWithAutoUpdateMixin],
@@ -253,11 +253,11 @@
 
                 instance.data.widgetSettings[widget][prop] = value;
 
-                let view = app.views['/user/{' + path_pk_key + '}/settings/edit/'];
+                let view = app.views['/user/{' + spa.utils.path_pk_key + '}/settings/edit/'];
                 instance
-                    .save(view.schema.query_type)
+                    .update({ method: view.schema.query_type })
                     .then((instance) => {
-                        guiDashboard.updateSettings(instance.data);
+                        updateSettings(instance.data);
                     })
                     .catch((error) => {
                         /*jshint unused:false*/

@@ -1,5 +1,5 @@
 # Main
-vstutils[rpc,ldap,doc,prod]~=3.3.1
+vstutils[rpc,ldap,doc,prod]~=4.0.0
 docutils~=0.16.0
 markdown2==2.3.9
 
@@ -11,5 +11,5 @@ gitdb2==3.0.3
 requests==2.22.0
 
 # Ansible required packages
-polemarch-ansible~=2.0.2
+polemarch-ansible~=2.1.0
 netaddr

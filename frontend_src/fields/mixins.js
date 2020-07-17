@@ -1,4 +1,3 @@
-import AnsibleJSONFieldContentReadonly from './AnsibleJSONFieldContentReadonly.vue';
 import OneHistoryStringFieldContentReadonly from './OneHistoryStringFieldContentReadonly.vue';
 import OneHistoryChoicesFieldContentReadonly from './OneHistoryChoicesFieldContentReadonly.vue';
 import OneHistoryBooleanFieldContentReadonly from './OneHistoryBooleanFieldContentReadonly.vue';
@@ -16,25 +15,6 @@ export const OneHistoryFieldMixin = {
                     styles_dict: {},
                 };
             },
-        },
-    },
-};
-
-/**
- * Mixin for ansible json field.
- */
-export const AnsibleJSONFieldMixin = {
-    data: function () {
-        return {
-            wrapper_classes_list: {
-                base: 'form-group guiField',
-                grid: 'col-lg-12 col-xs-12 col-sm-12 col-md-12',
-            },
-        };
-    },
-    components: {
-        field_content_readonly: {
-            mixins: [spa.fields.base.BaseFieldContentReadonlyMixin, AnsibleJSONFieldContentReadonly],
         },
     },
 };
