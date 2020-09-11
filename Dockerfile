@@ -11,7 +11,9 @@ RUN tox -c tox_build.ini -e py36-build && \
 
 FROM alpine:3.11
 
-ENV WORKER=ENABLE
+ENV WORKER=ENABLE \
+    POLEMARCH_WEB_HOST=0.0.0.0
+    POLEMARCH_WEB_PORT=8080
 
 COPY --from=build /usr/local/project/environment/docker_data/ /etc/polemarch/
 

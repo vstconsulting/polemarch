@@ -119,7 +119,7 @@ Install from PyPI
 
 
    #. Create directory for `log` and `pid` files:
-      
+
       .. sourcecode:: bash
 
             mkdir /opt/polemarch/logs /opt/polemarch/pid
@@ -205,7 +205,7 @@ For run Polemarch docker image use command:
 
 Using this command download official docker image and run it with default settings. Dont use default SQLite installation with filecache in production.
 
-Polemarch will be run with web interface on port `8080`
+Polemarch will be run with web interface on port `8080` unless specified otherwise by environment variable `POLEMARCH_WEB_PORT`
 
 
 Settings
@@ -213,6 +213,10 @@ Settings
 
 Main section
 ~~~~~~~~~~~~
+
+* **POLEMARCH_WEB_HOST** - host on which web server is listening to. Default value: `0.0.0.0`.
+
+* **POLEMARCH_WEB_PORT** - port on which web server is listening to. Default value: `8080`.
 
 * **POLEMARCH_DEBUG** - status of debug mode. Default value: `false`.
 
