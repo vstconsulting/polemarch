@@ -553,7 +553,11 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
     )
 
     template_opt = vst_fields.DependEnumField(
-        allow_blank=True, required=False, field='kind', types={
+        allow_blank=True,
+        required=False,
+        allow_null=True,
+        field='kind',
+        types={
             'PLAYBOOK': 'hidden',
             'MODULE': 'hidden',
             'TEMPLATE': 'autocomplete',
