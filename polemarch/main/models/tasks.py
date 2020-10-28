@@ -77,6 +77,8 @@ class Template(ACLModel):
     @property
     def inventory_object(self) -> InvOrString:
         try:
+            if 'inventory' not in self.data:
+                return None
             return self.project.inventories.get(pk=int(self.data['inventory']))
         except (ValueError, Inventory.DoesNotExist):
             self.project.check_path(self.data['inventory'])

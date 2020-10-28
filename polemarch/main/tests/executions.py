@@ -1825,3 +1825,30 @@ class ProjectTestCase(BaseExecutionsTestCase):
         self.assertEqual(results[10]['data']['inventory'], '')
         self.assertEqual(results[12]['data']['inventory'], './localhost, ')
         self.assertEqual(results[-2]['data']['status'], 'OK')
+
+    def test_periodic_task_without_inventory(self):
+        template_data = self.template_playbook
+        del template_data['data']['inventory']
+        periodic_task = {
+            "name": "WithoutInventory",
+            "kind": "TEMPLATE",
+            "mode": "",
+            "inventory": "",
+            "save_result": True,
+            "template": "<<2[data][id]>>",
+            "template_opt": None,
+            "enabled": True,
+            "type": "CRONTAB",
+            "schedule": "56 9 * * 1-6",
+            "notes": ""
+        }
+        results = self.bulk([
+            {'method': 'post', 'path': ['project'], 'data': dict(name='test_pt_errors', repo_type='MANUAL')},
+            {'method': 'post', 'path': ['project', '<<0[data][id]>>', 'sync']},
+            {'method': 'post', 'path': ['project', '<<0[data][id]>>', 'template'], 'data': template_data},
+            {'method': 'post', 'path': ['project', '<<0[data][id]>>', 'periodic_task'], 'data': periodic_task},
+            {'method': 'post', 'path': ['project', '<<0[data][id]>>', 'periodic_task', '<<3[data][id]>>', 'execute']},
+            {'method': 'delete', 'path': ['project', '<<0[data][id]>>']},
+        ])
+        self.assertEqual(len(tuple(filter(lambda x: x['status'] not in (201, 200, 204), results))), 0, results)
+        self.assertIn('history_id', results[4]['data'].keys())
