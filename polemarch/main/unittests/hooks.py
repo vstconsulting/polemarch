@@ -1,5 +1,5 @@
 import os
-import json
+import json as json_mod
 try:
     from mock import patch
 except ImportError:  # nocv
@@ -34,7 +34,7 @@ class HooksTestCase(TestCase):
         rep += self.recipients[self.count]
         self.assertEqual(check_data[0], rep)
         self.assertEqual(check_data[1], 'on_execution')
-        message = json.loads(kwargs['input'])
+        message = json_mod.loads(kwargs['input'])
         self.assertEqual(message.get('test', None), 'test')
         self.assertTrue(kwargs['universal_newlines'])
         self.count += 1
@@ -64,12 +64,12 @@ class HooksTestCase(TestCase):
             self.assertEqual(hook.run(message=dict(test="test")), "Err\nErr")
             self.assertEqual(cmd.call_count, 4)
 
-    def check_output_run_http(self, method, url, data, **kwargs):
+    def check_output_run_http(self, method, url, data=None, json=None, **kwargs):
         # pylint: disable=protected-access, unused-argument
         self.assertEqual(method, "post")
         self.check_output_run(
-            [url, data['type']],
-            cwd='', input=json.dumps(data['payload']),
+            [url, json['type']],
+            cwd='', input=json_mod.dumps(json['payload']),
             universal_newlines=True
         )
         the_response = Response()

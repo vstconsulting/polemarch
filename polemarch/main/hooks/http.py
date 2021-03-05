@@ -11,7 +11,7 @@ class Backend(BaseHook):
     def execute(self, url, when, message) -> str:
         data = dict(type=when, payload=message)
         try:
-            response = requests.post(url, data=data)
+            response = requests.post(url, json=data)
             return "{} {}: {}".format(
                 response.status_code, response.reason, response.text
             )
