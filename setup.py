@@ -346,11 +346,11 @@ def get_compile_command(extensions_dict=None):
 def make_setup(**opts):
     if 'packages' not in opts:
         opts['packages'] = find_packages()
-    ext_modules_list = opts.pop('ext_modules_list', list())
+    ext_modules_list = opts.pop('ext_modules_list', [])
     ext_mod, ext_mod_dict = make_extensions(ext_modules_list, opts['packages'])
-    opts['ext_modules'] = opts.get('ext_modules', list()) + ext_mod
+    opts['ext_modules'] = opts.get('ext_modules', []) + ext_mod
     cmdclass = opts.get('cmdclass', dict())
-    static_exclude = opts.pop('static_exclude_min', list())
+    static_exclude = opts.pop('static_exclude_min', [])
     if 'compile' not in cmdclass:
         compile_class = get_compile_command(ext_mod_dict)
         compile_class.static_exclude = static_exclude
@@ -358,7 +358,7 @@ def make_setup(**opts):
     if has_cython:
         build_py.exclude = ext_modules_list
         install_lib.static_exclude = static_exclude
-        install_lib.compile_exclude = opts.pop('compile_modules_exclude', list())
+        install_lib.compile_exclude = opts.pop('compile_modules_exclude', [])
         cmdclass.update({
             'build_ext': _build_ext,
             'build_py': build_py,

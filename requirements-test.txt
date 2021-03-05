@@ -1,6 +1,6 @@
-vcrpy-unittest==0.1.6
-coverage~=5.1
+vcrpy-unittest==0.1.7
+coverage~=5.5
 mock~=3.0.5
-fakeldap==0.6.1
-tblib~=1.6.0
-django-test-migrations~=1.0.0
+fakeldap==0.6.2
+tblib~=1.7.0
+django-test-migrations~=1.1.0
