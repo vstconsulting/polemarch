@@ -1,8 +1,18 @@
 version: '3'
+
 services:
+
   polemarch:
     build: .
     restart: unless-stopped
+    depends_on:
+      - redis
+      - mysql
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/api/health/" ]
+      interval: 3s
+      timeout: 3s
+      retries: 3
     environment:
       POLEMARCH_DB_TYPE: mysql
       POLEMARCH_DB_NAME: project-db
@@ -19,15 +29,23 @@ services:
       TIMEZONE: 'Asia/Vladivostok'
     ports:
       - "8080:8080"
+
   redis:
     image: "redis:alpine"
+
   mysql:
-    image: "mysql:5.7"
+    image: mariadb:10.5
+    restart: unless-stopped
     environment:
       MYSQL_USER: project-user
       MYSQL_PASSWORD: project-pas
       MYSQL_DATABASE: project-db
       MYSQL_ROOT_PASSWORD: project-root
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "root", "-p${POLEMARCH_SQL_ROOT_PASSWORD:-project-root}" ]
+      interval: 3s
+      timeout: 3s
+      retries: 3
     volumes:
       - data-volume:/var/lib/mysql
 
