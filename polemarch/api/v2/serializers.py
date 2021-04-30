@@ -8,11 +8,10 @@ from collections import OrderedDict
 from django.contrib.auth import get_user_model
 from django.utils.functional import cached_property
 from django.db import transaction
-from rest_framework import serializers, exceptions, status, fields
+from rest_framework import serializers, exceptions, fields
 from vstutils.api import serializers as vst_serializers, fields as vst_fields
 from vstutils.api import auth as vst_auth
 from vstutils.api.serializers import DataSerializer, EmptySerializer
-from vstutils.api.base import Response
 from ...main.utils import AnsibleArgumentsReference
 from ...main.settings import LANGUAGES
 from ...main.validators import path_validator
@@ -88,9 +87,9 @@ class InventoryAutoCompletionField(vst_fields.AutoCompletionField):
 
 
 def with_signals(func):
-    '''
+    """
     Decorator for send api_pre_save and api_post_save signals from serializers.
-    '''
+    """
     def func_wrapper(*args, **kwargs):
         user = args[0].context['request'].user
         with transaction.atomic():
@@ -347,14 +346,8 @@ class OneHistorySerializer(_SignalSerializer):
                   "raw_stdout",
                   "raw_inventory",)
 
-    def get_raw(self, request) -> str:
-        return self.instance.get_raw(request.query_params.get("color", "no") == "yes")
-
     def get_raw_stdout(self, obj: models.History):
         return self.context.get('request').build_absolute_uri("raw/")
-
-    def get_facts(self, request):
-        return self.instance.facts
 
 
 class HistoryLinesSerializer(_SignalSerializer):
@@ -629,14 +622,13 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
                   'schedule',
                   'notes',)
 
-    def execute(self) -> Response:
-        inventory = self.instance.inventory
+    def execute(self):
         rdata = ExecuteResponseSerializer(data=dict(
-            detail="Started at inventory {}.".format(inventory),
+            detail=f"Started at inventory {self.instance.inventory}.",
             history_id=self.instance.execute(sync=False)
         ))
         rdata.is_valid(True)
-        return Response(rdata.data, status.HTTP_201_CREATED)
+        return rdata.data
 
 
 class TemplateSerializer(_WithVariablesSerializer):
@@ -710,9 +702,6 @@ class OneTemplateSerializer(TemplateSerializer):
             'options',
             'options_list',
         )
-
-    def execute(self, request):
-        return self.instance.execute(request.user, request.data.get('option', None))
 
 
 class TemplateExecSerializer(DataSerializer):
@@ -958,65 +947,6 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'notes',
                   'readme_content',
                   'execute_view_data',)
-
-    @transaction.atomic()
-    def sync(self) -> Response:
-        self.instance.start_repo_task("sync")
-        serializer = ActionResponseSerializer(
-            data=dict(detail="Sync with {}.".format(self.instance.repository))
-        )
-        serializer.is_valid(True)
-        return Response(serializer.data, status.HTTP_200_OK)
-
-    def _get_ansible_serializer(self, kind: str) -> serializers.Serializer:
-        view = self.context['view']
-        exec_method = getattr(view, 'execute_{}'.format(kind), None)
-        if exec_method is None:  # nocv
-            raise Exception('Unknown kind')
-        serializer_class = exec_method.kwargs['serializer_class']
-        serializer = serializer_class(context=self.context)
-        serializer.project = self.instance
-        return serializer
-
-    def _execution(self, kind: str, data: Dict, user: User, **kwargs) -> Response:
-        template = data.pop("template", None)
-        inventory = data.get("inventory", None)
-        msg = "Started in the inventory {}.".format(
-            inventory if inventory else 'specified in the project configuration.'
-        )
-        if template is not None:
-            init_type = "template"
-            obj_id = template
-            msg = 'Start template [id={}].'.format(template)
-        else:
-            init_type = "project"
-            obj_id = self.instance.id
-            serializer = self._get_ansible_serializer(kind.lower())
-            data = {
-                k: v for k, v in serializer.to_internal_value(data).items()
-                if k in data.keys() or v
-            }
-        target = data.pop(kind)
-        try:
-            target = str(target)
-        except UnicodeEncodeError:  # nocv
-            target = target.encode('utf-8')
-        history_id = self.instance.execute(
-            kind, str(target),
-            initiator=obj_id, initiator_type=init_type, executor=user, **data
-        )
-        rdata = ExecuteResponseSerializer(data=dict(
-            detail=msg,
-            history_id=history_id, executor=user.id
-        ))
-        rdata.is_valid(raise_exception=True)
-        return Response(rdata.data, status.HTTP_201_CREATED)
-
-    def execute_playbook(self, request) -> Response:
-        return self._execution("playbook", dict(request.data), request.user)
-
-    def execute_module(self, request) -> Response:
-        return self._execution("module", dict(request.data), request.user)
 
 
 def generate_fileds(ansible_reference: AnsibleArgumentsReference, ansible_type: str) -> OrderedDict:

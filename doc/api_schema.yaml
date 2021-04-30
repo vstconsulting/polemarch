@@ -24,9 +24,9 @@ info:
       url: https://gitlab.com/vstconsulting/polemarch.git
     Request:
       - name: Question
-        url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%201.8.0
+        url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%201.8.2
       - name: Bug report
-        url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%201.8.0
+        url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%201.8.2
       - name: Feature request
         url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Feature%20request&issue%5Btitle%5D=
   x-menu:
@@ -58,16 +58,21 @@ info:
         - name: Hooks
           span_class: fa fa-plug
           url: /hook
+  x-page-limit: 20
   x-settings:
     static_path: /static/
     enable_gravatar: true
     time_zone: UTC
+    logout_url: /account/logout/
+    login_url: /account/login/
   x-versions:
-    application: 1.8.0
-    library: 1.8.0
-    vstutils: 4.0.14
-    django: 2.2.14
-    ansible: 2.9.6
+    application: 1.8.2
+    library: 1.8.2
+    vstutils: 4.7.1
+    django: '3.2'
+    djangorestframework: 3.12.4
+    drf_yasg: 1.20.0
+    ansible: 2.9.20
   version: v2
   x-user-id: 1
 host: localhost:8080
@@ -130,6 +135,8 @@ paths:
                   $ref: '#/definitions/ProjectTemplate'
       tags:
         - community_template
+      x-subscribe-labels:
+        - main.ProjectTemplate
     parameters: []
   /community_template/{id}/:
     get:
@@ -143,6 +150,8 @@ paths:
             $ref: '#/definitions/OneProjectTemplate'
       tags:
         - community_template
+      x-subscribe-labels:
+        - main.ProjectTemplate
     parameters:
       - name: id
         in: path
@@ -244,6 +253,8 @@ paths:
                   $ref: '#/definitions/Group'
       tags:
         - group
+      x-subscribe-labels:
+        - main.Group
     post:
       operationId: group_add
       description: Create a new group.
@@ -273,6 +284,8 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
         - group
+      x-subscribe-labels:
+        - main.Group
     put:
       operationId: group_update
       description: Update a group.
@@ -415,6 +428,8 @@ paths:
                   $ref: '#/definitions/Group'
       tags:
         - group
+      x-subscribe-labels:
+        - main.Group
     post:
       operationId: group_group_add
       description: Create a new group.
@@ -431,6 +446,7 @@ paths:
             $ref: '#/definitions/GroupCreateMaster'
       tags:
         - group
+      x-allow-append: true
     parameters:
       - name: id
         in: path
@@ -449,6 +465,8 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
         - group
+      x-subscribe-labels:
+        - main.Group
     put:
       operationId: group_group_update
       description: Update a group.
@@ -624,6 +642,8 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
         - group
+      x-subscribe-labels:
+        - main.Variable
     post:
       operationId: group_group_variables_add
       description: Create a new variable of instance.
@@ -640,6 +660,7 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - group
+      x-allow-append: false
     parameters:
       - name: group_id
         in: path
@@ -663,6 +684,8 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - group
+      x-subscribe-labels:
+        - main.Variable
     put:
       operationId: group_group_variables_update
       description: Update variable value.
@@ -798,6 +821,8 @@ paths:
                   $ref: '#/definitions/Host'
       tags:
         - group
+      x-subscribe-labels:
+        - main.Host
     post:
       operationId: group_host_add
       description: Create a new host.
@@ -814,6 +839,7 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
         - group
+      x-allow-append: true
     parameters:
       - name: id
         in: path
@@ -832,6 +858,8 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
         - group
+      x-subscribe-labels:
+        - main.Host
     put:
       operationId: group_host_update
       description: Update a host.
@@ -1007,6 +1035,8 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
         - group
+      x-subscribe-labels:
+        - main.Variable
     post:
       operationId: group_host_variables_add
       description: Create a new variable of instance.
@@ -1023,6 +1053,7 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - group
+      x-allow-append: false
     parameters:
       - name: host_id
         in: path
@@ -1046,6 +1077,8 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - group
+      x-subscribe-labels:
+        - main.Variable
     put:
       operationId: group_host_variables_update
       description: Update variable value.
@@ -1194,6 +1227,8 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
         - group
+      x-subscribe-labels:
+        - main.Variable
     post:
       operationId: group_variables_add
       description: Create a new variable of instance.
@@ -1210,6 +1245,7 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - group
+      x-allow-append: false
     parameters:
       - name: id
         in: path
@@ -1228,6 +1264,8 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - group
+      x-subscribe-labels:
+        - main.Variable
     put:
       operationId: group_variables_update
       description: Update variable value.
@@ -1373,6 +1411,8 @@ paths:
                   $ref: '#/definitions/History'
       tags:
         - history
+      x-subscribe-labels:
+        - main.History
     parameters: []
   /history/{id}/:
     get:
@@ -1386,6 +1426,8 @@ paths:
             $ref: '#/definitions/OneHistory'
       tags:
         - history
+      x-subscribe-labels:
+        - main.History
     delete:
       operationId: history_remove
       description: Remove an existing history record.
@@ -1434,6 +1476,7 @@ paths:
           description: NO CONTENT
       tags:
         - history
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -1442,7 +1485,7 @@ paths:
         type: integer
   /history/{id}/facts/:
     get:
-      operationId: history_facts
+      operationId: history_facts_get
       description: Get compilated history facts (only for execution 'module' with
         module 'setup').
       parameters: []
@@ -1453,6 +1496,8 @@ paths:
             $ref: '#/definitions/Data'
       tags:
         - history
+      x-subscribe-labels:
+        - main.History
     parameters:
       - name: id
         in: path
@@ -1531,6 +1576,8 @@ paths:
                   $ref: '#/definitions/Hook'
       tags:
         - hook
+      x-subscribe-labels:
+        - main.Hook
     post:
       operationId: hook_add
       description: Create a new hook.
@@ -1560,6 +1607,8 @@ paths:
             $ref: '#/definitions/Hook'
       tags:
         - hook
+      x-subscribe-labels:
+        - main.Hook
     put:
       operationId: hook_update
       description: Update a hook.
@@ -1684,6 +1733,8 @@ paths:
                   $ref: '#/definitions/Host'
       tags:
         - host
+      x-subscribe-labels:
+        - main.Host
     post:
       operationId: host_add
       description: Create a new host.
@@ -1713,6 +1764,8 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
         - host
+      x-subscribe-labels:
+        - main.Host
     put:
       operationId: host_update
       description: Update a host.
@@ -1873,6 +1926,8 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
         - host
+      x-subscribe-labels:
+        - main.Variable
     post:
       operationId: host_variables_add
       description: Create a new variable of instance.
@@ -1889,6 +1944,7 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - host
+      x-allow-append: false
     parameters:
       - name: id
         in: path
@@ -1907,6 +1963,8 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - host
+      x-subscribe-labels:
+        - main.Variable
     put:
       operationId: host_variables_update
       description: Update variable value.
@@ -2032,6 +2090,8 @@ paths:
                   $ref: '#/definitions/Inventory'
       tags:
         - inventory
+      x-subscribe-labels:
+        - main.Inventory
     post:
       operationId: inventory_add
       description: Create a new inventory.
@@ -2079,6 +2139,8 @@ paths:
             $ref: '#/definitions/OneInventory'
       tags:
         - inventory
+      x-subscribe-labels:
+        - main.Inventory
     put:
       operationId: inventory_update
       description: Update a inventory.
@@ -2198,6 +2260,8 @@ paths:
                   $ref: '#/definitions/Group'
       tags:
         - inventory
+      x-subscribe-labels:
+        - main.Group
     parameters:
       - name: id
         in: path
@@ -2216,6 +2280,8 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
         - inventory
+      x-subscribe-labels:
+        - main.Group
     parameters:
       - name: all_groups_id
         in: path
@@ -2303,6 +2369,8 @@ paths:
                   $ref: '#/definitions/Host'
       tags:
         - inventory
+      x-subscribe-labels:
+        - main.Host
     parameters:
       - name: id
         in: path
@@ -2321,6 +2389,8 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
         - inventory
+      x-subscribe-labels:
+        - main.Host
     parameters:
       - name: all_hosts_id
         in: path
@@ -2426,6 +2496,8 @@ paths:
                   $ref: '#/definitions/Group'
       tags:
         - inventory
+      x-subscribe-labels:
+        - main.Group
     post:
       operationId: inventory_group_add
       description: Create a new group.
@@ -2442,6 +2514,7 @@ paths:
             $ref: '#/definitions/GroupCreateMaster'
       tags:
         - inventory
+      x-allow-append: true
     parameters:
       - name: id
         in: path
@@ -2460,6 +2533,8 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
         - inventory
+      x-subscribe-labels:
+        - main.Group
     put:
       operationId: inventory_group_update
       description: Update a group.
@@ -2635,6 +2710,8 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
         - inventory
+      x-subscribe-labels:
+        - main.Variable
     post:
       operationId: inventory_group_variables_add
       description: Create a new variable of instance.
@@ -2651,6 +2728,7 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - inventory
+      x-allow-append: false
     parameters:
       - name: group_id
         in: path
@@ -2674,6 +2752,8 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - inventory
+      x-subscribe-labels:
+        - main.Variable
     put:
       operationId: inventory_group_variables_update
       description: Update variable value.
@@ -2809,6 +2889,8 @@ paths:
                   $ref: '#/definitions/Host'
       tags:
         - inventory
+      x-subscribe-labels:
+        - main.Host
     post:
       operationId: inventory_host_add
       description: Create a new host.
@@ -2825,6 +2907,7 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
         - inventory
+      x-allow-append: true
     parameters:
       - name: id
         in: path
@@ -2843,6 +2926,8 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
         - inventory
+      x-subscribe-labels:
+        - main.Host
     put:
       operationId: inventory_host_update
       description: Update a host.
@@ -3018,6 +3103,8 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
         - inventory
+      x-subscribe-labels:
+        - main.Variable
     post:
       operationId: inventory_host_variables_add
       description: Create a new variable of instance.
@@ -3034,6 +3121,7 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - inventory
+      x-allow-append: false
     parameters:
       - name: host_id
         in: path
@@ -3057,6 +3145,8 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - inventory
+      x-subscribe-labels:
+        - main.Variable
     put:
       operationId: inventory_host_variables_update
       description: Update variable value.
@@ -3205,6 +3295,8 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
         - inventory
+      x-subscribe-labels:
+        - main.Variable
     post:
       operationId: inventory_variables_add
       description: Create a new variable of instance.
@@ -3221,6 +3313,7 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - inventory
+      x-allow-append: false
     parameters:
       - name: id
         in: path
@@ -3239,6 +3332,8 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - inventory
+      x-subscribe-labels:
+        - main.Variable
     put:
       operationId: inventory_variables_update
       description: Update variable value.
@@ -3374,6 +3469,8 @@ paths:
                   $ref: '#/definitions/Project'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Project
     post:
       operationId: project_add
       description: Create a new project.
@@ -3403,6 +3500,8 @@ paths:
             $ref: '#/definitions/OneProject'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Project
     put:
       operationId: project_update
       description: Update a project.
@@ -3522,7 +3621,9 @@ paths:
   /project/{id}/history/:
     get:
       operationId: project_history_list
-      description: ''
+      description: History(id, hidden, project, inventory, mode, revision, kind, start_time,
+        stop_time, raw_args, json_args, raw_inventory, status, initiator, initiator_type,
+        executor, json_options)
       parameters:
         - name: id
           in: query
@@ -3611,6 +3712,8 @@ paths:
                   $ref: '#/definitions/ProjectHistory'
       tags:
         - project
+      x-subscribe-labels:
+        - main.History
     parameters:
       - name: id
         in: path
@@ -3620,7 +3723,9 @@ paths:
   /project/{id}/history/{history_id}/:
     get:
       operationId: project_history_get
-      description: ''
+      description: History(id, hidden, project, inventory, mode, revision, kind, start_time,
+        stop_time, raw_args, json_args, raw_inventory, status, initiator, initiator_type,
+        executor, json_options)
       parameters: []
       responses:
         '200':
@@ -3629,9 +3734,13 @@ paths:
             $ref: '#/definitions/OneHistory'
       tags:
         - project
+      x-subscribe-labels:
+        - main.History
     delete:
       operationId: project_history_remove
-      description: ''
+      description: History(id, hidden, project, inventory, mode, revision, kind, start_time,
+        stop_time, raw_args, json_args, raw_inventory, status, initiator, initiator_type,
+        executor, json_options)
       parameters: []
       responses:
         '204':
@@ -3687,6 +3796,7 @@ paths:
           description: NO CONTENT
       tags:
         - project
+      x-multiaction: false
     parameters:
       - name: history_id
         in: path
@@ -3700,7 +3810,7 @@ paths:
         type: integer
   /project/{id}/history/{history_id}/facts/:
     get:
-      operationId: project_history_facts
+      operationId: project_history_facts_get
       description: Get compilated history facts (only for execution 'module' with
         module 'setup').
       parameters: []
@@ -3711,6 +3821,8 @@ paths:
             $ref: '#/definitions/Data'
       tags:
         - project
+      x-subscribe-labels:
+        - main.History
     parameters:
       - name: history_id
         in: path
@@ -3794,6 +3906,8 @@ paths:
                   $ref: '#/definitions/Inventory'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Inventory
     post:
       operationId: project_inventory_add
       description: Create a new inventory.
@@ -3810,6 +3924,7 @@ paths:
             $ref: '#/definitions/OneInventory'
       tags:
         - project
+      x-allow-append: true
     parameters:
       - name: id
         in: path
@@ -3874,6 +3989,8 @@ paths:
             $ref: '#/definitions/OneInventory'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Inventory
     put:
       operationId: project_inventory_update
       description: Update a inventory.
@@ -3999,6 +4116,8 @@ paths:
                   $ref: '#/definitions/Group'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Group
     parameters:
       - name: id
         in: path
@@ -4023,6 +4142,8 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Group
     parameters:
       - name: all_groups_id
         in: path
@@ -4116,6 +4237,8 @@ paths:
                   $ref: '#/definitions/Host'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Host
     parameters:
       - name: id
         in: path
@@ -4140,6 +4263,8 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Host
     parameters:
       - name: all_hosts_id
         in: path
@@ -4257,6 +4382,8 @@ paths:
                   $ref: '#/definitions/Group'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Group
     post:
       operationId: project_inventory_group_add
       description: Create a new group.
@@ -4273,6 +4400,7 @@ paths:
             $ref: '#/definitions/GroupCreateMaster'
       tags:
         - project
+      x-allow-append: true
     parameters:
       - name: id
         in: path
@@ -4297,6 +4425,8 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Group
     put:
       operationId: project_inventory_group_update
       description: Update a group.
@@ -4487,6 +4617,8 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Variable
     post:
       operationId: project_inventory_group_variables_add
       description: Create a new variable of instance.
@@ -4503,6 +4635,7 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - project
+      x-allow-append: false
     parameters:
       - name: group_id
         in: path
@@ -4531,6 +4664,8 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Variable
     put:
       operationId: project_inventory_group_variables_update
       description: Update variable value.
@@ -4671,6 +4806,8 @@ paths:
                   $ref: '#/definitions/Host'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Host
     post:
       operationId: project_inventory_host_add
       description: Create a new host.
@@ -4687,6 +4824,7 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
         - project
+      x-allow-append: true
     parameters:
       - name: id
         in: path
@@ -4711,6 +4849,8 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Host
     put:
       operationId: project_inventory_host_update
       description: Update a host.
@@ -4901,6 +5041,8 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Variable
     post:
       operationId: project_inventory_host_variables_add
       description: Create a new variable of instance.
@@ -4917,6 +5059,7 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - project
+      x-allow-append: false
     parameters:
       - name: host_id
         in: path
@@ -4945,6 +5088,8 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Variable
     put:
       operationId: project_inventory_host_variables_update
       description: Update variable value.
@@ -5104,6 +5249,8 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Variable
     post:
       operationId: project_inventory_variables_add
       description: Create a new variable of instance.
@@ -5120,6 +5267,7 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - project
+      x-allow-append: false
     parameters:
       - name: id
         in: path
@@ -5144,6 +5292,8 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Variable
     put:
       operationId: project_inventory_variables_update
       description: Update variable value.
@@ -5263,6 +5413,8 @@ paths:
                   $ref: '#/definitions/Module'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Module
     parameters:
       - name: id
         in: path
@@ -5281,6 +5433,8 @@ paths:
             $ref: '#/definitions/OneModule'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Module
     parameters:
       - name: id
         in: path
@@ -5378,6 +5532,8 @@ paths:
                   $ref: '#/definitions/Periodictask'
       tags:
         - project
+      x-subscribe-labels:
+        - main.PeriodicTask
     post:
       operationId: project_periodic_task_add
       description: Create a new periodic task.
@@ -5394,6 +5550,7 @@ paths:
             $ref: '#/definitions/OnePeriodictask'
       tags:
         - project
+      x-allow-append: false
     parameters:
       - name: id
         in: path
@@ -5412,6 +5569,8 @@ paths:
             $ref: '#/definitions/OnePeriodictask'
       tags:
         - project
+      x-subscribe-labels:
+        - main.PeriodicTask
     put:
       operationId: project_periodic_task_update
       description: Update a periodic task.
@@ -5561,6 +5720,8 @@ paths:
                   $ref: '#/definitions/PeriodicTaskVariable'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Variable
     post:
       operationId: project_periodic_task_variables_add
       description: Create a new variable of periodic task.
@@ -5577,6 +5738,7 @@ paths:
             $ref: '#/definitions/PeriodicTaskVariable'
       tags:
         - project
+      x-allow-append: false
     parameters:
       - name: id
         in: path
@@ -5601,6 +5763,8 @@ paths:
             $ref: '#/definitions/PeriodicTaskVariable'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Variable
     put:
       operationId: project_periodic_task_variables_update
       description: Update variable value.
@@ -5742,6 +5906,8 @@ paths:
                   $ref: '#/definitions/Playbook'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Task
     parameters:
       - name: id
         in: path
@@ -5760,6 +5926,8 @@ paths:
             $ref: '#/definitions/OnePlaybook'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Task
     parameters:
       - name: id
         in: path
@@ -5895,6 +6063,8 @@ paths:
                   $ref: '#/definitions/Template'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Template
     post:
       operationId: project_template_add
       description: Create a new execute template.
@@ -5911,6 +6081,7 @@ paths:
             $ref: '#/definitions/OneTemplate'
       tags:
         - project
+      x-allow-append: false
     parameters:
       - name: id
         in: path
@@ -5929,6 +6100,8 @@ paths:
             $ref: '#/definitions/OneTemplate'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Template
     put:
       operationId: project_template_update
       description: Update a execute template.
@@ -6078,6 +6251,8 @@ paths:
                   $ref: '#/definitions/ProjectVariable'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Variable
     post:
       operationId: project_variables_add
       description: Create a new variable of instance.
@@ -6094,6 +6269,7 @@ paths:
             $ref: '#/definitions/ProjectVariable'
       tags:
         - project
+      x-allow-append: false
     parameters:
       - name: id
         in: path
@@ -6112,6 +6288,8 @@ paths:
             $ref: '#/definitions/ProjectVariable'
       tags:
         - project
+      x-subscribe-labels:
+        - main.Variable
     put:
       operationId: project_variables_update
       description: Update variable value.
@@ -6232,6 +6410,8 @@ paths:
                   $ref: '#/definitions/Team'
       tags:
         - team
+      x-subscribe-labels:
+        - main.UserGroup
     post:
       operationId: team_add
       description: Create a new team.
@@ -6261,6 +6441,8 @@ paths:
             $ref: '#/definitions/OneTeam'
       tags:
         - team
+      x-subscribe-labels:
+        - main.UserGroup
     put:
       operationId: team_update
       description: Update a team.
@@ -6441,6 +6623,8 @@ paths:
                   $ref: '#/definitions/User'
       tags:
         - team
+      x-subscribe-labels:
+        - auth.User
     post:
       operationId: team_user_add
       description: Create a new user.
@@ -6457,6 +6641,7 @@ paths:
             $ref: '#/definitions/CreateUser'
       tags:
         - team
+      x-allow-append: true
     parameters:
       - name: id
         in: path
@@ -6475,6 +6660,8 @@ paths:
             $ref: '#/definitions/OneUser'
       tags:
         - team
+      x-subscribe-labels:
+        - auth.User
     put:
       operationId: team_user_update
       description: Update a user.
@@ -6514,6 +6701,47 @@ paths:
       responses:
         '204':
           description: NO CONTENT
+      tags:
+        - team
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this user group.
+        required: true
+        type: integer
+      - name: user_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this users sublist.
+  /team/{id}/user/{user_id}/_settings/:
+    get:
+      operationId: team_user__settings_get
+      description: Return all users.
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/_UserSettings'
+      tags:
+        - team
+      x-subscribe-labels:
+        - auth.User
+    put:
+      operationId: team_user__settings_update
+      description: Update a user.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/_UserSettings'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/_UserSettings'
       tags:
         - team
     parameters:
@@ -6587,14 +6815,19 @@ paths:
     get:
       operationId: team_user_settings_get
       summary: |-
-        A settings object, that allows API settings to be accessed as properties.
-            For example:
+        A settings object that allows REST Framework settings to be accessed as
+            properties. For example:
       description: |-
         from rest_framework.settings import api_settings
                 print(api_settings.DEFAULT_RENDERER_CLASSES)
 
             Any setting with string import paths will be automatically resolved
             and return the class, rather than the string literal.
+
+            Note:
+            This is an internal class that is only compatible with settings namespaced
+            under the REST_FRAMEWORK name. It is not intended to be used by 3rd-party
+            apps, and test helpers like `override_settings` may not work as expected.
       parameters: []
       responses:
         '200':
@@ -6603,17 +6836,24 @@ paths:
             $ref: '#/definitions/UserSettings'
       tags:
         - team
+      x-subscribe-labels:
+        - auth.User
     post:
       operationId: team_user_settings_add
       summary: |-
-        A settings object, that allows API settings to be accessed as properties.
-            For example:
+        A settings object that allows REST Framework settings to be accessed as
+            properties. For example:
       description: |-
         from rest_framework.settings import api_settings
                 print(api_settings.DEFAULT_RENDERER_CLASSES)
 
             Any setting with string import paths will be automatically resolved
             and return the class, rather than the string literal.
+
+            Note:
+            This is an internal class that is only compatible with settings namespaced
+            under the REST_FRAMEWORK name. It is not intended to be used by 3rd-party
+            apps, and test helpers like `override_settings` may not work as expected.
       parameters:
         - name: data
           in: body
@@ -6630,18 +6870,64 @@ paths:
     delete:
       operationId: team_user_settings_remove
       summary: |-
-        A settings object, that allows API settings to be accessed as properties.
-            For example:
+        A settings object that allows REST Framework settings to be accessed as
+            properties. For example:
       description: |-
         from rest_framework.settings import api_settings
                 print(api_settings.DEFAULT_RENDERER_CLASSES)
 
             Any setting with string import paths will be automatically resolved
             and return the class, rather than the string literal.
+
+            Note:
+            This is an internal class that is only compatible with settings namespaced
+            under the REST_FRAMEWORK name. It is not intended to be used by 3rd-party
+            apps, and test helpers like `override_settings` may not work as expected.
       parameters: []
       responses:
         '204':
           description: NO CONTENT
+      tags:
+        - team
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this user group.
+        required: true
+        type: integer
+      - name: user_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this users sublist.
+  /team/{id}/user/{user_id}/twofa/:
+    get:
+      operationId: team_user_twofa_get
+      description: Return all users.
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/TwoFA'
+      tags:
+        - team
+      x-subscribe-labels:
+        - auth.User
+    put:
+      operationId: team_user_twofa_update
+      description: Update a user.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/TwoFA'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/TwoFA'
       tags:
         - team
     parameters:
@@ -6742,6 +7028,8 @@ paths:
                   $ref: '#/definitions/User'
       tags:
         - user
+      x-subscribe-labels:
+        - auth.User
     post:
       operationId: user_add
       description: Create a new user.
@@ -6771,6 +7059,8 @@ paths:
             $ref: '#/definitions/OneUser'
       tags:
         - user
+      x-subscribe-labels:
+        - auth.User
     put:
       operationId: user_update
       description: Update a user.
@@ -6810,6 +7100,42 @@ paths:
       responses:
         '204':
           description: NO CONTENT
+      tags:
+        - user
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this user.
+        required: true
+        type: integer
+  /user/{id}/_settings/:
+    get:
+      operationId: user__settings_get
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/_UserSettings'
+      tags:
+        - user
+      x-subscribe-labels:
+        - auth.User
+    put:
+      operationId: user__settings_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/_UserSettings'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/_UserSettings'
       tags:
         - user
     parameters:
@@ -6876,6 +7202,8 @@ paths:
             $ref: '#/definitions/UserSettings'
       tags:
         - user
+      x-subscribe-labels:
+        - auth.User
     post:
       operationId: user_settings_add
       description: Return user settings.
@@ -6907,6 +7235,42 @@ paths:
         description: A unique integer value identifying this user.
         required: true
         type: integer
+  /user/{id}/twofa/:
+    get:
+      operationId: user_twofa_get
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/TwoFA'
+      tags:
+        - user
+      x-subscribe-labels:
+        - auth.User
+    put:
+      operationId: user_twofa_update
+      description: ''
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/TwoFA'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/TwoFA'
+      tags:
+        - user
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this user.
+        required: true
+        type: integer
 definitions:
   ProjectTemplate:
     required:
@@ -6928,6 +7292,12 @@ definitions:
         enum:
           - GIT
           - TAR
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - type
+    x-view-field-name: name
   OneProjectTemplate:
     required:
       - id
@@ -6959,6 +7329,14 @@ definitions:
         type: string
         maxLength: 2048
         minLength: 1
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - description
+        - type
+        - repository
+    x-view-field-name: name
   ProjectTemplateCreate:
     type: object
     properties:
@@ -6967,12 +7345,17 @@ definitions:
         type: integer
         readOnly: true
         additionalProperties:
-          redirect: true
+          redirect: project
         x-nullable: true
       name:
         title: Name
         type: string
         minLength: 1
+    x-properties-groups:
+      '':
+        - project_id
+        - name
+    x-view-field-name: name
   Group:
     type: object
     properties:
@@ -6993,8 +7376,14 @@ definitions:
         title: Project Based
         type: boolean
         readOnly: true
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - children
+        - from_project
+    x-view-field-name: name
   User:
-    title: Owner
     required:
       - username
     type: object
@@ -7020,6 +7409,13 @@ definitions:
         type: string
         format: email
         minLength: 1
+    x-properties-groups:
+      '':
+        - id
+        - username
+        - is_active
+        - email
+    x-view-field-name: username
   GroupCreateMaster:
     type: object
     properties:
@@ -7042,6 +7438,14 @@ definitions:
         default: false
       owner:
         $ref: '#/definitions/User'
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - notes
+        - children
+        - owner
+    x-view-field-name: name
   OneGroup:
     type: object
     properties:
@@ -7064,6 +7468,14 @@ definitions:
         readOnly: true
       owner:
         $ref: '#/definitions/User'
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - notes
+        - children
+        - owner
+    x-view-field-name: name
   SetOwner:
     required:
       - user_id
@@ -7074,10 +7486,18 @@ definitions:
         type: integer
         format: fk
         additionalProperties:
+          dependence: null
+          filters: null
+          makeLink: true
           model:
             $ref: '#/definitions/User'
+          usePrefetch: true
           value_field: id
           view_field: username
+    x-properties-groups:
+      '':
+        - user_id
+    x-view-field-name: user_id
   InventoryVariable:
     required:
       - key
@@ -7129,6 +7549,12 @@ definitions:
             ansible_port: integer
             ansible_ssh_pass: password
             ansible_ssh_private_key_file: secretfile
+    x-properties-groups:
+      '':
+        - id
+        - key
+        - value
+    x-view-field-name: key
   Host:
     type: object
     properties:
@@ -7152,6 +7578,13 @@ definitions:
         title: Project Based
         type: boolean
         readOnly: true
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - type
+        - from_project
+    x-view-field-name: name
   OneHost:
     type: object
     properties:
@@ -7177,6 +7610,14 @@ definitions:
         default: HOST
       owner:
         $ref: '#/definitions/User'
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - notes
+        - type
+        - owner
+    x-view-field-name: name
   History:
     required:
       - mode
@@ -7239,6 +7680,21 @@ definitions:
         type: string
         format: date-time
         x-nullable: true
+    x-properties-groups:
+      '':
+        - id
+        - start_time
+        - executor
+        - initiator
+        - initiator_type
+        - project
+        - inventory
+        - kind
+        - mode
+        - options
+        - status
+        - stop_time
+    x-view-field-name: start_time
   OneHistory:
     required:
       - mode
@@ -7327,9 +7783,33 @@ definitions:
         title: Raw inventory
         type: string
         minLength: 1
+    x-properties-groups:
+      '':
+        - id
+        - status
+        - executor
+        - project
+        - revision
+        - inventory
+        - kind
+        - mode
+        - execute_args
+        - execution_time
+        - start_time
+        - stop_time
+        - initiator
+        - initiator_type
+        - options
+        - raw_args
+        - raw_stdout
+        - raw_inventory
+    x-view-field-name: status
   Empty:
     type: object
     properties: {}
+    x-properties-groups:
+      '': []
+    x-view-field-name: null
   ActionResponse:
     required:
       - detail
@@ -7339,9 +7819,16 @@ definitions:
         title: Detail
         type: string
         minLength: 1
+    x-properties-groups:
+      '':
+        - detail
+    x-view-field-name: detail
   Data:
     type: object
     properties: {}
+    x-properties-groups:
+      '': []
+    x-view-field-name: null
   Hook:
     required:
       - type
@@ -7382,6 +7869,15 @@ definitions:
         title: Recipients
         type: string
         minLength: 1
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - type
+        - when
+        - enable
+        - recipients
+    x-view-field-name: name
   Inventory:
     type: object
     properties:
@@ -7398,6 +7894,12 @@ definitions:
         title: Project Based
         type: boolean
         readOnly: true
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - from_project
+    x-view-field-name: name
   OneInventory:
     type: object
     properties:
@@ -7416,6 +7918,13 @@ definitions:
         format: textarea
       owner:
         $ref: '#/definitions/User'
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - notes
+        - owner
+    x-view-field-name: name
   InventoryImport:
     required:
       - name
@@ -7427,7 +7936,7 @@ definitions:
         type: integer
         readOnly: true
         additionalProperties:
-          redirect: true
+          redirect: inventory
         x-nullable: true
       name:
         title: Name
@@ -7437,6 +7946,12 @@ definitions:
         title: Raw data
         type: string
         minLength: 1
+    x-properties-groups:
+      '':
+        - inventory_id
+        - name
+        - raw_data
+    x-view-field-name: name
   Project:
     type: object
     properties:
@@ -7464,6 +7979,13 @@ definitions:
           - WAIT_SYNC
           - SYNC
         readOnly: true
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - type
+        - status
+    x-view-field-name: name
   ProjectCreateMaster:
     required:
       - name
@@ -7541,6 +8063,18 @@ definitions:
         type: string
         minLength: 1
         x-nullable: true
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - status
+        - type
+        - repository
+        - repo_auth
+        - auth_data
+        - branch
+        - additional_playbook_path
+    x-view-field-name: name
   OneProject:
     type: object
     properties:
@@ -7589,6 +8123,19 @@ definitions:
         readOnly: true
       execute_view_data:
         $ref: '#/definitions/Data'
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - repository
+        - status
+        - revision
+        - branch
+        - owner
+        - notes
+        - readme_content
+        - execute_view_data
+    x-view-field-name: name
   AnsibleModule:
     required:
       - module
@@ -7597,10 +8144,11 @@ definitions:
       module:
         title: Module
         type: string
-        format: autocomplete
+        format: fk_autocomplete
         additionalProperties:
           model:
             $ref: '#/definitions/Module'
+          usePrefetch: true
           value_field: name
           view_field: path
       args:
@@ -7655,10 +8203,11 @@ definitions:
         description: specify inventory host path or comma separated host list. --inventory-file
           is deprecated
         type: string
-        format: autocomplete
+        format: fk_autocomplete
         additionalProperties:
           model:
             $ref: '#/definitions/Inventory'
+          usePrefetch: true
           value_field: id
           view_field: name
       limit:
@@ -7746,6 +8295,40 @@ definitions:
         title: Group
         type: string
         default: all
+    x-properties-groups:
+      '':
+        - module
+        - args
+        - background
+        - become
+        - become_method
+        - become_user
+        - check
+        - connection
+        - diff
+        - extra_vars
+        - forks
+        - inventory
+        - limit
+        - list_hosts
+        - module_path
+        - one_line
+        - playbook_dir
+        - poll
+        - private_key
+        - scp_extra_args
+        - sftp_extra_args
+        - ssh_common_args
+        - ssh_extra_args
+        - syntax_check
+        - timeout
+        - tree
+        - user
+        - vault_id
+        - vault_password_file
+        - verbose
+        - group
+    x-view-field-name: args
   ExecuteResponse:
     required:
       - detail
@@ -7759,12 +8342,18 @@ definitions:
         title: History id
         type: integer
         additionalProperties:
-          redirect: true
+          redirect: history
         x-nullable: true
       executor:
         title: Executor
         type: integer
         x-nullable: true
+    x-properties-groups:
+      '':
+        - detail
+        - history_id
+        - executor
+    x-view-field-name: history_id
   AnsiblePlaybook:
     required:
       - playbook
@@ -7773,10 +8362,11 @@ definitions:
       playbook:
         title: Playbook
         type: string
-        format: autocomplete
+        format: fk_autocomplete
         additionalProperties:
           model:
             $ref: '#/definitions/Playbook'
+          usePrefetch: true
           value_field: playbook
           view_field: name
       args:
@@ -7837,10 +8427,11 @@ definitions:
         description: specify inventory host path or comma separated host list. --inventory-file
           is deprecated
         type: string
-        format: autocomplete
+        format: fk_autocomplete
         additionalProperties:
           model:
             $ref: '#/definitions/Inventory'
+          usePrefetch: true
           value_field: id
           view_field: name
       limit:
@@ -7932,6 +8523,42 @@ definitions:
         type: integer
         default: 0
         maximum: 4
+    x-properties-groups:
+      '':
+        - playbook
+        - args
+        - become
+        - become_method
+        - become_user
+        - check
+        - connection
+        - diff
+        - extra_vars
+        - flush_cache
+        - force_handlers
+        - forks
+        - inventory
+        - limit
+        - list_hosts
+        - list_tags
+        - list_tasks
+        - module_path
+        - private_key
+        - scp_extra_args
+        - sftp_extra_args
+        - skip_tags
+        - ssh_common_args
+        - ssh_extra_args
+        - start_at_task
+        - step
+        - syntax_check
+        - tags
+        - timeout
+        - user
+        - vault_id
+        - vault_password_file
+        - verbose
+    x-view-field-name: args
   ProjectHistory:
     required:
       - mode
@@ -7995,6 +8622,21 @@ definitions:
         type: string
         format: date-time
         x-nullable: true
+    x-properties-groups:
+      '':
+        - id
+        - start_time
+        - executor
+        - initiator
+        - initiator_type
+        - revision
+        - inventory
+        - kind
+        - mode
+        - options
+        - status
+        - stop_time
+    x-view-field-name: start_time
   InventoryFileImport:
     required:
       - name
@@ -8005,7 +8647,7 @@ definitions:
         type: integer
         readOnly: true
         additionalProperties:
-          redirect: true
+          redirect: inventory
         x-nullable: true
       name:
         title: Name
@@ -8017,6 +8659,12 @@ definitions:
         type: string
         readOnly: true
         minLength: 1
+    x-properties-groups:
+      '':
+        - inventory_id
+        - name
+        - raw_data
+    x-view-field-name: name
   Module:
     required:
       - path
@@ -8035,6 +8683,12 @@ definitions:
         title: Name
         type: string
         readOnly: true
+    x-properties-groups:
+      '':
+        - id
+        - path
+        - name
+    x-view-field-name: name
   OneModule:
     required:
       - path
@@ -8055,8 +8709,16 @@ definitions:
         readOnly: true
       data:
         title: Data
-        type: object
+        type: string
+        format: json
         readOnly: true
+    x-properties-groups:
+      '':
+        - id
+        - path
+        - name
+        - data
+    x-view-field-name: name
   Periodictask:
     required:
       - schedule
@@ -8140,6 +8802,20 @@ definitions:
           types:
             CRONTAB: crontab
             INTERVAL: integer
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - kind
+        - mode
+        - inventory
+        - save_result
+        - template
+        - template_opt
+        - enabled
+        - type
+        - schedule
+    x-view-field-name: name
   OnePeriodictask:
     required:
       - schedule
@@ -8227,6 +8903,21 @@ definitions:
         title: Notes
         type: string
         format: textarea
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - kind
+        - mode
+        - inventory
+        - save_result
+        - template
+        - template_opt
+        - enabled
+        - type
+        - schedule
+        - notes
+    x-view-field-name: name
   PeriodicTaskVariable:
     required:
       - key
@@ -8245,6 +8936,12 @@ definitions:
         title: Value
         type: string
         default: ''
+    x-properties-groups:
+      '':
+        - id
+        - key
+        - value
+    x-view-field-name: key
   Playbook:
     required:
       - playbook
@@ -8264,6 +8961,12 @@ definitions:
         type: string
         maxLength: 256
         minLength: 1
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - playbook
+    x-view-field-name: name
   OnePlaybook:
     type: object
     properties:
@@ -8281,6 +8984,12 @@ definitions:
         type: string
         readOnly: true
         minLength: 1
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - playbook
+    x-view-field-name: name
   Template:
     required:
       - name
@@ -8312,7 +9021,17 @@ definitions:
         type: array
         items:
           type: string
+          x-nullable: true
         readOnly: true
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - kind
+        - data
+        - options
+        - options_list
+    x-view-field-name: name
   OneTemplate:
     required:
       - name
@@ -8347,7 +9066,18 @@ definitions:
         type: array
         items:
           type: string
+          x-nullable: true
         readOnly: true
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - notes
+        - kind
+        - data
+        - options
+        - options_list
+    x-view-field-name: name
   TemplateExec:
     type: object
     properties:
@@ -8356,6 +9086,10 @@ definitions:
         description: Option name from template options.
         type: string
         minLength: 0
+    x-properties-groups:
+      '':
+        - option
+    x-view-field-name: option
   ProjectVariable:
     required:
       - key
@@ -8398,6 +9132,12 @@ definitions:
             repo_key: secretfile
             repo_password: password
             repo_sync_on_run_timeout: uptime
+    x-properties-groups:
+      '':
+        - id
+        - key
+        - value
+    x-view-field-name: key
   Team:
     required:
       - name
@@ -8412,6 +9152,11 @@ definitions:
         type: string
         maxLength: 150
         minLength: 1
+    x-properties-groups:
+      '':
+        - id
+        - name
+    x-view-field-name: name
   OneTeam:
     required:
       - name
@@ -8432,6 +9177,13 @@ definitions:
         format: textarea
       owner:
         $ref: '#/definitions/User'
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - notes
+        - owner
+    x-view-field-name: name
   CreateUser:
     required:
       - username
@@ -8462,7 +9214,7 @@ definitions:
       first_name:
         title: First name
         type: string
-        maxLength: 30
+        maxLength: 150
       last_name:
         title: Last name
         type: string
@@ -8480,6 +9232,18 @@ definitions:
         title: Repeat password
         type: string
         minLength: 1
+    x-properties-groups:
+      '':
+        - id
+        - username
+        - is_active
+        - is_staff
+        - first_name
+        - last_name
+        - email
+        - password
+        - password2
+    x-view-field-name: username
   OneUser:
     required:
       - username
@@ -8504,7 +9268,7 @@ definitions:
       first_name:
         title: First name
         type: string
-        maxLength: 30
+        maxLength: 150
       last_name:
         title: Last name
         type: string
@@ -8514,6 +9278,50 @@ definitions:
         type: string
         format: email
         minLength: 1
+    x-properties-groups:
+      '':
+        - id
+        - username
+        - is_active
+        - first_name
+        - last_name
+        - email
+    x-view-field-name: username
+  _MainSettings:
+    type: object
+    properties:
+      language:
+        title: Language
+        type: string
+        enum:
+          - en
+          - ru
+          - cn
+          - vi
+      dark_mode:
+        title: Dark mode
+        type: boolean
+        default: false
+    x-properties-groups:
+      '':
+        - language
+        - dark_mode
+    x-view-field-name: dark_mode
+  _UserSettings:
+    type: object
+    properties:
+      main:
+        $ref: '#/definitions/_MainSettings'
+      custom:
+        title: Custom
+        type: string
+        format: json
+        default: {}
+    x-properties-groups:
+      '':
+        - main
+        - custom
+    x-view-field-name: custom
   ChangePassword:
     required:
       - old_password
@@ -8524,25 +9332,33 @@ definitions:
       old_password:
         title: Old password
         type: string
-        minLength: 1
+        format: password
       password:
         title: New password
         type: string
-        minLength: 1
+        format: password
       password2:
         title: Confirm new password
         type: string
-        minLength: 1
+        format: password
+    x-properties-groups:
+      '':
+        - old_password
+        - password
+        - password2
+    x-view-field-name: password
   ChartLineSetting:
-    title: All tasks
     type: object
     properties:
       active:
         title: Active
         type: boolean
         default: true
+    x-properties-groups:
+      '':
+        - active
+    x-view-field-name: active
   ChartLineSettings:
-    title: Chartlinesettings
     required:
       - all_tasks
       - delay
@@ -8564,8 +9380,16 @@ definitions:
         $ref: '#/definitions/ChartLineSetting'
       offline:
         $ref: '#/definitions/ChartLineSetting'
+    x-properties-groups:
+      '':
+        - all_tasks
+        - delay
+        - ok
+        - error
+        - interrupted
+        - offline
+    x-view-field-name: delay
   CounterWidgetSetting:
-    title: Pmwuserscounter
     type: object
     properties:
       active:
@@ -8581,8 +9405,13 @@ definitions:
         title: Sort
         type: integer
         default: 0
+    x-properties-groups:
+      '':
+        - active
+        - collapse
+        - sort
+    x-view-field-name: collapse
   WidgetSetting:
-    title: Pmwchartwidget
     type: object
     properties:
       active:
@@ -8597,8 +9426,13 @@ definitions:
         title: Sort
         type: integer
         default: 0
+    x-properties-groups:
+      '':
+        - active
+        - collapse
+        - sort
+    x-view-field-name: collapse
   WidgetSettings:
-    title: Widgetsettings
     required:
       - pmwUsersCounter
       - pmwProjectsCounter
@@ -8623,6 +9457,16 @@ definitions:
         $ref: '#/definitions/CounterWidgetSetting'
       pmwChartWidget:
         $ref: '#/definitions/WidgetSetting'
+    x-properties-groups:
+      '':
+        - pmwUsersCounter
+        - pmwProjectsCounter
+        - pmwTemplatesCounter
+        - pmwInventoriesCounter
+        - pmwGroupsCounter
+        - pmwHostsCounter
+        - pmwChartWidget
+    x-view-field-name: pmwProjectsCounter
   UserSettings:
     required:
       - chartLineSettings
@@ -8635,6 +9479,8 @@ definitions:
         enum:
           - en
           - ru
+          - cn
+          - vi
         default: en
       autoupdateInterval:
         title: Autoupdateinterval
@@ -8650,3 +9496,39 @@ definitions:
         minLength: 1
       skinsSettings:
         $ref: '#/definitions/Data'
+    x-properties-groups:
+      '':
+        - lang
+        - autoupdateInterval
+        - chartLineSettings
+        - widgetSettings
+        - selectedSkin
+        - skinsSettings
+    x-view-field-name: autoupdateInterval
+  TwoFA:
+    type: object
+    properties:
+      enabled:
+        title: Enabled
+        type: boolean
+        readOnly: true
+      secret:
+        title: Secret
+        type: string
+        minLength: 1
+        x-nullable: true
+      pin:
+        title: Enter the six-digit code from the application
+        type: string
+        minLength: 1
+      recovery:
+        title: Recovery
+        type: string
+        minLength: 1
+    x-properties-groups:
+      '':
+        - enabled
+        - secret
+        - pin
+        - recovery
+    x-view-field-name: secret

@@ -2,10 +2,11 @@
 from __future__ import unicode_literals
 
 import logging
+import os
+import subprocess
 
 import sys
 import re
-import os
 import json
 from os.path import dirname
 
@@ -15,13 +16,12 @@ except ImportError:  # nocv
     from yaml import Loader, Dumper, load, dump
 
 from vstutils.utils import (
-    ON_POSIX,
     tmp_file_context,
     BaseVstObject,
     Executor,
-    UnhandledExecutor,
-    subprocess
+    UnhandledExecutor, ON_POSIX,
 )
+
 
 from . import __file__ as file
 
@@ -169,7 +169,7 @@ class PMAnsible(PMObject):
             env = os.environ.copy()
             env.update(self.env)
             result = subprocess.check_output(
-                cmd, stderr=self._stderr,
+                cmd, stderr=self.__stderr__,
                 bufsize=0, universal_newlines=True,
                 cwd=cwd, env=env,
                 close_fds=ON_POSIX
@@ -178,6 +178,7 @@ class PMAnsible(PMObject):
             return self.output
 
     def __init__(self, execute_path: str = '/tmp/'):
+        super().__init__()
         self.execute_path = execute_path
 
     def get_ansible_cache(self):

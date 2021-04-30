@@ -14,7 +14,7 @@ class OApiTestCase(BaseTestCase):
 
     @skipUnless(openapi_schema_yaml.is_file(), "OpenApi schema file doesn't exist")
     def test_openapi_schema(self):
-        '''
+        """
         Regenerate new doc schema:
 
         Examples:
@@ -26,7 +26,7 @@ class OApiTestCase(BaseTestCase):
                                     --url 'http://localhost:8080/' \
                                     --user admin \
                                     -m doc/api_schema.yaml
-        '''
+        """
         schema = self.get_result('get', '/api/endpoint/?format=openapi')
 
         with openapi_schema_yaml.open('r') as fin:
@@ -42,6 +42,9 @@ class OApiTestCase(BaseTestCase):
         for key in list(filter(lambda x: 'Ansible' in x, openapi_schema_yml['definitions'].keys())):
             del openapi_schema_yml['definitions'][key]
             del schema['definitions'][key]
+
+        del openapi_schema_yml['definitions']['_MainSettings']
+        del schema['definitions']['_MainSettings']
 
         for key, value in openapi_schema_yml.items():
             cmp_value = schema.get(key, None)
