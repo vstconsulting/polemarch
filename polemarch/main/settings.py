@@ -48,7 +48,6 @@ API = {
         group={'view': '{}.api.v2.views.GroupViewSet'.format(VST_PROJECT_LIB_NAME)},
         host={'view': '{}.api.v2.views.HostViewSet'.format(VST_PROJECT_LIB_NAME)},
         history={'view': '{}.api.v2.views.HistoryViewSet'.format(VST_PROJECT_LIB_NAME), "op_types": ['get', 'del', 'mod']},
-        _bulk={'view': '{}.api.v2.views.BulkViewSet'.format(VST_PROJECT_LIB_NAME), 'type': 'view'},
         user={'view': '{}.api.v2.views.UserViewSet'.format(VST_PROJECT_LIB_NAME)},
         team={'view': '{}.api.v2.views.TeamViewSet'.format(VST_PROJECT_LIB_NAME)},
         token={'view': '{}.api.v2.views.TokenView'.format(VST_PROJECT_LIB_NAME), 'type': 'view'},
