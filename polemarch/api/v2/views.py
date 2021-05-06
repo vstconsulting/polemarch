@@ -592,7 +592,8 @@ class __TemplateViewSet(base.ModelViewSet):
         """
         Execute template with option.
         """
-        return HTTP_201_CREATED(self.get_object().execute(request.user, request.data.get('option', None)))
+        # returns HTTPResponse
+        return self.get_object().execute(request.user, request.data.get('option', None))
 
 
 class __ProjectHistoryViewSet(HistoryViewSet):
