@@ -12,7 +12,7 @@ const isProd = ENV === "prod";
 const enableAnalyzer = process.env.BUNDLE_ANALYZER === "true";
 
 const KB = 1024;
-const entrypoints_dir = __dirname + "/frontend_src";
+const entrypoints_dir = __dirname + "/frontend_src_new";
 
 function setMode() {
   if (isProd) {
@@ -25,8 +25,7 @@ function setMode() {
 const config = {
   mode: setMode(),
   entry: {
-    pmlib: entrypoints_dir + "/main.js",
-    pmTests: entrypoints_dir + "/tests/index.js"
+    pmlib: entrypoints_dir + "/index.js",
   },
   output: {
     path: __dirname + "/polemarch/static/polemarch",
@@ -49,20 +48,7 @@ const config = {
     rules: [
       {
         test: /\.js$/,
-        use: {
-          loader: "babel-loader",
-          options: {
-            presets: [
-              [
-                "@babel/preset-env",
-                {
-                  corejs: 3,
-                  useBuiltIns: "usage"
-                }
-              ]
-            ]
-          }
-        },
+        loader: "babel-loader",
         exclude: [/node_modules/]
       },
       {

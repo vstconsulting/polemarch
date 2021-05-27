@@ -2,6 +2,7 @@
 from collections import OrderedDict
 
 from django.db import transaction
+from django.http.response import HttpResponse
 from django.utils.decorators import method_decorator
 from rest_framework import exceptions as excepts, status, permissions
 from rest_framework.authtoken import views as token_views
@@ -295,7 +296,7 @@ class HistoryViewSet(base.HistoryModelViewSet):
         """
         RAW executions output.
         """
-        return HTTP_200_OK(self.get_raw(request), content_type="text/plain")
+        return HttpResponse(self.get_raw(request), content_type="text/plain", status=200)
 
     @deco.subaction(serializer_class=sers.EmptySerializer, **action_kw)
     def cancel(self, request, *args, **kwargs):
