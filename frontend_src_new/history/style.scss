@@ -1,0 +1,27 @@
+.list-History, .list-ProjectHistory {
+    @media (max-width: 600px) {
+        .column-start_time {
+            display: none;
+        }
+    }
+    @media (max-width: 1000px) {
+        .column-executor {
+            display: none;
+        }
+    }
+    @media (max-width: 1100px) {
+        .column-inventory {
+            display: none;
+        }
+    }
+    @media (max-width: 1200px) {
+        .column-initiator, .column-revision {
+            display: none;
+        }
+    }
+    @media (max-width: 1400px) {
+        .column-stop_time {
+            display: none;
+        }
+    }
+}

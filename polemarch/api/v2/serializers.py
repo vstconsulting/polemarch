@@ -1,28 +1,48 @@
 # pylint: disable=no-member,unused-argument,too-many-lines,c-extension-no-member
 from __future__ import unicode_literals
-from typing import Dict, List
+
+from collections import OrderedDict
+
 import json
 import uuid
-from pathlib import Path
-from collections import OrderedDict
 from django.contrib.auth import get_user_model
-from django.utils.functional import cached_property
 from django.db import transaction
+from django.utils.functional import cached_property
+from pathlib import Path
 from rest_framework import serializers, exceptions, fields
-from vstutils.api import serializers as vst_serializers, fields as vst_fields
+from typing import Dict, List
+
 from vstutils.api import auth as vst_auth
+from vstutils.api import serializers as vst_serializers, fields as vst_fields
 from vstutils.api.serializers import DataSerializer, EmptySerializer
-from ...main.utils import AnsibleArgumentsReference
-from ...main.settings import LANGUAGES
-from ...main.validators import path_validator
-
-from ...main import models
 from ..signals import api_post_save, api_pre_save
-
+from ...main import models
+from ...main.settings import LANGUAGES
+from ...main.utils import AnsibleArgumentsReference
+from ...main.validators import path_validator
 
 User = get_user_model()
 
 LANG_CHOICES = [item[0] for item in LANGUAGES]
+
+
+def get_initiator_field():
+    return vst_fields.DependEnumField(field='initiator_type', types={
+        k: {
+            'format': 'fk',
+            'additionalProperties': {
+                'list_paths': v,
+                'makeLink': True,
+                'view_field': 'name',
+                'value_field': 'id',
+            }
+        }
+        for k, v in (
+            ('project', ['/project/']),
+            ('template', ['/project/{id}/template/']),
+            ('scheduler', ['/project/{id}/periodic_task/']),
+        )
+    })
 
 
 # NOTE: we can freely remove that because according to real behaviour all our
@@ -283,6 +303,7 @@ class OneTeamSerializer(TeamSerializer):
 
 class HistorySerializer(_SignalSerializer):
     status = serializers.ChoiceField(choices=models.History.statuses, required=False)
+    initiator = get_initiator_field()
 
     class Meta:
         model = models.History
@@ -324,6 +345,7 @@ class OneHistorySerializer(_SignalSerializer):
     status = serializers.ChoiceField(choices=models.History.statuses, required=False)
     raw_stdout = serializers.SerializerMethodField(read_only=True)
     execution_time = vst_fields.UptimeField()
+    initiator = get_initiator_field()
 
     class Meta:
         model = models.History
