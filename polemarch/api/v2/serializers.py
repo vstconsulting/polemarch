@@ -33,6 +33,7 @@ def get_initiator_field():
             'additionalProperties': {
                 'list_paths': v,
                 'makeLink': True,
+                'usePrefetch': True,
                 'view_field': 'name',
                 'value_field': 'id',
             }

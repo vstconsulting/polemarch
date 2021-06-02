@@ -68,11 +68,11 @@ info:
   x-versions:
     application: 1.8.2
     library: 1.8.2
-    vstutils: 5.0.0b14
-    django: '3.2'
+    vstutils: 5.0.0b16
+    django: 3.2.3
     djangorestframework: 3.12.4
     drf_yasg: 1.20.0
-    ansible: 2.9.19
+    ansible: 2.9.22
   version: v2
   x-user-id: 1
 host: localhost:8080
@@ -7649,6 +7649,7 @@ definitions:
                 list_paths:
                   - /project/
                 makeLink: true
+                usePrefetch: true
                 value_field: id
                 view_field: name
               format: fk
@@ -7657,6 +7658,7 @@ definitions:
                 list_paths:
                   - /project/{id}/periodic_task/
                 makeLink: true
+                usePrefetch: true
                 value_field: id
                 view_field: name
               format: fk
@@ -7665,6 +7667,7 @@ definitions:
                 list_paths:
                   - /project/{id}/template/
                 makeLink: true
+                usePrefetch: true
                 value_field: id
                 view_field: name
               format: fk
@@ -7803,6 +7806,7 @@ definitions:
                 list_paths:
                   - /project/
                 makeLink: true
+                usePrefetch: true
                 value_field: id
                 view_field: name
               format: fk
@@ -7811,6 +7815,7 @@ definitions:
                 list_paths:
                   - /project/{id}/periodic_task/
                 makeLink: true
+                usePrefetch: true
                 value_field: id
                 view_field: name
               format: fk
@@ -7819,6 +7824,7 @@ definitions:
                 list_paths:
                   - /project/{id}/template/
                 makeLink: true
+                usePrefetch: true
                 value_field: id
                 view_field: name
               format: fk
@@ -8650,6 +8656,7 @@ definitions:
                 list_paths:
                   - /project/
                 makeLink: true
+                usePrefetch: true
                 value_field: id
                 view_field: name
               format: fk
@@ -8658,6 +8665,7 @@ definitions:
                 list_paths:
                   - /project/{id}/periodic_task/
                 makeLink: true
+                usePrefetch: true
                 value_field: id
                 view_field: name
               format: fk
@@ -8666,6 +8674,7 @@ definitions:
                 list_paths:
                   - /project/{id}/template/
                 makeLink: true
+                usePrefetch: true
                 value_field: id
                 view_field: name
               format: fk
