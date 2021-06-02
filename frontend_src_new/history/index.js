@@ -60,7 +60,8 @@ const modePlaybookField = (projectId) => ({
         view_field: 'playbook',
         makeLink: true,
         usePrefetch: true,
-        filter_field_name: 'pb_filter',
+        filter_name: 'pb_filter',
+        filter_field_name: 'playbook',
         projectId,
     },
 });
@@ -72,6 +73,7 @@ const modeModuleField = (projectId) => ({
         list_paths: ['/project/{id}/module/'],
         value_field: 'id',
         view_field: 'name',
+        filter_name: 'name',
         filter_field_name: 'name',
         makeLink: true,
         usePrefetch: true,
@@ -136,6 +138,17 @@ const HistoryDetailView = {
         },
         afterFieldsGroupsComponent() {
             return OutputLines;
+        },
+        isInProgress() {
+            return ['RUN', 'DELAY'].includes(this.instance.status);
+        },
+    },
+    methods: {
+        shouldStartAutoupdate() {
+            return (
+                spa.components.page.PageViewComponent.methods.shouldStartAutoupdate.call(this) &&
+                this.isInProgress
+            );
         },
     },
 };
