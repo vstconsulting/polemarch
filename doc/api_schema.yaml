@@ -68,7 +68,7 @@ info:
   x-versions:
     application: 1.8.2
     library: 1.8.2
-    vstutils: 5.0.0b16
+    vstutils: 5.0.0b25
     django: 3.2.3
     djangorestframework: 3.12.4
     drf_yasg: 1.20.0
@@ -7345,7 +7345,10 @@ definitions:
         type: integer
         readOnly: true
         additionalProperties:
-          redirect: project
+          redirect:
+            concat_field_name: false
+            depend_field: null
+            operation_name: project_id
         x-nullable: true
       name:
         title: Name
@@ -8002,7 +8005,10 @@ definitions:
         type: integer
         readOnly: true
         additionalProperties:
-          redirect: inventory
+          redirect:
+            concat_field_name: false
+            depend_field: null
+            operation_name: inventory_id
         x-nullable: true
       name:
         title: Name
@@ -8408,7 +8414,10 @@ definitions:
         title: History id
         type: integer
         additionalProperties:
-          redirect: history
+          redirect:
+            concat_field_name: false
+            depend_field: null
+            operation_name: history
         x-nullable: true
       executor:
         title: Executor
@@ -8746,7 +8755,10 @@ definitions:
         type: integer
         readOnly: true
         additionalProperties:
-          redirect: inventory
+          redirect:
+            concat_field_name: false
+            depend_field: null
+            operation_name: inventory_id
         x-nullable: true
       name:
         title: Name

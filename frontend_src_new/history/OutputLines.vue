@@ -59,6 +59,11 @@
                 return this.lines;
             },
         },
+        watch: {
+            'page.isInProgress': function (newVal, oldVal) {
+                if (!newVal && oldVal) this.startUpdatingLinesAfter();
+            },
+        },
         async mounted() {
             this.loading = true;
             this.lines = await this.loadLines();

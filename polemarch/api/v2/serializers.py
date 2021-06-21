@@ -133,7 +133,7 @@ class ActionResponseSerializer(DataSerializer, EmptySerializer):
 
 
 class ExecuteResponseSerializer(ActionResponseSerializer):
-    history_id = vst_fields.RedirectIntegerField(default=None, allow_null=True)
+    history_id = vst_fields.RedirectIntegerField(default=None, allow_null=True, operation_name='history')
     executor = serializers.IntegerField(default=None, allow_null=True)
 
 

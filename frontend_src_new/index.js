@@ -1,6 +1,7 @@
 import './style.scss';
 import './layout';
-import './project.js';
+import './inventory';
+import './project';
 import './history';
 
 import Home from './Home.vue';
