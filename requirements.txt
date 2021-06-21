@@ -1,5 +1,5 @@
 # Main
-vstutils[rpc,ldap,doc,prod]~=5.0.0b16
+vstutils[rpc,ldap,doc,prod]~=5.0.0b25
 markdown2~=2.4.0
 
 # Repo types

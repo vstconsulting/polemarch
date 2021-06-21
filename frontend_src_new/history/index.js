@@ -1,25 +1,12 @@
 /* eslint-disable vue/one-component-per-file */
+import { InventoryField } from '../inventory';
+
 import './style.scss';
 import OutputLines from './OutputLines.vue';
 
 const HISTORY_MODELS = ['History', 'OneHistory', 'ProjectHistory'];
 const HISTORY_LIST_PATHS = ['/history/', '/project/{id}/history/'];
 const HISTORY_DETAIL_PATHS = ['/history/{id}/', '/project/{id}/history/{history_id}/'];
-
-class InventoryField extends spa.fields.fk.fk.FKField {
-    constructor(options) {
-        options.additionalProperties = {
-            model: { $ref: '#/definitions/Inventory' },
-            value_field: 'id',
-            view_field: 'name',
-            makeLink: true,
-            usePrefetch: true,
-        };
-        super(options);
-    }
-}
-InventoryField.format = 'inventory';
-spa.fields.globalFields.set(InventoryField.format, InventoryField);
 
 const executorSchedulerField = new spa.fields.staticValue.StaticValueField({
     name: 'executor',
@@ -140,7 +127,12 @@ const HistoryDetailView = {
             return OutputLines;
         },
         isInProgress() {
-            return ['RUN', 'DELAY'].includes(this.instance.status);
+            return ['RUN', 'DELAY'].includes(this.instance && this.instance.status);
+        },
+    },
+    watch: {
+        isInProgress: function (newVal, oldVal) {
+            if (!newVal && oldVal) this.stopAutoUpdate();
         },
     },
     methods: {
