@@ -1,11 +1,11 @@
-'''
+"""
 ### Polemarch is ansible based service for orchestration infrastructure.
 
-* [Documentation](http://polemarch.readthedocs.io/)
+* [Documentation](https://polemarch.readthedocs.io/)
 * [Issue Tracker](https://gitlab.com/vstconsulting/polemarch/issues)
 * [Source Code](https://gitlab.com/vstconsulting/polemarch)
 
-'''
+"""
 
 import os
 import warnings
@@ -31,6 +31,6 @@ default_settings = {
     "VST_ROOT_URLCONF": os.getenv("VST_ROOT_URLCONF", 'vstutils.urls'),
 }
 
-__version__ = "1.8.4"
+__version__ = "1.8.5"
 
 prepare_environment(**default_settings)

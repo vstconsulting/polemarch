@@ -4,9 +4,9 @@ WORKDIR /usr/local/project
 
 COPY . .
 
-ENV WORKER=ENABLE
-    LC_ALL = en_US.UTF-8
-    LANG = en_US.UTF-8
+ENV WORKER=ENABLE \
+    LC_ALL=en_US.UTF-8 \
+    LANG=en_US.UTF-8
 
 RUN tox -c tox_build.ini -e py36-build && \
     mv dist/ environment/docker_data/
@@ -15,9 +15,9 @@ RUN tox -c tox_build.ini -e py36-build && \
 
 FROM alpine:3.11
 
-ENV WORKER=ENABLE
-    LC_ALL = en_US.UTF-8
-    LANG = en_US.UTF-8
+ENV WORKER=ENABLE \
+    LC_ALL=en_US.UTF-8 \
+    LANG=en_US.UTF-8
 
 COPY --from=build /usr/local/project/environment/docker_data/ /etc/polemarch/
 
