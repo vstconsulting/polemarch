@@ -19,3 +19,4 @@ postgresql-libs
 mariadb-dev
 mailcap
 openssh-client
+openldap-back-mdb
