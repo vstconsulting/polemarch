@@ -19,6 +19,8 @@ variables:
   DOCKER_TLS_CERTDIR: ""
   DOCKER_HOST: "tcp://docker_service_host:2375"
   K8S_INGRESS_DOMAIN: "polemarch-$KUBE_NAMESPACE.$KUBE_INGRESS_BASE_DOMAIN"
+  LC_ALL: en_US.UTF-8
+  LANG: en_US.UTF-8
 
 stages:
   - code_standarts
