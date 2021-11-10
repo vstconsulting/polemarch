@@ -6,4 +6,4 @@ class TaskError(PMException):
 
     def __init__(self, message):
         msg = self._default_message.format(message)
-        super(TaskError, self).__init__(msg)
+        super().__init__(msg)

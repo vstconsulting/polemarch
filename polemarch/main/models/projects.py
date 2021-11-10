@@ -162,7 +162,7 @@ class Project(AbstractModel):
         return str(self.name)  # pragma: no cover
 
     def get_hook_data(self, when: Text) -> Dict:
-        data = super(Project, self).get_hook_data(when)
+        data = super().get_hook_data(when)
         data['type'] = self.type
         data['repository'] = self.repository
         return data
@@ -213,7 +213,7 @@ class Project(AbstractModel):
 
     def __parse_yaml_view(self, data: Dict[Text, Any]) -> Dict[Text, Dict]:
         valid_formats = self.PM_YAML_FORMATS
-        parsed_data = dict(fields=dict(), playbooks=dict())
+        parsed_data = {'fields': {}, 'playbooks': {}}
         # Parse fields
         for fieldname, field_data in data['fields'].items():
             parsed_data['fields'][fieldname] = dict(
@@ -259,7 +259,7 @@ class Project(AbstractModel):
             return cache_data
         try:
             cache.clear()
-            with open(yaml_path, 'r') as fd:
+            with open(yaml_path, 'r', encoding='utf-8') as fd:
                 data = load(fd.read(), Loader=Loader)
             cache.set(data)
             return data

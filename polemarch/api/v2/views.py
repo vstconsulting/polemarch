@@ -32,7 +32,7 @@ execute_kw.update({
 
 
 def concat_classes(*args):
-    concated_object = list()
+    concated_object = []
     for arg in args:
         if isinstance(arg, (list, tuple)):
             concated_object += arg
@@ -43,7 +43,7 @@ def concat_classes(*args):
 
 class _VariablesCopyMixin(base.CopyMixin):
     def copy_instance(self, instance):
-        new_instance = super(_VariablesCopyMixin, self).copy_instance(instance)
+        new_instance = super().copy_instance(instance)
         new_instance.variables.bulk_create([
             sers.models.Variable(key=key, value=value, content_object=new_instance)
             for key, value in instance.vars.items()
@@ -212,7 +212,7 @@ class UserViewSet(vst_auth.UserViewSet, base.CopyMixin):
     copy_field_name = 'username'
 
     def copy_instance(self, instance):
-        new_instance = super(UserViewSet, self).copy_instance(instance)
+        new_instance = super().copy_instance(instance)
         new_instance.settings.data = instance.settings.get_settings_copy()
         new_instance.settings.save()
         return new_instance
@@ -638,7 +638,7 @@ class ProjectViewSet(OwnedView, _VariablesCopyMixin):
 
     def copy_instance(self, instance):
         instance.status = instance.__class__._meta.get_field('status').default
-        return super(ProjectViewSet, self).copy_instance(instance)
+        return super().copy_instance(instance)
 
     @deco.subaction(serializer_class=vstsers.EmptySerializer, **action_kw)
     @transaction.atomic()

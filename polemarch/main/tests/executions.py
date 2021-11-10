@@ -408,13 +408,13 @@ class BaseExecutionsTestCase(BaseTestCase):
         inventory_path = f'/{self._settings("VST_API_URL")}/{self._settings("VST_API_VERSION")}/inventory/'
         for result in bulk_results:
             item = self.get_model_from_path(result['path'])
-            if result['method'] == 'POST' and item != 'sync':
+            if result['method'] == 'post' and item != 'sync':
                 self.assertEqual(result['status'], 201)
                 if isinstance(objects.get(item), list):
                     if 'inventory' in result['path'] and result['path'] != inventory_path:
                         continue
                     objects[item].append(result['data'])
-            if result['method'] == 'GET' and 'history' in result['path']:
+            if result['method'] == 'get' and 'history' in result['path']:
                 self.assertEqual(result['status'], 200)
                 history = result['data']
                 self.assertEqual(history['revision'], "NO VCS")

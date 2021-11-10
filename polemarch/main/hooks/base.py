@@ -14,7 +14,7 @@ class BaseHook:
         return getattr(settings, name, default)
 
     def setup(self, **kwargs):
-        self.conf = dict()
+        self.conf = {}
         self.conf.update(kwargs)
 
     def validate(self) -> Dict:

@@ -415,7 +415,11 @@ kwargs = dict(
     ] +
     load_requirements('requirements.txt', os.getcwd()),
     extras_require={
-        'test': load_requirements('requirements-test.txt', os.getcwd()),
+        'test': load_requirements('requirements-test.txt', os.getcwd()) + [
+            i.replace('prod', 'test,prod')
+            for i in load_requirements('requirements.txt', os.getcwd())
+            if isinstance(i, str) and 'vstutils' in i
+        ],
         'mysql': ['mysqlclient'],
         'postgresql': ['psycopg2'],
     },

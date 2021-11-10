@@ -2,11 +2,11 @@ import InventoryFieldMixin from './InventoryFieldMixin.vue';
 
 export class InventoryField extends spa.fields.dynamic.DynamicField {
     constructor(options) {
-        options.additionalProperties = {
+        options['x-options'] = {
             types: {
                 Inventory: {
                     format: 'fk',
-                    additionalProperties: {
+                    'x-options': {
                         model: { $ref: '#/definitions/Inventory' },
                         value_field: 'id',
                         view_field: 'name',
@@ -17,7 +17,7 @@ export class InventoryField extends spa.fields.dynamic.DynamicField {
                 'Inventory path': {
                     format: 'string',
                     description: 'Inventory host path',
-                    additionalProperties: {
+                    'x-options': {
                         prependText: './',
                     },
                 },
@@ -50,7 +50,11 @@ export class InventoryField extends spa.fields.dynamic.DynamicField {
     }
 }
 InventoryField.format = 'inventory';
-spa.fields.globalFields.set(InventoryField.format, InventoryField);
+spa.signals.once('APP_CREATED', (app) => {
+    for (const type of ['integer', 'string']) {
+        app.fieldsResolver.registerField(type, InventoryField.format, InventoryField);
+    }
+});
 
 for (const modelName of ['AnsibleModule', 'AnsiblePlaybook']) {
     spa.signals.once(`models[${modelName}].fields.beforeInit`, (fields) => {

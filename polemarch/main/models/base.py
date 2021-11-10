@@ -23,15 +23,15 @@ class BQuerySet(_BQSet):
 
     def __getattribute__(self, item: str) -> Any:
         try:
-            return super(BQuerySet, self).__getattribute__(item)
+            return super().__getattribute__(item)
         except:
-            model = super(BQuerySet, self).__getattribute__("model")
+            model = super().__getattribute__("model")
             if model and item in model.acl_handler.qs_methods:  # noce
                 return self.__decorator(getattr(model.acl_handler, "qs_{}".format(item)))
             raise
 
     def create(self, **kwargs) -> _BM:
-        return self.model.acl_handler.qs_create(super(BQuerySet, self).create, **kwargs)
+        return self.model.acl_handler.qs_create(super().create, **kwargs)
 
     def user_filter(self, user, *args, **kwargs) -> _BQSet:
         # pylint: disable=unused-argument
@@ -94,7 +94,7 @@ class AccessExtendsFieldMixin(object):
 
 
 class ManyToManyFieldACL(models.ManyToManyField, AccessExtendsFieldMixin):
-    pass
+    through: Any
 
 
 class ForeignKeyACL(models.ForeignKey, AccessExtendsFieldMixin):
@@ -105,13 +105,11 @@ class ReverseAccessExtendsFieldMixin(object):
     reverse_access_to_related = True
 
 
-class ManyToManyFieldACLReverse(models.ManyToManyField,
-                                ReverseAccessExtendsFieldMixin):
-    pass
+class ManyToManyFieldACLReverse(models.ManyToManyField, ReverseAccessExtendsFieldMixin):
+    through: Any
 
 
-class ForeignKeyACLReverse(models.ForeignKey,
-                           ReverseAccessExtendsFieldMixin):
+class ForeignKeyACLReverse(models.ForeignKey, ReverseAccessExtendsFieldMixin):
     pass
 
 

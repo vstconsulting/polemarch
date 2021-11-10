@@ -40,8 +40,8 @@ class Git(_VCS):
     }
 
     def __init__(self, *args, **kwargs):
-        super(Git, self).__init__(*args, **kwargs)
-        self.env = self.options.get("GIT_ENV", dict())
+        super().__init__(*args, **kwargs)
+        self.env = self.options.get("GIT_ENV", {})
         self._fetch_map = {
             1 << x: self._fetch_statuses[x] for x in range(8)
         }
@@ -59,7 +59,7 @@ class Git(_VCS):
     @raise_context()
     def _fetch_from_remote(self, repo: git.Repo, env: ENV_VARS_TYPE):
         with repo.git.custom_environment(**env):
-            kwargs = self.options.get("FETCH_KWARGS", dict())
+            kwargs = self.options.get("FETCH_KWARGS", {})
             fetch_method_name = 'fetch'
             if not repo.head.is_detached:
                 fetch_method_name = 'pull'
@@ -99,8 +99,8 @@ class Git(_VCS):
             reponame = repo.active_branch.name
         return reponame
 
-    def make_clone(self, env: ENV_VARS_TYPE) -> Tuple[git.Repo, None]:
-        kw = dict(**self.options.get("CLONE_KWARGS", dict()))
+    def make_clone(self, env: ENV_VARS_TYPE) -> Tuple[git.Repo, None]:  # pylint: disable=arguments-renamed
+        kw = dict(**self.options.get("CLONE_KWARGS", {}))
         if self.target_branch:
             kw['branch'] = self.target_branch.replace('tags/', '')
         repo = self.vsc_clone(self.proj.repository, self.path, env=env, **kw)
@@ -124,7 +124,7 @@ class Git(_VCS):
             repo = self.make_clone(env)[0]
         return repo
 
-    def make_update(self, env: ENV_VARS_TYPE) -> Tuple[git.Repo, Any]:
+    def make_update(self, env: ENV_VARS_TYPE) -> Tuple[git.Repo, Any]:  # pylint: disable=arguments-renamed
         try:
             repo = self._get_or_create_repo(env)
         except git.InvalidGitRepositoryError:
@@ -132,7 +132,7 @@ class Git(_VCS):
             repo = git.Repo.init(self.path)
             repo.create_remote('origin', self.proj.repository)
             with repo.git.custom_environment(**env):
-                kwargs = self.options.get("FETCH_KWARGS", dict())
+                kwargs = self.options.get("FETCH_KWARGS", {})
                 origin = repo.remote('origin')
                 logger.debug('Fetch remote brances for project [{}].'.format(self.proj.id))
                 origin.fetch(**kwargs)
@@ -161,7 +161,7 @@ class Git(_VCS):
         return repo.head.object.hexsha
 
     def _with_password(self, tmp, env_vars: ENV_VARS_TYPE) -> ENV_VARS_TYPE:
-        env_vars.update(self.env.get("PASSWORD", dict()))
+        env_vars.update(self.env.get("PASSWORD", {}))
         tmp.write("echo '{}'".format(self.proj.vars["repo_password"]))
         os.chmod(tmp.name, 0o700)
         env_vars["GIT_ASKPASS"] = env_vars.get("GIT_ASKPASS", tmp.name)
@@ -169,7 +169,7 @@ class Git(_VCS):
         return env_vars
 
     def _with_key(self, tmp, env_vars: Dict) -> ENV_VARS_TYPE:
-        env_vars.update(self.env.get("KEY", dict()))
+        env_vars.update(self.env.get("KEY", {}))
         tmp.write(self.proj.vars["repo_key"])
         tmp.close()
         ssh = "ssh -vT -i {} -F /dev/null".format(tmp.name)
@@ -179,13 +179,13 @@ class Git(_VCS):
         return env_vars
 
     def _operate(self, operation, **env_vars):
-        env_vars.update(self.env.get("GLOBAL", dict()))
+        env_vars.update(self.env.get("GLOBAL", {}))
         with tmp_file_context(delete=False) as tmp:
             if self.proj.vars.get("repo_password", None) is not None:
                 env_vars = self._with_password(tmp, env_vars)
             elif self.proj.vars.get("repo_key", None) is not None:
                 env_vars = self._with_key(tmp, env_vars)
-            return super(Git, self)._operate(operation, **env_vars)
+            return super()._operate(operation, **env_vars)
 
     def search_files(self, repo: git.Repo = None, pattern: Text = '**/*') -> Iterable[pathlib.Path]:
         recursive = pattern.startswith('**/')
@@ -213,7 +213,7 @@ class Git(_VCS):
     def get(self) -> Dict[str, str]:
         return {
             res.ref.remote_head: self._fetch_map[res.flags]
-            for res in super(Git, self).get()[1]
+            for res in super().get()[1]
         }
 
     def revision(self) -> Text:

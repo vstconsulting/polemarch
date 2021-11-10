@@ -32,7 +32,7 @@ class VariablesQuerySet(BQuerySet):
     use_for_related_fields = True
 
     def sort_by_key(self) -> BQuerySet:
-        args, kwargs = [], dict()
+        args, kwargs = [], {}
         keys = self.model.variables_keys
         index = keys.index
         for key in keys:
@@ -43,7 +43,7 @@ class VariablesQuerySet(BQuerySet):
         return self.annotate(sort_idx=Case(*args, **kwargs)).order_by("sort_idx", "key")
 
     def cleared(self) -> BQuerySet:
-        return super(VariablesQuerySet, self).cleared().sort_by_key()
+        return super().cleared().sort_by_key()
 
 
 class Variable(BModel):
@@ -142,7 +142,7 @@ class AbstractModel(ACLModel):
         return reduce(update_boolean, self.BOOLEAN_VARS, OrderedDict(qs))
 
     def get_vars_prefixed(self, prefix: Text):
-        vars_by_prefix_dict = dict()
+        vars_by_prefix_dict = {}
         search_prefix = prefix + '_'
         search_prefix_len = len(search_prefix)
         for var_obj in self.variables.filter(key__startswith=prefix):

@@ -13,7 +13,7 @@
             :data="data"
             type="edit"
             :hideable="hideable"
-            @toggleHidden="$emit('toggleHidden')"
+            @hide-field="$emit('hide-field', $event)"
             @set-value="$emit('set-value', $event)"
         />
     </div>

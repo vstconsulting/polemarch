@@ -11,7 +11,7 @@ const HISTORY_DETAIL_PATHS = ['/history/{id}/', '/project/{id}/history/{history_
 const executorSchedulerField = new spa.fields.staticValue.StaticValueField({
     name: 'executor',
     format: 'static_value',
-    additionalProperties: {
+    'x-options': {
         staticValue: 'system',
         realField: 'string',
     },
@@ -19,7 +19,7 @@ const executorSchedulerField = new spa.fields.staticValue.StaticValueField({
 const executorUserField = new spa.fields.fk.fk.FKField({
     name: 'executor',
     format: 'fk',
-    additionalProperties: {
+    'x-options': {
         model: { $ref: '#/definitions/User' },
         value_field: 'id',
         view_field: 'username',
@@ -36,12 +36,14 @@ class ProjectBasedFkField extends spa.fields.fk.fk.FKField {
     }
 }
 ProjectBasedFkField.format = 'project-fk';
-spa.fields.globalFields.set(ProjectBasedFkField.format, ProjectBasedFkField);
+spa.signals.once('APP_CREATED', (app) => {
+    app.fieldsResolver.registerField('integer', ProjectBasedFkField.format, ProjectBasedFkField);
+});
 
 const modePlaybookField = (projectId) => ({
     name: 'mode',
     format: ProjectBasedFkField.format,
-    additionalProperties: {
+    'x-options': {
         list_paths: ['/project/{id}/playbook/'],
         value_field: 'id',
         view_field: 'playbook',
@@ -56,7 +58,7 @@ const modePlaybookField = (projectId) => ({
 const modeModuleField = (projectId) => ({
     name: 'mode',
     format: ProjectBasedFkField.format,
-    additionalProperties: {
+    'x-options': {
         list_paths: ['/project/{id}/module/'],
         value_field: 'id',
         view_field: 'name',
@@ -71,7 +73,7 @@ const modeModuleField = (projectId) => ({
 for (const modelName of HISTORY_MODELS) {
     spa.signals.once(`models[${modelName}].fields.beforeInit`, (fields) => {
         fields.executor.format = 'dynamic';
-        fields.executor.additionalProperties = {
+        fields.executor['x-options'] = {
             types: {
                 project: executorUserField,
                 template: executorUserField,
@@ -83,7 +85,7 @@ for (const modelName of HISTORY_MODELS) {
         fields.inventory.format = InventoryField.format;
 
         fields.mode.format = 'dynamic';
-        fields.mode.additionalProperties = {
+        fields.mode['x-options'] = {
             callback: ({ kind, project = app.application.$route.params.id }) => {
                 if (kind === 'PLAYBOOK') {
                     return modePlaybookField(project);
@@ -123,8 +125,11 @@ const HistoryDetailView = {
         title() {
             return 'History';
         },
-        afterFieldsGroupsComponent() {
+        beforeFieldsGroupsComponent() {
             return OutputLines;
+        },
+        modelsFieldsWrapperClasses() {
+            return 'col-md-6 history-info';
         },
         isInProgress() {
             return ['RUN', 'DELAY'].includes(this.instance && this.instance.status);

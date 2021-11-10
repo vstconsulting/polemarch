@@ -8,7 +8,7 @@ from ..utils import AnsibleArgumentsReference
 class BaseCommand(_BaseCommand):
 
     def _get_versions(self):
-        versions = super(BaseCommand, self)._get_versions()
+        versions = super()._get_versions()
         versions['ansible'] = AnsibleArgumentsReference().version
         versions['celery'] = celery.__version__
         return versions

@@ -147,7 +147,7 @@ class Template(ACLModel):
 
     def set_options_data(self, value: Any) -> NoReturn:
         options_data = self._convert_to_data(value)
-        new = dict()
+        new = {}
         for option, data in options_data.items():
             self._validate_option_data(data)
             if data.get('vars', None):
@@ -267,7 +267,7 @@ class PeriodicTask(AbstractModel):
 
     @property
     def crontab_kwargs(self) -> Dict:
-        kwargs, index, fields = dict(), 0, self.schedule.split(" ")
+        kwargs, index, fields = {}, 0, self.schedule.split(" ")
         for field_name in self.time_types_list:
             if index < len(fields) and len(fields[index]) > 0:
                 kwargs[field_name] = fields[index]
@@ -311,7 +311,7 @@ class HistoryQuerySet(BQuerySet):
 
     def create(self, **kwargs) -> BModel:
         raw_stdout = kwargs.pop("raw_stdout", None)
-        history = super(HistoryQuerySet, self).create(**kwargs)
+        history = super().create(**kwargs)
         if raw_stdout:
             history.raw_stdout = raw_stdout
         return history
@@ -345,7 +345,7 @@ class HistoryQuerySet(BQuerySet):
         return {opt: extra.pop(opt, options[opt]) for opt in options}
 
     def __get_additional_options(self, extra_options) -> Dict[str, Any]:
-        options = dict()
+        options = {}
         if extra_options['template_option'] is not None:
             options['template_option'] = extra_options['template_option']
         return options
@@ -400,7 +400,7 @@ class History(BModel):
 
     def __init__(self, *args, **kwargs):
         execute_args = kwargs.pop('execute_args', None)
-        super(History, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if execute_args:
             self.execute_args = execute_args
 
