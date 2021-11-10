@@ -1,152 +1,109 @@
 <template>
-    <div class="col-md-6">
-        <Card :title="$t('execution output') | capitalize">
+    <div class="col-md-6 output-lines">
+        <Card card-body-classes="p-0" :title="title" :is-collapsable="false">
             <template #tools>
+                <button v-show="loading" type="button" class="btn btn-tool">
+                    <i class="fa fa-spinner fa-pulse fa-fw" />
+                </button>
+                <a
+                    class="btn btn-tool"
+                    :href="page.instance.raw_stdout"
+                    :title="$t('full raw stdout') | capitalize"
+                    target="_blank"
+                >
+                    <i class="fas fa-align-justify" />
+                </a>
                 <button type="button" class="btn btn-tool" title="Clear" @click="clear">
                     <i class="fa fa-trash fa-lg" />
                 </button>
+                <button type="button" class="btn btn-tool d-none d-md-block" @click="toggleMaximize">
+                    <i class="far fa-window-maximize" />
+                    <i class="far fa-window-minimize" style="display: none;" />
+                </button>
             </template>
-            <p>
-                <b>{{ $t('stdout') }}</b>
-                (
-                <a :href="page.instance.raw_stdout" target="_blank">
-                    {{ $t('full raw stdout') | capitalize }}
-                </a>
-                )
-                <i v-show="loading" class="fa fa-spinner fa-pulse fa-fw" />
-                <i
-                    class="fas fa-angle-double-down float-right cursor-pointer"
-                    :class="{ 'opacity-05': !stickToBottom }"
-                    @click="scrollToBottom"
-                />
-            </p>
-            <pre ref="output" class="history-stdout" @scroll="scrollHandler"><span
-                v-for="line in preparedLines" :key="line.line_gnumber" v-html="ansiToHTML(line.line)"
-            /></pre>
+            <pre ref="output" class="history-stdout" @scroll="scrollHandler" v-html="linesHTML" />
         </Card>
     </div>
 </template>
 
 <script>
-    const LINES_LIMIT = 500;
+    import OldLinesMixin from './OldLinesMixin.js';
 
     export default {
         components: {
             Card: spa.components.Card,
         },
+        mixins: [OldLinesMixin],
         props: {
             page: { type: Object, required: true },
         },
         data: () => ({
-            ansiToHTML: spa.colors.ansiToHTML,
             loading: false,
-            hasLinesBefore: true,
-            hasLinesAfter: true,
-            updatingLinesAfterTimeoutId: null,
-            lines: [],
-            height: 0,
-            scrollHeight: 0,
-            scrollTop: 0,
         }),
         computed: {
-            stickToBottom() {
-                return this.scrollTop + this.height === this.scrollHeight;
+            title() {
+                return `${this.$u.capitalize(this.$t('execution output'))} (${this.$t('stdout')})`;
             },
-            linesPath() {
-                return [...spa.utils.pathToArray(this.$route.path), 'lines'];
+            instance() {
+                return this.page.instance;
             },
-            preparedLines() {
-                return this.lines;
-            },
-        },
-        watch: {
-            'page.isInProgress': function (newVal, oldVal) {
-                if (!newVal && oldVal) this.startUpdatingLinesAfter();
-            },
-        },
-        async mounted() {
-            this.loading = true;
-            this.lines = await this.loadLines();
-            this.$nextTick(() => this.scrollToBottom());
-            if (this.page.isInProgress) {
-                this.startUpdatingLinesAfter();
-            }
-            this.loading = false;
         },
         methods: {
-            scrollToBottom() {
-                this.$refs.output.scrollTop = this.$refs.output.scrollHeight - this.$refs.output.clientHeight;
-            },
-            ensureScrollPositionTheSame(func) {
-                const scrollTopBefore = this.$refs.output.scrollTop;
-                const scrollHeightBefore = this.$refs.output.scrollHeight;
-                func();
-                this.$nextTick(() => {
-                    const scrollHeightAfter = this.$refs.output.scrollHeight;
-                    this.$refs.output.scrollTop = scrollTopBefore + (scrollHeightAfter - scrollHeightBefore);
-                });
-            },
             clear() {
                 this.page.executeAction(this.page.view.actions.get('clear'), this.page.instance);
             },
-            async scrollHandler(e) {
-                const target = e.target;
-                this.height = target.clientHeight;
-                this.scrollHeight = target.scrollHeight;
-                this.scrollTop = target.scrollTop;
-                if (!this.loading && this.hasLinesBefore && target.scrollTop <= 100) {
-                    this.loading = true;
-                    await this.loadMoreLinesBefore();
-                    this.loading = false;
-                }
-            },
-            async loadMoreLinesBefore() {
-                const lines = await this.loadLines({ before: this.lines[0].line_gnumber });
-                if (lines.length === 0) this.hasLinesBefore = false;
-                this.ensureScrollPositionTheSame(() => this.lines.unshift(...lines));
-            },
-            async loadMoreLinesAfter() {
-                const lines = await this.loadLines(
-                    this.lines.last ? { after: this.lines.last.line_gnumber } : {},
-                );
-                if (lines.length === 0 && !this.page.isInProgress) this.hasLinesAfter = false;
-                this.ensureScrollPositionTheSame(() => this.lines.unshift(...lines));
-            },
-            startUpdatingLinesAfter() {
-                this.updatingLinesAfterTimeoutId = setTimeout(async () => {
-                    this.loading = true;
-                    await this.loadMoreLinesAfter();
-                    this.loading = false;
-                    if (this.updatingLinesAfterTimeoutId) {
-                        this.startUpdatingLinesAfter();
-                    }
-                }, 2000);
-            },
-            stopUpdatingLinesAfter() {
-                clearTimeout(this.updatingLinesAfterTimeoutId);
-                this.updatingLinesAfterTimeoutId = null;
-            },
-            /**
-             * @param {Object} [query]
-             * @return {Promise<Object[]>}
-             */
-            async loadLines(query = {}) {
-                const response = await this.$app.api.makeRequest({
-                    method: spa.utils.HttpMethods.GET,
-                    path: this.linesPath,
-                    query: { limit: LINES_LIMIT, ...query },
-                    useBulk: true,
-                });
-                return response.data.results.reverse();
+            toggleMaximize() {
+                document.body.classList.toggle('output-lines-maximized');
             },
         },
     };
 </script>
 
-<style scoped>
-    .opacity-05 {
-        opacity: 0.5;
+<style lang="scss">
+    @media (min-width: 768px) {
+        @media (prefers-reduced-motion: no-preference) {
+            .page-history_id,
+            .page-project_id_history_history_id {
+                .output-lines,
+                .history-info,
+                .fields-group,
+                .history-stdout {
+                    transition-duration: 0.25s;
+                    transition-timing-function: ease-in-out;
+                }
+            }
+        }
+
+        .page-history_id.output-lines-maximized,
+        .page-project_id_history_history_id.output-lines-maximized {
+            .output-lines,
+            .history-info,
+            .fields-group {
+                flex: 0 0 100% !important;
+                max-width: 100% !important;
+            }
+            .history-stdout {
+                max-height: 500px;
+            }
+            .fa-window-maximize {
+                display: none !important;
+            }
+            .fa-window-minimize {
+                display: inline !important;
+            }
+        }
     }
+    @media (max-width: 767.98px) {
+        .output-lines {
+            order: 1;
+        }
+        .history-info {
+            order: 0;
+        }
+    }
+</style>
+
+<style scoped>
     .history-stdout {
         background-color: #000;
         color: #ececec;
@@ -154,8 +111,8 @@
         overflow-y: scroll;
         min-height: 300px;
         max-height: 350px;
-        padding-left: 15px;
-        padding-right: 15px;
+        padding: 0 15px;
+        margin: 0;
         font-weight: normal !important;
     }
 </style>

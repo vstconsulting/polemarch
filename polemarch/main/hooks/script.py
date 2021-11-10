@@ -13,7 +13,7 @@ logger = logging.getLogger("polemarch")
 
 class Backend(BaseHook):
 
-    def execute(self, script, when, file) -> str:
+    def execute(self, script, when, file) -> str:  # pylint: disable=arguments-renamed
         try:
             work_dir = self.conf['HOOKS_DIR']
             script = '{}/{}'.format(work_dir, script)
@@ -33,15 +33,15 @@ class Backend(BaseHook):
             return str(err)
 
     def setup(self, **kwargs):
-        super(Backend, self).setup(**kwargs)
+        super().setup(**kwargs)
         self.conf['HOOKS_DIR'] = self.get_settings('HOOKS_DIR', '/tmp/')
 
     def validate(self) -> Dict:
-        errors = super(Backend, self).validate()
+        errors = super().validate()
         for rep in self.hook_object.reps:
             if '../' in rep or rep not in os.listdir(self.conf['HOOKS_DIR']):
                 errors["recipients"] = "Recipients must be in hooks dir."
         return errors
 
     def modify_message(self, message):
-        return json.dumps(super(Backend, self).modify_message(message))
+        return json.dumps(super().modify_message(message))

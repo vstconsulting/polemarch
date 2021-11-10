@@ -156,7 +156,7 @@ def validate_crontab(instance: PeriodicTask, **kwargs) -> None:
         instance.get_schedule()
     except ValueError as ex:
         msg = dict(schedule=["{}".format(ex)])
-        raise ValidationError(msg)
+        raise ValidationError(msg) from ex
 
 
 @receiver(signals.pre_save, sender=Host)
@@ -441,6 +441,7 @@ def cancel_task_on_delete_history(instance: History, **kwargs) -> None:
 
 @receiver(signals.post_migrate)
 def update_crontab_timezone_ptasks(*args, **kwargs):
+    # pylint: disable=no-member
     qs = CrontabSchedule.objects.exclude(timezone=settings.TIME_ZONE)
     qs.filter(periodictask__task__startswith='polemarch').update(timezone=settings.TIME_ZONE)
     qs.filter(periodictask__task__startswith='pmlib').update(timezone=settings.TIME_ZONE)

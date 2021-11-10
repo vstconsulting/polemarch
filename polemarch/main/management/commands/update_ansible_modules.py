@@ -26,6 +26,6 @@ class Command(ServiceCommand):
             self._print('The modules have been successfully updated.', 'SUCCESS')
 
     def handle(self, *args, **options):
-        super(Command, self).handle(*args, **options)
+        super().handle(*args, **options)
         if self.ask_user_bool("Update ansible modules?[y/n]:"):
             self.update_modules()

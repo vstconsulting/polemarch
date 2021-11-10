@@ -5,12 +5,13 @@ from collections import OrderedDict
 
 import json
 import uuid
+from pathlib import Path
+from typing import Dict, List
+
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.utils.functional import cached_property
-from pathlib import Path
 from rest_framework import serializers, exceptions, fields
-from typing import Dict, List
 
 from vstutils.api import auth as vst_auth
 from vstutils.api import serializers as vst_serializers, fields as vst_fields
@@ -30,7 +31,7 @@ def get_initiator_field():
     return vst_fields.DependEnumField(field='initiator_type', types={
         k: {
             'format': 'fk',
-            'additionalProperties': {
+            'x-options': {
                 'list_paths': v,
                 'makeLink': True,
                 'usePrefetch': True,
@@ -83,13 +84,13 @@ class InventoryDependEnumField(vst_fields.DependEnumField):
     def to_representation(self, value):
         if isinstance(value, models.Inventory):
             value = value.id  # nocv
-        return super(InventoryDependEnumField, self).to_representation(value)
+        return super().to_representation(value)
 
 
 class InventoryAutoCompletionField(vst_fields.AutoCompletionField):
 
     def to_internal_value(self, data):
-        inventory = super(InventoryAutoCompletionField, self).to_internal_value(data)
+        inventory = super().to_internal_value(data)
         try:
             inventory = models.Inventory.objects.get(id=int(inventory))
             user = self.context['request'].user
@@ -156,7 +157,7 @@ class SetOwnerSerializer(DataSerializer):
     def current_user(self) -> User:
         return self.context['request'].user
 
-    def to_representation(self, value: User):
+    def to_representation(self, value: User):  # pylint: disable=arguments-renamed
         return dict(user_id=value.pk)
 
     def to_internal_value(self, data: dict):
@@ -165,8 +166,8 @@ class SetOwnerSerializer(DataSerializer):
 
 class _SignalSerializer(serializers.ModelSerializer):
     @cached_property
-    def _writable_fields(self) -> List:
-        writable_fields = super(_SignalSerializer, self)._writable_fields
+    def _writable_fields(self) -> List:  # pylint: disable=invalid-overridden-method
+        writable_fields = super()._writable_fields
         fields_of_serializer = []
         attrs = [
             'field_name', 'source_attrs', 'source',
@@ -184,18 +185,18 @@ class _SignalSerializer(serializers.ModelSerializer):
 
     @with_signals
     def create(self, validated_data):
-        return super(_SignalSerializer, self).create(validated_data)
+        return super().create(validated_data)
 
     @with_signals
     def update(self, instance, validated_data):
-        return super(_SignalSerializer, self).update(instance, validated_data)
+        return super().update(instance, validated_data)
 
 
 class _WithPermissionsSerializer(_SignalSerializer):
     perms_msg = "You do not have permission to perform this action."
 
     def is_valid(self, *args, **kwargs):
-        result = super(_WithPermissionsSerializer, self).is_valid(*args, **kwargs)
+        result = super().is_valid(*args, **kwargs)
         if not hasattr(self, 'instance') or self.instance is None:  # noce
             self.validated_data['owner'] = self.validated_data.get(
                 'owner', self.current_user()
@@ -211,7 +212,7 @@ class UserSerializer(vst_auth.UserSerializer):
 
     @with_signals
     def update(self, instance: User, validated_data: Dict):
-        return super(UserSerializer, self).update(instance, validated_data)
+        return super().update(instance, validated_data)
 
 
 class CreateUserSerializer(vst_auth.CreateUserSerializer):
@@ -225,7 +226,7 @@ class ChangePasswordSerializer(vst_auth.ChangePasswordSerializer):
 
     @with_signals
     def update(self, instance: User, validated_data: Dict) -> User:
-        return super(ChangePasswordSerializer, self).update(instance, validated_data)
+        return super().update(instance, validated_data)
 
 
 class OneUserSerializer(UserSerializer):
@@ -414,7 +415,7 @@ class VariableSerializer(_SignalSerializer):
         )
 
     def to_representation(self, instance: models.Variable):
-        result = super(VariableSerializer, self).to_representation(instance)
+        result = super().to_representation(instance)
         if instance.key in getattr(instance.content_object, 'HIDDEN_VARS', []):
             result['value'] = "[~~ENCRYPTED~~]"
         elif instance.key in getattr(instance.content_object, 'BOOLEAN_VARS', []):
@@ -459,7 +460,7 @@ class ProjectVariableSerializer(VariableSerializer):
 class _WithVariablesSerializer(_WithPermissionsSerializer):
     @transaction.atomic
     def _do_with_vars(self, method_name: str, *args, **kwargs):
-        method = getattr(super(_WithVariablesSerializer, self), method_name)
+        method = getattr(super(), method_name)
         instance = method(*args, **kwargs)
         return instance
 
@@ -473,7 +474,7 @@ class _WithVariablesSerializer(_WithPermissionsSerializer):
         return representation.get('vars', None)
 
     def to_representation(self, instance, hidden_vars: List[str] = None):
-        rep = super(_WithVariablesSerializer, self).to_representation(instance)
+        rep = super().to_representation(instance)
         hv = hidden_vars
         hv = getattr(instance, 'HIDDEN_VARS', []) if hidden_vars is None else hidden_vars
         vars = self.get_vars(rep)
@@ -624,7 +625,7 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
             kw['inventory'] = ''
             kw['mode'] = ''
             kwargs['validated_data'] = kw
-        return super(PeriodictaskSerializer, self)._do_with_vars(*args, **kwargs)
+        return super()._do_with_vars(*args, **kwargs)
 
 
 class OnePeriodictaskSerializer(PeriodictaskSerializer):
@@ -701,7 +702,7 @@ class TemplateSerializer(_WithVariablesSerializer):
         data = OrderedDict()
         if instance.kind in ["Task", "Module"]:
             hidden_vars = models.PeriodicTask.HIDDEN_VARS
-            data = super(TemplateSerializer, self).to_representation(
+            data = super().to_representation(
                 instance, hidden_vars=hidden_vars
             )
             self.repr_options(instance, data, hidden_vars)
@@ -862,7 +863,7 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer, _WithPermissi
         repo_branch = validated_data.pop('branch', None)
         playbook_path = validated_data.pop('additional_playbook_path', '')
 
-        instance = super(ProjectCreateMasterSerializer, self).create(validated_data)
+        instance = super().create(validated_data)
         instance.variables.create(key='repo_type', value=repo_type)
         if repo_auth_type != 'NONE':  # nocv
             key = 'repo_{}'.format(repo_auth_type.lower())
@@ -947,7 +948,7 @@ class ProjectSerializer(_InventoryOperations):
 
     @transaction.atomic
     def _do_with_vars(self, *args, **kw):
-        instance = super(ProjectSerializer, self)._do_with_vars(*args, **kw)
+        instance = super()._do_with_vars(*args, **kw)
         return instance if instance.repo_class else None
 
 
@@ -989,7 +990,7 @@ def generate_fileds(ansible_reference: AnsibleArgumentsReference, ansible_type: 
             kwargs['default'] = False
         elif ref_type == 'int':
             field = serializers.IntegerField
-        elif ref_type == 'string' or 'choice':
+        elif ref_type in ('string', 'choice'):
             field = vst_fields.VSTCharField
             kwargs['allow_blank'] = True
 

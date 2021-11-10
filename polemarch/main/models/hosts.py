@@ -25,8 +25,8 @@ def _delete_not_existing_objects(queryset, object_dict):
 
 # Helpfull methods
 def _get_dict(objects: AbstractVarsQuerySet, keys: List = None, tmp_dir: Text = '/tmp') -> Tuple[Dict, List]:
-    keys = keys if keys else list()
-    result = dict()
+    keys = keys if keys else []
+    result = {}
     for obj in objects:
         result[obj.name], obj_keys = obj.toDict(tmp_dir)
         keys += obj_keys
@@ -39,10 +39,10 @@ class InventoryDumper(Dumper):
     """
     yaml_representers = getattr(Dumper, 'yaml_representers', {}).copy()
     yaml_representers[type(None)] = lambda dumper, value: (
-        ScalarNode(tag=u'tag:yaml.org,2002:null', value='')
+        ScalarNode(tag='tag:yaml.org,2002:null', value='')
     )
     yaml_representers[str] = lambda dumper, value: (
-        ScalarNode(tag=u'tag:yaml.org,2002:str', value=value)
+        ScalarNode(tag='tag:yaml.org,2002:str', value=value)
     )
 
 
@@ -52,7 +52,7 @@ class CiclicDependencyError(ex.PMException):
 
     def __init__(self, tp: Text = ""):
         msg = self._def_message.format(tp)
-        super(CiclicDependencyError, self).__init__(msg)
+        super().__init__(msg)
 
 
 # Block of models
@@ -134,7 +134,7 @@ class Group(InventoryItems):
         ]
 
     def toDict(self, tmp_dir: Text = '/tmp') -> Tuple[Dict, List]:
-        result = dict()
+        result = {}
         hvars, keys = self.get_generated_vars(tmp_dir)
         if self.children:
             objs = self.groups
@@ -190,7 +190,7 @@ class Inventory(InventoryItems):
         return self.hosts.all().order_by("name")
 
     def get_inventory(self, tmp_dir='/tmp/') -> Tuple[Text, List]:
-        inv = dict(all=dict())
+        inv = {'all': {}}
         hvars, keys = self.get_generated_vars(tmp_dir)
         hosts = self.hosts.all().order_by("name")
         groups = self.groups.all().order_by("name")
@@ -228,7 +228,7 @@ class Inventory(InventoryItems):
             inventory = cls.objects.create(name=name, **kwargs)
 
         inventory.vars = inv_json['vars']
-        created_hosts, created_groups = dict(), dict()
+        created_hosts, created_groups = {}, {}
 
         _delete_not_existing_objects(inventory.hosts, inv_json['hosts'])
         for host in inv_json['hosts']:

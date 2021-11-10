@@ -89,7 +89,7 @@ TRANSLATION = {
     'team': 'команда',
     'template option': 'опция шаблона',
 
-    'quick playbook execution form': 'форма быстрого запуска плейбуков',
+    'Quick playbook execution form': 'Форма быстрого запуска плейбуков',
     'execute parameters': 'параметры запуска',
     'additional execute parameters': 'дополнительные параметры запуска',
     'execution output': 'результаты запуска',
