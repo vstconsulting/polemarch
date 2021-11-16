@@ -7,19 +7,39 @@ Install from PyPI
 
 #. Install dependencies:
 
-   Required packages on Ubuntu/Debian:
+    Required packages on Ubuntu 18.04:
 
-   .. sourcecode:: bash
+    .. sourcecode:: bash
 
-        sudo apt-get install python3-virtualenv python3.6 python3.6-dev gcc libffi-dev libkrb5-dev libffi6 libssl-dev libyaml-dev libsasl2-dev libldap2-dev default-libmysqlclient-dev sshpass git
+        sudo apt-get install python3-virtualenv python3.8 python3.8-dev gcc libffi-dev libkrb5-dev libffi6 libssl-dev libyaml-dev libsasl2-dev libldap2-dev default-libmysqlclient-dev sshpass git virtualenv
 
-   Required packages on Red Hat/CentOS:
+    Required packages on Ubuntu 20.04:
 
-   .. sourcecode:: bash
+    .. sourcecode:: bash
+
+        sudo apt-get install python3-virtualenv python3.8 python3.8-dev gcc libffi-dev libkrb5-dev libffi7 libssl-dev libyaml-dev libsasl2-dev libldap2-dev default-libmysqlclient-dev sshpass git
+
+    Required packages on Debian 10 (as root user):
+
+    .. sourcecode:: bash
+
+        apt-get install python3-virtualenv python3.7 python3.7-dev gcc libffi-dev libkrb5-dev libffi6 libssl-dev libyaml-dev libsasl2-dev libldap2-dev default-libmysqlclient-dev sshpass git virtualenv
+
+    Required packages on Red Hat/CentOS 7:
+
+    .. sourcecode:: bash
 
         sudo yum install epel-release
-        sudo yum install https://$(rpm -E '%{?centos:centos}%{!?centos:rhel}%{rhel}').iuscommunity.org/ius-release.rpm
-        sudo yum install python36u python36u-devel python36-virtualenv openssl-devel libyaml-devel krb5-devel krb5-libs openldap-devel mysql-devel git sshpass
+        sudo yum install python36 python36-devel python36-virtualenv openssl-devel libyaml-devel krb5-devel krb5-libs openldap-devel mysql-devel git sshpass
+
+    Required packages on Red Hat/Alma/Rocky 8:
+
+    .. sourcecode:: bash
+
+        sudo dnf install epel-release
+        sudo dnf install python38-devel python3-virtualenv gcc openssl-devel libyaml krb5-devel krb5-libs openldap-devel mysql-devel git sshpass
+
+    .. note:: If your OS is not in the list of presented OS, but you understand the differences between these OS and yours, then you can adapt this list of packages to your platform. We dont tie environment to system package versions as much as possible.
 
 #. Create user:
     .. sourcecode:: bash
@@ -32,14 +52,15 @@ Install from PyPI
 
     .. sourcecode:: bash
 
-        virtualenv --python=python3.6 /opt/polemarch
+        # For Debian 10 use python3.7
+        # For rhel/centos7 use python3.6
+        # In some cases use sudo for first command.
+        virtualenv --python=python3.8 /opt/polemarch
         sudo chown -R polemarch:polemarch /opt/polemarch
         sudo -u polemarch -i
         source /opt/polemarch/bin/activate
 
-    .. note:: If you have more then one Python version, recomended use Python 3.6 and create virtualenv with Py3.6
-
-    .. warning:: We support Python 2.7 until Polemarch 2.0 release.
+    .. note:: If you have more then one Python version, recomended use Python 3.6 or newer for virtualenv.
 
 
 #. Install Polemarch:
@@ -73,7 +94,8 @@ Install from PyPI
        .. sourcecode:: bash
 
             sudo -H mysql <<QUERY_INPUT
-            SET @@global.innodb_large_prefix = 1;
+            # uncomment this string on old MariaDB/MySQL versions
+            # SET @@global.innodb_large_prefix = 1;
             create user db_user;
             create database db_name default CHARACTER set utf8   default COLLATE utf8_general_ci;
             grant all on db_name.* to 'db_user'@'localhost' identified by 'db_password';
@@ -129,8 +151,6 @@ Install from PyPI
       .. code-block:: ini
 
            [uwsgi]
-           processes = 4
-           threads = 4
            harakiri = 120
            vacuum = True
            http-keepalive = true
