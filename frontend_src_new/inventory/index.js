@@ -1,10 +1,59 @@
-import InventoryFieldMixin from './InventoryFieldMixin.vue';
+import InventoryFieldEdit from './InventoryFieldEdit.vue';
+
+/** @vue/component */
+const InventoryFieldMixin = {
+    components: {
+        field_content_edit: InventoryFieldEdit,
+    },
+    mixins: [spa.fields.dynamic.DynamicFieldMixin],
+    methods: {
+        selectField(field) {
+            this.savedValues.set(this.realField, this.value);
+            this.realField = field;
+            this.setValue(this.savedValues.get(field));
+        },
+        renderReadonly() {
+            return this.$createElement(this.realField.component, {
+                props: { data: this.data, field: this.realField, type: this.type },
+            });
+        },
+        renderEdit() {
+            return this.$createElement('div', { class: this.wrapperClasses }, [
+                this.$createElement(spa.fields.base.BaseFieldLabel, {
+                    props: {
+                        type: this.type,
+                        value: this.value,
+                        field: this.field,
+                        data: this.data,
+                        error: this.error,
+                    },
+                }),
+                this.$createElement(InventoryFieldEdit, {
+                    props: {
+                        field: this.field,
+                        data: this.data,
+                        value: this.value,
+                        realField: this.realField,
+                    },
+                    on: {
+                        'set-value': this.setValue.bind(this),
+                        'select-field': this.selectField.bind(this),
+                    },
+                }),
+            ]);
+        },
+    },
+    render() {
+        return this.type === 'list' || this.type === 'readonly' ? this.renderReadonly() : this.renderEdit();
+    },
+};
 
 export class InventoryField extends spa.fields.dynamic.DynamicField {
     constructor(options) {
         options['x-options'] = {
             types: {
                 Inventory: {
+                    title: 'Inventory',
                     format: 'fk',
                     'x-options': {
                         model: { $ref: '#/definitions/Inventory' },
@@ -15,6 +64,7 @@ export class InventoryField extends spa.fields.dynamic.DynamicField {
                     },
                 },
                 'Inventory path': {
+                    title: 'Inventory path',
                     format: 'string',
                     description: 'Inventory host path',
                     'x-options': {
@@ -22,6 +72,7 @@ export class InventoryField extends spa.fields.dynamic.DynamicField {
                     },
                 },
                 'Hosts list': {
+                    title: 'Hosts list',
                     format: 'string',
                     description: 'Comma separated host list',
                 },

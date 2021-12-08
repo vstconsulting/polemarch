@@ -4,6 +4,7 @@ from typing import Any, Text, Iterable, Dict, Union
 import sys
 import json
 import logging
+from itertools import chain
 from collections import OrderedDict
 from django_celery_beat.models import IntervalSchedule, CrontabSchedule, PeriodicTask as CPTask
 from django.db.models import signals, IntegerField
@@ -12,13 +13,14 @@ from django.dispatch import receiver
 from django.db.models.functions import Cast
 from django.core.validators import ValidationError
 from django.conf import settings
+from rest_framework.exceptions import ValidationError as drfValidationError
 from vstutils.utils import raise_context, KVExchanger
 
 from .vars import Variable
 from .hosts import Host, Group, Inventory
 from .projects import Project, Task, Module, ProjectTemplate, list_to_choices
 from .users import get_user_model, UserGroup, ACLPermission, UserSettings
-from .tasks import PeriodicTask, History, HistoryLines, Template
+from .tasks import PeriodicTask, History, HistoryLines, Template, TemplateOption, ExecutionTypes
 from .hooks import Hook
 from ..validators import RegexValidator, validate_hostname, path_validator
 from ..exceptions import UnknownTypeException, Conflict
@@ -180,13 +182,14 @@ def validate_template_keys(instance: Template, **kwargs) -> None:
     if instance.kind not in instance.template_fields.keys():
         raise UnknownTypeException(instance.kind)
     errors = {}
-    for key in instance.data.keys():
-        if key not in instance.template_fields[instance.kind]:
-            errors[key] = "Unknown key. Keys should be {}".format(
-                instance.template_fields[instance.kind]
-            )
+    for _, data in chain(((None, instance.data),), instance.options.items()):
+        for key in data.keys():
+            if key not in instance.template_fields[instance.kind]:
+                errors[key] = ["Unknown key. Keys should be {}".format(
+                    instance.template_fields[instance.kind]
+                )]
     if errors:
-        raise ValidationError(errors)
+        raise drfValidationError(errors)
 
 
 @receiver(signals.pre_save, sender=Template)

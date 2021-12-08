@@ -68,16 +68,16 @@ info:
   x-versions:
     application: 1.8.5
     library: 1.8.5
-    vstutils: 5.0.0b74
+    vstutils: 5.0.0b85
     django: 3.2.8
     djangorestframework: 3.12.4
     drf_yasg: 1.20.0
     ansible: 2.9.27
-  version: v2
+  version: v3
 host: localhost:8080
 schemes:
   - http
-basePath: /api/v2
+basePath: /api/v3
 consumes:
   - application/json
 produces:
@@ -102,8 +102,6 @@ paths:
           items:
             type: string
             enum:
-              - id
-              - -id
               - name
               - -name
               - type
@@ -4181,6 +4179,430 @@ paths:
         description: A unique integer value identifying this project.
         required: true
         type: integer
+  /project/{id}/execution_templates/:
+    get:
+      operationId: project_execution_templates_list
+      description: Template(id, hidden, notes, owner, name, kind, template_data, options_data,
+        inventory, project)
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: name
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: kind
+          in: query
+          description: A kind of template.
+          required: false
+          type: string
+        - name: inventory
+          in: query
+          description: The inventory id or path in project.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: name__not
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - id
+              - -id
+              - name
+              - -name
+              - kind
+              - -kind
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: __search
+          in: query
+          description: A search term.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/ExecutionTemplate'
+      tags:
+        - project
+      x-subscribe-labels:
+        - main.Template
+    post:
+      operationId: project_execution_templates_add
+      description: Template(id, hidden, notes, owner, name, kind, template_data, options_data,
+        inventory, project)
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateExecutionTemplate'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/CreateExecutionTemplate'
+      tags:
+        - project
+      x-allow-append: false
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
+  /project/{id}/execution_templates/{execution_templates_id}/:
+    get:
+      operationId: project_execution_templates_get
+      description: Template(id, hidden, notes, owner, name, kind, template_data, options_data,
+        inventory, project)
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneExecutionTemplate'
+      tags:
+        - project
+      x-subscribe-labels:
+        - main.Template
+    put:
+      operationId: project_execution_templates_update
+      description: Template(id, hidden, notes, owner, name, kind, template_data, options_data,
+        inventory, project)
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/OneExecutionTemplate'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneExecutionTemplate'
+      tags:
+        - project
+    patch:
+      operationId: project_execution_templates_edit
+      description: Template(id, hidden, notes, owner, name, kind, template_data, options_data,
+        inventory, project)
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/OneExecutionTemplate'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneExecutionTemplate'
+      tags:
+        - project
+    delete:
+      operationId: project_execution_templates_remove
+      description: Template(id, hidden, notes, owner, name, kind, template_data, options_data,
+        inventory, project)
+      parameters: []
+      responses:
+        '204':
+          description: NO CONTENT
+      tags:
+        - project
+    parameters:
+      - name: execution_templates_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this template
+          sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
+  /project/{id}/execution_templates/{execution_templates_id}/execute/:
+    post:
+      operationId: project_execution_templates_execute
+      description: Execute template with option.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/TemplateExec'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/ExecuteResponse'
+      tags:
+        - project
+      x-multiaction: false
+    parameters:
+      - name: execution_templates_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this template
+          sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
+  /project/{id}/execution_templates/{execution_templates_id}/option/:
+    get:
+      operationId: project_execution_templates_option_list
+      description: TemplateOption(template, id, name, data)
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: string
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: name
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: string
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: name__not
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - name
+              - -name
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: __search
+          in: query
+          description: A search term.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/TemplateOption'
+      tags:
+        - project
+      x-subscribe-labels:
+        - main.TemplateOption
+    post:
+      operationId: project_execution_templates_option_add
+      description: TemplateOption(template, id, name, data)
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateTemplateOption'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/CreateTemplateOption'
+      tags:
+        - project
+      x-allow-append: false
+    parameters:
+      - name: execution_templates_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this template
+          sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
+  /project/{id}/execution_templates/{execution_templates_id}/option/{option_id}/:
+    get:
+      operationId: project_execution_templates_option_get
+      description: TemplateOption(template, id, name, data)
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneTemplateOption'
+      tags:
+        - project
+      x-subscribe-labels:
+        - main.TemplateOption
+    put:
+      operationId: project_execution_templates_option_update
+      description: TemplateOption(template, id, name, data)
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/OneTemplateOption'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneTemplateOption'
+      tags:
+        - project
+    patch:
+      operationId: project_execution_templates_option_edit
+      description: TemplateOption(template, id, name, data)
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/OneTemplateOption'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneTemplateOption'
+      tags:
+        - project
+    delete:
+      operationId: project_execution_templates_option_remove
+      description: TemplateOption(template, id, name, data)
+      parameters: []
+      responses:
+        '204':
+          description: NO CONTENT
+      tags:
+        - project
+    parameters:
+      - name: execution_templates_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this template
+          sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
+      - name: option_id
+        in: path
+        required: true
+        type: string
   /project/{id}/history/:
     get:
       operationId: project_history_list
@@ -6919,232 +7341,6 @@ paths:
         description: A unique integer value identifying this project.
         required: true
         type: integer
-  /project/{id}/template/:
-    get:
-      operationId: project_template_list
-      description: Return all execute templates in project.
-      parameters:
-        - name: id
-          in: query
-          description: A unique integer value (or comma separated list) identifying
-            this instance.
-          required: false
-          type: array
-          items:
-            type: integer
-          collectionFormat: csv
-          minItems: 1
-          uniqueItems: true
-        - name: name
-          in: query
-          description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: kind
-          in: query
-          description: A kind of template.
-          required: false
-          type: string
-        - name: inventory
-          in: query
-          description: The inventory id or path in project.
-          required: false
-          type: string
-        - name: id__not
-          in: query
-          description: A unique integer value (or comma separated list) identifying
-            this instance.
-          required: false
-          type: array
-          items:
-            type: integer
-          collectionFormat: csv
-          minItems: 1
-          uniqueItems: true
-        - name: name__not
-          in: query
-          description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: ordering
-          in: query
-          description: Which field to use when ordering the results.
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - id
-              - -id
-              - name
-              - -name
-              - kind
-              - -kind
-          collectionFormat: csv
-          minItems: 1
-          uniqueItems: true
-        - name: __search
-          in: query
-          description: A search term.
-          required: false
-          type: string
-        - name: limit
-          in: query
-          description: Number of results to return per page.
-          required: false
-          type: integer
-        - name: offset
-          in: query
-          description: The initial index from which to return the results.
-          required: false
-          type: integer
-      responses:
-        '200':
-          description: OK
-          schema:
-            required:
-              - count
-              - results
-            type: object
-            properties:
-              count:
-                type: integer
-              next:
-                type: string
-                format: uri
-                x-nullable: true
-              previous:
-                type: string
-                format: uri
-                x-nullable: true
-              results:
-                type: array
-                items:
-                  $ref: '#/definitions/Template'
-      tags:
-        - project
-      x-subscribe-labels:
-        - main.Template
-    post:
-      operationId: project_template_add
-      description: Create a new execute template.
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/OneTemplate'
-      responses:
-        '201':
-          description: CREATED
-          schema:
-            $ref: '#/definitions/OneTemplate'
-      tags:
-        - project
-      x-allow-append: false
-    parameters:
-      - name: id
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{id}/template/{template_id}/:
-    get:
-      operationId: project_template_get
-      description: Return a execute template instance.
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/OneTemplate'
-      tags:
-        - project
-      x-subscribe-labels:
-        - main.Template
-    put:
-      operationId: project_template_update
-      description: Update a execute template.
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/OneTemplate'
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/OneTemplate'
-      tags:
-        - project
-    patch:
-      operationId: project_template_edit
-      description: Update one or more fields on an existing execute template.
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/OneTemplate'
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/OneTemplate'
-      tags:
-        - project
-    delete:
-      operationId: project_template_remove
-      description: Remove an existing execute template.
-      parameters: []
-      responses:
-        '204':
-          description: NO CONTENT
-      tags:
-        - project
-    parameters:
-      - name: id
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-      - name: template_id
-        in: path
-        required: true
-        type: integer
-        description: A unique integer value identifying instance of this template
-          sublist.
-  /project/{id}/template/{template_id}/execute/:
-    post:
-      operationId: project_template_execute
-      description: Execute template with option.
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/TemplateExec'
-      responses:
-        '201':
-          description: CREATED
-          schema:
-            $ref: '#/definitions/ExecuteResponse'
-      tags:
-        - project
-      x-multiaction: false
-    parameters:
-      - name: id
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-      - name: template_id
-        in: path
-        required: true
-        type: integer
-        description: A unique integer value identifying instance of this template
-          sublist.
   /project/{id}/variables/:
     get:
       operationId: project_variables_list
@@ -8731,7 +8927,7 @@ definitions:
               format: fk
               x-options:
                 list_paths:
-                  - /project/{id}/template/
+                  - /project/{id}/execution_templates/
                 makeLink: true
                 usePrefetch: true
                 view_field: name
@@ -8888,7 +9084,7 @@ definitions:
               format: fk
               x-options:
                 list_paths:
-                  - /project/{id}/template/
+                  - /project/{id}/execution_templates/
                 makeLink: true
                 usePrefetch: true
                 view_field: name
@@ -9312,10 +9508,6 @@ definitions:
         description: privilege escalation method to use (default=sudo), use `ansible-doc
           -t become -l` to list valid choices.
         type: string
-      become_user:
-        title: Become user
-        description: run operations as this user (default=root)
-        type: string
       check:
         title: Check
         description: don't make any changes; instead, try to predict some of the changes
@@ -9362,10 +9554,6 @@ definitions:
         description: outputs a list of matching hosts; does not execute anything else
         type: boolean
         default: false
-      module_path:
-        title: Module path
-        description: prepend colon-separated path(s) to module library (default=~/.ansible/plugins/modules:/usr/share/ansible/plugins/modules)
-        type: string
       one_line:
         title: One line
         description: condense output
@@ -9419,10 +9607,6 @@ definitions:
         title: User
         description: connect as this user (default=None)
         type: string
-      vault_id:
-        title: Vault id
-        description: the vault identity to use
-        type: string
       vault_password_file:
         title: Vault password file
         description: vault password file
@@ -9445,7 +9629,6 @@ definitions:
         - background
         - become
         - become_method
-        - become_user
         - check
         - connection
         - diff
@@ -9454,7 +9637,6 @@ definitions:
         - inventory
         - limit
         - list_hosts
-        - module_path
         - one_line
         - playbook_dir
         - poll
@@ -9467,7 +9649,6 @@ definitions:
         - timeout
         - tree
         - user
-        - vault_id
         - vault_password_file
         - verbose
         - group
@@ -9528,10 +9709,6 @@ definitions:
         title: Become method
         description: privilege escalation method to use (default=sudo), use `ansible-doc
           -t become -l` to list valid choices.
-        type: string
-      become_user:
-        title: Become user
-        description: run operations as this user (default=root)
         type: string
       check:
         title: Check
@@ -9599,10 +9776,6 @@ definitions:
         description: list all tasks that would be executed
         type: boolean
         default: false
-      module_path:
-        title: Module path
-        description: prepend colon-separated path(s) to module library (default=~/.ansible/plugins/modules:/usr/share/ansible/plugins/modules)
-        type: string
       private_key:
         title: Private key
         description: use this file to authenticate the connection
@@ -9654,10 +9827,6 @@ definitions:
         title: User
         description: connect as this user (default=None)
         type: string
-      vault_id:
-        title: Vault id
-        description: the vault identity to use
-        type: string
       vault_password_file:
         title: Vault password file
         description: vault password file
@@ -9675,7 +9844,6 @@ definitions:
         - args
         - become
         - become_method
-        - become_user
         - check
         - connection
         - diff
@@ -9688,7 +9856,6 @@ definitions:
         - list_hosts
         - list_tags
         - list_tasks
-        - module_path
         - private_key
         - scp_extra_args
         - sftp_extra_args
@@ -9701,10 +9868,1518 @@ definitions:
         - tags
         - timeout
         - user
-        - vault_id
         - vault_password_file
         - verbose
     x-view-field-name: args
+  ExecutionTemplate:
+    required:
+      - name
+    type: object
+    properties:
+      id:
+        title: Id
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+        minLength: 1
+      kind:
+        title: Type
+        type: string
+        enum:
+          - Task
+          - Module
+        default: Task
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - kind
+    x-view-field-name: name
+  CreateExecutionTemplate:
+    required:
+      - name
+      - data
+    type: object
+    properties:
+      id:
+        title: Id
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+        minLength: 1
+      kind:
+        title: Type
+        type: string
+        enum:
+          - Task
+          - Module
+        default: Task
+      notes:
+        title: Notes
+        type: string
+        minLength: 1
+      inventory:
+        title: Inventory
+        type: string
+        maxLength: 128
+        x-nullable: true
+      data:
+        title: Data
+        type: string
+        format: dynamic
+        x-options:
+          field: kind
+          choices: {}
+          types:
+            Task:
+              required:
+                - playbook
+              type: object
+              properties:
+                playbook:
+                  title: Playbook
+                  type: string
+                  format: fk_autocomplete
+                  x-options:
+                    model:
+                      $ref: '#/definitions/Playbook'
+                    value_field: playbook
+                    view_field: playbook
+                    usePrefetch: true
+                vars:
+                  type: object
+                  properties:
+                    args:
+                      title: Args
+                      description: Playbook(s)
+                      type: string
+                    become:
+                      title: Become
+                      description: run operations with become (does not imply password
+                        prompting)
+                      type: boolean
+                    become_method:
+                      title: Become method
+                      description: privilege escalation method to use (default=sudo),
+                        use `ansible-doc -t become -l` to list valid choices.
+                      type: string
+                    check:
+                      title: Check
+                      description: don't make any changes; instead, try to predict
+                        some of the changes that may occur
+                      type: boolean
+                    connection:
+                      title: Connection
+                      description: connection type to use (default=smart)
+                      type: string
+                    diff:
+                      title: Diff
+                      description: when changing (small) files and templates, show
+                        the differences in those files; works great with --check
+                      type: boolean
+                    extra_vars:
+                      title: Extra vars
+                      description: set additional variables as key=value or YAML/JSON,
+                        if filename prepend with @
+                      type: string
+                    flush_cache:
+                      title: Flush cache
+                      description: clear the fact cache for every host in inventory
+                      type: boolean
+                    force_handlers:
+                      title: Force handlers
+                      description: run handlers even if a task fails
+                      type: boolean
+                    forks:
+                      title: Forks
+                      description: specify number of parallel processes to use (default=5)
+                      type: integer
+                    inventory:
+                      title: Inventory
+                      description: specify inventory host path or comma separated
+                        host list. --inventory-file is deprecated
+                      type: string
+                      format: fk_autocomplete
+                      x-options:
+                        model:
+                          $ref: '#/definitions/Inventory'
+                        value_field: id
+                        view_field: name
+                        usePrefetch: true
+                    limit:
+                      title: Limit
+                      description: further limit selected hosts to an additional pattern
+                      type: string
+                    list_hosts:
+                      title: List hosts
+                      description: outputs a list of matching hosts; does not execute
+                        anything else
+                      type: boolean
+                    list_tags:
+                      title: List tags
+                      description: list all available tags
+                      type: boolean
+                    list_tasks:
+                      title: List tasks
+                      description: list all tasks that would be executed
+                      type: boolean
+                    private_key:
+                      title: Private key
+                      description: use this file to authenticate the connection
+                      type: string
+                      format: secretfile
+                    scp_extra_args:
+                      title: Scp extra args
+                      description: specify extra arguments to pass to scp only (e.g.
+                        -l)
+                      type: string
+                    sftp_extra_args:
+                      title: Sftp extra args
+                      description: specify extra arguments to pass to sftp only (e.g.
+                        -f, -l)
+                      type: string
+                    skip_tags:
+                      title: Skip tags
+                      description: only run plays and tasks whose tags do not match
+                        these values
+                      type: string
+                    ssh_common_args:
+                      title: Ssh common args
+                      description: specify common arguments to pass to sftp/scp/ssh
+                        (e.g. ProxyCommand)
+                      type: string
+                    ssh_extra_args:
+                      title: Ssh extra args
+                      description: specify extra arguments to pass to ssh only (e.g.
+                        -R)
+                      type: string
+                    start_at_task:
+                      title: Start at task
+                      description: start the playbook at the task matching this name
+                      type: string
+                    step:
+                      title: Step
+                      description: 'one-step-at-a-time: confirm each task before running'
+                      type: boolean
+                    syntax_check:
+                      title: Syntax check
+                      description: perform a syntax check on the playbook, but do
+                        not execute it
+                      type: boolean
+                    tags:
+                      title: Tags
+                      description: only run plays and tasks tagged with these values
+                      type: string
+                    timeout:
+                      title: Timeout
+                      description: override the connection timeout in seconds (default=10)
+                      type: integer
+                    user:
+                      title: User
+                      description: connect as this user (default=None)
+                      type: string
+                    vault_password_file:
+                      title: Vault password file
+                      description: vault password file
+                      type: string
+                      format: secretfile
+                    verbose:
+                      title: Verbose
+                      description: verbose mode (-vvv for more, -vvvv to enable connection
+                        debugging)
+                      type: integer
+                      maximum: 4
+            Module:
+              required:
+                - group
+                - module
+                - args
+              type: object
+              properties:
+                group:
+                  title: Group
+                  type: string
+                  minLength: 1
+                module:
+                  title: Module
+                  type: string
+                  format: fk_autocomplete
+                  x-options:
+                    model:
+                      $ref: '#/definitions/Module'
+                    value_field: name
+                    view_field: path
+                    usePrefetch: true
+                args:
+                  title: Arguments
+                  type: string
+                  minLength: 1
+                vars:
+                  type: object
+                  properties:
+                    args:
+                      title: Args
+                      description: host pattern
+                      type: string
+                    background:
+                      title: Background
+                      description: run asynchronously, failing after X seconds (default=N/A)
+                      type: integer
+                    become:
+                      title: Become
+                      description: run operations with become (does not imply password
+                        prompting)
+                      type: boolean
+                    become_method:
+                      title: Become method
+                      description: privilege escalation method to use (default=sudo),
+                        use `ansible-doc -t become -l` to list valid choices.
+                      type: string
+                    check:
+                      title: Check
+                      description: don't make any changes; instead, try to predict
+                        some of the changes that may occur
+                      type: boolean
+                    connection:
+                      title: Connection
+                      description: connection type to use (default=smart)
+                      type: string
+                    diff:
+                      title: Diff
+                      description: when changing (small) files and templates, show
+                        the differences in those files; works great with --check
+                      type: boolean
+                    extra_vars:
+                      title: Extra vars
+                      description: set additional variables as key=value or YAML/JSON,
+                        if filename prepend with @
+                      type: string
+                    forks:
+                      title: Forks
+                      description: specify number of parallel processes to use (default=5)
+                      type: integer
+                    inventory:
+                      title: Inventory
+                      description: specify inventory host path or comma separated
+                        host list. --inventory-file is deprecated
+                      type: string
+                      format: fk_autocomplete
+                      x-options:
+                        model:
+                          $ref: '#/definitions/Inventory'
+                        value_field: id
+                        view_field: name
+                        usePrefetch: true
+                    limit:
+                      title: Limit
+                      description: further limit selected hosts to an additional pattern
+                      type: string
+                    list_hosts:
+                      title: List hosts
+                      description: outputs a list of matching hosts; does not execute
+                        anything else
+                      type: boolean
+                    one_line:
+                      title: One line
+                      description: condense output
+                      type: boolean
+                    playbook_dir:
+                      title: Playbook dir
+                      description: Since this tool does not use playbooks, use this
+                        as a substitute playbook directory.This sets the relative
+                        path for many features including roles/ group_vars/ etc.
+                      type: string
+                    poll:
+                      title: Poll
+                      description: set the poll interval if using -B (default=15)
+                      type: integer
+                    private_key:
+                      title: Private key
+                      description: use this file to authenticate the connection
+                      type: string
+                      format: secretfile
+                    scp_extra_args:
+                      title: Scp extra args
+                      description: specify extra arguments to pass to scp only (e.g.
+                        -l)
+                      type: string
+                    sftp_extra_args:
+                      title: Sftp extra args
+                      description: specify extra arguments to pass to sftp only (e.g.
+                        -f, -l)
+                      type: string
+                    ssh_common_args:
+                      title: Ssh common args
+                      description: specify common arguments to pass to sftp/scp/ssh
+                        (e.g. ProxyCommand)
+                      type: string
+                    ssh_extra_args:
+                      title: Ssh extra args
+                      description: specify extra arguments to pass to ssh only (e.g.
+                        -R)
+                      type: string
+                    syntax_check:
+                      title: Syntax check
+                      description: perform a syntax check on the playbook, but do
+                        not execute it
+                      type: boolean
+                    timeout:
+                      title: Timeout
+                      description: override the connection timeout in seconds (default=10)
+                      type: integer
+                    tree:
+                      title: Tree
+                      description: log output to this directory
+                      type: string
+                    user:
+                      title: User
+                      description: connect as this user (default=None)
+                      type: string
+                    vault_password_file:
+                      title: Vault password file
+                      description: vault password file
+                      type: string
+                      format: secretfile
+                    verbose:
+                      title: Verbose
+                      description: verbose mode (-vvv for more, -vvvv to enable connection
+                        debugging)
+                      type: integer
+                      maximum: 4
+                    group:
+                      title: Group
+                      type: string
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - kind
+        - notes
+        - inventory
+        - data
+    x-view-field-name: name
+  OneExecutionTemplate:
+    required:
+      - name
+      - data
+    type: object
+    properties:
+      id:
+        title: Id
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+        minLength: 1
+      kind:
+        title: Type
+        type: string
+        enum:
+          - Task
+          - Module
+        readOnly: true
+      notes:
+        title: Notes
+        type: string
+        minLength: 1
+      inventory:
+        title: Inventory
+        type: string
+        maxLength: 128
+        x-nullable: true
+      data:
+        title: Data
+        type: string
+        format: dynamic
+        x-options:
+          field: kind
+          choices: {}
+          types:
+            Task:
+              required:
+                - playbook
+              type: object
+              properties:
+                playbook:
+                  title: Playbook
+                  type: string
+                  format: fk_autocomplete
+                  x-options:
+                    model:
+                      $ref: '#/definitions/Playbook'
+                    value_field: playbook
+                    view_field: playbook
+                    usePrefetch: true
+                vars:
+                  type: object
+                  properties:
+                    args:
+                      title: Args
+                      description: Playbook(s)
+                      type: string
+                    become:
+                      title: Become
+                      description: run operations with become (does not imply password
+                        prompting)
+                      type: boolean
+                    become_method:
+                      title: Become method
+                      description: privilege escalation method to use (default=sudo),
+                        use `ansible-doc -t become -l` to list valid choices.
+                      type: string
+                    check:
+                      title: Check
+                      description: don't make any changes; instead, try to predict
+                        some of the changes that may occur
+                      type: boolean
+                    connection:
+                      title: Connection
+                      description: connection type to use (default=smart)
+                      type: string
+                    diff:
+                      title: Diff
+                      description: when changing (small) files and templates, show
+                        the differences in those files; works great with --check
+                      type: boolean
+                    extra_vars:
+                      title: Extra vars
+                      description: set additional variables as key=value or YAML/JSON,
+                        if filename prepend with @
+                      type: string
+                    flush_cache:
+                      title: Flush cache
+                      description: clear the fact cache for every host in inventory
+                      type: boolean
+                    force_handlers:
+                      title: Force handlers
+                      description: run handlers even if a task fails
+                      type: boolean
+                    forks:
+                      title: Forks
+                      description: specify number of parallel processes to use (default=5)
+                      type: integer
+                    inventory:
+                      title: Inventory
+                      description: specify inventory host path or comma separated
+                        host list. --inventory-file is deprecated
+                      type: string
+                      format: fk_autocomplete
+                      x-options:
+                        model:
+                          $ref: '#/definitions/Inventory'
+                        value_field: id
+                        view_field: name
+                        usePrefetch: true
+                    limit:
+                      title: Limit
+                      description: further limit selected hosts to an additional pattern
+                      type: string
+                    list_hosts:
+                      title: List hosts
+                      description: outputs a list of matching hosts; does not execute
+                        anything else
+                      type: boolean
+                    list_tags:
+                      title: List tags
+                      description: list all available tags
+                      type: boolean
+                    list_tasks:
+                      title: List tasks
+                      description: list all tasks that would be executed
+                      type: boolean
+                    private_key:
+                      title: Private key
+                      description: use this file to authenticate the connection
+                      type: string
+                      format: secretfile
+                    scp_extra_args:
+                      title: Scp extra args
+                      description: specify extra arguments to pass to scp only (e.g.
+                        -l)
+                      type: string
+                    sftp_extra_args:
+                      title: Sftp extra args
+                      description: specify extra arguments to pass to sftp only (e.g.
+                        -f, -l)
+                      type: string
+                    skip_tags:
+                      title: Skip tags
+                      description: only run plays and tasks whose tags do not match
+                        these values
+                      type: string
+                    ssh_common_args:
+                      title: Ssh common args
+                      description: specify common arguments to pass to sftp/scp/ssh
+                        (e.g. ProxyCommand)
+                      type: string
+                    ssh_extra_args:
+                      title: Ssh extra args
+                      description: specify extra arguments to pass to ssh only (e.g.
+                        -R)
+                      type: string
+                    start_at_task:
+                      title: Start at task
+                      description: start the playbook at the task matching this name
+                      type: string
+                    step:
+                      title: Step
+                      description: 'one-step-at-a-time: confirm each task before running'
+                      type: boolean
+                    syntax_check:
+                      title: Syntax check
+                      description: perform a syntax check on the playbook, but do
+                        not execute it
+                      type: boolean
+                    tags:
+                      title: Tags
+                      description: only run plays and tasks tagged with these values
+                      type: string
+                    timeout:
+                      title: Timeout
+                      description: override the connection timeout in seconds (default=10)
+                      type: integer
+                    user:
+                      title: User
+                      description: connect as this user (default=None)
+                      type: string
+                    vault_password_file:
+                      title: Vault password file
+                      description: vault password file
+                      type: string
+                      format: secretfile
+                    verbose:
+                      title: Verbose
+                      description: verbose mode (-vvv for more, -vvvv to enable connection
+                        debugging)
+                      type: integer
+                      maximum: 4
+            Module:
+              required:
+                - group
+                - module
+                - args
+              type: object
+              properties:
+                group:
+                  title: Group
+                  type: string
+                  minLength: 1
+                module:
+                  title: Module
+                  type: string
+                  format: fk_autocomplete
+                  x-options:
+                    model:
+                      $ref: '#/definitions/Module'
+                    value_field: name
+                    view_field: path
+                    usePrefetch: true
+                args:
+                  title: Arguments
+                  type: string
+                  minLength: 1
+                vars:
+                  type: object
+                  properties:
+                    args:
+                      title: Args
+                      description: host pattern
+                      type: string
+                    background:
+                      title: Background
+                      description: run asynchronously, failing after X seconds (default=N/A)
+                      type: integer
+                    become:
+                      title: Become
+                      description: run operations with become (does not imply password
+                        prompting)
+                      type: boolean
+                    become_method:
+                      title: Become method
+                      description: privilege escalation method to use (default=sudo),
+                        use `ansible-doc -t become -l` to list valid choices.
+                      type: string
+                    check:
+                      title: Check
+                      description: don't make any changes; instead, try to predict
+                        some of the changes that may occur
+                      type: boolean
+                    connection:
+                      title: Connection
+                      description: connection type to use (default=smart)
+                      type: string
+                    diff:
+                      title: Diff
+                      description: when changing (small) files and templates, show
+                        the differences in those files; works great with --check
+                      type: boolean
+                    extra_vars:
+                      title: Extra vars
+                      description: set additional variables as key=value or YAML/JSON,
+                        if filename prepend with @
+                      type: string
+                    forks:
+                      title: Forks
+                      description: specify number of parallel processes to use (default=5)
+                      type: integer
+                    inventory:
+                      title: Inventory
+                      description: specify inventory host path or comma separated
+                        host list. --inventory-file is deprecated
+                      type: string
+                      format: fk_autocomplete
+                      x-options:
+                        model:
+                          $ref: '#/definitions/Inventory'
+                        value_field: id
+                        view_field: name
+                        usePrefetch: true
+                    limit:
+                      title: Limit
+                      description: further limit selected hosts to an additional pattern
+                      type: string
+                    list_hosts:
+                      title: List hosts
+                      description: outputs a list of matching hosts; does not execute
+                        anything else
+                      type: boolean
+                    one_line:
+                      title: One line
+                      description: condense output
+                      type: boolean
+                    playbook_dir:
+                      title: Playbook dir
+                      description: Since this tool does not use playbooks, use this
+                        as a substitute playbook directory.This sets the relative
+                        path for many features including roles/ group_vars/ etc.
+                      type: string
+                    poll:
+                      title: Poll
+                      description: set the poll interval if using -B (default=15)
+                      type: integer
+                    private_key:
+                      title: Private key
+                      description: use this file to authenticate the connection
+                      type: string
+                      format: secretfile
+                    scp_extra_args:
+                      title: Scp extra args
+                      description: specify extra arguments to pass to scp only (e.g.
+                        -l)
+                      type: string
+                    sftp_extra_args:
+                      title: Sftp extra args
+                      description: specify extra arguments to pass to sftp only (e.g.
+                        -f, -l)
+                      type: string
+                    ssh_common_args:
+                      title: Ssh common args
+                      description: specify common arguments to pass to sftp/scp/ssh
+                        (e.g. ProxyCommand)
+                      type: string
+                    ssh_extra_args:
+                      title: Ssh extra args
+                      description: specify extra arguments to pass to ssh only (e.g.
+                        -R)
+                      type: string
+                    syntax_check:
+                      title: Syntax check
+                      description: perform a syntax check on the playbook, but do
+                        not execute it
+                      type: boolean
+                    timeout:
+                      title: Timeout
+                      description: override the connection timeout in seconds (default=10)
+                      type: integer
+                    tree:
+                      title: Tree
+                      description: log output to this directory
+                      type: string
+                    user:
+                      title: User
+                      description: connect as this user (default=None)
+                      type: string
+                    vault_password_file:
+                      title: Vault password file
+                      description: vault password file
+                      type: string
+                      format: secretfile
+                    verbose:
+                      title: Verbose
+                      description: verbose mode (-vvv for more, -vvvv to enable connection
+                        debugging)
+                      type: integer
+                      maximum: 4
+                    group:
+                      title: Group
+                      type: string
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - kind
+        - notes
+        - inventory
+        - data
+    x-view-field-name: name
+  TemplateExec:
+    required:
+      - option
+    type: object
+    properties:
+      option:
+        title: Option
+        type: integer
+        format: fk
+        x-options:
+          model:
+            $ref: '#/definitions/TemplateOption'
+          value_field: name
+          view_field: name
+          usePrefetch: true
+          makeLink: true
+          dependence: null
+          filters: null
+        x-nullable: true
+    x-properties-groups:
+      '':
+        - option
+    x-view-field-name: option
+  TemplateOption:
+    required:
+      - name
+    type: object
+    properties:
+      id:
+        title: Id
+        type: string
+        readOnly: true
+        minLength: 1
+      name:
+        title: Name
+        type: string
+        maxLength: 256
+        minLength: 1
+    x-properties-groups:
+      '':
+        - id
+        - name
+    x-view-field-name: name
+  CreateTemplateOption:
+    required:
+      - name
+      - data
+    type: object
+    properties:
+      id:
+        title: Id
+        type: string
+        readOnly: true
+        minLength: 1
+      name:
+        title: Name
+        type: string
+        maxLength: 256
+        minLength: 1
+      kind:
+        title: Kind
+        type: string
+        readOnly: true
+        minLength: 1
+      data:
+        title: Data
+        type: string
+        format: dynamic
+        x-options:
+          field: kind
+          choices: {}
+          types:
+            Task:
+              required:
+                - playbook
+              type: object
+              properties:
+                playbook:
+                  title: Playbook
+                  type: string
+                  format: fk_autocomplete
+                  x-options:
+                    model:
+                      $ref: '#/definitions/Playbook'
+                    value_field: playbook
+                    view_field: playbook
+                    usePrefetch: true
+                vars:
+                  type: object
+                  properties:
+                    args:
+                      title: Args
+                      description: Playbook(s)
+                      type: string
+                    become:
+                      title: Become
+                      description: run operations with become (does not imply password
+                        prompting)
+                      type: boolean
+                    become_method:
+                      title: Become method
+                      description: privilege escalation method to use (default=sudo),
+                        use `ansible-doc -t become -l` to list valid choices.
+                      type: string
+                    check:
+                      title: Check
+                      description: don't make any changes; instead, try to predict
+                        some of the changes that may occur
+                      type: boolean
+                    connection:
+                      title: Connection
+                      description: connection type to use (default=smart)
+                      type: string
+                    diff:
+                      title: Diff
+                      description: when changing (small) files and templates, show
+                        the differences in those files; works great with --check
+                      type: boolean
+                    extra_vars:
+                      title: Extra vars
+                      description: set additional variables as key=value or YAML/JSON,
+                        if filename prepend with @
+                      type: string
+                    flush_cache:
+                      title: Flush cache
+                      description: clear the fact cache for every host in inventory
+                      type: boolean
+                    force_handlers:
+                      title: Force handlers
+                      description: run handlers even if a task fails
+                      type: boolean
+                    forks:
+                      title: Forks
+                      description: specify number of parallel processes to use (default=5)
+                      type: integer
+                    inventory:
+                      title: Inventory
+                      description: specify inventory host path or comma separated
+                        host list. --inventory-file is deprecated
+                      type: string
+                      format: fk_autocomplete
+                      x-options:
+                        model:
+                          $ref: '#/definitions/Inventory'
+                        value_field: id
+                        view_field: name
+                        usePrefetch: true
+                    limit:
+                      title: Limit
+                      description: further limit selected hosts to an additional pattern
+                      type: string
+                    list_hosts:
+                      title: List hosts
+                      description: outputs a list of matching hosts; does not execute
+                        anything else
+                      type: boolean
+                    list_tags:
+                      title: List tags
+                      description: list all available tags
+                      type: boolean
+                    list_tasks:
+                      title: List tasks
+                      description: list all tasks that would be executed
+                      type: boolean
+                    private_key:
+                      title: Private key
+                      description: use this file to authenticate the connection
+                      type: string
+                      format: secretfile
+                    scp_extra_args:
+                      title: Scp extra args
+                      description: specify extra arguments to pass to scp only (e.g.
+                        -l)
+                      type: string
+                    sftp_extra_args:
+                      title: Sftp extra args
+                      description: specify extra arguments to pass to sftp only (e.g.
+                        -f, -l)
+                      type: string
+                    skip_tags:
+                      title: Skip tags
+                      description: only run plays and tasks whose tags do not match
+                        these values
+                      type: string
+                    ssh_common_args:
+                      title: Ssh common args
+                      description: specify common arguments to pass to sftp/scp/ssh
+                        (e.g. ProxyCommand)
+                      type: string
+                    ssh_extra_args:
+                      title: Ssh extra args
+                      description: specify extra arguments to pass to ssh only (e.g.
+                        -R)
+                      type: string
+                    start_at_task:
+                      title: Start at task
+                      description: start the playbook at the task matching this name
+                      type: string
+                    step:
+                      title: Step
+                      description: 'one-step-at-a-time: confirm each task before running'
+                      type: boolean
+                    syntax_check:
+                      title: Syntax check
+                      description: perform a syntax check on the playbook, but do
+                        not execute it
+                      type: boolean
+                    tags:
+                      title: Tags
+                      description: only run plays and tasks tagged with these values
+                      type: string
+                    timeout:
+                      title: Timeout
+                      description: override the connection timeout in seconds (default=10)
+                      type: integer
+                    user:
+                      title: User
+                      description: connect as this user (default=None)
+                      type: string
+                    vault_password_file:
+                      title: Vault password file
+                      description: vault password file
+                      type: string
+                      format: secretfile
+                    verbose:
+                      title: Verbose
+                      description: verbose mode (-vvv for more, -vvvv to enable connection
+                        debugging)
+                      type: integer
+                      maximum: 4
+            Module:
+              required:
+                - group
+                - module
+                - args
+              type: object
+              properties:
+                group:
+                  title: Group
+                  type: string
+                  minLength: 1
+                module:
+                  title: Module
+                  type: string
+                  format: fk_autocomplete
+                  x-options:
+                    model:
+                      $ref: '#/definitions/Module'
+                    value_field: name
+                    view_field: path
+                    usePrefetch: true
+                args:
+                  title: Arguments
+                  type: string
+                  minLength: 1
+                vars:
+                  type: object
+                  properties:
+                    args:
+                      title: Args
+                      description: host pattern
+                      type: string
+                    background:
+                      title: Background
+                      description: run asynchronously, failing after X seconds (default=N/A)
+                      type: integer
+                    become:
+                      title: Become
+                      description: run operations with become (does not imply password
+                        prompting)
+                      type: boolean
+                    become_method:
+                      title: Become method
+                      description: privilege escalation method to use (default=sudo),
+                        use `ansible-doc -t become -l` to list valid choices.
+                      type: string
+                    check:
+                      title: Check
+                      description: don't make any changes; instead, try to predict
+                        some of the changes that may occur
+                      type: boolean
+                    connection:
+                      title: Connection
+                      description: connection type to use (default=smart)
+                      type: string
+                    diff:
+                      title: Diff
+                      description: when changing (small) files and templates, show
+                        the differences in those files; works great with --check
+                      type: boolean
+                    extra_vars:
+                      title: Extra vars
+                      description: set additional variables as key=value or YAML/JSON,
+                        if filename prepend with @
+                      type: string
+                    forks:
+                      title: Forks
+                      description: specify number of parallel processes to use (default=5)
+                      type: integer
+                    inventory:
+                      title: Inventory
+                      description: specify inventory host path or comma separated
+                        host list. --inventory-file is deprecated
+                      type: string
+                      format: fk_autocomplete
+                      x-options:
+                        model:
+                          $ref: '#/definitions/Inventory'
+                        value_field: id
+                        view_field: name
+                        usePrefetch: true
+                    limit:
+                      title: Limit
+                      description: further limit selected hosts to an additional pattern
+                      type: string
+                    list_hosts:
+                      title: List hosts
+                      description: outputs a list of matching hosts; does not execute
+                        anything else
+                      type: boolean
+                    one_line:
+                      title: One line
+                      description: condense output
+                      type: boolean
+                    playbook_dir:
+                      title: Playbook dir
+                      description: Since this tool does not use playbooks, use this
+                        as a substitute playbook directory.This sets the relative
+                        path for many features including roles/ group_vars/ etc.
+                      type: string
+                    poll:
+                      title: Poll
+                      description: set the poll interval if using -B (default=15)
+                      type: integer
+                    private_key:
+                      title: Private key
+                      description: use this file to authenticate the connection
+                      type: string
+                      format: secretfile
+                    scp_extra_args:
+                      title: Scp extra args
+                      description: specify extra arguments to pass to scp only (e.g.
+                        -l)
+                      type: string
+                    sftp_extra_args:
+                      title: Sftp extra args
+                      description: specify extra arguments to pass to sftp only (e.g.
+                        -f, -l)
+                      type: string
+                    ssh_common_args:
+                      title: Ssh common args
+                      description: specify common arguments to pass to sftp/scp/ssh
+                        (e.g. ProxyCommand)
+                      type: string
+                    ssh_extra_args:
+                      title: Ssh extra args
+                      description: specify extra arguments to pass to ssh only (e.g.
+                        -R)
+                      type: string
+                    syntax_check:
+                      title: Syntax check
+                      description: perform a syntax check on the playbook, but do
+                        not execute it
+                      type: boolean
+                    timeout:
+                      title: Timeout
+                      description: override the connection timeout in seconds (default=10)
+                      type: integer
+                    tree:
+                      title: Tree
+                      description: log output to this directory
+                      type: string
+                    user:
+                      title: User
+                      description: connect as this user (default=None)
+                      type: string
+                    vault_password_file:
+                      title: Vault password file
+                      description: vault password file
+                      type: string
+                      format: secretfile
+                    verbose:
+                      title: Verbose
+                      description: verbose mode (-vvv for more, -vvvv to enable connection
+                        debugging)
+                      type: integer
+                      maximum: 4
+                    group:
+                      title: Group
+                      type: string
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - kind
+        - data
+    x-view-field-name: name
+  OneTemplateOption:
+    required:
+      - data
+    type: object
+    properties:
+      id:
+        title: Id
+        type: string
+        readOnly: true
+        minLength: 1
+      name:
+        title: Name
+        type: string
+        readOnly: true
+        minLength: 1
+      kind:
+        title: Kind
+        type: string
+        readOnly: true
+        minLength: 1
+      data:
+        title: Data
+        type: string
+        format: dynamic
+        x-options:
+          field: kind
+          choices: {}
+          types:
+            Task:
+              required:
+                - playbook
+              type: object
+              properties:
+                playbook:
+                  title: Playbook
+                  type: string
+                  format: fk_autocomplete
+                  x-options:
+                    model:
+                      $ref: '#/definitions/Playbook'
+                    value_field: playbook
+                    view_field: playbook
+                    usePrefetch: true
+                vars:
+                  type: object
+                  properties:
+                    args:
+                      title: Args
+                      description: Playbook(s)
+                      type: string
+                    become:
+                      title: Become
+                      description: run operations with become (does not imply password
+                        prompting)
+                      type: boolean
+                    become_method:
+                      title: Become method
+                      description: privilege escalation method to use (default=sudo),
+                        use `ansible-doc -t become -l` to list valid choices.
+                      type: string
+                    check:
+                      title: Check
+                      description: don't make any changes; instead, try to predict
+                        some of the changes that may occur
+                      type: boolean
+                    connection:
+                      title: Connection
+                      description: connection type to use (default=smart)
+                      type: string
+                    diff:
+                      title: Diff
+                      description: when changing (small) files and templates, show
+                        the differences in those files; works great with --check
+                      type: boolean
+                    extra_vars:
+                      title: Extra vars
+                      description: set additional variables as key=value or YAML/JSON,
+                        if filename prepend with @
+                      type: string
+                    flush_cache:
+                      title: Flush cache
+                      description: clear the fact cache for every host in inventory
+                      type: boolean
+                    force_handlers:
+                      title: Force handlers
+                      description: run handlers even if a task fails
+                      type: boolean
+                    forks:
+                      title: Forks
+                      description: specify number of parallel processes to use (default=5)
+                      type: integer
+                    inventory:
+                      title: Inventory
+                      description: specify inventory host path or comma separated
+                        host list. --inventory-file is deprecated
+                      type: string
+                      format: fk_autocomplete
+                      x-options:
+                        model:
+                          $ref: '#/definitions/Inventory'
+                        value_field: id
+                        view_field: name
+                        usePrefetch: true
+                    limit:
+                      title: Limit
+                      description: further limit selected hosts to an additional pattern
+                      type: string
+                    list_hosts:
+                      title: List hosts
+                      description: outputs a list of matching hosts; does not execute
+                        anything else
+                      type: boolean
+                    list_tags:
+                      title: List tags
+                      description: list all available tags
+                      type: boolean
+                    list_tasks:
+                      title: List tasks
+                      description: list all tasks that would be executed
+                      type: boolean
+                    private_key:
+                      title: Private key
+                      description: use this file to authenticate the connection
+                      type: string
+                      format: secretfile
+                    scp_extra_args:
+                      title: Scp extra args
+                      description: specify extra arguments to pass to scp only (e.g.
+                        -l)
+                      type: string
+                    sftp_extra_args:
+                      title: Sftp extra args
+                      description: specify extra arguments to pass to sftp only (e.g.
+                        -f, -l)
+                      type: string
+                    skip_tags:
+                      title: Skip tags
+                      description: only run plays and tasks whose tags do not match
+                        these values
+                      type: string
+                    ssh_common_args:
+                      title: Ssh common args
+                      description: specify common arguments to pass to sftp/scp/ssh
+                        (e.g. ProxyCommand)
+                      type: string
+                    ssh_extra_args:
+                      title: Ssh extra args
+                      description: specify extra arguments to pass to ssh only (e.g.
+                        -R)
+                      type: string
+                    start_at_task:
+                      title: Start at task
+                      description: start the playbook at the task matching this name
+                      type: string
+                    step:
+                      title: Step
+                      description: 'one-step-at-a-time: confirm each task before running'
+                      type: boolean
+                    syntax_check:
+                      title: Syntax check
+                      description: perform a syntax check on the playbook, but do
+                        not execute it
+                      type: boolean
+                    tags:
+                      title: Tags
+                      description: only run plays and tasks tagged with these values
+                      type: string
+                    timeout:
+                      title: Timeout
+                      description: override the connection timeout in seconds (default=10)
+                      type: integer
+                    user:
+                      title: User
+                      description: connect as this user (default=None)
+                      type: string
+                    vault_password_file:
+                      title: Vault password file
+                      description: vault password file
+                      type: string
+                      format: secretfile
+                    verbose:
+                      title: Verbose
+                      description: verbose mode (-vvv for more, -vvvv to enable connection
+                        debugging)
+                      type: integer
+                      maximum: 4
+            Module:
+              required:
+                - group
+                - module
+                - args
+              type: object
+              properties:
+                group:
+                  title: Group
+                  type: string
+                  minLength: 1
+                module:
+                  title: Module
+                  type: string
+                  format: fk_autocomplete
+                  x-options:
+                    model:
+                      $ref: '#/definitions/Module'
+                    value_field: name
+                    view_field: path
+                    usePrefetch: true
+                args:
+                  title: Arguments
+                  type: string
+                  minLength: 1
+                vars:
+                  type: object
+                  properties:
+                    args:
+                      title: Args
+                      description: host pattern
+                      type: string
+                    background:
+                      title: Background
+                      description: run asynchronously, failing after X seconds (default=N/A)
+                      type: integer
+                    become:
+                      title: Become
+                      description: run operations with become (does not imply password
+                        prompting)
+                      type: boolean
+                    become_method:
+                      title: Become method
+                      description: privilege escalation method to use (default=sudo),
+                        use `ansible-doc -t become -l` to list valid choices.
+                      type: string
+                    check:
+                      title: Check
+                      description: don't make any changes; instead, try to predict
+                        some of the changes that may occur
+                      type: boolean
+                    connection:
+                      title: Connection
+                      description: connection type to use (default=smart)
+                      type: string
+                    diff:
+                      title: Diff
+                      description: when changing (small) files and templates, show
+                        the differences in those files; works great with --check
+                      type: boolean
+                    extra_vars:
+                      title: Extra vars
+                      description: set additional variables as key=value or YAML/JSON,
+                        if filename prepend with @
+                      type: string
+                    forks:
+                      title: Forks
+                      description: specify number of parallel processes to use (default=5)
+                      type: integer
+                    inventory:
+                      title: Inventory
+                      description: specify inventory host path or comma separated
+                        host list. --inventory-file is deprecated
+                      type: string
+                      format: fk_autocomplete
+                      x-options:
+                        model:
+                          $ref: '#/definitions/Inventory'
+                        value_field: id
+                        view_field: name
+                        usePrefetch: true
+                    limit:
+                      title: Limit
+                      description: further limit selected hosts to an additional pattern
+                      type: string
+                    list_hosts:
+                      title: List hosts
+                      description: outputs a list of matching hosts; does not execute
+                        anything else
+                      type: boolean
+                    one_line:
+                      title: One line
+                      description: condense output
+                      type: boolean
+                    playbook_dir:
+                      title: Playbook dir
+                      description: Since this tool does not use playbooks, use this
+                        as a substitute playbook directory.This sets the relative
+                        path for many features including roles/ group_vars/ etc.
+                      type: string
+                    poll:
+                      title: Poll
+                      description: set the poll interval if using -B (default=15)
+                      type: integer
+                    private_key:
+                      title: Private key
+                      description: use this file to authenticate the connection
+                      type: string
+                      format: secretfile
+                    scp_extra_args:
+                      title: Scp extra args
+                      description: specify extra arguments to pass to scp only (e.g.
+                        -l)
+                      type: string
+                    sftp_extra_args:
+                      title: Sftp extra args
+                      description: specify extra arguments to pass to sftp only (e.g.
+                        -f, -l)
+                      type: string
+                    ssh_common_args:
+                      title: Ssh common args
+                      description: specify common arguments to pass to sftp/scp/ssh
+                        (e.g. ProxyCommand)
+                      type: string
+                    ssh_extra_args:
+                      title: Ssh extra args
+                      description: specify extra arguments to pass to ssh only (e.g.
+                        -R)
+                      type: string
+                    syntax_check:
+                      title: Syntax check
+                      description: perform a syntax check on the playbook, but do
+                        not execute it
+                      type: boolean
+                    timeout:
+                      title: Timeout
+                      description: override the connection timeout in seconds (default=10)
+                      type: integer
+                    tree:
+                      title: Tree
+                      description: log output to this directory
+                      type: string
+                    user:
+                      title: User
+                      description: connect as this user (default=None)
+                      type: string
+                    vault_password_file:
+                      title: Vault password file
+                      description: vault password file
+                      type: string
+                      format: secretfile
+                    verbose:
+                      title: Verbose
+                      description: verbose mode (-vvv for more, -vvvv to enable connection
+                        debugging)
+                      type: integer
+                      maximum: 4
+                    group:
+                      title: Group
+                      type: string
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - kind
+        - data
+    x-view-field-name: name
   ProjectHistory:
     required:
       - initiator
@@ -9744,7 +11419,7 @@ definitions:
               format: fk
               x-options:
                 list_paths:
-                  - /project/{id}/template/
+                  - /project/{id}/execution_templates/
                 makeLink: true
                 usePrefetch: true
                 view_field: name
@@ -10172,106 +11847,6 @@ definitions:
         - name
         - playbook
     x-view-field-name: name
-  Template:
-    required:
-      - name
-      - data
-      - options
-    type: object
-    properties:
-      id:
-        title: Id
-        type: integer
-        readOnly: true
-      name:
-        title: Name
-        type: string
-        maxLength: 512
-        minLength: 1
-      kind:
-        title: Type
-        type: string
-        enum:
-          - Task
-          - Module
-        default: Task
-      data:
-        $ref: '#/definitions/Data'
-      options:
-        $ref: '#/definitions/Data'
-      options_list:
-        type: array
-        items:
-          type: string
-          x-nullable: true
-        readOnly: true
-    x-properties-groups:
-      '':
-        - id
-        - name
-        - kind
-        - data
-        - options
-        - options_list
-    x-view-field-name: name
-  OneTemplate:
-    required:
-      - name
-      - data
-    type: object
-    properties:
-      id:
-        title: Id
-        type: integer
-        readOnly: true
-      name:
-        title: Name
-        type: string
-        maxLength: 512
-        minLength: 1
-      notes:
-        title: Notes
-        type: string
-        format: textarea
-      kind:
-        title: Type
-        type: string
-        enum:
-          - Task
-          - Module
-        default: Task
-      data:
-        $ref: '#/definitions/Data'
-      options:
-        $ref: '#/definitions/Data'
-      options_list:
-        type: array
-        items:
-          type: string
-          x-nullable: true
-        readOnly: true
-    x-properties-groups:
-      '':
-        - id
-        - name
-        - notes
-        - kind
-        - data
-        - options
-        - options_list
-    x-view-field-name: name
-  TemplateExec:
-    type: object
-    properties:
-      option:
-        title: Option
-        description: Option name from template options.
-        type: string
-        minLength: 0
-    x-properties-groups:
-      '':
-        - option
-    x-view-field-name: option
   ProjectVariable:
     required:
       - key

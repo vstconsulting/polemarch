@@ -450,7 +450,7 @@ class ProjectTemplate(custom_model.FileModel):
     _template_types = (t for t in Project.repo_handlers.keys() if t != 'MANUAL')
     _auth_types = ['NONE', 'KEY', 'PASSWORD']
 
-    id = custom_model.IntegerField(primary_key=True)
+    id = models.PositiveIntegerField(primary_key=True)
     name = custom_model.CharField(max_length=1024)
     description = custom_model.TextField()
     repository = custom_model.CharField(max_length=2*1024)
