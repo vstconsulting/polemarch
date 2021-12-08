@@ -32,16 +32,16 @@ AUTH_PASSWORD_VALIDATORS += [
 ]
 
 # API settings
-VST_API_VERSION = 'v2'
+VST_API_VERSION = 'v3'
 
 REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = [
-    "{}.api.{}.permissions.ModelPermission".format(VST_PROJECT_LIB_NAME, VST_API_VERSION),
+    "{}.api.v2.permissions.ModelPermission".format(VST_PROJECT_LIB_NAME),
 ]
 
 API_URL = VST_API_URL
 DEFAULT_API_URL = "/{}/{}".format(API_URL, VST_API_VERSION)
 API = {
-    VST_API_VERSION: OrderedDict(
+    'v2': OrderedDict(
         project={'view': '{}.api.v2.views.ProjectViewSet'.format(VST_PROJECT_LIB_NAME)},
         community_template={'view': '{}.api.v2.views.ProjectTemplateViewSet'.format(VST_PROJECT_LIB_NAME)},
         inventory={'view': '{}.api.v2.views.InventoryViewSet'.format(VST_PROJECT_LIB_NAME)},
@@ -52,7 +52,14 @@ API = {
         team={'view': '{}.api.v2.views.TeamViewSet'.format(VST_PROJECT_LIB_NAME)},
         token={'view': '{}.api.v2.views.TokenView'.format(VST_PROJECT_LIB_NAME), 'type': 'view'},
         hook={'view': '{}.api.v2.views.HookViewSet'.format(VST_PROJECT_LIB_NAME)},
-        stats={'view': '{}.api.v2.views.StatisticViewSet'.format(VST_PROJECT_LIB_NAME), 'op_types': ['get']})
+        stats={'view': '{}.api.v2.views.StatisticViewSet'.format(VST_PROJECT_LIB_NAME), 'op_types': ['get']}
+    )
+}
+API[VST_API_VERSION] = {
+    **API['v2'],
+    'project': {
+        'view': '{}.api.v3.views.ProjectViewSet'.format(VST_PROJECT_LIB_NAME)
+    },
 }
 
 PROJECT_GUI_MENU = [

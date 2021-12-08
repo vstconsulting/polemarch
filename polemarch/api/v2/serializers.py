@@ -41,7 +41,7 @@ def get_initiator_field():
         }
         for k, v in (
             ('project', ['/project/']),
-            ('template', ['/project/{id}/template/']),
+            ('template', ['/project/{id}/execution_templates/']),
             ('scheduler', ['/project/{id}/periodic_task/']),
         )
     })
@@ -475,7 +475,6 @@ class _WithVariablesSerializer(_WithPermissionsSerializer):
 
     def to_representation(self, instance, hidden_vars: List[str] = None):
         rep = super().to_representation(instance)
-        hv = hidden_vars
         hv = getattr(instance, 'HIDDEN_VARS', []) if hidden_vars is None else hidden_vars
         vars = self.get_vars(rep)
         if vars is not None:
@@ -729,10 +728,11 @@ class OneTemplateSerializer(TemplateSerializer):
 
 
 class TemplateExecSerializer(DataSerializer):
-    option = vst_fields.VSTCharField(
-        help_text='Option name from template options.',
-        min_length=0, allow_blank=True,
-        required=False
+    option = vst_fields.FkField(
+        select='TemplateOption',
+        autocomplete_property='name',
+        autocomplete_represent='name',
+        allow_null=True,
     )
 
 
@@ -973,7 +973,7 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'execute_view_data',)
 
 
-def generate_fileds(ansible_reference: AnsibleArgumentsReference, ansible_type: str) -> OrderedDict:
+def generate_fileds(ansible_reference: AnsibleArgumentsReference, ansible_type: str, no_default=False) -> OrderedDict:
     if ansible_type is None:
         return OrderedDict()  # nocv
 
@@ -1011,6 +1011,8 @@ def generate_fileds(ansible_reference: AnsibleArgumentsReference, ansible_type: 
                 kwargs['default'] = 'all'
 
         field_name = ref.replace('-', '_')
+        if no_default:
+            kwargs['default'] = fields.empty
         fields_of_serializer[field_name] = field(**kwargs)
 
     return fields_of_serializer

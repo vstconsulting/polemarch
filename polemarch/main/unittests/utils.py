@@ -15,7 +15,7 @@ class TemplateCreateTestCase(BaseTestCase):
             Template.objects.create()
         with self.assertRaises(ValidationError):
             Template.objects.create(
-                data=dict(err_key='err_val'),
+                data=dict(vars=dict(err_key='err_val')),
                 project=test_proj,
                 kind='Task'
             )
