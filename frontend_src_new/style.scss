@@ -37,3 +37,7 @@ $project-status-colors: (
         color: #{$color};
     }
 }
+
+.field-children-false .operation__group {
+    display: none;
+}

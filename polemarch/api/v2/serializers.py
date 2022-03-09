@@ -27,26 +27,6 @@ User = get_user_model()
 LANG_CHOICES = [item[0] for item in LANGUAGES]
 
 
-def get_initiator_field():
-    return vst_fields.DependEnumField(field='initiator_type', types={
-        k: {
-            'format': 'fk',
-            'x-options': {
-                'list_paths': v,
-                'makeLink': True,
-                'usePrefetch': True,
-                'view_field': 'name',
-                'value_field': 'id',
-            }
-        }
-        for k, v in (
-            ('project', ['/project/']),
-            ('template', ['/project/{id}/execution_templates/']),
-            ('scheduler', ['/project/{id}/periodic_task/']),
-        )
-    })
-
-
 # NOTE: we can freely remove that because according to real behaviour all our
 #  models always have queryset at this stage, so this code actually doing
 # nothing
@@ -305,7 +285,6 @@ class OneTeamSerializer(TeamSerializer):
 
 class HistorySerializer(_SignalSerializer):
     status = serializers.ChoiceField(choices=models.History.statuses, required=False)
-    initiator = get_initiator_field()
 
     class Meta:
         model = models.History
@@ -347,7 +326,6 @@ class OneHistorySerializer(_SignalSerializer):
     status = serializers.ChoiceField(choices=models.History.statuses, required=False)
     raw_stdout = serializers.SerializerMethodField(read_only=True)
     execution_time = vst_fields.UptimeField()
-    initiator = get_initiator_field()
 
     class Meta:
         model = models.History
@@ -589,8 +567,16 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
 
     mode = vst_fields.DependEnumField(
         allow_blank=True, required=False, field='kind', types={
-            'PLAYBOOK': 'fk_autocomplete',
-            'MODULE': 'fk_autocomplete',
+            'PLAYBOOK': vst_fields.AutoCompletionField(
+                autocomplete='Playbook',
+                autocomplete_property='playbook',
+                autocomplete_represent='playbook',
+            ),
+            'MODULE': vst_fields.AutoCompletionField(
+                autocomplete='Module',
+                autocomplete_property='name',
+                autocomplete_represent='path',
+            ),
             'TEMPLATE': 'hidden',
         }
     )

@@ -47,7 +47,7 @@ spa.signals.once('allViews.created', ({ views }) => {
 });
 
 spa.signals.once('app.afterInit', ({ app }) => {
-    ['UpdateExecutionTemplate', 'OneExecutionTemplate', 'CreateTemplateOption', 'OneTemplateOption']
+    ['OneExecutionTemplate', 'CreateTemplateOption', 'OneTemplateOption']
         .map((modelName) => app.modelsResolver.get(modelName))
         .flatMap((model) => Object.values(model.fields.get('data').types))
         .forEach((field) => (field.nestedModel.fields.get('vars').hideNotRequired = true));

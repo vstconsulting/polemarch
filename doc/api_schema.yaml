@@ -68,9 +68,9 @@ info:
   x-versions:
     application: 1.8.5
     library: 1.8.5
-    vstutils: 5.0.0b85
-    django: 3.2.8
-    djangorestframework: 3.12.4
+    vstutils: 5.0.0b108
+    django: 3.2.11
+    djangorestframework: 3.13.1
     drf_yasg: 1.20.0
     ansible: 2.9.27
   version: v3
@@ -80,8 +80,10 @@ schemes:
 basePath: /api/v3
 consumes:
   - application/json
+  - application/msgpack
 produces:
   - application/json
+  - application/msgpack
   - multipart/form-data; boundary=BoUnDaRyStRiNg
 securityDefinitions:
   basic:
@@ -8890,7 +8892,6 @@ definitions:
     x-view-field-name: name
   History:
     required:
-      - initiator
       - mode
     type: object
     properties:
@@ -8908,39 +8909,7 @@ definitions:
         x-nullable: true
       initiator:
         title: Initiator
-        type: string
-        format: dynamic
-        x-options:
-          field: initiator_type
-          choices: {}
-          types:
-            project:
-              format: fk
-              x-options:
-                list_paths:
-                  - /project/
-                makeLink: true
-                usePrefetch: true
-                view_field: name
-                value_field: id
-            template:
-              format: fk
-              x-options:
-                list_paths:
-                  - /project/{id}/execution_templates/
-                makeLink: true
-                usePrefetch: true
-                view_field: name
-                value_field: id
-            scheduler:
-              format: fk
-              x-options:
-                list_paths:
-                  - /project/{id}/periodic_task/
-                makeLink: true
-                usePrefetch: true
-                view_field: name
-                value_field: id
+        type: integer
       initiator_type:
         title: Initiator type
         type: string
@@ -9002,7 +8971,6 @@ definitions:
     required:
       - mode
       - execution_time
-      - initiator
     type: object
     properties:
       id:
@@ -9065,39 +9033,7 @@ definitions:
         x-nullable: true
       initiator:
         title: Initiator
-        type: string
-        format: dynamic
-        x-options:
-          field: initiator_type
-          choices: {}
-          types:
-            project:
-              format: fk
-              x-options:
-                list_paths:
-                  - /project/
-                makeLink: true
-                usePrefetch: true
-                view_field: name
-                value_field: id
-            template:
-              format: fk
-              x-options:
-                list_paths:
-                  - /project/{id}/execution_templates/
-                makeLink: true
-                usePrefetch: true
-                view_field: name
-                value_field: id
-            scheduler:
-              format: fk
-              x-options:
-                list_paths:
-                  - /project/{id}/periodic_task/
-                makeLink: true
-                usePrefetch: true
-                view_field: name
-                value_field: id
+        type: integer
       initiator_type:
         title: Initiator type
         type: string
@@ -11382,7 +11318,6 @@ definitions:
     x-view-field-name: name
   ProjectHistory:
     required:
-      - initiator
       - mode
     type: object
     properties:
@@ -11400,39 +11335,7 @@ definitions:
         x-nullable: true
       initiator:
         title: Initiator
-        type: string
-        format: dynamic
-        x-options:
-          field: initiator_type
-          choices: {}
-          types:
-            project:
-              format: fk
-              x-options:
-                list_paths:
-                  - /project/
-                makeLink: true
-                usePrefetch: true
-                view_field: name
-                value_field: id
-            template:
-              format: fk
-              x-options:
-                list_paths:
-                  - /project/{id}/execution_templates/
-                makeLink: true
-                usePrefetch: true
-                view_field: name
-                value_field: id
-            scheduler:
-              format: fk
-              x-options:
-                list_paths:
-                  - /project/{id}/periodic_task/
-                makeLink: true
-                usePrefetch: true
-                view_field: name
-                value_field: id
+        type: integer
       initiator_type:
         title: Initiator type
         type: string
@@ -11606,8 +11509,24 @@ definitions:
           field: kind
           choices: {}
           types:
-            PLAYBOOK: fk_autocomplete
-            MODULE: fk_autocomplete
+            PLAYBOOK:
+              type: string
+              format: fk_autocomplete
+              x-options:
+                model:
+                  $ref: '#/definitions/Playbook'
+                value_field: playbook
+                view_field: playbook
+                usePrefetch: true
+            MODULE:
+              type: string
+              format: fk_autocomplete
+              x-options:
+                model:
+                  $ref: '#/definitions/Module'
+                value_field: name
+                view_field: path
+                usePrefetch: true
             TEMPLATE: hidden
       inventory:
         title: Inventory
@@ -11703,8 +11622,24 @@ definitions:
           field: kind
           choices: {}
           types:
-            PLAYBOOK: fk_autocomplete
-            MODULE: fk_autocomplete
+            PLAYBOOK:
+              type: string
+              format: fk_autocomplete
+              x-options:
+                model:
+                  $ref: '#/definitions/Playbook'
+                value_field: playbook
+                view_field: playbook
+                usePrefetch: true
+            MODULE:
+              type: string
+              format: fk_autocomplete
+              x-options:
+                model:
+                  $ref: '#/definitions/Module'
+                value_field: name
+                view_field: path
+                usePrefetch: true
             TEMPLATE: hidden
       inventory:
         title: Inventory

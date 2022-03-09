@@ -107,7 +107,7 @@ spa.signals.once('APP_CREATED', (app) => {
     }
 });
 
-for (const modelName of ['AnsibleModule', 'AnsiblePlaybook']) {
+for (const modelName of ['AnsibleModule', 'AnsiblePlaybook', 'Periodictask', 'OnePeriodictask']) {
     spa.signals.once(`models[${modelName}].fields.beforeInit`, (fields) => {
         fields.inventory.format = InventoryField.format;
     });
