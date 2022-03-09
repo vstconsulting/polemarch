@@ -70,6 +70,43 @@ const modeModuleField = (projectId) => ({
     },
 });
 
+const initiatorField = {
+    template: (projectId) => ({
+        format: ProjectBasedFkField.format,
+        name: 'initiator',
+        'x-options': {
+            list_paths: ['/project/{id}/execution_templates/'],
+            makeLink: true,
+            usePrefetch: true,
+            view_field: 'name',
+            value_field: 'id',
+            projectId,
+        },
+    }),
+    scheduler: (projectId) => ({
+        format: ProjectBasedFkField.format,
+        name: 'initiator',
+        'x-options': {
+            list_paths: ['/project/{id}/periodic_task/'],
+            makeLink: true,
+            usePrefetch: true,
+            view_field: 'name',
+            value_field: 'id',
+            projectId,
+        },
+    }),
+    project: () => ({
+        format: 'fk',
+        'x-options': {
+            list_paths: ['/project/'],
+            makeLink: true,
+            usePrefetch: true,
+            view_field: 'name',
+            value_field: 'id',
+        },
+    }),
+};
+
 for (const modelName of HISTORY_MODELS) {
     spa.signals.once(`models[${modelName}].fields.beforeInit`, (fields) => {
         fields.executor.format = 'dynamic';
@@ -80,6 +117,13 @@ for (const modelName of HISTORY_MODELS) {
                 scheduler: executorSchedulerField,
             },
             field: 'initiator_type',
+        };
+
+        fields.initiator.format = 'dynamic';
+        fields.initiator['x-options'] = {
+            callback: ({ initiator_type, project = app.application.$route.params.id }) =>
+                initiatorField[initiator_type](project),
+            field: ['initiator_type', 'project'],
         };
 
         fields.inventory.format = InventoryField.format;
