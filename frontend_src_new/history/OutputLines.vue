@@ -1,5 +1,8 @@
 <template>
     <div class="col-md-6 output-lines">
+        <Card v-if="rawInventory" :title="$t('Raw inventory')">
+            <pre style="white-space: pre-wrap">{{ rawInventory }}</pre>
+        </Card>
         <Card card-body-classes="p-0" :title="title" :is-collapsable="false">
             <template #tools>
                 <button v-show="loading" type="button" class="btn btn-tool">
@@ -46,6 +49,9 @@
             },
             instance() {
                 return this.page.instance;
+            },
+            rawInventory(){
+                return this.instance.raw_inventory;
             },
         },
         methods: {
