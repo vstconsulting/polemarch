@@ -38,6 +38,10 @@ $project-status-colors: (
     }
 }
 
-.field-children-false .operation__group {
+.field-children-false .operation__groups {
+    display: none;
+}
+
+.field-children-true .operation__host {
     display: none;
 }

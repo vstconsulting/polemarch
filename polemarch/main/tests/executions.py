@@ -318,11 +318,11 @@ class BaseExecutionsTestCase(BaseTestCase):
             dict(method='post', path='host', data=dict(name='127.0.1.[5:6]', type="RANGE")),
             dict(method='post', path='host', data=dict(name='hostlocl')),
             # Create groups
-            dict(method='post', path='group', data=dict(name='hosts1')),
-            dict(method='post', path='group', data=dict(name='hosts2')),
-            dict(method='post', path='group', data=dict(name='groups1', children=True)),
-            dict(method='post', path='group', data=dict(name='groups2', children=True)),
-            dict(method='post', path='group', data=dict(name='groups3', children=True)),
+            dict(method='post', path='groups', data=dict(name='hosts1')),
+            dict(method='post', path='groups', data=dict(name='hosts2')),
+            dict(method='post', path='groups', data=dict(name='groups1', children=True)),
+            dict(method='post', path='groups', data=dict(name='groups2', children=True)),
+            dict(method='post', path='groups', data=dict(name='groups3', children=True)),
             # Create inventory
             dict(method='post', path='inventory', data=dict(name='complex_inventory')),
             # Create manual project
@@ -330,7 +330,7 @@ class BaseExecutionsTestCase(BaseTestCase):
             # Set vars
             *[dict(method='post', path=['host', '<<3[data][id]>>', 'variables'], data=dict(key=k, value=v))
               for k, v in hostlocl_v.items()],
-            *[dict(method='post', path=['group', '<<6[data][id]>>', 'variables'], data=dict(key=k, value=v))
+            *[dict(method='post', path=['groups', '<<6[data][id]>>', 'variables'], data=dict(key=k, value=v))
               for k, v in groups1_v.items()],
             *[dict(method='post', path=['inventory', '<<9[data][id]>>', 'variables'], data=dict(key=k, value=v))
               for k, v in complex_inventory_v.items()],
@@ -338,24 +338,24 @@ class BaseExecutionsTestCase(BaseTestCase):
             # Add children
             *[
                 # to hosts1
-                dict(method='post', path=['group', '<<4[data][id]>>', 'host'], data=dict(id='<<0[data][id]>>')),
-                dict(method='post', path=['group', '<<4[data][id]>>', 'host'], data=dict(id='<<3[data][id]>>')),
+                dict(method='post', path=['groups', '<<4[data][id]>>', 'hosts'], data=dict(id='<<0[data][id]>>')),
+                dict(method='post', path=['groups', '<<4[data][id]>>', 'hosts'], data=dict(id='<<3[data][id]>>')),
                 # to hosts2
-                dict(method='post', path=['group', '<<5[data][id]>>', 'host'], data=dict(id='<<1[data][id]>>')),
-                dict(method='post', path=['group', '<<5[data][id]>>', 'host'], data=dict(id='<<2[data][id]>>')),
+                dict(method='post', path=['groups', '<<5[data][id]>>', 'hosts'], data=dict(id='<<1[data][id]>>')),
+                dict(method='post', path=['groups', '<<5[data][id]>>', 'hosts'], data=dict(id='<<2[data][id]>>')),
                 # to groups1
-                dict(method='post', path=['group', '<<6[data][id]>>', 'group'], data=dict(id='<<7[data][id]>>')),
-                dict(method='post', path=['group', '<<6[data][id]>>', 'group'], data=dict(id='<<8[data][id]>>')),
+                dict(method='post', path=['groups', '<<6[data][id]>>', 'groups'], data=dict(id='<<7[data][id]>>')),
+                dict(method='post', path=['groups', '<<6[data][id]>>', 'groups'], data=dict(id='<<8[data][id]>>')),
                 # to groups2
-                dict(method='post', path=['group', '<<7[data][id]>>', 'group'], data=dict(id='<<8[data][id]>>')),
+                dict(method='post', path=['groups', '<<7[data][id]>>', 'groups'], data=dict(id='<<8[data][id]>>')),
                 # to groups3
-                dict(method='post', path=['group', '<<8[data][id]>>', 'group'], data=dict(id='<<4[data][id]>>')),
-                dict(method='post', path=['group', '<<8[data][id]>>', 'group'], data=dict(id='<<5[data][id]>>')),
+                dict(method='post', path=['groups', '<<8[data][id]>>', 'groups'], data=dict(id='<<4[data][id]>>')),
+                dict(method='post', path=['groups', '<<8[data][id]>>', 'groups'], data=dict(id='<<5[data][id]>>')),
                 # to inventory
                 dict(method='post', path=['inventory', '<<9[data][id]>>', 'group'], data=dict(id='<<6[data][id]>>')),
-                dict(method='post', path=['inventory', '<<9[data][id]>>', 'host'], data=dict(id='<<0[data][id]>>')),
-                dict(method='post', path=['inventory', '<<9[data][id]>>', 'host'], data=dict(id='<<1[data][id]>>')),
-                dict(method='post', path=['inventory', '<<9[data][id]>>', 'host'], data=dict(id='<<3[data][id]>>')),
+                dict(method='post', path=['inventory', '<<9[data][id]>>', 'hosts'], data=dict(id='<<0[data][id]>>')),
+                dict(method='post', path=['inventory', '<<9[data][id]>>', 'hosts'], data=dict(id='<<1[data][id]>>')),
+                dict(method='post', path=['inventory', '<<9[data][id]>>', 'hosts'], data=dict(id='<<3[data][id]>>')),
                 # to project
                 dict(method='post', path=['project', '<<10[data][id]>>', 'inventory'], data=dict(id='<<9[data][id]>>')),
             ]
@@ -1612,7 +1612,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         file_for_remove.unlink()
         results = self.bulk([
             dict(method='post', path=['project', prj_id, 'sync']),
-            dict(method='get', path=['inventory', inv_id, 'host']),
+            dict(method='get', path=['inventory', inv_id, 'hosts']),
             dict(method='get', path=['inventory', inv_id, 'group']),
             dict(method='get', path=['inventory', inv_id, 'variables']),
             dict(method='get', path=['inventory', remove_inv_id]),
@@ -1643,7 +1643,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
             dict(method='post', path=['inventory', inv_id, 'variables'], data=dict(ansible_port=8888)),
             dict(method='get', path=['inventory', inv_id, 'all_groups']),
             dict(method='get', path=['inventory', inv_id, 'all_hosts']),
-            dict(method='put', path=['group', '<<3[data][results][0][id]>>'], data=dict(name='new-group-name')),
+            dict(method='put', path=['groups', '<<3[data][results][0][id]>>'], data=dict(name='new-group-name')),
             dict(method='put', path=['host', '<<4[data][results][0][id]>>'], data=dict(name='new-host-ame')),
         ])
         self.assertEqual(results[1]['status'], 403)

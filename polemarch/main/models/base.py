@@ -19,6 +19,7 @@ class BQuerySet(_BQSet):
     def __decorator(self, func: Callable) -> Callable:  # noce
         def wrapper(*args, **kwargs):
             return func(self, *args, **kwargs)
+
         return wrapper
 
     def __getattribute__(self, item: str) -> Any:
@@ -46,7 +47,7 @@ class Manager(_BManager.from_queryset(BQuerySet)):
 
 class BaseModel(_BM):
     # pylint: disable=no-member
-    objects    = BQuerySet.as_manager()
+    objects = BQuerySet.as_manager()
 
     class Meta:
         abstract = True
@@ -68,8 +69,8 @@ class BaseModel(_BM):
 
 
 class BModel(BaseModel):
-    id         = models.AutoField(primary_key=True, max_length=20)
-    hidden     = models.BooleanField(default=False)
+    id = models.AutoField(primary_key=True, max_length=20)
+    hidden = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -79,11 +80,8 @@ class BModel(BaseModel):
 
 
 class BGroupedModel(BModel):
-    parent     = models.ForeignKey('self',
-                                   blank=True,
-                                   null=True,
-                                   on_delete=models.CASCADE)
-    group      = models.BooleanField(default=False)
+    parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
+    group = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -115,10 +113,13 @@ class ForeignKeyACLReverse(models.ForeignKey, ReverseAccessExtendsFieldMixin):
 
 class ACLModel(BModel):
     notes = models.TextField(default="")
-    acl   = models.ManyToManyField("main.ACLPermission", blank=True, null=True)
-    owner = models.ForeignKey(get_user_model(), on_delete=models.SET_DEFAULT,
-                              default=first_staff_user,
-                              related_name="polemarch_%(class)s_set")
+    acl = models.ManyToManyField("main.ACLPermission", blank=True)
+    owner = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.SET_DEFAULT,
+        default=first_staff_user,
+        related_name="polemarch_%(class)s_set"
+    )
 
     class Meta:
         abstract = True

@@ -10,13 +10,13 @@ from typing import Dict, List
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.utils.functional import cached_property
 from rest_framework import serializers, exceptions, fields
 
 from vstutils.api import auth as vst_auth
 from vstutils.api import serializers as vst_serializers, fields as vst_fields
 from vstutils.api.serializers import DataSerializer, EmptySerializer
-from ..signals import api_post_save, api_pre_save
+
+from .base_serializers import with_signals, UserSerializer, _WithPermissionsSerializer, _SignalSerializer
 from ...main import models
 from ...main.settings import LANGUAGES
 from ...main.utils import AnsibleArgumentsReference
@@ -61,10 +61,15 @@ class MultiTypeField(serializers.CharField):
 
 
 class InventoryDependEnumField(vst_fields.DependEnumField):
+    def to_internal_value(self, data):
+        data = super().to_internal_value(data)
+        return data
+
     def to_representation(self, value):
+        value = super().to_representation(value)
         if isinstance(value, models.Inventory):
-            value = value.id  # nocv
-        return super().to_representation(value)
+            value = value.id
+        return value
 
 
 class InventoryAutoCompletionField(vst_fields.AutoCompletionField):
@@ -86,26 +91,6 @@ class InventoryAutoCompletionField(vst_fields.AutoCompletionField):
         if not hasattr(self.root, 'project'):  # nocv
             return
         self.root.project.check_path(inventory)
-
-
-def with_signals(func):
-    """
-    Decorator for send api_pre_save and api_post_save signals from serializers.
-    """
-    def func_wrapper(*args, **kwargs):
-        user = args[0].context['request'].user
-        with transaction.atomic():
-            instance = func(*args, **kwargs)
-            api_pre_save.send(
-                sender=instance.__class__, instance=instance, user=user
-            )
-        with transaction.atomic():
-            api_post_save.send(
-                sender=instance.__class__, instance=instance, user=user
-            )
-        return instance
-
-    return func_wrapper
 
 
 # Serializers
@@ -142,57 +127,6 @@ class SetOwnerSerializer(DataSerializer):
 
     def to_internal_value(self, data: dict):
         return dict(pk=data['user_id'])
-
-
-class _SignalSerializer(serializers.ModelSerializer):
-    @cached_property
-    def _writable_fields(self) -> List:  # pylint: disable=invalid-overridden-method
-        writable_fields = super()._writable_fields
-        fields_of_serializer = []
-        attrs = [
-            'field_name', 'source_attrs', 'source',
-            'read_only', 'required', 'write_only', 'default'
-        ]
-        for field in writable_fields:
-            if not isinstance(field, DataSerializer):
-                fields_of_serializer.append(field)
-                continue
-            field_object = serializers.DictField()
-            for attr in attrs:
-                setattr(field_object, attr, getattr(field, attr, None))
-            fields_of_serializer.append(field_object)
-        return fields_of_serializer
-
-    @with_signals
-    def create(self, validated_data):
-        return super().create(validated_data)
-
-    @with_signals
-    def update(self, instance, validated_data):
-        return super().update(instance, validated_data)
-
-
-class _WithPermissionsSerializer(_SignalSerializer):
-    perms_msg = "You do not have permission to perform this action."
-
-    def is_valid(self, *args, **kwargs):
-        result = super().is_valid(*args, **kwargs)
-        if not hasattr(self, 'instance') or self.instance is None:  # noce
-            self.validated_data['owner'] = self.validated_data.get(
-                'owner', self.current_user()
-            )
-        return result
-
-    def current_user(self) -> User:
-        return self.context['request'].user  # noce
-
-
-class UserSerializer(vst_auth.UserSerializer):
-    is_staff = serializers.HiddenField(default=True, label='Staff')
-
-    @with_signals
-    def update(self, instance: User, validated_data: Dict):
-        return super().update(instance, validated_data)
 
 
 class CreateUserSerializer(vst_auth.CreateUserSerializer):
@@ -729,42 +663,6 @@ class _InventoryOperations(_WithVariablesSerializer):
     pass
 
 
-###################################
-
-class GroupSerializer(_WithVariablesSerializer):
-    children = serializers.BooleanField(read_only=True)
-    from_project = serializers.BooleanField(read_only=True, label='Project Based')
-
-    class Meta:
-        model = models.Group
-        fields = ('id',
-                  'name',
-                  'children',
-                  'from_project')
-
-
-class OneGroupSerializer(GroupSerializer, _InventoryOperations):
-    owner = UserSerializer(read_only=True)
-    notes = vst_fields.TextareaField(required=False, allow_blank=True)
-
-    class Meta:
-        model = models.Group
-        fields = ('id',
-                  'name',
-                  'notes',
-                  'children',
-                  'owner',)
-
-    class ValidationException(exceptions.ValidationError):
-        status_code = 409
-
-
-class GroupCreateMasterSerializer(OneGroupSerializer):
-    children = serializers.BooleanField(write_only=True,
-                                        label='Contains groups',
-                                        default=False)
-
-
 class InventorySerializer(_WithVariablesSerializer):
     from_project = serializers.BooleanField(read_only=True, label='Project Based')
 
@@ -787,7 +685,7 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
                   'owner',)
 
 
-class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer, _WithPermissionsSerializer):
+class ProjectCreateMasterSerializer(_WithPermissionsSerializer):
     types = models.list_to_choices(models.Project.repo_handlers.keys())
     auth_types = ['NONE', 'KEY', 'PASSWORD']
     branch_auth_types = {t: "hidden" for t in models.Project.repo_handlers.keys()}

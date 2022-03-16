@@ -92,6 +92,7 @@ class InvBaseTestCase(BaseTestCase):
         bulk_name = kwargs.get('bulk_name', api_name)
         child_bulk_name = kwargs.get('child_bulk_name', child_api_name)
         should_fail = kwargs.get('should_fail', False)
+        is_deep_nested = kwargs.get('deep_nested', False)
         self.get_model_filter(model_name).delete()
         self.get_model_filter(child_name).delete()
         parent = self.mass_create_bulk(bulk_name, [data])[0]['data']
@@ -99,14 +100,19 @@ class InvBaseTestCase(BaseTestCase):
         pk = parent['id']
         id = child['id']
         child_suburl = '{}/{}'.format(child_api_name, id)
+        delete_path = [bulk_name, pk, child_suburl]
+        if is_deep_nested:
+            delete_path = [bulk_name, id]
         result = self.bulk([
             dict(method='post', path=[bulk_name, pk, child_api_name], data=child),
             dict(method='patch', path=[bulk_name, pk, child_suburl], data={'name': 'g'}),
             dict(method='get', path=[bulk_name, pk, child_suburl]),
             dict(method='put', path=[bulk_name, pk, child_suburl], data=child),
-            dict(method='delete', path=[bulk_name, pk, child_suburl]),
+            dict(method='delete', path=delete_path),
         ])
         if should_fail:
+            if is_deep_nested:
+                result.pop()
             for res in result:
                 self.assertIn(res['status'], [409, 400])
             return
@@ -117,7 +123,11 @@ class InvBaseTestCase(BaseTestCase):
         self.assertEqual(result[2]['data']['name'], 'g', result[2])
         self.assertEqual(result[3]['status'], 200, result[3])
         self.assertEqual(result[4]['status'], 204, result[4])
-        self.assertTrue(self.get_model_filter(child_name, pk=id).exists())
+        should_exist = True
+        if is_deep_nested and not should_fail:
+            should_exist = False
+        exists = self.get_model_filter(child_name, pk=id).exists()
+        self.assertTrue(exists if should_exist else not exists)
         self._check_copy(model_name, bulk_name, copy_checks)
 
 
@@ -172,31 +182,50 @@ class InventoriesTestCase(InvBaseTestCase):
         self.assertEqual(results[5]['status'], 400)
 
     def test_groups(self):
-        self._check_with_vars('Group', self.hosts_data, ansible_port='222', ansible_user='one')
+        self._check_with_vars(
+            'Group',
+            self.hosts_data,
+            bulk_name='groups',
+            api_name='groups',
+            ansible_port='222',
+            ansible_user='one'
+        )
         self._check_dependent(
             'Group', dict(name='g_children', children=True),
-            'Group', dict(name='g_child', children=False),
-            copy_check=dict(group='groups')
+            'Group', dict(name='g_child', children=False, notes='somenotes'),
+            copy_check=dict(groups='groups'),
+            api_name='groups',
+            child_api_name='groups',
+            deep_nested=True,
         )
         self._check_dependent(
             'Group', dict(name='g_children', children=False),
-            'Group', dict(name='g_child', children=False),
-            should_fail=True
+            'Group', dict(name='g_child', children=False, notes='somenotes'),
+            should_fail=True,
+            api_name='groups',
+            child_api_name='groups',
+            deep_nested=True,
         )
         self._check_dependent(
             'Group', dict(name='g_children', children=False),
             'Host', dict(name='hchild'),
+            api_name='groups',
+            child_api_name='hosts',
+            child_bulk_name='host',
         )
         self._check_dependent(
             'Group', dict(name='g_children', children=True),
             'Host', dict(name='hchild'),
-            should_fail=True
+            should_fail=True,
+            api_name='groups',
+            child_api_name='hosts',
+            child_bulk_name='host',
         )
         # Check cyclic dependency
         results = self.bulk_transactional([
-            *[dict(method='post', path='group', data=dict(name=f'cicl-{i}', children=True))
+            *[dict(method='post', path='groups', data=dict(name=f'cicl-{i}', children=True))
               for i in range(4)],
-            *[dict(method='post', path=['group', '<<0[data][id]>>', 'group'], data=dict(id=f'<<{i}[data][id]>>'))
+            *[dict(method='post', path=['groups', '<<0[data][id]>>', 'groups'], data=dict(id=f'<<{i}[data][id]>>'))
               for i in range(1, 4)]
         ])
         for result in results:
@@ -204,13 +233,13 @@ class InventoriesTestCase(InvBaseTestCase):
 
         group_id = results[0]['data']['id']
         results = self.bulk([
-            dict(method='post', path=['group', results[0]['data']['id'], 'group'],
+            dict(method='post', path=['groups', results[0]['data']['id'], 'groups'],
                  data=dict(id=results[0]['data']['id'])),
-            dict(method='post', path=['group', results[1]['data']['id'], 'group'],
+            dict(method='post', path=['groups', results[1]['data']['id'], 'groups'],
                  data=dict(id=results[0]['data']['id'])),
-            dict(method='post', path=['group', results[2]['data']['id'], 'group'],
+            dict(method='post', path=['groups', results[2]['data']['id'], 'groups'],
                  data=dict(id=results[0]['data']['id'])),
-            dict(method='post', path=['group', results[3]['data']['id'], 'group'],
+            dict(method='post', path=['groups', results[3]['data']['id'], 'groups'],
                  data=dict(id=results[0]['data']['id'])),
         ])
         for result in results:
@@ -218,7 +247,7 @@ class InventoriesTestCase(InvBaseTestCase):
             self.assertEqual(result['data']['error_type'], "CiclicDependencyError")
 
         # Check update children
-        self.get_result('patch', self.get_url('group', group_id), 200, data=json.dumps(dict(children=True)))
+        self.get_result('patch', self.get_url('groups', group_id), 200, data=json.dumps(dict(children=True)))
 
     def test_inventories(self):
         self._check_with_vars(
@@ -226,11 +255,15 @@ class InventoriesTestCase(InvBaseTestCase):
         )
         self._check_dependent(
             'Inventory', dict(name='inventory'),
-            'Group', dict(name='inv-group', children=False),
+            'Group', dict(name='inv-group', children=False, notes='somenote'),
+            child_api_name='group',
+            child_bulk_name='groups',
             copy_check=dict(group='groups')
         )
         self._check_dependent(
             'Inventory', dict(name='inventory'),
             'Host', dict(name='inv-host'),
-            copy_check=dict(host='hosts')
+            child_api_name='hosts',
+            child_bulk_name='host',
+            copy_check=dict(hosts='hosts')
         )
