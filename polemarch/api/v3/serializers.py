@@ -80,8 +80,14 @@ class CreateExecutionTemplateSerializer(ExecutionTemplateSerializer):
         fields = ExecutionTemplateSerializer.Meta.fields + ['notes', 'inventory', 'data']
 
     def create(self, validated_data):
-        if not validated_data['data'].get('vars'):
-            validated_data['data']['vars'] = {}
+        data = validated_data['data']
+        inventory = validated_data.get('inventory', None)
+
+        if inventory and not data.get('inventory'):
+            data['inventory'] = inventory
+
+        if not data.get('vars'):
+            data['vars'] = {}
         return super().create(validated_data)
 
 

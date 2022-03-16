@@ -366,7 +366,7 @@ class HostViewSet(OwnedView, _VariablesCopyMixin):
 
 
 @deco.nested_view('variables', 'id', view=__InvVarsViewSet)
-class _BaseGroupViewSet(OwnedView, base.ModelViewSet):
+class _BaseGroupViewSet(OwnedView, sers.models.Group.generated_view):  # pylint: disable=inherit-non-class
     """
     retrieve:
         Return a group instance.
@@ -386,20 +386,27 @@ class _BaseGroupViewSet(OwnedView, base.ModelViewSet):
     update:
         Update a group.
     """
-    model = sers.models.Group
-    serializer_class = sers.GroupSerializer
-    serializer_class_one = sers.OneGroupSerializer
-    serializer_class_create = sers.GroupCreateMasterSerializer
     filter_class = filters.GroupFilter
 
+    class ValidationException(excepts.ValidationError):
+        status_code = 409
 
-@deco.nested_view('host', 'id', manager_name='hosts', allow_append=yes, view=HostViewSet)
-@deco.nested_view('group', 'id', manager_name='groups', allow_append=yes, view=_BaseGroupViewSet)
+
+@deco.nested_view('hosts', 'id', allow_append=yes, view=HostViewSet)
 class _GroupMixin(OwnedView, _VariablesCopyMixin):
     """
     Instance with groups and hosts.
     """
     copy_related = ['hosts', 'groups']
+
+
+def nested_allow_check(view):
+    # pylint: disable=no-member
+    exception = _BaseGroupViewSet.ValidationException
+    if not view.nested_parent_object.children and view.nested_name == 'groups':
+        raise exception("Group is not children.")
+    if view.nested_parent_object.children and view.nested_name == 'hosts':
+        raise exception("Group is children.")
 
 
 class GroupViewSet(_BaseGroupViewSet, _GroupMixin):
@@ -410,17 +417,12 @@ class GroupViewSet(_BaseGroupViewSet, _GroupMixin):
         InventoryItemsPermission
     )
 
-    def nested_allow_check(self):
-        # pylint: disable=no-member
-        exception = _BaseGroupViewSet.serializer_class_one.ValidationException
-        if not self.nested_parent_object.children and self.nested_name == 'group':
-            raise exception("Group is not children.")
-        if self.nested_parent_object.children and self.nested_name == 'host':
-            raise exception("Group is children.")
+    nested_allow_check = nested_allow_check
 
 
 @deco.nested_view('all_groups', 'id', methods=['get'], view=GroupViewSet, subs=None)
 @deco.nested_view('all_hosts', 'id', methods=['get'], view=HostViewSet, subs=None)
+@deco.nested_view('group', 'id', manager_name='groups', allow_append=True, view=GroupViewSet)
 @deco.nested_view('variables', 'id', view=__InvVarsViewSet)
 class InventoryViewSet(_GroupMixin):
     """
@@ -447,7 +449,6 @@ class InventoryViewSet(_GroupMixin):
     serializer_class_one = sers.OneInventorySerializer
     serializer_class_import_inventory = sers.InventoryImportSerializer  # pylint: disable=invalid-name
     filter_class = filters.InventoryFilter
-    copy_related = ['hosts', 'groups']
     permission_classes = concat_classes(
         _GroupMixin.permission_classes,
         InventoryItemsPermission

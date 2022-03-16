@@ -13,7 +13,6 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from vstutils.utils import tmp_file
 from .base import ACLModel, BQuerySet, BModel, models
 
-
 logger = logging.getLogger("polemarch")
 
 
@@ -48,11 +47,11 @@ class VariablesQuerySet(BQuerySet):
 
 class Variable(BModel):
     objects = VariablesQuerySet.as_manager()
-    content_type   = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id      = models.PositiveIntegerField()
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
-    key            = models.CharField(max_length=512)
-    value          = models.TextField(null=True)
+    key = models.CharField(max_length=512)
+    value = models.TextField(null=True)
 
     variables_keys = [
         "ansible_host",
@@ -98,10 +97,9 @@ class AbstractVarsQuerySet(BQuerySet):
 
 
 class AbstractModel(ACLModel):
-    objects     = AbstractVarsQuerySet.as_manager()
-    name        = models.CharField(max_length=512, default=uuid.uuid1)
-    variables   = GenericRelation(Variable, related_query_name="variables",
-                                  object_id_field="object_id")
+    objects = AbstractVarsQuerySet.as_manager()
+    name = models.CharField(max_length=512, default=uuid.uuid1)
+    variables = GenericRelation(Variable, related_query_name="variables", object_id_field="object_id")
 
     class Meta:
         abstract = True

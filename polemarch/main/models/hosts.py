@@ -4,6 +4,13 @@ from typing import Any, List, Tuple, Dict, Text
 import logging
 from django.db.models import Q
 from django.db import transaction
+
+from rest_framework import serializers, fields
+from vstutils.api.serializers import VSTSerializer
+from vstutils.utils import lazy_translate as __
+
+from ...api.v2.base_serializers import UserSerializer, _WithPermissionsSerializer
+
 try:
     from yaml import dump as to_yaml, CDumper as Dumper, ScalarNode
 except ImportError:  # nocv
@@ -15,8 +22,18 @@ from .vars import AbstractModel, AbstractVarsQuerySet
 from ...main import exceptions as ex, utils
 from ..validators import RegexValidator
 
-
 logger = logging.getLogger("polemarch")
+
+
+vars_help = 'List of variables to filter. Comma separeted "key:value" list.'
+
+
+def variables_filter(queryset, field, value):
+    # filter applicable only to variables
+    # pylint: disable=unused-argument
+    items = value.split(",")
+    kwargs = {item.split(":")[0]: item.split(":")[1] for item in items}
+    return queryset.var_filter(**kwargs)
 
 
 def _delete_not_existing_objects(queryset, object_dict):
@@ -57,10 +74,12 @@ class CiclicDependencyError(ex.PMException):
 
 # Block of models
 class InventoryItems(AbstractModel):
-    master_project = models.ForeignKey(blank=True, default=None, null=True,
-                                       on_delete=models.CASCADE,
-                                       related_name='slave_%(class)s',
-                                       to='main.Project')
+    master_project = models.ForeignKey(
+        null=True,
+        on_delete=models.CASCADE,
+        related_name='slave_%(class)s',
+        to='main.Project'
+    )
 
     class Meta:
         abstract = True
@@ -76,8 +95,8 @@ class HostQuerySet(AbstractVarsQuerySet):
 
 
 class Host(InventoryItems):
-    objects     = HostQuerySet.as_manager()
-    type        = models.CharField(max_length=5, default="HOST")
+    objects = HostQuerySet.as_manager()
+    type = models.CharField(max_length=5, default="HOST")
 
     types = ["HOST", "RANGE"]
 
@@ -97,34 +116,26 @@ class Host(InventoryItems):
         return hvars or None, keys
 
 
-class GroupQuerySet(AbstractVarsQuerySet):
-    # pylint: disable=no-member
+class GroupCreateMasterSerializer(VSTSerializer):
+    children = serializers.BooleanField(
+        write_only=True,
+        label='Contains groups',
+        default=False
+    )
 
-    def get_subgroups_id(self, accumulated: AbstractVarsQuerySet = None, tp: Text = "parents") -> AbstractVarsQuerySet:
-        accumulated = accumulated if accumulated else self.none()
-        list_id = self.exclude(id__in=accumulated).values_list("id", flat=True)
-        accumulated = (accumulated | list_id)
-        kw = {tp + "__id__in": list_id}
-        subs = self.model.objects.filter(**kw)
-        subs_id = subs.values_list("id", flat=True)
-        if subs_id:
-            accumulated = (accumulated | subs.get_subgroups_id(accumulated, tp))
-        return accumulated
-
-    def get_subgroups(self) -> AbstractVarsQuerySet:
-        return self.model.objects.filter(id__in=self.get_subgroups_id(tp="parents"))
-
-    def get_parents(self) -> AbstractVarsQuerySet:
-        return self.model.objects.filter(id__in=self.get_subgroups_id(tp="childrens"))
+    class Meta:
+        __inject_from__ = 'detail'
 
 
 class Group(InventoryItems):
     CiclicDependencyError = CiclicDependencyError
-    objects     = GroupQuerySet.as_manager()
-    hosts       = ManyToManyFieldACL(Host, related_query_name="groups")
-    parents     = ManyToManyFieldACLReverse('Group', blank=True, null=True,
-                                            related_query_name="childrens")
-    children    = models.BooleanField(default=False)
+
+    hosts = ManyToManyFieldACL(Host, related_query_name="groups")
+    parents = ManyToManyFieldACLReverse('Group', blank=True, related_query_name="childrens")
+    children = models.BooleanField(default=False)
+
+    deep_parent_field = 'parents'
+    deep_parent_allow_append = True
 
     class Meta:
         default_related_name = "groups"
@@ -132,6 +143,30 @@ class Group(InventoryItems):
             ["children"],
             ["children", "id"],
         ]
+        _list_fields = (
+            'id',
+            'name',
+            'children',
+            'from_project',
+        )
+        _detail_fields = (
+            'id',
+            'name',
+            'notes',
+            'children',
+            'owner',
+        )
+        _override_list_fields = {
+            'from_project': fields.BooleanField(label=__('Project based')),
+        }
+        _override_detail_fields = {
+            'owner': UserSerializer(read_only=True),
+            'children': fields.BooleanField(read_only=True),
+        }
+        _serializer_class = _WithPermissionsSerializer
+        _extra_serializer_classes = {
+            'serializer_class_create': GroupCreateMasterSerializer,
+        }
 
     def toDict(self, tmp_dir: Text = '/tmp') -> Tuple[Dict, List]:
         result = {}
@@ -152,8 +187,8 @@ class Group(InventoryItems):
 
 
 class Inventory(InventoryItems):
-    hosts       = ManyToManyFieldACL(Host)
-    groups      = ManyToManyFieldACL(Group)
+    hosts = ManyToManyFieldACL(Host)
+    groups = ManyToManyFieldACL(Group)
 
     _to_yaml_kwargs = dict(
         Dumper=InventoryDumper,
@@ -171,16 +206,15 @@ class Inventory(InventoryItems):
         return str(self.id)  # pragma: no cover
 
     @property
-    def groups_list(self) -> GroupQuerySet:
+    def groups_list(self):
         '''
-        :return:GroupQuerySet: Mixed queryset with all groups
+        :return:BQuerySet: Mixed queryset with all groups
         '''
-        groups_list = (
-            self.groups.filter(children=False) |
-            self.groups.filter(children=True).get_subgroups()
-        )
-        groups_list = groups_list.distinct().prefetch_related("variables", "hosts")
-        return groups_list.order_by("-children", "id")
+        return self.groups\
+            .get_children(with_current=True)\
+            .distinct()\
+            .prefetch_related("variables", "hosts")\
+            .order_by("-children", "id")
 
     @property
     def hosts_list(self) -> HostQuerySet:
@@ -205,8 +239,8 @@ class Inventory(InventoryItems):
         return to_yaml(inv, **self._to_yaml_kwargs), keys
 
     @property
-    def all_groups(self) -> GroupQuerySet:
-        return self.groups_list.distinct()
+    def all_groups(self):
+        return self.groups_list
 
     @property
     def all_hosts(self) -> HostQuerySet:

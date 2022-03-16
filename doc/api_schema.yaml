@@ -41,7 +41,7 @@ info:
       span_class: fa fa-folder
       sublinks:
         - name: Groups
-          url: /group
+          url: /groups
           span_class: fas fa-server
         - name: Hosts
           url: /host
@@ -68,8 +68,8 @@ info:
   x-versions:
     application: 1.8.5
     library: 1.8.5
-    vstutils: 5.0.0b108
-    django: 3.2.11
+    vstutils: 5.0.0b111
+    django: 3.2.12
     djangorestframework: 3.13.1
     drf_yasg: 1.20.0
     ansible: 2.9.27
@@ -198,11 +198,16 @@ paths:
         description: A unique value identifying this project template.
         required: true
         type: integer
-  /group/:
+  /groups/:
     get:
-      operationId: group_list
-      description: Return all groups.
+      operationId: groups_list
+      description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters:
+        - name: __deep_parent
+          in: query
+          description: ''
+          required: false
+          type: integer
         - name: id
           in: query
           description: A unique integer value (or comma separated list) identifying
@@ -219,6 +224,11 @@ paths:
           description: A name string value (or comma separated list) of instance.
           required: false
           type: string
+        - name: variables
+          in: query
+          description: List of variables to filter. Comma separeted "key:value" list.
+          required: false
+          type: string
         - name: id__not
           in: query
           description: A unique integer value (or comma separated list) identifying
@@ -233,11 +243,6 @@ paths:
         - name: name__not
           in: query
           description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: variables
-          in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -296,12 +301,13 @@ paths:
                 items:
                   $ref: '#/definitions/Group'
       tags:
-        - group
+        - groups
       x-subscribe-labels:
         - main.Group
+      x-deep-nested-view: groups
     post:
-      operationId: group_add
-      description: Create a new group.
+      operationId: groups_add
+      description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters:
         - name: data
           in: body
@@ -314,12 +320,12 @@ paths:
           schema:
             $ref: '#/definitions/GroupCreateMaster'
       tags:
-        - group
+        - groups
     parameters: []
-  /group/{id}/:
+  /groups/{id}/:
     get:
-      operationId: group_get
-      description: Return a group instance.
+      operationId: groups_get
+      description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters: []
       responses:
         '200':
@@ -327,12 +333,13 @@ paths:
           schema:
             $ref: '#/definitions/OneGroup'
       tags:
-        - group
+        - groups
       x-subscribe-labels:
         - main.Group
+      x-deep-nested-view: groups
     put:
-      operationId: group_update
-      description: Update a group.
+      operationId: groups_update
+      description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters:
         - name: data
           in: body
@@ -345,10 +352,10 @@ paths:
           schema:
             $ref: '#/definitions/OneGroup'
       tags:
-        - group
+        - groups
     patch:
-      operationId: group_edit
-      description: Update one or more fields on an existing group.
+      operationId: groups_edit
+      description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters:
         - name: data
           in: body
@@ -361,25 +368,25 @@ paths:
           schema:
             $ref: '#/definitions/OneGroup'
       tags:
-        - group
+        - groups
     delete:
-      operationId: group_remove
-      description: Remove an existing group.
+      operationId: groups_remove
+      description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters: []
       responses:
         '204':
           description: NO CONTENT
       tags:
-        - group
+        - groups
     parameters:
       - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{id}/copy/:
+  /groups/{id}/copy/:
     post:
-      operationId: group_copy
+      operationId: groups_copy
       description: Endpoint which copy instance with deps.
       parameters:
         - name: data
@@ -393,18 +400,23 @@ paths:
           schema:
             $ref: '#/definitions/Group'
       tags:
-        - group
+        - groups
     parameters:
       - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{id}/group/:
+  /groups/{id}/groups/:
     get:
-      operationId: group_group_list
-      description: Return all groups.
+      operationId: groups_groups_list
+      description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters:
+        - name: __deep_parent
+          in: query
+          description: ''
+          required: false
+          type: integer
         - name: id
           in: query
           description: A unique integer value (or comma separated list) identifying
@@ -421,6 +433,11 @@ paths:
           description: A name string value (or comma separated list) of instance.
           required: false
           type: string
+        - name: variables
+          in: query
+          description: List of variables to filter. Comma separeted "key:value" list.
+          required: false
+          type: string
         - name: id__not
           in: query
           description: A unique integer value (or comma separated list) identifying
@@ -435,11 +452,6 @@ paths:
         - name: name__not
           in: query
           description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: variables
-          in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -498,12 +510,12 @@ paths:
                 items:
                   $ref: '#/definitions/Group'
       tags:
-        - group
+        - groups
       x-subscribe-labels:
         - main.Group
     post:
-      operationId: group_group_add
-      description: Create a new group.
+      operationId: groups_groups_add
+      description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters:
         - name: data
           in: body
@@ -516,7 +528,7 @@ paths:
           schema:
             $ref: '#/definitions/GroupCreateMaster'
       tags:
-        - group
+        - groups
       x-allow-append: true
     parameters:
       - name: id
@@ -524,10 +536,10 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{id}/group/{group_id}/:
+  /groups/{id}/groups/{groups_id}/:
     get:
-      operationId: group_group_get
-      description: Return a group instance.
+      operationId: groups_groups_get
+      description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters: []
       responses:
         '200':
@@ -535,12 +547,12 @@ paths:
           schema:
             $ref: '#/definitions/OneGroup'
       tags:
-        - group
+        - groups
       x-subscribe-labels:
         - main.Group
     put:
-      operationId: group_group_update
-      description: Update a group.
+      operationId: groups_groups_update
+      description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters:
         - name: data
           in: body
@@ -553,10 +565,10 @@ paths:
           schema:
             $ref: '#/definitions/OneGroup'
       tags:
-        - group
+        - groups
     patch:
-      operationId: group_group_edit
-      description: Update one or more fields on an existing group.
+      operationId: groups_groups_edit
+      description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters:
         - name: data
           in: body
@@ -569,18 +581,18 @@ paths:
           schema:
             $ref: '#/definitions/OneGroup'
       tags:
-        - group
+        - groups
     delete:
-      operationId: group_group_remove
-      description: Remove an existing group.
+      operationId: groups_groups_remove
+      description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters: []
       responses:
         '204':
           description: NO CONTENT
       tags:
-        - group
+        - groups
     parameters:
-      - name: group_id
+      - name: groups_id
         in: path
         required: true
         type: integer
@@ -590,9 +602,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{id}/group/{group_id}/copy/:
+  /groups/{id}/groups/{groups_id}/copy/:
     post:
-      operationId: group_group_copy
+      operationId: groups_groups_copy
       description: Endpoint which copy instance with deps.
       parameters:
         - name: data
@@ -606,9 +618,9 @@ paths:
           schema:
             $ref: '#/definitions/Group'
       tags:
-        - group
+        - groups
     parameters:
-      - name: group_id
+      - name: groups_id
         in: path
         required: true
         type: integer
@@ -618,233 +630,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{id}/group/{group_id}/set_owner/:
-    post:
-      operationId: group_group_set_owner
-      description: Change instance owner.
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/SetOwner'
-      responses:
-        '201':
-          description: CREATED
-          schema:
-            $ref: '#/definitions/SetOwner'
-      tags:
-        - group
-    parameters:
-      - name: group_id
-        in: path
-        required: true
-        type: integer
-        description: A unique integer value identifying instance of this groups sublist.
-      - name: id
-        in: path
-        description: A unique integer value identifying this group.
-        required: true
-        type: integer
-  /group/{id}/group/{group_id}/variables/:
+  /groups/{id}/groups/{groups_id}/hosts/:
     get:
-      operationId: group_group_variables_list
-      description: Return all variables of instance.
-      parameters:
-        - name: id
-          in: query
-          description: A unique integer value (or comma separated list) identifying
-            this instance.
-          required: false
-          type: array
-          items:
-            type: integer
-          collectionFormat: csv
-          minItems: 1
-          uniqueItems: true
-        - name: key
-          in: query
-          description: A key name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: value
-          in: query
-          description: A value of instance.
-          required: false
-          type: string
-        - name: id__not
-          in: query
-          description: A unique integer value (or comma separated list) identifying
-            this instance.
-          required: false
-          type: array
-          items:
-            type: integer
-          collectionFormat: csv
-          minItems: 1
-          uniqueItems: true
-        - name: ordering
-          in: query
-          description: Which field to use when ordering the results.
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - id
-              - -id
-              - key
-              - -key
-              - value
-              - -value
-          collectionFormat: csv
-          minItems: 1
-          uniqueItems: true
-        - name: __search
-          in: query
-          description: A search term.
-          required: false
-          type: string
-        - name: limit
-          in: query
-          description: Number of results to return per page.
-          required: false
-          type: integer
-        - name: offset
-          in: query
-          description: The initial index from which to return the results.
-          required: false
-          type: integer
-      responses:
-        '200':
-          description: OK
-          schema:
-            required:
-              - count
-              - results
-            type: object
-            properties:
-              count:
-                type: integer
-              next:
-                type: string
-                format: uri
-                x-nullable: true
-              previous:
-                type: string
-                format: uri
-                x-nullable: true
-              results:
-                type: array
-                items:
-                  $ref: '#/definitions/InventoryVariable'
-      tags:
-        - group
-      x-subscribe-labels:
-        - main.Variable
-    post:
-      operationId: group_group_variables_add
-      description: Create a new variable of instance.
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/InventoryVariable'
-      responses:
-        '201':
-          description: CREATED
-          schema:
-            $ref: '#/definitions/InventoryVariable'
-      tags:
-        - group
-      x-allow-append: false
-    parameters:
-      - name: group_id
-        in: path
-        required: true
-        type: integer
-        description: A unique integer value identifying instance of this groups sublist.
-      - name: id
-        in: path
-        description: A unique integer value identifying this group.
-        required: true
-        type: integer
-  /group/{id}/group/{group_id}/variables/{variables_id}/:
-    get:
-      operationId: group_group_variables_get
-      description: Return a variable of instance.
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/InventoryVariable'
-      tags:
-        - group
-      x-subscribe-labels:
-        - main.Variable
-    put:
-      operationId: group_group_variables_update
-      description: Update variable value.
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/InventoryVariable'
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/InventoryVariable'
-      tags:
-        - group
-    patch:
-      operationId: group_group_variables_edit
-      description: Update one or more fields on an existing variable.
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/InventoryVariable'
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/InventoryVariable'
-      tags:
-        - group
-    delete:
-      operationId: group_group_variables_remove
-      description: Remove an existing variable.
-      parameters: []
-      responses:
-        '204':
-          description: NO CONTENT
-      tags:
-        - group
-    parameters:
-      - name: group_id
-        in: path
-        required: true
-        type: integer
-        description: A unique integer value identifying instance of this groups sublist.
-      - name: id
-        in: path
-        description: A unique integer value identifying this group.
-        required: true
-        type: integer
-      - name: variables_id
-        in: path
-        required: true
-        type: integer
-        description: A unique integer value identifying instance of this variables
-          sublist.
-  /group/{id}/host/:
-    get:
-      operationId: group_host_list
+      operationId: groups_groups_hosts_list
       description: Return all hosts.
       parameters:
         - name: id
@@ -945,11 +733,11 @@ paths:
                 items:
                   $ref: '#/definitions/Host'
       tags:
-        - group
+        - groups
       x-subscribe-labels:
         - main.Host
     post:
-      operationId: group_host_add
+      operationId: groups_groups_hosts_add
       description: Create a new host.
       parameters:
         - name: data
@@ -963,17 +751,22 @@ paths:
           schema:
             $ref: '#/definitions/OneHost'
       tags:
-        - group
+        - groups
       x-allow-append: true
     parameters:
+      - name: groups_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
       - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{id}/host/{host_id}/:
+  /groups/{id}/groups/{groups_id}/hosts/{hosts_id}/:
     get:
-      operationId: group_host_get
+      operationId: groups_groups_hosts_get
       description: Return a host instance.
       parameters: []
       responses:
@@ -982,11 +775,11 @@ paths:
           schema:
             $ref: '#/definitions/OneHost'
       tags:
-        - group
+        - groups
       x-subscribe-labels:
         - main.Host
     put:
-      operationId: group_host_update
+      operationId: groups_groups_hosts_update
       description: Update a host.
       parameters:
         - name: data
@@ -1000,9 +793,9 @@ paths:
           schema:
             $ref: '#/definitions/OneHost'
       tags:
-        - group
+        - groups
     patch:
-      operationId: group_host_edit
+      operationId: groups_groups_hosts_edit
       description: Update one or more fields on an existing host.
       parameters:
         - name: data
@@ -1016,18 +809,23 @@ paths:
           schema:
             $ref: '#/definitions/OneHost'
       tags:
-        - group
+        - groups
     delete:
-      operationId: group_host_remove
+      operationId: groups_groups_hosts_remove
       description: Remove an existing host.
       parameters: []
       responses:
         '204':
           description: NO CONTENT
       tags:
-        - group
+        - groups
     parameters:
-      - name: host_id
+      - name: groups_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: hosts_id
         in: path
         required: true
         type: integer
@@ -1037,9 +835,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{id}/host/{host_id}/copy/:
+  /groups/{id}/groups/{groups_id}/hosts/{hosts_id}/copy/:
     post:
-      operationId: group_host_copy
+      operationId: groups_groups_hosts_groups_copy
       description: Endpoint which copy instance with deps.
       parameters:
         - name: data
@@ -1053,9 +851,14 @@ paths:
           schema:
             $ref: '#/definitions/Host'
       tags:
-        - group
+        - groups
     parameters:
-      - name: host_id
+      - name: groups_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: hosts_id
         in: path
         required: true
         type: integer
@@ -1065,9 +868,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{id}/host/{host_id}/set_owner/:
+  /groups/{id}/groups/{groups_id}/hosts/{hosts_id}/set_owner/:
     post:
-      operationId: group_host_set_owner
+      operationId: groups_groups_hosts_groups_set_owner
       description: Change instance owner.
       parameters:
         - name: data
@@ -1081,9 +884,14 @@ paths:
           schema:
             $ref: '#/definitions/SetOwner'
       tags:
-        - group
+        - groups
     parameters:
-      - name: host_id
+      - name: groups_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: hosts_id
         in: path
         required: true
         type: integer
@@ -1093,9 +901,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{id}/host/{host_id}/variables/:
+  /groups/{id}/groups/{groups_id}/hosts/{hosts_id}/variables/:
     get:
-      operationId: group_host_variables_list
+      operationId: groups_groups_hosts_variables_list
       description: Return all variables of instance.
       parameters:
         - name: id
@@ -1186,11 +994,11 @@ paths:
                 items:
                   $ref: '#/definitions/InventoryVariable'
       tags:
-        - group
+        - groups
       x-subscribe-labels:
         - main.Variable
     post:
-      operationId: group_host_variables_add
+      operationId: groups_groups_hosts_variables_add
       description: Create a new variable of instance.
       parameters:
         - name: data
@@ -1204,10 +1012,15 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - group
+        - groups
       x-allow-append: false
     parameters:
-      - name: host_id
+      - name: groups_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: hosts_id
         in: path
         required: true
         type: integer
@@ -1217,9 +1030,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{id}/host/{host_id}/variables/{variables_id}/:
+  /groups/{id}/groups/{groups_id}/hosts/{hosts_id}/variables/{variables_id}/:
     get:
-      operationId: group_host_variables_get
+      operationId: groups_groups_hosts_variables_get
       description: Return a variable of instance.
       parameters: []
       responses:
@@ -1228,11 +1041,11 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - group
+        - groups
       x-subscribe-labels:
         - main.Variable
     put:
-      operationId: group_host_variables_update
+      operationId: groups_groups_hosts_variables_update
       description: Update variable value.
       parameters:
         - name: data
@@ -1246,9 +1059,9 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - group
+        - groups
     patch:
-      operationId: group_host_variables_edit
+      operationId: groups_groups_hosts_variables_edit
       description: Update one or more fields on an existing variable.
       parameters:
         - name: data
@@ -1262,18 +1075,23 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - group
+        - groups
     delete:
-      operationId: group_host_variables_remove
+      operationId: groups_groups_hosts_variables_remove
       description: Remove an existing variable.
       parameters: []
       responses:
         '204':
           description: NO CONTENT
       tags:
-        - group
+        - groups
     parameters:
-      - name: host_id
+      - name: groups_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: hosts_id
         in: path
         required: true
         type: integer
@@ -1289,9 +1107,9 @@ paths:
         type: integer
         description: A unique integer value identifying instance of this variables
           sublist.
-  /group/{id}/set_owner/:
+  /groups/{id}/groups/{groups_id}/set_owner/:
     post:
-      operationId: group_set_owner
+      operationId: groups_groups_set_owner
       description: Change instance owner.
       parameters:
         - name: data
@@ -1305,16 +1123,21 @@ paths:
           schema:
             $ref: '#/definitions/SetOwner'
       tags:
-        - group
+        - groups
     parameters:
+      - name: groups_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
       - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{id}/variables/:
+  /groups/{id}/groups/{groups_id}/variables/:
     get:
-      operationId: group_variables_list
+      operationId: groups_groups_variables_list
       description: Return all variables of instance.
       parameters:
         - name: id
@@ -1405,11 +1228,11 @@ paths:
                 items:
                   $ref: '#/definitions/InventoryVariable'
       tags:
-        - group
+        - groups
       x-subscribe-labels:
         - main.Variable
     post:
-      operationId: group_variables_add
+      operationId: groups_groups_variables_add
       description: Create a new variable of instance.
       parameters:
         - name: data
@@ -1423,17 +1246,22 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - group
+        - groups
       x-allow-append: false
     parameters:
+      - name: groups_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
       - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /group/{id}/variables/{variables_id}/:
+  /groups/{id}/groups/{groups_id}/variables/{variables_id}/:
     get:
-      operationId: group_variables_get
+      operationId: groups_groups_variables_get
       description: Return a variable of instance.
       parameters: []
       responses:
@@ -1442,11 +1270,11 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - group
+        - groups
       x-subscribe-labels:
         - main.Variable
     put:
-      operationId: group_variables_update
+      operationId: groups_groups_variables_update
       description: Update variable value.
       parameters:
         - name: data
@@ -1460,9 +1288,9 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - group
+        - groups
     patch:
-      operationId: group_variables_edit
+      operationId: groups_groups_variables_edit
       description: Update one or more fields on an existing variable.
       parameters:
         - name: data
@@ -1476,16 +1304,677 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - group
+        - groups
     delete:
-      operationId: group_variables_remove
+      operationId: groups_groups_variables_remove
       description: Remove an existing variable.
       parameters: []
       responses:
         '204':
           description: NO CONTENT
       tags:
-        - group
+        - groups
+    parameters:
+      - name: groups_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this group.
+        required: true
+        type: integer
+      - name: variables_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this variables
+          sublist.
+  /groups/{id}/hosts/:
+    get:
+      operationId: groups_hosts_list
+      description: Return all hosts.
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: name
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: type
+          in: query
+          description: Instance type.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: name__not
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: variables
+          in: query
+          description: List of variables to filter. Comma separeted "key:value" list.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - id
+              - -id
+              - name
+              - -name
+              - type
+              - -type
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: __search
+          in: query
+          description: A search term.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Host'
+      tags:
+        - groups
+      x-subscribe-labels:
+        - main.Host
+    post:
+      operationId: groups_hosts_add
+      description: Create a new host.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/OneHost'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/OneHost'
+      tags:
+        - groups
+      x-allow-append: true
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this group.
+        required: true
+        type: integer
+  /groups/{id}/hosts/{hosts_id}/:
+    get:
+      operationId: groups_hosts_get
+      description: Return a host instance.
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneHost'
+      tags:
+        - groups
+      x-subscribe-labels:
+        - main.Host
+    put:
+      operationId: groups_hosts_update
+      description: Update a host.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/OneHost'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneHost'
+      tags:
+        - groups
+    patch:
+      operationId: groups_hosts_edit
+      description: Update one or more fields on an existing host.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/OneHost'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneHost'
+      tags:
+        - groups
+    delete:
+      operationId: groups_hosts_remove
+      description: Remove an existing host.
+      parameters: []
+      responses:
+        '204':
+          description: NO CONTENT
+      tags:
+        - groups
+    parameters:
+      - name: hosts_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this group.
+        required: true
+        type: integer
+  /groups/{id}/hosts/{hosts_id}/copy/:
+    post:
+      operationId: groups_hosts_copy
+      description: Endpoint which copy instance with deps.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Host'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/Host'
+      tags:
+        - groups
+    parameters:
+      - name: hosts_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this group.
+        required: true
+        type: integer
+  /groups/{id}/hosts/{hosts_id}/set_owner/:
+    post:
+      operationId: groups_hosts_set_owner
+      description: Change instance owner.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/SetOwner'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/SetOwner'
+      tags:
+        - groups
+    parameters:
+      - name: hosts_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this group.
+        required: true
+        type: integer
+  /groups/{id}/hosts/{hosts_id}/variables/:
+    get:
+      operationId: groups_hosts_variables_list
+      description: Return all variables of instance.
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: key
+          in: query
+          description: A key name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: value
+          in: query
+          description: A value of instance.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - id
+              - -id
+              - key
+              - -key
+              - value
+              - -value
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: __search
+          in: query
+          description: A search term.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/InventoryVariable'
+      tags:
+        - groups
+      x-subscribe-labels:
+        - main.Variable
+    post:
+      operationId: groups_hosts_variables_add
+      description: Create a new variable of instance.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      tags:
+        - groups
+      x-allow-append: false
+    parameters:
+      - name: hosts_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this group.
+        required: true
+        type: integer
+  /groups/{id}/hosts/{hosts_id}/variables/{variables_id}/:
+    get:
+      operationId: groups_hosts_variables_get
+      description: Return a variable of instance.
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      tags:
+        - groups
+      x-subscribe-labels:
+        - main.Variable
+    put:
+      operationId: groups_hosts_variables_update
+      description: Update variable value.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      tags:
+        - groups
+    patch:
+      operationId: groups_hosts_variables_edit
+      description: Update one or more fields on an existing variable.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      tags:
+        - groups
+    delete:
+      operationId: groups_hosts_variables_remove
+      description: Remove an existing variable.
+      parameters: []
+      responses:
+        '204':
+          description: NO CONTENT
+      tags:
+        - groups
+    parameters:
+      - name: hosts_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this group.
+        required: true
+        type: integer
+      - name: variables_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this variables
+          sublist.
+  /groups/{id}/set_owner/:
+    post:
+      operationId: groups_set_owner
+      description: Change instance owner.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/SetOwner'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/SetOwner'
+      tags:
+        - groups
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this group.
+        required: true
+        type: integer
+  /groups/{id}/variables/:
+    get:
+      operationId: groups_variables_list
+      description: Return all variables of instance.
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: key
+          in: query
+          description: A key name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: value
+          in: query
+          description: A value of instance.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - id
+              - -id
+              - key
+              - -key
+              - value
+              - -value
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: __search
+          in: query
+          description: A search term.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/InventoryVariable'
+      tags:
+        - groups
+      x-subscribe-labels:
+        - main.Variable
+    post:
+      operationId: groups_variables_add
+      description: Create a new variable of instance.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      tags:
+        - groups
+      x-allow-append: false
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this group.
+        required: true
+        type: integer
+  /groups/{id}/variables/{variables_id}/:
+    get:
+      operationId: groups_variables_get
+      description: Return a variable of instance.
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      tags:
+        - groups
+      x-subscribe-labels:
+        - main.Variable
+    put:
+      operationId: groups_variables_update
+      description: Update variable value.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      tags:
+        - groups
+    patch:
+      operationId: groups_variables_edit
+      description: Update one or more fields on an existing variable.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      tags:
+        - groups
+    delete:
+      operationId: groups_variables_remove
+      description: Remove an existing variable.
+      parameters: []
+      responses:
+        '204':
+          description: NO CONTENT
+      tags:
+        - groups
     parameters:
       - name: id
         in: path
@@ -2528,6 +3017,11 @@ paths:
       operationId: inventory_all_groups_list
       description: Return all groups.
       parameters:
+        - name: __deep_parent
+          in: query
+          description: ''
+          required: false
+          type: integer
         - name: id
           in: query
           description: A unique integer value (or comma separated list) identifying
@@ -2544,6 +3038,11 @@ paths:
           description: A name string value (or comma separated list) of instance.
           required: false
           type: string
+        - name: children
+          in: query
+          description: ''
+          required: false
+          type: boolean
         - name: id__not
           in: query
           description: A unique integer value (or comma separated list) identifying
@@ -2558,11 +3057,6 @@ paths:
         - name: name__not
           in: query
           description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: variables
-          in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -2624,6 +3118,7 @@ paths:
         - inventory
       x-subscribe-labels:
         - main.Group
+      x-deep-nested-view: groups
     parameters:
       - name: id
         in: path
@@ -2644,6 +3139,7 @@ paths:
         - inventory
       x-subscribe-labels:
         - main.Group
+      x-deep-nested-view: groups
     parameters:
       - name: all_groups_id
         in: path
@@ -2818,6 +3314,11 @@ paths:
       operationId: inventory_group_list
       description: Return all groups.
       parameters:
+        - name: __deep_parent
+          in: query
+          description: ''
+          required: false
+          type: integer
         - name: id
           in: query
           description: A unique integer value (or comma separated list) identifying
@@ -2834,6 +3335,11 @@ paths:
           description: A name string value (or comma separated list) of instance.
           required: false
           type: string
+        - name: children
+          in: query
+          description: ''
+          required: false
+          type: boolean
         - name: id__not
           in: query
           description: A unique integer value (or comma separated list) identifying
@@ -2848,11 +3354,6 @@ paths:
         - name: name__not
           in: query
           description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: variables
-          in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -2914,6 +3415,7 @@ paths:
         - inventory
       x-subscribe-labels:
         - main.Group
+      x-deep-nested-view: groups
     post:
       operationId: inventory_group_add
       description: Create a new group.
@@ -2951,6 +3453,7 @@ paths:
         - inventory
       x-subscribe-labels:
         - main.Group
+      x-deep-nested-view: groups
     put:
       operationId: inventory_group_update
       description: Update a group.
@@ -3031,6 +3534,688 @@ paths:
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
+  /inventory/{id}/group/{group_id}/groups/:
+    get:
+      operationId: inventory_group_groups_list
+      description: Group(id, hidden, notes, owner, name, master_project, children)
+      parameters:
+        - name: __deep_parent
+          in: query
+          description: ''
+          required: false
+          type: integer
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: name
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: children
+          in: query
+          description: ''
+          required: false
+          type: boolean
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: name__not
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - id
+              - -id
+              - name
+              - -name
+              - children
+              - -children
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: __search
+          in: query
+          description: A search term.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Group'
+      tags:
+        - inventory
+      x-subscribe-labels:
+        - main.Group
+    post:
+      operationId: inventory_group_groups_add
+      description: Group(id, hidden, notes, owner, name, master_project, children)
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/GroupCreateMaster'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/GroupCreateMaster'
+      tags:
+        - inventory
+      x-allow-append: true
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this inventory.
+        required: true
+        type: integer
+  /inventory/{id}/group/{group_id}/groups/{groups_id}/:
+    get:
+      operationId: inventory_group_groups_get
+      description: Group(id, hidden, notes, owner, name, master_project, children)
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneGroup'
+      tags:
+        - inventory
+      x-subscribe-labels:
+        - main.Group
+    put:
+      operationId: inventory_group_groups_update
+      description: Group(id, hidden, notes, owner, name, master_project, children)
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/OneGroup'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneGroup'
+      tags:
+        - inventory
+    patch:
+      operationId: inventory_group_groups_edit
+      description: Group(id, hidden, notes, owner, name, master_project, children)
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/OneGroup'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneGroup'
+      tags:
+        - inventory
+    delete:
+      operationId: inventory_group_groups_remove
+      description: Group(id, hidden, notes, owner, name, master_project, children)
+      parameters: []
+      responses:
+        '204':
+          description: NO CONTENT
+      tags:
+        - inventory
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: groups_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this inventory.
+        required: true
+        type: integer
+  /inventory/{id}/group/{group_id}/hosts/:
+    get:
+      operationId: inventory_group_hosts_list
+      description: Return all hosts.
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: name
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: type
+          in: query
+          description: Instance type.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: name__not
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: variables
+          in: query
+          description: List of variables to filter. Comma separeted "key:value" list.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - id
+              - -id
+              - name
+              - -name
+              - type
+              - -type
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: __search
+          in: query
+          description: A search term.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Host'
+      tags:
+        - inventory
+      x-subscribe-labels:
+        - main.Host
+    post:
+      operationId: inventory_group_hosts_add
+      description: Create a new host.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/OneHost'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/OneHost'
+      tags:
+        - inventory
+      x-allow-append: true
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this inventory.
+        required: true
+        type: integer
+  /inventory/{id}/group/{group_id}/hosts/{hosts_id}/:
+    get:
+      operationId: inventory_group_hosts_get
+      description: Return a host instance.
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneHost'
+      tags:
+        - inventory
+      x-subscribe-labels:
+        - main.Host
+    put:
+      operationId: inventory_group_hosts_update
+      description: Update a host.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/OneHost'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneHost'
+      tags:
+        - inventory
+    patch:
+      operationId: inventory_group_hosts_edit
+      description: Update one or more fields on an existing host.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/OneHost'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneHost'
+      tags:
+        - inventory
+    delete:
+      operationId: inventory_group_hosts_remove
+      description: Remove an existing host.
+      parameters: []
+      responses:
+        '204':
+          description: NO CONTENT
+      tags:
+        - inventory
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: hosts_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this inventory.
+        required: true
+        type: integer
+  /inventory/{id}/group/{group_id}/hosts/{hosts_id}/copy/:
+    post:
+      operationId: inventory_group_hosts_group_copy
+      description: Endpoint which copy instance with deps.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Host'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/Host'
+      tags:
+        - inventory
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: hosts_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this inventory.
+        required: true
+        type: integer
+  /inventory/{id}/group/{group_id}/hosts/{hosts_id}/set_owner/:
+    post:
+      operationId: inventory_group_hosts_group_set_owner
+      description: Change instance owner.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/SetOwner'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/SetOwner'
+      tags:
+        - inventory
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: hosts_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this inventory.
+        required: true
+        type: integer
+  /inventory/{id}/group/{group_id}/hosts/{hosts_id}/variables/:
+    get:
+      operationId: inventory_group_hosts_variables_list
+      description: Return all variables of instance.
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: key
+          in: query
+          description: A key name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: value
+          in: query
+          description: A value of instance.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - id
+              - -id
+              - key
+              - -key
+              - value
+              - -value
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: __search
+          in: query
+          description: A search term.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/InventoryVariable'
+      tags:
+        - inventory
+      x-subscribe-labels:
+        - main.Variable
+    post:
+      operationId: inventory_group_hosts_variables_add
+      description: Create a new variable of instance.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      tags:
+        - inventory
+      x-allow-append: false
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: hosts_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this inventory.
+        required: true
+        type: integer
+  /inventory/{id}/group/{group_id}/hosts/{hosts_id}/variables/{variables_id}/:
+    get:
+      operationId: inventory_group_hosts_variables_get
+      description: Return a variable of instance.
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      tags:
+        - inventory
+      x-subscribe-labels:
+        - main.Variable
+    put:
+      operationId: inventory_group_hosts_variables_update
+      description: Update variable value.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      tags:
+        - inventory
+    patch:
+      operationId: inventory_group_hosts_variables_edit
+      description: Update one or more fields on an existing variable.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      tags:
+        - inventory
+    delete:
+      operationId: inventory_group_hosts_variables_remove
+      description: Remove an existing variable.
+      parameters: []
+      responses:
+        '204':
+          description: NO CONTENT
+      tags:
+        - inventory
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: hosts_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this inventory.
+        required: true
+        type: integer
+      - name: variables_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this variables
+          sublist.
   /inventory/{id}/group/{group_id}/set_owner/:
     post:
       operationId: inventory_group_set_owner
@@ -3255,9 +4440,9 @@ paths:
         type: integer
         description: A unique integer value identifying instance of this variables
           sublist.
-  /inventory/{id}/host/:
+  /inventory/{id}/hosts/:
     get:
-      operationId: inventory_host_list
+      operationId: inventory_hosts_list
       description: Return all hosts.
       parameters:
         - name: id
@@ -3362,7 +4547,7 @@ paths:
       x-subscribe-labels:
         - main.Host
     post:
-      operationId: inventory_host_add
+      operationId: inventory_hosts_add
       description: Create a new host.
       parameters:
         - name: data
@@ -3384,9 +4569,9 @@ paths:
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{id}/host/{host_id}/:
+  /inventory/{id}/hosts/{hosts_id}/:
     get:
-      operationId: inventory_host_get
+      operationId: inventory_hosts_get
       description: Return a host instance.
       parameters: []
       responses:
@@ -3399,7 +4584,7 @@ paths:
       x-subscribe-labels:
         - main.Host
     put:
-      operationId: inventory_host_update
+      operationId: inventory_hosts_update
       description: Update a host.
       parameters:
         - name: data
@@ -3415,7 +4600,7 @@ paths:
       tags:
         - inventory
     patch:
-      operationId: inventory_host_edit
+      operationId: inventory_hosts_edit
       description: Update one or more fields on an existing host.
       parameters:
         - name: data
@@ -3431,7 +4616,7 @@ paths:
       tags:
         - inventory
     delete:
-      operationId: inventory_host_remove
+      operationId: inventory_hosts_remove
       description: Remove an existing host.
       parameters: []
       responses:
@@ -3440,7 +4625,7 @@ paths:
       tags:
         - inventory
     parameters:
-      - name: host_id
+      - name: hosts_id
         in: path
         required: true
         type: integer
@@ -3450,9 +4635,9 @@ paths:
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{id}/host/{host_id}/copy/:
+  /inventory/{id}/hosts/{hosts_id}/copy/:
     post:
-      operationId: inventory_host_copy
+      operationId: inventory_hosts_copy
       description: Endpoint which copy instance with deps.
       parameters:
         - name: data
@@ -3468,7 +4653,7 @@ paths:
       tags:
         - inventory
     parameters:
-      - name: host_id
+      - name: hosts_id
         in: path
         required: true
         type: integer
@@ -3478,9 +4663,9 @@ paths:
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{id}/host/{host_id}/set_owner/:
+  /inventory/{id}/hosts/{hosts_id}/set_owner/:
     post:
-      operationId: inventory_host_set_owner
+      operationId: inventory_hosts_set_owner
       description: Change instance owner.
       parameters:
         - name: data
@@ -3496,7 +4681,7 @@ paths:
       tags:
         - inventory
     parameters:
-      - name: host_id
+      - name: hosts_id
         in: path
         required: true
         type: integer
@@ -3506,9 +4691,9 @@ paths:
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{id}/host/{host_id}/variables/:
+  /inventory/{id}/hosts/{hosts_id}/variables/:
     get:
-      operationId: inventory_host_variables_list
+      operationId: inventory_hosts_variables_list
       description: Return all variables of instance.
       parameters:
         - name: id
@@ -3603,7 +4788,7 @@ paths:
       x-subscribe-labels:
         - main.Variable
     post:
-      operationId: inventory_host_variables_add
+      operationId: inventory_hosts_variables_add
       description: Create a new variable of instance.
       parameters:
         - name: data
@@ -3620,7 +4805,7 @@ paths:
         - inventory
       x-allow-append: false
     parameters:
-      - name: host_id
+      - name: hosts_id
         in: path
         required: true
         type: integer
@@ -3630,9 +4815,9 @@ paths:
         description: A unique integer value identifying this inventory.
         required: true
         type: integer
-  /inventory/{id}/host/{host_id}/variables/{variables_id}/:
+  /inventory/{id}/hosts/{hosts_id}/variables/{variables_id}/:
     get:
-      operationId: inventory_host_variables_get
+      operationId: inventory_hosts_variables_get
       description: Return a variable of instance.
       parameters: []
       responses:
@@ -3645,7 +4830,7 @@ paths:
       x-subscribe-labels:
         - main.Variable
     put:
-      operationId: inventory_host_variables_update
+      operationId: inventory_hosts_variables_update
       description: Update variable value.
       parameters:
         - name: data
@@ -3661,7 +4846,7 @@ paths:
       tags:
         - inventory
     patch:
-      operationId: inventory_host_variables_edit
+      operationId: inventory_hosts_variables_edit
       description: Update one or more fields on an existing variable.
       parameters:
         - name: data
@@ -3677,7 +4862,7 @@ paths:
       tags:
         - inventory
     delete:
-      operationId: inventory_host_variables_remove
+      operationId: inventory_hosts_variables_remove
       description: Remove an existing variable.
       parameters: []
       responses:
@@ -3686,7 +4871,7 @@ paths:
       tags:
         - inventory
     parameters:
-      - name: host_id
+      - name: hosts_id
         in: path
         required: true
         type: integer
@@ -5105,6 +6290,11 @@ paths:
       operationId: project_inventory_all_groups_list
       description: Return all groups.
       parameters:
+        - name: __deep_parent
+          in: query
+          description: ''
+          required: false
+          type: integer
         - name: id
           in: query
           description: A unique integer value (or comma separated list) identifying
@@ -5121,6 +6311,11 @@ paths:
           description: A name string value (or comma separated list) of instance.
           required: false
           type: string
+        - name: children
+          in: query
+          description: ''
+          required: false
+          type: boolean
         - name: id__not
           in: query
           description: A unique integer value (or comma separated list) identifying
@@ -5135,11 +6330,6 @@ paths:
         - name: name__not
           in: query
           description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: variables
-          in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -5201,6 +6391,7 @@ paths:
         - project
       x-subscribe-labels:
         - main.Group
+      x-deep-nested-view: groups
     parameters:
       - name: id
         in: path
@@ -5227,6 +6418,7 @@ paths:
         - project
       x-subscribe-labels:
         - main.Group
+      x-deep-nested-view: groups
     parameters:
       - name: all_groups_id
         in: path
@@ -5425,6 +6617,11 @@ paths:
       operationId: project_inventory_group_list
       description: Return all groups.
       parameters:
+        - name: __deep_parent
+          in: query
+          description: ''
+          required: false
+          type: integer
         - name: id
           in: query
           description: A unique integer value (or comma separated list) identifying
@@ -5441,6 +6638,11 @@ paths:
           description: A name string value (or comma separated list) of instance.
           required: false
           type: string
+        - name: children
+          in: query
+          description: ''
+          required: false
+          type: boolean
         - name: id__not
           in: query
           description: A unique integer value (or comma separated list) identifying
@@ -5455,11 +6657,6 @@ paths:
         - name: name__not
           in: query
           description: A name string value (or comma separated list) of instance.
-          required: false
-          type: string
-        - name: variables
-          in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -5521,6 +6718,7 @@ paths:
         - project
       x-subscribe-labels:
         - main.Group
+      x-deep-nested-view: groups
     post:
       operationId: project_inventory_group_add
       description: Create a new group.
@@ -5564,6 +6762,7 @@ paths:
         - project
       x-subscribe-labels:
         - main.Group
+      x-deep-nested-view: groups
     put:
       operationId: project_inventory_group_update
       description: Update a group.
@@ -5653,6 +6852,728 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this inventories
+          sublist.
+  /project/{id}/inventory/{inventory_id}/group/{group_id}/groups/:
+    get:
+      operationId: project_inventory_group_groups_list
+      description: Group(id, hidden, notes, owner, name, master_project, children)
+      parameters:
+        - name: __deep_parent
+          in: query
+          description: ''
+          required: false
+          type: integer
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: name
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: children
+          in: query
+          description: ''
+          required: false
+          type: boolean
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: name__not
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - id
+              - -id
+              - name
+              - -name
+              - children
+              - -children
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: __search
+          in: query
+          description: A search term.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Group'
+      tags:
+        - project
+      x-subscribe-labels:
+        - main.Group
+    post:
+      operationId: project_inventory_group_groups_add
+      description: Group(id, hidden, notes, owner, name, master_project, children)
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/GroupCreateMaster'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/GroupCreateMaster'
+      tags:
+        - project
+      x-allow-append: true
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: string
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
+      - name: inventory_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
+  /project/{id}/inventory/{inventory_id}/group/{group_id}/groups/{groups_id}/:
+    get:
+      operationId: project_inventory_group_groups_get
+      description: Group(id, hidden, notes, owner, name, master_project, children)
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneGroup'
+      tags:
+        - project
+      x-subscribe-labels:
+        - main.Group
+    put:
+      operationId: project_inventory_group_groups_update
+      description: Group(id, hidden, notes, owner, name, master_project, children)
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/OneGroup'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneGroup'
+      tags:
+        - project
+    patch:
+      operationId: project_inventory_group_groups_edit
+      description: Group(id, hidden, notes, owner, name, master_project, children)
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/OneGroup'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneGroup'
+      tags:
+        - project
+    delete:
+      operationId: project_inventory_group_groups_remove
+      description: Group(id, hidden, notes, owner, name, master_project, children)
+      parameters: []
+      responses:
+        '204':
+          description: NO CONTENT
+      tags:
+        - project
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: string
+      - name: groups_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this groups sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
+      - name: inventory_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
+  /project/{id}/inventory/{inventory_id}/group/{group_id}/hosts/:
+    get:
+      operationId: project_inventory_group_hosts_list
+      description: Return all hosts.
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: name
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: type
+          in: query
+          description: Instance type.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: name__not
+          in: query
+          description: A name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: variables
+          in: query
+          description: List of variables to filter. Comma separeted "key:value" list.
+          required: false
+          type: string
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - id
+              - -id
+              - name
+              - -name
+              - type
+              - -type
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: __search
+          in: query
+          description: A search term.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Host'
+      tags:
+        - project
+      x-subscribe-labels:
+        - main.Host
+    post:
+      operationId: project_inventory_group_hosts_add
+      description: Create a new host.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/OneHost'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/OneHost'
+      tags:
+        - project
+      x-allow-append: true
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: string
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
+      - name: inventory_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
+  /project/{id}/inventory/{inventory_id}/group/{group_id}/hosts/{hosts_id}/:
+    get:
+      operationId: project_inventory_group_hosts_get
+      description: Return a host instance.
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneHost'
+      tags:
+        - project
+      x-subscribe-labels:
+        - main.Host
+    put:
+      operationId: project_inventory_group_hosts_update
+      description: Update a host.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/OneHost'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneHost'
+      tags:
+        - project
+    patch:
+      operationId: project_inventory_group_hosts_edit
+      description: Update one or more fields on an existing host.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/OneHost'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OneHost'
+      tags:
+        - project
+    delete:
+      operationId: project_inventory_group_hosts_remove
+      description: Remove an existing host.
+      parameters: []
+      responses:
+        '204':
+          description: NO CONTENT
+      tags:
+        - project
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: string
+      - name: hosts_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
+      - name: inventory_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
+  /project/{id}/inventory/{inventory_id}/group/{group_id}/hosts/{hosts_id}/copy/:
+    post:
+      operationId: project_inventory_group_hosts_inventory_group_copy
+      description: Endpoint which copy instance with deps.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Host'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/Host'
+      tags:
+        - project
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: string
+      - name: hosts_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
+      - name: inventory_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
+  /project/{id}/inventory/{inventory_id}/group/{group_id}/hosts/{hosts_id}/set_owner/:
+    post:
+      operationId: project_inventory_group_hosts_inventory_group_set_owner
+      description: Change instance owner.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/SetOwner'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/SetOwner'
+      tags:
+        - project
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: string
+      - name: hosts_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
+      - name: inventory_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
+  /project/{id}/inventory/{inventory_id}/group/{group_id}/hosts/{hosts_id}/variables/:
+    get:
+      operationId: project_inventory_group_hosts_variables_list
+      description: Return all variables of instance.
+      parameters:
+        - name: id
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: key
+          in: query
+          description: A key name string value (or comma separated list) of instance.
+          required: false
+          type: string
+        - name: value
+          in: query
+          description: A value of instance.
+          required: false
+          type: string
+        - name: id__not
+          in: query
+          description: A unique integer value (or comma separated list) identifying
+            this instance.
+          required: false
+          type: array
+          items:
+            type: integer
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - id
+              - -id
+              - key
+              - -key
+              - value
+              - -value
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
+        - name: __search
+          in: query
+          description: A search term.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Number of results to return per page.
+          required: false
+          type: integer
+        - name: offset
+          in: query
+          description: The initial index from which to return the results.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/InventoryVariable'
+      tags:
+        - project
+      x-subscribe-labels:
+        - main.Variable
+    post:
+      operationId: project_inventory_group_hosts_variables_add
+      description: Create a new variable of instance.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      tags:
+        - project
+      x-allow-append: false
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: string
+      - name: hosts_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
+      - name: inventory_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
+  /project/{id}/inventory/{inventory_id}/group/{group_id}/hosts/{hosts_id}/variables/{variables_id}/:
+    get:
+      operationId: project_inventory_group_hosts_variables_get
+      description: Return a variable of instance.
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      tags:
+        - project
+      x-subscribe-labels:
+        - main.Variable
+    put:
+      operationId: project_inventory_group_hosts_variables_update
+      description: Update variable value.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      tags:
+        - project
+    patch:
+      operationId: project_inventory_group_hosts_variables_edit
+      description: Update one or more fields on an existing variable.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InventoryVariable'
+      tags:
+        - project
+    delete:
+      operationId: project_inventory_group_hosts_variables_remove
+      description: Remove an existing variable.
+      parameters: []
+      responses:
+        '204':
+          description: NO CONTENT
+      tags:
+        - project
+    parameters:
+      - name: group_id
+        in: path
+        required: true
+        type: string
+      - name: hosts_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
+      - name: inventory_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this inventories
+          sublist.
+      - name: variables_id
+        in: path
+        required: true
+        type: integer
+        description: A unique integer value identifying instance of this variables
           sublist.
   /project/{id}/inventory/{inventory_id}/group/{group_id}/set_owner/:
     post:
@@ -5893,9 +7814,9 @@ paths:
         type: integer
         description: A unique integer value identifying instance of this variables
           sublist.
-  /project/{id}/inventory/{inventory_id}/host/:
+  /project/{id}/inventory/{inventory_id}/hosts/:
     get:
-      operationId: project_inventory_host_list
+      operationId: project_inventory_hosts_list
       description: Return all hosts.
       parameters:
         - name: id
@@ -6000,7 +7921,7 @@ paths:
       x-subscribe-labels:
         - main.Host
     post:
-      operationId: project_inventory_host_add
+      operationId: project_inventory_hosts_add
       description: Create a new host.
       parameters:
         - name: data
@@ -6028,9 +7949,9 @@ paths:
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-  /project/{id}/inventory/{inventory_id}/host/{host_id}/:
+  /project/{id}/inventory/{inventory_id}/hosts/{hosts_id}/:
     get:
-      operationId: project_inventory_host_get
+      operationId: project_inventory_hosts_get
       description: Return a host instance.
       parameters: []
       responses:
@@ -6043,7 +7964,7 @@ paths:
       x-subscribe-labels:
         - main.Host
     put:
-      operationId: project_inventory_host_update
+      operationId: project_inventory_hosts_update
       description: Update a host.
       parameters:
         - name: data
@@ -6059,7 +7980,7 @@ paths:
       tags:
         - project
     patch:
-      operationId: project_inventory_host_edit
+      operationId: project_inventory_hosts_edit
       description: Update one or more fields on an existing host.
       parameters:
         - name: data
@@ -6075,7 +7996,7 @@ paths:
       tags:
         - project
     delete:
-      operationId: project_inventory_host_remove
+      operationId: project_inventory_hosts_remove
       description: Remove an existing host.
       parameters: []
       responses:
@@ -6084,10 +8005,11 @@ paths:
       tags:
         - project
     parameters:
-      - name: host_id
+      - name: hosts_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: id
         in: path
         description: A unique integer value identifying this project.
@@ -6099,9 +8021,9 @@ paths:
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-  /project/{id}/inventory/{inventory_id}/host/{host_id}/copy/:
+  /project/{id}/inventory/{inventory_id}/hosts/{hosts_id}/copy/:
     post:
-      operationId: project_inventory_host_inventory_copy
+      operationId: project_inventory_hosts_inventory_copy
       description: Endpoint which copy instance with deps.
       parameters:
         - name: data
@@ -6117,10 +8039,11 @@ paths:
       tags:
         - project
     parameters:
-      - name: host_id
+      - name: hosts_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: id
         in: path
         description: A unique integer value identifying this project.
@@ -6132,9 +8055,9 @@ paths:
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-  /project/{id}/inventory/{inventory_id}/host/{host_id}/set_owner/:
+  /project/{id}/inventory/{inventory_id}/hosts/{hosts_id}/set_owner/:
     post:
-      operationId: project_inventory_host_inventory_set_owner
+      operationId: project_inventory_hosts_inventory_set_owner
       description: Change instance owner.
       parameters:
         - name: data
@@ -6150,10 +8073,11 @@ paths:
       tags:
         - project
     parameters:
-      - name: host_id
+      - name: hosts_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: id
         in: path
         description: A unique integer value identifying this project.
@@ -6165,9 +8089,9 @@ paths:
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-  /project/{id}/inventory/{inventory_id}/host/{host_id}/variables/:
+  /project/{id}/inventory/{inventory_id}/hosts/{hosts_id}/variables/:
     get:
-      operationId: project_inventory_host_variables_list
+      operationId: project_inventory_hosts_variables_list
       description: Return all variables of instance.
       parameters:
         - name: id
@@ -6262,7 +8186,7 @@ paths:
       x-subscribe-labels:
         - main.Variable
     post:
-      operationId: project_inventory_host_variables_add
+      operationId: project_inventory_hosts_variables_add
       description: Create a new variable of instance.
       parameters:
         - name: data
@@ -6279,10 +8203,11 @@ paths:
         - project
       x-allow-append: false
     parameters:
-      - name: host_id
+      - name: hosts_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: id
         in: path
         description: A unique integer value identifying this project.
@@ -6294,9 +8219,9 @@ paths:
         type: integer
         description: A unique integer value identifying instance of this inventories
           sublist.
-  /project/{id}/inventory/{inventory_id}/host/{host_id}/variables/{variables_id}/:
+  /project/{id}/inventory/{inventory_id}/hosts/{hosts_id}/variables/{variables_id}/:
     get:
-      operationId: project_inventory_host_variables_get
+      operationId: project_inventory_hosts_variables_get
       description: Return a variable of instance.
       parameters: []
       responses:
@@ -6309,7 +8234,7 @@ paths:
       x-subscribe-labels:
         - main.Variable
     put:
-      operationId: project_inventory_host_variables_update
+      operationId: project_inventory_hosts_variables_update
       description: Update variable value.
       parameters:
         - name: data
@@ -6325,7 +8250,7 @@ paths:
       tags:
         - project
     patch:
-      operationId: project_inventory_host_variables_edit
+      operationId: project_inventory_hosts_variables_edit
       description: Update one or more fields on an existing variable.
       parameters:
         - name: data
@@ -6341,7 +8266,7 @@ paths:
       tags:
         - project
     delete:
-      operationId: project_inventory_host_variables_remove
+      operationId: project_inventory_hosts_variables_remove
       description: Remove an existing variable.
       parameters: []
       responses:
@@ -6350,10 +8275,11 @@ paths:
       tags:
         - project
     parameters:
-      - name: host_id
+      - name: hosts_id
         in: path
         required: true
-        type: string
+        type: integer
+        description: A unique integer value identifying instance of this hosts sublist.
       - name: id
         in: path
         description: A unique integer value identifying this project.
@@ -8629,6 +10555,8 @@ definitions:
         - name
     x-view-field-name: name
   Group:
+    required:
+      - from_project
     type: object
     properties:
       id:
@@ -8643,11 +10571,9 @@ definitions:
       children:
         title: Children
         type: boolean
-        readOnly: true
       from_project:
-        title: Project Based
+        title: Project based
         type: boolean
-        readOnly: true
     x-properties-groups:
       '':
         - id
@@ -8703,7 +10629,7 @@ definitions:
       notes:
         title: Notes
         type: string
-        format: textarea
+        minLength: 1
       children:
         title: Contains groups
         type: boolean
@@ -8733,7 +10659,7 @@ definitions:
       notes:
         title: Notes
         type: string
-        format: textarea
+        minLength: 1
       children:
         title: Children
         type: boolean
@@ -8746,6 +10672,69 @@ definitions:
         - name
         - notes
         - children
+        - owner
+    x-view-field-name: name
+  Host:
+    type: object
+    properties:
+      id:
+        title: Id
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+        minLength: 1
+      type:
+        title: Type
+        type: string
+        enum:
+          - HOST
+          - RANGE
+        default: HOST
+      from_project:
+        title: Project Based
+        type: boolean
+        readOnly: true
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - type
+        - from_project
+    x-view-field-name: name
+  OneHost:
+    type: object
+    properties:
+      id:
+        title: Id
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+        minLength: 1
+      notes:
+        title: Notes
+        type: string
+        format: textarea
+      type:
+        title: Type
+        type: string
+        enum:
+          - HOST
+          - RANGE
+        default: HOST
+      owner:
+        $ref: '#/definitions/User'
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - notes
+        - type
         - owner
     x-view-field-name: name
   SetOwner:
@@ -8827,69 +10816,6 @@ definitions:
         - key
         - value
     x-view-field-name: key
-  Host:
-    type: object
-    properties:
-      id:
-        title: Id
-        type: integer
-        readOnly: true
-      name:
-        title: Name
-        type: string
-        maxLength: 512
-        minLength: 1
-      type:
-        title: Type
-        type: string
-        enum:
-          - HOST
-          - RANGE
-        default: HOST
-      from_project:
-        title: Project Based
-        type: boolean
-        readOnly: true
-    x-properties-groups:
-      '':
-        - id
-        - name
-        - type
-        - from_project
-    x-view-field-name: name
-  OneHost:
-    type: object
-    properties:
-      id:
-        title: Id
-        type: integer
-        readOnly: true
-      name:
-        title: Name
-        type: string
-        maxLength: 512
-        minLength: 1
-      notes:
-        title: Notes
-        type: string
-        format: textarea
-      type:
-        title: Type
-        type: string
-        enum:
-          - HOST
-          - RANGE
-        default: HOST
-      owner:
-        $ref: '#/definitions/User'
-    x-properties-groups:
-      '':
-        - id
-        - name
-        - notes
-        - type
-        - owner
-    x-view-field-name: name
   History:
     required:
       - mode

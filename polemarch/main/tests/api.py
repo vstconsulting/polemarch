@@ -352,7 +352,7 @@ class APITestCase(ProjectTestCase, OApiTestCase):
         result = self.get_result('get', self.get_url())
         self.assertTrue(result.get('user', False))
         self.assertTrue(result.get('host', False))
-        self.assertTrue(result.get('group', False))
+        self.assertTrue(result.get('groups', False))
         self.assertTrue(result.get('inventory', False))
         self.assertTrue(result.get('project', False))
         self.assertTrue(result.get('history', False))

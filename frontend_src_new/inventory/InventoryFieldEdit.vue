@@ -1,6 +1,6 @@
 <template>
     <div class="input-group mb-3">
-        <div class="input-group-prepend" style="flex-wrap: nowrap;">
+        <div class="input-group-prepend" style="flex-wrap: nowrap">
             <button
                 type="button"
                 class="btn"
@@ -15,10 +15,10 @@
                 data-toggle="dropdown"
                 aria-haspopup="true"
                 aria-expanded="false"
-                style="margin-right: 1px;"
+                style="margin-right: 1px"
                 :disabled="disabled"
             >
-                <span style="margin-right: 1ch;">{{ $t(realField.title) }}</span>
+                <span style="margin-right: 1ch">{{ $t(realField.title) }}</span>
             </button>
             <div class="dropdown-menu">
                 <button
@@ -34,8 +34,8 @@
             </div>
         </div>
         <InventoryFKEdit
+            v-if="displayFk"
             type="edit"
-            :show="Boolean(realField.fkModel)"
             :field="field.types.Inventory"
             :data="data"
             :value="fkValue"
@@ -43,7 +43,7 @@
             @set-value="setValue"
         />
         <input
-            v-if="!realField.fkModel"
+            v-else
             type="text"
             class="form-control"
             :disabled="disabled"
@@ -67,6 +67,11 @@
                 disabled: Boolean(!this.value),
                 fkValue: null,
             };
+        },
+        computed: {
+            displayFk() {
+                return Boolean(this.realField.fkModel);
+            },
         },
         watch: {
             value: {

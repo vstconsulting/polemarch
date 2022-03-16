@@ -136,7 +136,7 @@ def check_circular_deps(instance: Group, action: Text, pk_set: Iterable, *args, 
         if instance.id in pk_set:
             raise instance.CiclicDependencyError("The group can not refer to itself.")
         parents = instance.parents.all().get_parents()
-        childrens = instance.groups.all().get_subgroups()
+        childrens = instance.groups.all().get_children()
         if instance in (parents | childrens) or parents.filter(id__in=pk_set).count():
             raise instance.CiclicDependencyError("The group has a dependence on itself.")
 

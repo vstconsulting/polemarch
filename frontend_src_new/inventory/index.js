@@ -99,6 +99,12 @@ export class InventoryField extends spa.fields.dynamic.DynamicField {
     _getParentValues() {
         return { [this.props.field]: this.selectedType };
     }
+    getRealField({ inventory }) {
+        if (typeof inventory === 'string' && inventory.includes(',')) {
+            return this.types['Hosts list'];
+        }
+        return super.getRealField(arguments[0]);
+    }
 }
 InventoryField.format = 'inventory';
 spa.signals.once('APP_CREATED', (app) => {
@@ -107,7 +113,13 @@ spa.signals.once('APP_CREATED', (app) => {
     }
 });
 
-for (const modelName of ['AnsibleModule', 'AnsiblePlaybook', 'Periodictask', 'OnePeriodictask']) {
+for (const modelName of [
+    'AnsibleModule',
+    'AnsiblePlaybook',
+    'Periodictask',
+    'OnePeriodictask',
+    'CreateExecutionTemplate',
+]) {
     spa.signals.once(`models[${modelName}].fields.beforeInit`, (fields) => {
         fields.inventory.format = InventoryField.format;
     });

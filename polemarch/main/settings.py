@@ -57,10 +57,17 @@ API = {
 }
 API[VST_API_VERSION] = {
     **API['v2'],
+    'groups': {
+        'view': '{}.api.v3.views.GroupViewSet'.format(VST_PROJECT_LIB_NAME)
+    },
+    'inventory': {
+        'view': '{}.api.v3.views.InventoryViewSet'.format(VST_PROJECT_LIB_NAME)
+    },
     'project': {
         'view': '{}.api.v3.views.ProjectViewSet'.format(VST_PROJECT_LIB_NAME)
     },
 }
+del API[VST_API_VERSION]['group']
 
 PROJECT_GUI_MENU = [
     {
@@ -80,7 +87,7 @@ PROJECT_GUI_MENU = [
         'sublinks': [
             {
                 'name': 'Groups',
-                'url': '/group',
+                'url': '/groups',
                 'span_class': 'fas fa-server',
             },
             {
