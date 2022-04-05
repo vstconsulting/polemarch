@@ -16,6 +16,7 @@ from vstutils.api.responses import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CO
 from . import filters
 from .permissions import InventoryItemsPermission
 from . import serializers as sers
+from ..v3 import serializers as sers3
 from ...main import utils
 
 yes = True
@@ -515,7 +516,7 @@ class __ModuleViewSet(base.ReadOnlyModelViewSet):
     lookup_field = 'id'
     model = sers.models.Module
     serializer_class = sers.ModuleSerializer
-    serializer_class_one = sers.OneModuleSerializer
+    serializer_class_one = sers3.OneModuleSerializer
     filter_class = filters.ModuleFilter
 
 
@@ -543,8 +544,8 @@ class __PeriodicTaskViewSet(base.ModelViewSet):
     """
     lookup_field = 'id'
     model = sers.models.PeriodicTask
-    serializer_class = sers.PeriodictaskSerializer
-    serializer_class_one = sers.OnePeriodictaskSerializer
+    serializer_class = sers3.PeriodictaskSerializer
+    serializer_class_one = sers3.OnePeriodictaskSerializer
     filter_class = filters.PeriodicTaskFilter
 
     @deco.subaction(**{
@@ -556,7 +557,7 @@ class __PeriodicTaskViewSet(base.ModelViewSet):
         """
         Ad-hoc execute periodic task.
         """
-        return HTTP_201_CREATED(sers.OnePeriodictaskSerializer(self.get_object()).execute())
+        return HTTP_201_CREATED(sers3.OnePeriodictaskSerializer(self.get_object()).execute())
 
 
 class __TemplateViewSet(base.ModelViewSet):
