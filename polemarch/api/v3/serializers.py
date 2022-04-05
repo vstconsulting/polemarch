@@ -1,5 +1,6 @@
+from django.db import transaction
 from rest_framework import fields, serializers
-from vstutils.api.fields import DependEnumField, AutoCompletionField
+from vstutils.api import fields as vst_fields
 from vstutils.api.serializers import BaseSerializer
 from vstutils.utils import lazy_translate as __
 
@@ -11,6 +12,9 @@ from ..v2.serializers import (
     AnsiblePlaybookSerializer,
     AnsibleModuleSerializer,
     generate_fileds,
+    ModuleSerializer,
+    InventoryDependEnumField,
+    ExecuteResponseSerializer,
 )
 
 
@@ -38,7 +42,7 @@ class ModuleTemplateVariablesSerializer(TemplateVariablesSerializer):
 
 
 class TaskTemplateParameters(BaseSerializer):
-    playbook = AutoCompletionField(
+    playbook = vst_fields.AutoCompletionField(
         autocomplete='Playbook',
         autocomplete_property='playbook',
         autocomplete_represent='playbook',
@@ -48,7 +52,7 @@ class TaskTemplateParameters(BaseSerializer):
 
 class ModuleTemplateParameters(BaseSerializer):
     group = fields.CharField()
-    module = AutoCompletionField(
+    module = vst_fields.AutoCompletionField(
         autocomplete='Module',
         autocomplete_property='name',
         autocomplete_represent='path'
@@ -71,7 +75,7 @@ class ExecutionTemplateSerializer(_WithVariablesSerializer):
 
 
 class CreateExecutionTemplateSerializer(ExecutionTemplateSerializer):
-    data = DependEnumField(field='kind', types={
+    data = vst_fields.DependEnumField(field='kind', types={
         ExecutionTypes.Task.value: TaskTemplateParameters(),
         ExecutionTypes.Module.value: ModuleTemplateParameters(),
     })
@@ -83,7 +87,7 @@ class CreateExecutionTemplateSerializer(ExecutionTemplateSerializer):
         data = validated_data['data']
         inventory = validated_data.get('inventory', None)
 
-        if inventory and not data.get('inventory'):
+        if inventory and not data.get('inventory'):  # nocv
             data['inventory'] = inventory
 
         if not data.get('vars'):
@@ -101,7 +105,133 @@ class OneExecutionTemplateSerializer(CreateExecutionTemplateSerializer):
 
 class ExecutionTemplateVariablesSerializer(BaseSerializer):
     kind = fields.CharField(read_only=True)
-    vars = DependEnumField(field='kind', types={
+    vars = vst_fields.DependEnumField(field='kind', types={
         ExecutionTypes.Task.value: AnsiblePlaybookSerializer(),
         ExecutionTypes.Module.value: AnsibleModuleSerializer(),
     })
+
+
+class OneModuleSerializer(ModuleSerializer):
+    data = fields.JSONField(read_only=True)
+
+    class Meta:
+        model = models.Module
+        fields = (
+            'id',
+            'path',
+            'name',
+            'data',
+        )
+
+
+class PeriodictaskSerializer(_WithVariablesSerializer):
+    kind = serializers.ChoiceField(
+        choices=[(k, k) for k in models.PeriodicTask.kinds],
+        required=False,
+        default=models.PeriodicTask.kinds[0],
+        label='Task type'
+    )
+    type = serializers.ChoiceField(
+        choices=[(k, k) for k in models.PeriodicTask.types],
+        required=False,
+        default=models.PeriodicTask.types[0],
+        label='Interval type'
+    )
+    template = vst_fields.DependEnumField(
+        allow_blank=True,
+        required=False,
+        allow_null=True,
+        field='kind',
+        types={
+            'PLAYBOOK': 'hidden',
+            'MODULE': 'hidden',
+            'TEMPLATE': vst_fields.FkModelField(select=ExecutionTemplateSerializer),
+        }
+    )
+    template_opt = vst_fields.DependEnumField(
+        allow_blank=True,
+        required=False,
+        allow_null=True,
+        field='template'
+    )
+    schedule = vst_fields.DependEnumField(
+        allow_blank=True,
+        field='type',
+        types={
+            'CRONTAB': 'crontab',
+            'INTERVAL': 'integer',
+        }
+    )
+    mode = vst_fields.DependEnumField(
+        allow_blank=True,
+        required=False,
+        field='kind',
+        types={
+            'PLAYBOOK': vst_fields.AutoCompletionField(
+                autocomplete='Playbook',
+                autocomplete_property='playbook',
+                autocomplete_represent='playbook',
+            ),
+            'MODULE': vst_fields.AutoCompletionField(
+                autocomplete='Module',
+                autocomplete_property='name',
+                autocomplete_represent='path',
+            ),
+            'TEMPLATE': 'hidden',
+        }
+    )
+    inventory = InventoryDependEnumField(allow_blank=True, required=False, field='kind')
+
+    class Meta:
+        model = models.PeriodicTask
+        fields = (
+            'id',
+            'name',
+            'kind',
+            'mode',
+            'inventory',
+            'save_result',
+            'template',
+            'template_opt',
+            'enabled',
+            'type',
+            'schedule',
+        )
+
+    @transaction.atomic
+    def _do_with_vars(self, *args, **kwargs):
+        kw = kwargs['validated_data']
+        if kw.get('kind', None) == 'TEMPLATE':
+            kw['inventory'] = ''
+            kw['mode'] = ''
+            kwargs['validated_data'] = kw
+        return super()._do_with_vars(*args, **kwargs)
+
+
+class OnePeriodictaskSerializer(PeriodictaskSerializer):
+    notes = vst_fields.TextareaField(required=False, allow_blank=True)
+
+    class Meta:
+        model = models.PeriodicTask
+        fields = (
+            'id',
+            'name',
+            'kind',
+            'mode',
+            'inventory',
+            'save_result',
+            'template',
+            'template_opt',
+            'enabled',
+            'type',
+            'schedule',
+            'notes',
+        )
+
+    def execute(self):
+        rdata = ExecuteResponseSerializer(data=dict(
+            detail=f"Started at inventory {self.instance.inventory}.",
+            history_id=self.instance.execute(sync=False)
+        ))
+        rdata.is_valid(True)
+        return rdata.data

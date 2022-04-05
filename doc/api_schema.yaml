@@ -68,7 +68,7 @@ info:
   x-versions:
     application: 1.8.5
     library: 1.8.5
-    vstutils: 5.0.0b111
+    vstutils: 5.0.0b116
     django: 3.2.12
     djangorestframework: 3.13.1
     drf_yasg: 1.20.0
@@ -192,6 +192,7 @@ paths:
       tags:
         - community_template
       x-multiaction: false
+      x-require-confirmation: false
     parameters:
       - name: id
         in: path
@@ -2172,6 +2173,7 @@ paths:
       tags:
         - history
       x-multiaction: false
+      x-require-confirmation: false
     parameters:
       - name: id
         in: path
@@ -2189,6 +2191,7 @@ paths:
       tags:
         - history
       x-multiaction: false
+      x-require-confirmation: false
     parameters:
       - name: id
         in: path
@@ -5336,6 +5339,7 @@ paths:
       tags:
         - project
       x-multiaction: false
+      x-require-confirmation: false
     parameters:
       - name: id
         in: path
@@ -5360,6 +5364,7 @@ paths:
       tags:
         - project
       x-multiaction: false
+      x-require-confirmation: false
     parameters:
       - name: id
         in: path
@@ -5586,6 +5591,7 @@ paths:
       tags:
         - project
       x-multiaction: false
+      x-require-confirmation: false
     parameters:
       - name: execution_templates_id
         in: path
@@ -5991,6 +5997,7 @@ paths:
       tags:
         - project
       x-multiaction: false
+      x-require-confirmation: false
     parameters:
       - name: history_id
         in: path
@@ -6013,6 +6020,7 @@ paths:
       tags:
         - project
       x-multiaction: false
+      x-require-confirmation: false
     parameters:
       - name: history_id
         in: path
@@ -8869,6 +8877,7 @@ paths:
       tags:
         - project
       x-multiaction: false
+      x-require-confirmation: false
     parameters:
       - name: id
         in: path
@@ -9263,6 +9272,7 @@ paths:
       tags:
         - project
       x-multiaction: false
+      x-require-confirmation: false
     parameters:
       - name: id
         in: path
@@ -13461,19 +13471,12 @@ definitions:
         x-options:
           field: kind
           choices: {}
-          types:
-            PLAYBOOK: fk_autocomplete
-            MODULE: fk_autocomplete
-            TEMPLATE: hidden
+          types: {}
       save_result:
         title: Save result
         type: boolean
       template:
         title: Template
-        type: integer
-        x-nullable: true
-      template_opt:
-        title: Template opt
         type: string
         format: dynamic
         x-options:
@@ -13482,7 +13485,27 @@ definitions:
           types:
             PLAYBOOK: hidden
             MODULE: hidden
-            TEMPLATE: autocomplete
+            TEMPLATE:
+              type: integer
+              format: fk
+              x-options:
+                model:
+                  $ref: '#/definitions/ExecutionTemplate'
+                value_field: id
+                view_field: name
+                usePrefetch: true
+                makeLink: true
+                dependence: null
+                filters: null
+        x-nullable: true
+      template_opt:
+        title: Template opt
+        type: string
+        format: dynamic
+        x-options:
+          field: template
+          choices: {}
+          types: {}
         x-nullable: true
       enabled:
         title: Enabled
@@ -13574,19 +13597,12 @@ definitions:
         x-options:
           field: kind
           choices: {}
-          types:
-            PLAYBOOK: fk_autocomplete
-            MODULE: fk_autocomplete
-            TEMPLATE: hidden
+          types: {}
       save_result:
         title: Save result
         type: boolean
       template:
         title: Template
-        type: integer
-        x-nullable: true
-      template_opt:
-        title: Template opt
         type: string
         format: dynamic
         x-options:
@@ -13595,7 +13611,27 @@ definitions:
           types:
             PLAYBOOK: hidden
             MODULE: hidden
-            TEMPLATE: autocomplete
+            TEMPLATE:
+              type: integer
+              format: fk
+              x-options:
+                model:
+                  $ref: '#/definitions/ExecutionTemplate'
+                value_field: id
+                view_field: name
+                usePrefetch: true
+                makeLink: true
+                dependence: null
+                filters: null
+        x-nullable: true
+      template_opt:
+        title: Template opt
+        type: string
+        format: dynamic
+        x-options:
+          field: template
+          choices: {}
+          types: {}
         x-nullable: true
       enabled:
         title: Enabled
