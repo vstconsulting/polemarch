@@ -1,40 +1,79 @@
+# syntax=docker/dockerfile:1
+
 FROM vstconsulting/images:tox AS build
 
-WORKDIR /usr/local/project
+WORKDIR /usr/local/polemarch
 
 COPY . .
 
-ENV WORKER=ENABLE \
-    LC_ALL=en_US.UTF-8 \
-    LANG=en_US.UTF-8
-
-RUN tox -c tox_build.ini -e py36-build && \
-    mv dist/ environment/docker_data/
-
+RUN --mount=type=cache,target=/root/.cache/pip \
+    --mount=type=cache,target=/cache \
+    --mount=type=cache,target=/usr/local/polemarch/.tox \
+    rm -rf dist/* && \
+    tox -c tox_build.ini -e py36-build
+ 
 ###############################################################
 
-FROM alpine:3.11
+FROM vstconsulting/images:python
+
+RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
 ENV WORKER=ENABLE \
     LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8
 
-COPY --from=build /usr/local/project/environment/docker_data/ /etc/polemarch/
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=type=cache,target=/var/lib/apt \
+    --mount=type=cache,target=/root/.cache/pip \
+    --mount=type=bind,from=build,source=/usr/local/polemarch/,target=/polemarch_env \
+    apt update && \
+    apt -y install --no-install-recommends \
+        git \
+        sudo \
+        sshpass \
+        python3.8-dev \
+        libldap2-dev \
+        libldap-2.4-2 \
+        libsasl2-dev \
+        libsasl2-2 \
+        libffi-dev \
+        libffi7 \
+        libkrb5-dev \
+        krb5-multidev \
+        libssl-dev \
+        libssl1.1 \
+        gcc && \
+    python3.8 -m pip install --upgrade pip -U \
+        wheel \
+        setuptools \
+        cryptography \
+        paramiko && \
+    ln -s /usr/bin/python3.8 /usr/bin/python && \
+    mkdir -p /projects /hooks /run/openldap && \
+    python3.8 -m pip install /polemarch_env/dist/$(ls /polemarch_env/dist/ | grep "\.tar\.gz" | tail -1)[mysql,postgresql] && \
+    apt remove -y \
+        python3.8-dev \
+        libldap2-dev \
+        libsasl2-dev \
+        libssl-dev \
+        libkrb5-dev \
+        libffi-dev \
+        default-libmysqlclient-dev \
+        gcc && \
+    apt autoremove -y && \
+    rm -rf /tmp/* \
+           /var/tmp/* \
+           /var/log/apt/*
 
-RUN cat /etc/polemarch/system_requirements.txt | xargs apk --update add && \
-    cat /etc/polemarch/system_requirements_build.txt | xargs apk add --virtual .build-deps && \
-    virtualenv -p python3 /opt/polemarch && \
-    /opt/polemarch/bin/pip3 install -U pip wheel setuptools && \
-    /opt/polemarch/bin/pip3 install -U -r /etc/polemarch/system_requirements_pip.txt && \
-    mkdir -p /projects /hooks && \
-    /opt/polemarch/bin/pip3 install -U /etc/polemarch/dist/$(ls /etc/polemarch/dist/ | grep "\.tar\.gz" | tail -1)[mysql,postgresql] && \
-    /opt/polemarch/bin/pip3 install paramiko && \
-    mkdir -p /run/openldap && \
-    apk --purge del .build-deps && \
-    rm -rf ~/.cache/pip/* && \
-    rm -rf /var/cache/apk/*
+RUN useradd -m -s /bin/bash -U polemarch && \
+    chown -R polemarch /projects /hooks /run/openldap
+
+USER polemarch
+
+WORKDIR /home/polemarch
 
 EXPOSE 8080
 
-ENTRYPOINT [ "/opt/polemarch/bin/polemarchctl" ]
-CMD ["dockerrun"]
+ENTRYPOINT []
+
+CMD ["/usr/local/bin/polemarchctl", "dockerrun"]
