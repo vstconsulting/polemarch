@@ -1,2 +1,0 @@
-# Versioned packages
-cython>=0.29, <0.30
