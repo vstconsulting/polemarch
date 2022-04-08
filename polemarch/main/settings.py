@@ -7,7 +7,7 @@ POLEMARCH_VERSION = PROJECT_VERSION
 APACHE = False if ("runserver" in sys.argv) else True
 
 # Directory for git projects
-PROJECTS_DIR = main.get("projects_dir", fallback="{LIB}/projects")
+PROJECTS_DIR = main.get("projects_dir", fallback=os.getenv("POLEMARCH_PROJECTS_DIR", "{LIB}/projects"))
 os.makedirs(PROJECTS_DIR) if not os.path.exists(PROJECTS_DIR) else None
 
 # Polemarch apps

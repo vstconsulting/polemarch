@@ -11,7 +11,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=cache,target=/usr/local/polemarch/.tox \
     rm -rf dist/* && \
     tox -c tox_build.ini -e py36-build
- 
+
 ###############################################################
 
 FROM vstconsulting/images:python
@@ -20,7 +20,8 @@ RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloa
 
 ENV WORKER=ENABLE \
     LC_ALL=en_US.UTF-8 \
-    LANG=en_US.UTF-8
+    LANG=en_US.UTF-8 \
+    POLEMARCH_PROJECTS_DIR=/projects
 
 RUN --mount=type=cache,target=/var/cache/apt \
     --mount=type=cache,target=/var/lib/apt \
@@ -49,7 +50,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
         cryptography \
         paramiko && \
     ln -s /usr/bin/python3.8 /usr/bin/python && \
-    mkdir -p /projects /hooks /run/openldap && \
+    mkdir -p /projects /hooks /run/openldap /etc/polemarch/hooks && \
     python3.8 -m pip install /polemarch_env/dist/$(ls /polemarch_env/dist/ | grep "\.tar\.gz" | tail -1)[mysql,postgresql] && \
     apt remove -y \
         python3.8-dev \
@@ -66,7 +67,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
            /var/log/apt/*
 
 RUN useradd -m -s /bin/bash -U polemarch && \
-    chown -R polemarch /projects /hooks /run/openldap
+    chown -R polemarch /projects /hooks /run/openldap /etc/polemarch
 
 USER polemarch
 
