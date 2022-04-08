@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import polemarch.main.models.base
+from ..models.base import ManyToManyFieldACL, ManyToManyFieldACLReverse
 
 
 class Migration(migrations.Migration):
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='group',
             name='parents',
-            field=polemarch.main.models.base.ManyToManyFieldACLReverse(blank=True, related_name='groups', related_query_name='childrens', to='main.Group'),
+            field=ManyToManyFieldACLReverse(blank=True, related_name='groups', related_query_name='childrens', to='main.Group'),
         ),
         migrations.AlterField(
             model_name='host',
@@ -60,17 +60,17 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='project',
             name='groups',
-            field=polemarch.main.models.base.ManyToManyFieldACL(blank=True, related_name='projects', to='main.Group'),
+            field=ManyToManyFieldACL(blank=True, related_name='projects', to='main.Group'),
         ),
         migrations.AlterField(
             model_name='project',
             name='hosts',
-            field=polemarch.main.models.base.ManyToManyFieldACL(blank=True, related_name='projects', to='main.Host'),
+            field=ManyToManyFieldACL(blank=True, related_name='projects', to='main.Host'),
         ),
         migrations.AlterField(
             model_name='project',
             name='inventories',
-            field=polemarch.main.models.base.ManyToManyFieldACL(blank=True, related_name='projects', to='main.Inventory'),
+            field=ManyToManyFieldACL(blank=True, related_name='projects', to='main.Inventory'),
         ),
         migrations.AlterField(
             model_name='template',
