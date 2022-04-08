@@ -5,17 +5,9 @@ from django.db.models import Q
 from django_filters import CharFilter, NumberFilter, IsoDateTimeFilter
 from vstutils.api.filters import DefaultIDFilter, extra_filter, name_filter, filters
 from ...main import models
+from ...main.models.hosts import variables_filter, vars_help
 
 name_help = 'A name string value (or comma separated list) of instance.'
-vars_help = 'List of variables to filter. Comma separeted "key:value" list.'
-
-
-def variables_filter(queryset, field, value):
-    # filter applicable only to variables
-    # pylint: disable=unused-argument
-    items = value.split(",")
-    kwargs = {item.split(":")[0]: item.split(":")[1] for item in items}
-    return queryset.var_filter(**kwargs)
 
 
 def filter_name_endswith(queryset, field, value):
@@ -48,7 +40,7 @@ class VariableFilter(DefaultIDFilter):
 
 class _BaseFilter(DefaultIDFilter):
     name__not = CharFilter(method=name_filter, help_text=name_help)
-    name      = CharFilter(method=name_filter, help_text=name_help)
+    name = CharFilter(method=name_filter, help_text=name_help)
 
 
 class _TypedFilter(_BaseFilter):
@@ -71,8 +63,8 @@ class TemplateFilter(_BaseFilter):
 
 class ModuleFilter(filters.FilterSet):
     path__not = CharFilter(method=name_filter, help_text='Full path to module.')
-    path      = CharFilter(method=name_filter, help_text='Full path to module.')
-    name      = CharFilter(method=filter_name_endswith, help_text='Name of module.')
+    path = CharFilter(method=name_filter, help_text='Full path to module.')
+    name = CharFilter(method=filter_name_endswith, help_text='Name of module.')
 
     class Meta:
         model = models.Module
@@ -97,7 +89,6 @@ class _BaseHGIFilter(_BaseFilter):
 
 
 class HostFilter(_TypedFilter, _BaseHGIFilter):
-
     class Meta:
         model = models.Host
         fields = ('id',
@@ -106,7 +97,6 @@ class HostFilter(_TypedFilter, _BaseHGIFilter):
 
 
 class GroupFilter(_BaseHGIFilter):
-
     class Meta:
         model = models.Group
         fields = ('id',
@@ -114,7 +104,6 @@ class GroupFilter(_BaseHGIFilter):
 
 
 class InventoryFilter(_BaseHGIFilter):
-
     class Meta:
         model = models.Inventory
         fields = ('id',
@@ -122,8 +111,8 @@ class InventoryFilter(_BaseHGIFilter):
 
 
 class ProjectFilter(_BaseHGIFilter):
-    status        = CharFilter(method=extra_filter, help_text='Project sync status.')
-    status__not   = CharFilter(method=extra_filter, help_text='Project sync status.')
+    status = CharFilter(method=extra_filter, help_text='Project sync status.')
+    status__not = CharFilter(method=extra_filter, help_text='Project sync status.')
 
     class Meta:
         model = models.Project
@@ -134,8 +123,8 @@ class ProjectFilter(_BaseHGIFilter):
 
 class TaskFilter(_BaseFilter):
     playbook__not = CharFilter(method=name_filter, help_text='Playbook filename.')
-    playbook      = CharFilter(method=name_filter, help_text='Playbook filename.')
-    pb_filter     = CharFilter(method=playbook_filter, help_text='Playbook filename - filter for prefetch.')
+    playbook = CharFilter(method=name_filter, help_text='Playbook filename.')
+    pb_filter = CharFilter(method=playbook_filter, help_text='Playbook filename - filter for prefetch.')
 
     class Meta:
         model = models.Task
@@ -181,7 +170,7 @@ class PeriodicTaskFilter(_TypedFilter):
 
 
 class HistoryLinesFilter(filters.FilterSet):
-    after  = NumberFilter(field_name="line_gnumber", lookup_expr=('gt'))
+    after = NumberFilter(field_name="line_gnumber", lookup_expr=('gt'))
     before = NumberFilter(field_name="line_gnumber", lookup_expr=('lt'))
 
     class Meta:

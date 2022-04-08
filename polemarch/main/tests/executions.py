@@ -17,6 +17,7 @@ from django_celery_beat.models import CrontabSchedule, IntervalSchedule, Periodi
 from yaml import dump, load as from_yaml, Loader
 
 from ._base import BaseTestCase, os
+from ..models import Template, ExecutionTypes
 from ..tasks import ScheduledTask
 from ..unittests.ansible import inventory_data, valid_inventory
 
@@ -256,8 +257,9 @@ class BaseExecutionsTestCase(BaseTestCase):
                 ),
             ),
             options=dict(
-                one=dict(module='shell', args='uname', verbose=3),
-                two=dict(vars=dict(forks=1))
+                one=dict(module='shell', args='uname', vars=dict(verbose=3)),
+                two=dict(vars=dict(forks=1)),
+                three=dict(),
             )
         )
 
@@ -316,11 +318,11 @@ class BaseExecutionsTestCase(BaseTestCase):
             dict(method='post', path='host', data=dict(name='127.0.1.[5:6]', type="RANGE")),
             dict(method='post', path='host', data=dict(name='hostlocl')),
             # Create groups
-            dict(method='post', path='group', data=dict(name='hosts1')),
-            dict(method='post', path='group', data=dict(name='hosts2')),
-            dict(method='post', path='group', data=dict(name='groups1', children=True)),
-            dict(method='post', path='group', data=dict(name='groups2', children=True)),
-            dict(method='post', path='group', data=dict(name='groups3', children=True)),
+            dict(method='post', path='groups', data=dict(name='hosts1')),
+            dict(method='post', path='groups', data=dict(name='hosts2')),
+            dict(method='post', path='groups', data=dict(name='groups1', children=True)),
+            dict(method='post', path='groups', data=dict(name='groups2', children=True)),
+            dict(method='post', path='groups', data=dict(name='groups3', children=True)),
             # Create inventory
             dict(method='post', path='inventory', data=dict(name='complex_inventory')),
             # Create manual project
@@ -328,7 +330,7 @@ class BaseExecutionsTestCase(BaseTestCase):
             # Set vars
             *[dict(method='post', path=['host', '<<3[data][id]>>', 'variables'], data=dict(key=k, value=v))
               for k, v in hostlocl_v.items()],
-            *[dict(method='post', path=['group', '<<6[data][id]>>', 'variables'], data=dict(key=k, value=v))
+            *[dict(method='post', path=['groups', '<<6[data][id]>>', 'variables'], data=dict(key=k, value=v))
               for k, v in groups1_v.items()],
             *[dict(method='post', path=['inventory', '<<9[data][id]>>', 'variables'], data=dict(key=k, value=v))
               for k, v in complex_inventory_v.items()],
@@ -336,24 +338,24 @@ class BaseExecutionsTestCase(BaseTestCase):
             # Add children
             *[
                 # to hosts1
-                dict(method='post', path=['group', '<<4[data][id]>>', 'host'], data=dict(id='<<0[data][id]>>')),
-                dict(method='post', path=['group', '<<4[data][id]>>', 'host'], data=dict(id='<<3[data][id]>>')),
+                dict(method='post', path=['groups', '<<4[data][id]>>', 'hosts'], data=dict(id='<<0[data][id]>>')),
+                dict(method='post', path=['groups', '<<4[data][id]>>', 'hosts'], data=dict(id='<<3[data][id]>>')),
                 # to hosts2
-                dict(method='post', path=['group', '<<5[data][id]>>', 'host'], data=dict(id='<<1[data][id]>>')),
-                dict(method='post', path=['group', '<<5[data][id]>>', 'host'], data=dict(id='<<2[data][id]>>')),
+                dict(method='post', path=['groups', '<<5[data][id]>>', 'hosts'], data=dict(id='<<1[data][id]>>')),
+                dict(method='post', path=['groups', '<<5[data][id]>>', 'hosts'], data=dict(id='<<2[data][id]>>')),
                 # to groups1
-                dict(method='post', path=['group', '<<6[data][id]>>', 'group'], data=dict(id='<<7[data][id]>>')),
-                dict(method='post', path=['group', '<<6[data][id]>>', 'group'], data=dict(id='<<8[data][id]>>')),
+                dict(method='post', path=['groups', '<<6[data][id]>>', 'groups'], data=dict(id='<<7[data][id]>>')),
+                dict(method='post', path=['groups', '<<6[data][id]>>', 'groups'], data=dict(id='<<8[data][id]>>')),
                 # to groups2
-                dict(method='post', path=['group', '<<7[data][id]>>', 'group'], data=dict(id='<<8[data][id]>>')),
+                dict(method='post', path=['groups', '<<7[data][id]>>', 'groups'], data=dict(id='<<8[data][id]>>')),
                 # to groups3
-                dict(method='post', path=['group', '<<8[data][id]>>', 'group'], data=dict(id='<<4[data][id]>>')),
-                dict(method='post', path=['group', '<<8[data][id]>>', 'group'], data=dict(id='<<5[data][id]>>')),
+                dict(method='post', path=['groups', '<<8[data][id]>>', 'groups'], data=dict(id='<<4[data][id]>>')),
+                dict(method='post', path=['groups', '<<8[data][id]>>', 'groups'], data=dict(id='<<5[data][id]>>')),
                 # to inventory
                 dict(method='post', path=['inventory', '<<9[data][id]>>', 'group'], data=dict(id='<<6[data][id]>>')),
-                dict(method='post', path=['inventory', '<<9[data][id]>>', 'host'], data=dict(id='<<0[data][id]>>')),
-                dict(method='post', path=['inventory', '<<9[data][id]>>', 'host'], data=dict(id='<<1[data][id]>>')),
-                dict(method='post', path=['inventory', '<<9[data][id]>>', 'host'], data=dict(id='<<3[data][id]>>')),
+                dict(method='post', path=['inventory', '<<9[data][id]>>', 'hosts'], data=dict(id='<<0[data][id]>>')),
+                dict(method='post', path=['inventory', '<<9[data][id]>>', 'hosts'], data=dict(id='<<1[data][id]>>')),
+                dict(method='post', path=['inventory', '<<9[data][id]>>', 'hosts'], data=dict(id='<<3[data][id]>>')),
                 # to project
                 dict(method='post', path=['project', '<<10[data][id]>>', 'inventory'], data=dict(id='<<9[data][id]>>')),
             ]
@@ -408,13 +410,13 @@ class BaseExecutionsTestCase(BaseTestCase):
         inventory_path = f'/{self._settings("VST_API_URL")}/{self._settings("VST_API_VERSION")}/inventory/'
         for result in bulk_results:
             item = self.get_model_from_path(result['path'])
-            if result['method'] == 'POST' and item != 'sync':
+            if result['method'] == 'post' and item != 'sync':
                 self.assertEqual(result['status'], 201)
                 if isinstance(objects.get(item), list):
                     if 'inventory' in result['path'] and result['path'] != inventory_path:
                         continue
                     objects[item].append(result['data'])
-            if result['method'] == 'GET' and 'history' in result['path']:
+            if result['method'] == 'get' and 'history' in result['path']:
                 self.assertEqual(result['status'], 200)
                 history = result['data']
                 self.assertEqual(history['revision'], "NO VCS")
@@ -1610,7 +1612,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
         file_for_remove.unlink()
         results = self.bulk([
             dict(method='post', path=['project', prj_id, 'sync']),
-            dict(method='get', path=['inventory', inv_id, 'host']),
+            dict(method='get', path=['inventory', inv_id, 'hosts']),
             dict(method='get', path=['inventory', inv_id, 'group']),
             dict(method='get', path=['inventory', inv_id, 'variables']),
             dict(method='get', path=['inventory', remove_inv_id]),
@@ -1641,7 +1643,7 @@ class ProjectTestCase(BaseExecutionsTestCase):
             dict(method='post', path=['inventory', inv_id, 'variables'], data=dict(ansible_port=8888)),
             dict(method='get', path=['inventory', inv_id, 'all_groups']),
             dict(method='get', path=['inventory', inv_id, 'all_hosts']),
-            dict(method='put', path=['group', '<<3[data][results][0][id]>>'], data=dict(name='new-group-name')),
+            dict(method='put', path=['groups', '<<3[data][results][0][id]>>'], data=dict(name='new-group-name')),
             dict(method='put', path=['host', '<<4[data][results][0][id]>>'], data=dict(name='new-host-ame')),
         ])
         self.assertEqual(results[1]['status'], 403)
@@ -1852,3 +1854,241 @@ class ProjectTestCase(BaseExecutionsTestCase):
         ])
         self.assertEqual(len(tuple(filter(lambda x: x['status'] not in (201, 200, 204), results))), 0, results)
         self.assertIn('history_id', results[4]['data'].keys())
+
+    def test_execution_templates(self):
+        template_data = {
+            'name': 'ping module',
+            'notes': 'some notes',
+            'inventory': None,
+            'kind': ExecutionTypes.Module.value,
+            'data': {'module': 'ping', 'args': 'arg1', 'group': 'all', 'vars': {
+                'playbook_dir': 'some_dir',
+            }},
+        }
+
+        results = self.bulk([
+            # [0] Create project
+            {'method': 'post', 'path': 'project', 'data': {'name': 'test_project', 'repo_type': 'MANUAL'}},
+
+            # [1] Get templates list
+            {'method': 'get', 'path': ['project', '<<0[data][id]>>', 'execution_templates']},
+
+            # [2] Create template
+            {'method': 'post', 'path': ['project', '<<0[data][id]>>', 'execution_templates'], 'data': {
+                **template_data,
+                'data': {
+                    **template_data['data'],
+                    'vars': {
+                        **template_data['data']['vars'],
+                        'list_tasks': True,  # Valid only for type Task
+                    }
+                }
+            }},
+            # [3] Get detail view
+            {'method': 'get', 'path': ['project', '<<0[data][id]>>', 'execution_templates', '<<2[data][id]>>']},
+
+            # [4] Try partial update (kind should not change)
+            {
+                'method': 'patch',
+                'path': ['project', '<<0[data][id]>>', 'execution_templates', '<<2[data][id]>>'],
+                'data': {'kind': ExecutionTypes.Task.value},
+            },
+            # [5] Get detail view
+            {'method': 'get', 'path': ['project', '<<0[data][id]>>', 'execution_templates', '<<2[data][id]>>']},
+
+            # [6] Try to change kind field (should fail)
+            {
+                'method': 'put',
+                'path': ['project', '<<0[data][id]>>', 'execution_templates', '<<2[data][id]>>'],
+                'data': {**template_data, 'kind':  ExecutionTypes.Task.value},
+            },
+            # [7] Update variables
+            {
+                'method': 'put',
+                'path': ['project', '<<0[data][id]>>', 'execution_templates', '<<2[data][id]>>'],
+                'data': {
+                    **template_data,
+                    'data': {**template_data['data'], 'vars': {'verbose': 2}},
+                },
+             },
+            # [8] Get detail view
+            {'method': 'get', 'path': ['project', '<<0[data][id]>>', 'execution_templates', '<<2[data][id]>>']},
+        ])
+
+        # Check empty templates list
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(len(results[1]['data']['results']), 0)
+
+        # Check template creation result
+        self.assertEqual(results[2]['status'], 201)
+        self.assertDictEqual(results[2]['data'], {**template_data, 'id': results[2]['data']['id']})
+
+        # Check created template detail view
+        self.assertEqual(results[3]['status'], 200)
+        self.assertDictEqual(results[3]['data'], {**template_data, 'id': results[2]['data']['id']})
+
+        # Check that kind cannot be changed using PATCH request
+        self.assertEqual(results[4]['status'], 200)
+        self.assertEqual(results[5]['data']['kind'], ExecutionTypes.Module.value)
+
+        # Check that kind cannot be changed using PUT request
+        self.assertEqual(results[6]['status'], 400)
+
+        # Check update result
+        self.assertEqual(results[7]['status'], 200)
+        self.assertDictEqual(results[7]['data'], {
+            **template_data,
+            'id': results[2]['data']['id'],
+            'data': {**template_data['data'], 'vars': {'verbose': 2}},
+        })
+        # Check detail view after update
+        self.assertEqual(results[8]['status'], 200)
+        self.assertDictEqual(results[8]['data'], {
+            **template_data,
+            'id': results[2]['data']['id'],
+            'data': {**template_data['data'], 'vars': {'verbose': 2}},
+        })
+
+    def test_execution_templates_options(self):
+        # Setup test data
+        results = self.bulk([
+            {'method': 'post', 'path': 'project', 'data': {'name': 'test_proj', 'repo_type': 'MANUAL'}},
+            {'method': 'post', 'path': ['project', '<<0[data][id]>>', 'execution_templates'], 'data': {
+                'name': 'ping module',
+                'notes': 'some notes',
+                'kind': ExecutionTypes.Module.value,
+                'data': {'module': 'ping', 'args': 'arg1', 'group': 'all'},
+            }},
+        ])
+        proj_id = results[0]['data']['id']
+        tmpl = Template.objects.get(id=results[1]['data']['id'])
+
+        detail_path = ['project', proj_id, 'execution_templates', tmpl.id, 'option', '<<1[data][id]>>']
+
+        # Test valid data
+        results = self.bulk([
+            # [0] Get options list
+            {'method': 'get', 'path': ['project', proj_id, 'execution_templates', tmpl.id, 'option']},
+            # [1] Create option
+            {'method': 'post', 'path': ['project', proj_id, 'execution_templates', tmpl.id, 'option'], 'data': {
+                'name': 'Option 1',
+                'data': {'module': 'other_module', 'vars': {'playbook_dir': 'some_dir'}},
+            }},
+            # [2] Get options list
+            {'method': 'get', 'path': ['project', proj_id, 'execution_templates', tmpl.id, 'option']},
+            # [3] Try to change option name
+            {'method': 'put', 'path': detail_path, 'data': {
+                'name': 'New name',
+                'data': {'module': 'other_module', 'vars': {'playbook_dir': 'some_dir'}},
+            }},
+            # [4] Get option detail view
+            {'method': 'get', 'path': detail_path},
+            # [5] Remove option
+            {'method': 'delete', 'path': detail_path},
+            # [6] Get options list
+            {'method': 'get', 'path': ['project', proj_id, 'execution_templates', tmpl.id, 'option']},
+        ])
+
+        # Check empty options list
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(len(results[0]['data']['results']), 0)
+
+        # Check that option successfully created
+        self.assertEqual(results[1]['status'], 201)
+        self.assertEqual(results[1]['data'], {
+            'id': 'option-1',
+            'kind': ExecutionTypes.Module.value,
+            'name': 'Option 1',
+            'data': {'module': 'other_module', 'vars': {'playbook_dir': 'some_dir'}},
+        })
+
+        # Check that list contains created option
+        self.assertEqual(results[2]['status'], 200)
+        self.assertListEqual(results[2]['data']['results'], [{'id': 'option-1', 'name': 'Option 1'}])
+
+        # Check that name of the option is not changed
+        self.assertEqual(results[3]['status'], 200)
+        self.assertEqual(results[3]['data']['name'], 'Option 1')
+
+        # Check detail view of the option
+        self.assertEqual(results[4]['status'], 200)
+        self.assertEqual(results[4]['data'], {
+            'id': 'option-1',
+            'kind': ExecutionTypes.Module.value,
+            'name': 'Option 1',
+            'data': {'module': 'other_module', 'vars': {'playbook_dir': 'some_dir'}},
+        })
+
+        # Check that option removed
+        self.assertEqual(results[5]['status'], 204)
+        self.assertEqual(len(results[6]['data']['results']), 0)
+
+        # Test invalid data
+        results = self.bulk([
+            {'method': 'post', 'path': ['project', proj_id, 'execution_templates', tmpl.id, 'option'], 'data': {
+                'name': 'Option 1',
+                'data': {'playbook': 'file.yml'},
+            }},
+        ])
+
+        self.assertEqual(results[0]['status'], 400)
+        self.assertEqual(
+            results[0]['data']['playbook'],
+            ["Unknown key. Keys should be ['inventory', 'module', 'group', 'args', 'vars']"]
+        )
+
+        # Test options with the same name
+        results = self.bulk([
+            # [0]
+            {
+                'method': 'post',
+                'path': ['project', proj_id, 'execution_templates', tmpl.id, 'option'],
+                'data': {
+                    'name': 'Option 1',
+                    'data': {'module': 'other_module'},
+                },
+            },
+            # [1]
+            {
+                'method': 'post',
+                'path': ['project', proj_id, 'execution_templates', tmpl.id, 'option'],
+                'data': {
+                    'name': 'Option 2',
+                    'data': {'module': 'other_module'},
+                },
+            },
+            # [2]
+            {
+                'method': 'put',
+                'path': ['project', proj_id, 'execution_templates', tmpl.id, 'option', '<<0[data][id]>>'],
+                'data': {
+                    'name': 'Option 1',
+                    'data': {'module': 'other_module'},
+                }
+            },
+            # [3]
+            {
+                'method': 'get',
+                'path': ['project', proj_id, 'execution_templates', tmpl.id, 'option', '<<0[data][id]>>'],
+            },
+            # [4]
+            {
+                'method': 'post',
+                'path': ['project', proj_id, 'execution_templates', tmpl.id, 'option'],
+                'data': {
+                    'name': 'option 1',
+                    'data': {'module': 'other_module'},
+                },
+            },
+        ])
+
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 201)
+        self.assertEqual(results[2]['status'], 200)
+        self.assertEqual(results[3]['status'], 200)
+        self.assertEqual(results[3]['data']['name'], 'Option 1')
+        self.assertEqual(results[4]['status'], 400, results[4]['data'])
+        self.assertEqual(results[4]['data'], {
+            'error_type': 'IntegrityError',
+            'detail': 'Template option name should be unique',
+        })

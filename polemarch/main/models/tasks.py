@@ -1,5 +1,6 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
+
 from typing import NoReturn, Any, Dict, List, Tuple, Iterable, TypeVar, Generator, Text
 import logging
 from collections import OrderedDict
@@ -11,9 +12,11 @@ import re
 import io
 from celery.schedules import crontab
 from django.core.exceptions import ValidationError
+from django.db.utils import IntegrityError
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.text import slugify
 from django.contrib.auth import get_user_model
 from django.db.models import functions as dbfunc, Count
 from django.utils.timezone import now
@@ -21,6 +24,8 @@ from django.test import Client
 from django.conf import settings
 from rest_framework.exceptions import UnsupportedMediaType
 
+from vstutils.custom_model import ListModel, CustomQuerySet
+from vstutils.utils import BaseEnum, translate as _
 from . import Inventory
 from ..exceptions import DataNotReady, NotApplicable
 from .base import ForeignKeyACL, BModel, ACLModel, BQuerySet, models
@@ -31,6 +36,12 @@ from .projects import Project, HISTORY_ID
 logger = logging.getLogger("polemarch")
 InvOrString = TypeVar('InvOrString', str, int, Inventory, None)
 User = get_user_model()
+
+
+class ExecutionTypes(BaseEnum):
+    # pylint: disable=invalid-name
+    Task = 'Task'
+    Module = 'Module'
 
 
 # Block of real models
@@ -147,7 +158,7 @@ class Template(ACLModel):
 
     def set_options_data(self, value: Any) -> NoReturn:
         options_data = self._convert_to_data(value)
-        new = dict()
+        new = {}
         for option, data in options_data.items():
             self._validate_option_data(data)
             if data.get('vars', None):
@@ -195,6 +206,59 @@ class Template(ACLModel):
     @property
     def options_list(self) -> List[str]:
         return list(self.options.keys())
+
+    @property
+    def options_qs(self):
+        return TemplateOption.objects.prepare_related(self)
+
+
+class TemplateOptionQueryset(CustomQuerySet):
+    def prepare_related(self, template):
+        return self.setup_custom_queryset_kwargs(template=template)._chain(
+            field=[f for f in self.model._meta.fields if f.name == 'template'][0],
+            instance=template,
+        )
+
+
+class TemplateOption(ListModel):
+    objects = TemplateOptionQueryset.as_manager()
+
+    template = models.ForeignKey(Template, on_delete=models.DO_NOTHING)
+    id = models.SlugField(max_length=256, primary_key=True)
+    name = models.CharField(max_length=256)
+    data = models.JSONField(default=dict)
+
+    class Meta:
+        managed = False
+
+    def get_pk_value(self):
+        return slugify(self.name)
+
+    def set_pk_value(self, value):
+        pass
+
+    @classmethod
+    def _get_data(cls, template: Template, **kwargs):
+        return [
+            {'id': slugify(key), 'name': key, 'data': value, 'template': template}
+            for key, value in template.options.items()
+        ]
+
+    def save(self, **kwargs):
+        # TODO: Make this code transaction atomic
+        if kwargs.get('force_insert', False) and slugify(self.name) in map(slugify, self.template.options.keys()):
+            raise IntegrityError(_('Template option name should be unique'))
+        self.template.set_options_data({
+            **self.template.options,
+            self.name: self.data,
+        })
+        self.template.save()
+
+    def delete(self, **kwargs):
+        options = self.template.options
+        del options[self.name]
+        self.template.set_options_data(options)
+        self.template.save()
 
 
 class PeriodicTaskQuerySet(AbstractVarsQuerySet):
@@ -267,7 +331,7 @@ class PeriodicTask(AbstractModel):
 
     @property
     def crontab_kwargs(self) -> Dict:
-        kwargs, index, fields = dict(), 0, self.schedule.split(" ")
+        kwargs, index, fields = {}, 0, self.schedule.split(" ")
         for field_name in self.time_types_list:
             if index < len(fields) and len(fields[index]) > 0:
                 kwargs[field_name] = fields[index]
@@ -311,7 +375,7 @@ class HistoryQuerySet(BQuerySet):
 
     def create(self, **kwargs) -> BModel:
         raw_stdout = kwargs.pop("raw_stdout", None)
-        history = super(HistoryQuerySet, self).create(**kwargs)
+        history = super().create(**kwargs)
         if raw_stdout:
             history.raw_stdout = raw_stdout
         return history
@@ -345,7 +409,7 @@ class HistoryQuerySet(BQuerySet):
         return {opt: extra.pop(opt, options[opt]) for opt in options}
 
     def __get_additional_options(self, extra_options) -> Dict[str, Any]:
-        options = dict()
+        options = {}
         if extra_options['template_option'] is not None:
             options['template_option'] = extra_options['template_option']
         return options
@@ -400,7 +464,7 @@ class History(BModel):
 
     def __init__(self, *args, **kwargs):
         execute_args = kwargs.pop('execute_args', None)
-        super(History, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if execute_args:
             self.execute_args = execute_args
 

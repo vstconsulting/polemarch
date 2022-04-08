@@ -19,19 +19,20 @@ class BQuerySet(_BQSet):
     def __decorator(self, func: Callable) -> Callable:  # noce
         def wrapper(*args, **kwargs):
             return func(self, *args, **kwargs)
+
         return wrapper
 
     def __getattribute__(self, item: str) -> Any:
         try:
-            return super(BQuerySet, self).__getattribute__(item)
+            return super().__getattribute__(item)
         except:
-            model = super(BQuerySet, self).__getattribute__("model")
+            model = super().__getattribute__("model")
             if model and item in model.acl_handler.qs_methods:  # noce
                 return self.__decorator(getattr(model.acl_handler, "qs_{}".format(item)))
             raise
 
     def create(self, **kwargs) -> _BM:
-        return self.model.acl_handler.qs_create(super(BQuerySet, self).create, **kwargs)
+        return self.model.acl_handler.qs_create(super().create, **kwargs)
 
     def user_filter(self, user, *args, **kwargs) -> _BQSet:
         # pylint: disable=unused-argument
@@ -46,7 +47,7 @@ class Manager(_BManager.from_queryset(BQuerySet)):
 
 class BaseModel(_BM):
     # pylint: disable=no-member
-    objects    = BQuerySet.as_manager()
+    objects = BQuerySet.as_manager()
 
     class Meta:
         abstract = True
@@ -68,8 +69,8 @@ class BaseModel(_BM):
 
 
 class BModel(BaseModel):
-    id         = models.AutoField(primary_key=True, max_length=20)
-    hidden     = models.BooleanField(default=False)
+    id = models.AutoField(primary_key=True, max_length=20)
+    hidden = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -79,11 +80,8 @@ class BModel(BaseModel):
 
 
 class BGroupedModel(BModel):
-    parent     = models.ForeignKey('self',
-                                   blank=True,
-                                   null=True,
-                                   on_delete=models.CASCADE)
-    group      = models.BooleanField(default=False)
+    parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
+    group = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -94,7 +92,7 @@ class AccessExtendsFieldMixin(object):
 
 
 class ManyToManyFieldACL(models.ManyToManyField, AccessExtendsFieldMixin):
-    pass
+    through: Any
 
 
 class ForeignKeyACL(models.ForeignKey, AccessExtendsFieldMixin):
@@ -105,22 +103,23 @@ class ReverseAccessExtendsFieldMixin(object):
     reverse_access_to_related = True
 
 
-class ManyToManyFieldACLReverse(models.ManyToManyField,
-                                ReverseAccessExtendsFieldMixin):
-    pass
+class ManyToManyFieldACLReverse(models.ManyToManyField, ReverseAccessExtendsFieldMixin):
+    through: Any
 
 
-class ForeignKeyACLReverse(models.ForeignKey,
-                           ReverseAccessExtendsFieldMixin):
+class ForeignKeyACLReverse(models.ForeignKey, ReverseAccessExtendsFieldMixin):
     pass
 
 
 class ACLModel(BModel):
     notes = models.TextField(default="")
-    acl   = models.ManyToManyField("main.ACLPermission", blank=True, null=True)
-    owner = models.ForeignKey(get_user_model(), on_delete=models.SET_DEFAULT,
-                              default=first_staff_user,
-                              related_name="polemarch_%(class)s_set")
+    acl = models.ManyToManyField("main.ACLPermission", blank=True)
+    owner = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.SET_DEFAULT,
+        default=first_staff_user,
+        related_name="polemarch_%(class)s_set"
+    )
 
     class Meta:
         abstract = True

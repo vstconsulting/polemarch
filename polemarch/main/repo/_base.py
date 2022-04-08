@@ -230,7 +230,7 @@ class _Base:
                 self.proj.status = "OK"
                 self._update_tasks(self._get_playbook_path(result[0]))
                 self._set_project_modules()
-                self._handle_yaml(self._load_yaml() or dict())
+                self._handle_yaml(self._load_yaml() or {})
                 self._update_slave_inventories(self.proj.slave_inventory.all())
                 self.proj.save()
         except Exception as err:

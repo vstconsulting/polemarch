@@ -66,7 +66,7 @@ class Executor(CmdExecutor):
     __slots__ = 'history', 'counter', 'exchanger'
 
     def __init__(self, history: History):
-        super(Executor, self).__init__()
+        super().__init__()
         self.history = history
         self.counter = 0
         self.exchanger = KVExchanger(self.CANCEL_PREFIX + str(self.history.id))
@@ -98,7 +98,7 @@ class Executor(CmdExecutor):
             proc.terminate()
             proc.kill()
             proc.wait()
-        super(Executor, self).working_handler(proc)
+        super().working_handler(proc)
 
     def write_output(self, line: Text):
         self.counter += 1
@@ -106,14 +106,14 @@ class Executor(CmdExecutor):
 
     def execute(self, cmd: Iterable[Text], cwd: Text):
         pm_ansible_path = ' '.join(self.pm_ansible())
-        new_cmd = list()
+        new_cmd = []
         for one_cmd in cmd:
             if isinstance(one_cmd, str):
                 with raise_context():
                     one_cmd = one_cmd.decode('utf-8')
             new_cmd.append(one_cmd)
         self.history.raw_args = " ".join(new_cmd).replace(pm_ansible_path, '').lstrip()
-        return super(Executor, self).execute(new_cmd, cwd)
+        return super().execute(new_cmd, cwd)
 
 
 class AnsibleCommand(PMObject):
@@ -197,7 +197,7 @@ class AnsibleCommand(PMObject):
         self.verbose = kwargs.get('verbose', 0)
         self.cwd = tempfile.mkdtemp()
         self._verbose_output('Execution tmpdir created - [{}].'.format(self.cwd), 0)
-        self.env = dict()
+        self.env = {}
 
     def _verbose_output(self, value: Text, level: int = 3) -> NoReturn:
         if self.verbose >= level:
@@ -244,7 +244,7 @@ class AnsibleCommand(PMObject):
         if key == 'verbose':
             extra_args += ['-' + ('v' * value)] if value else []
             return extra_args, files
-        result = [value, list()]
+        result = [value, []]
         if key in ["key-file", "private-key"]:
             result = self.__parse_key(key, value)
         elif key in ["vault-password-file", "new-vault-password-file"]:
@@ -341,7 +341,7 @@ class AnsibleCommand(PMObject):
 
     def dir_prepare_git(self, src: Text, work_dir: Text, revision: Text):
         # pylint: disable=no-member
-        import git
+        import git  # pylint: disable=import-outside-toplevel
         repo = git.Repo.clone_from(
             url=src + "/.git",
             to_path=work_dir,
@@ -436,8 +436,8 @@ class AnsibleModule(AnsibleCommand):
         kwargs['module-name'] = target
         if not kwargs.get('args', None):
             kwargs.pop('args', None)
-        super(AnsibleModule, self).__init__(*pargs, **kwargs)
+        super().__init__(*pargs, **kwargs)
         self.ansible_ref['module-name'] = {'type': 'string'}
 
     def execute(self, group: Text = 'all', *args, **extra_args):
-        return super(AnsibleModule, self).execute(group, *args, **extra_args)
+        return super().execute(group, *args, **extra_args)

@@ -1,0 +1,47 @@
+@use "sass:map";
+
+body {
+    --history-status-ok: #276900;
+    --history-status-error: #dc3545;
+    --history-status-interrupted: #9b97e4;
+    --history-status-delay: #808419;
+    --history-status-offline: #9e9e9e;
+    --history-status-run: #0085ff;
+
+    --project-status-new: #8c8c8c;
+    --project-status-error: #dc3545;
+    --project-status-ok: #276900;
+    --project-status-wait-sync: #0085ff;
+    --project-status-sync: #ff8c00;
+}
+
+$history-status-colors: (
+        "OK": var(--history-status-ok),
+        "ERROR": var(--history-status-error),
+        "INTERRUPTED": var(--history-status-interrupted),
+        "DELAY": var(--history-status-delay),
+        "OFFLINE": var(--history-status-offline),
+        "RUN": var(--history-status-run),
+);
+
+$project-status-colors: (
+        "NEW": var(--project-status-new),
+        "ERROR": var(--project-status-error),
+        "OK": var(--project-status-ok),
+        "WAIT_SYNC": var(--project-status-wait-sync),
+        "SYNC": var(--project-status-sync),
+);
+
+@each $status, $color in $project-status-colors {
+    .field-component.name-status.value-#{$status} {
+        color: #{$color};
+    }
+}
+
+.field-children-false .operation__groups {
+    display: none;
+}
+
+.field-children-true .operation__host {
+    display: none;
+}

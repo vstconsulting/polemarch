@@ -5,6 +5,7 @@ from django.conf import settings
 from ...wapp import app
 from ..utils import task, BaseTask
 from .exceptions import TaskError
+from ..models import PeriodicTask
 from ..models.utils import AnsibleModule, AnsiblePlaybook
 
 logger = logging.getLogger("polemarch")
@@ -45,7 +46,6 @@ class ScheduledTask(BaseTask):
         self.job_id = job_id
 
     def run(self):
-        from ..models import PeriodicTask
         try:
             PeriodicTask.objects.get(id=self.job_id).execute()
         except PeriodicTask.DoesNotExist:

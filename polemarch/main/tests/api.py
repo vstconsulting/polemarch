@@ -9,6 +9,7 @@ from ._base import BaseTestCase, json
 from .hosts import InventoriesTestCase, InvBaseTestCase  # noqa: F401
 from .executions import ProjectTestCase, BaseExecutionsTestCase
 from .openapi import OApiTestCase
+from django.contrib.auth import get_user_model
 
 
 class ApiBaseTestCase(InvBaseTestCase, BaseExecutionsTestCase, BaseTestCase):
@@ -21,7 +22,7 @@ class ApiUsersTestCase(ApiBaseTestCase):
         response = self.client.get('/')
         self.assertRedirects(response, self.login_url + '?next=/')
         client = self._login()
-        response = self.client.get('/login/')
+        response = self.client.get(self.login_url)
         self.assertRedirects(response, "/")
         self.result(client.delete, self.get_url('token'), 400)
         self._logout(client)
@@ -31,9 +32,9 @@ class ApiUsersTestCase(ApiBaseTestCase):
         User.objects.create_superuser(**data)
         data.pop("email", None)
         data["next"] = "/{}/".format(self._settings('VST_API_URL'))
-        response = self.client.post('/login/', data=data)
+        response = self.client.post(self.login_url, data=data)
         self.assertRedirects(response, "/{}/".format(self._settings('VST_API_URL')))
-        response = self.client.post("/logout/")
+        response = self.client.post(self.logout_url)
         self.assertEqual(response.status_code, 302)
         response = self.client.get('/')
         self.assertRedirects(response, self.login_url + '?next=/')
@@ -104,7 +105,7 @@ class ApiUsersTestCase(ApiBaseTestCase):
                         code=403, data=json.dumps(userdata))
 
     def test_api_users_password_settings(self):
-        User = self.get_model_class('django.contrib.auth.models.User')
+        User = get_user_model()
         client = self._login()
         userdata = {"username": "test_user2",
                     "password": "ab",
@@ -116,13 +117,11 @@ class ApiUsersTestCase(ApiBaseTestCase):
                     }
         self.result(client.post, self.get_url('user'), 400, userdata)
         passwd = 'eadgbe'
-        encr_passwd = make_password(passwd)
         userdata = dict(username="testuser3",
-                        password=encr_passwd, password2=encr_passwd,
+                        password=passwd, password2=passwd,
                         raw_password=True, is_active=True)
         self.result(client.post, self.get_url('user'), 201, userdata)
         user = User.objects.get(username=userdata['username'])
-        self.assertEqual(user.password, userdata['password'])
         self.assertTrue(user.check_password(passwd))
         user.delete()
         userdata.update({"raw_password": False, "password": passwd, "password2": passwd})
@@ -131,9 +130,9 @@ class ApiUsersTestCase(ApiBaseTestCase):
         self.assertTrue(user.check_password(userdata['password']))
         # logout
         self._logout(client)
-        self.client.post('/login/', data=dict(username=user.username, password=passwd))
+        self.client.post(self.login_url, data=dict(username=user.username, password=passwd))
         # Change password
-        new_password = 'newpassword'
+        new_password = 'strong_password1'
         data = {
             "password": new_password,
             "password2": new_password,
@@ -151,7 +150,7 @@ class ApiUsersTestCase(ApiBaseTestCase):
         self.assertNotEqual(response.status_code, 200)
         # login with new password
         login_data['password'] = data['password']
-        self.client.post('/login/', data=login_data)
+        self.client.post(self.login_url, data=login_data)
         response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
         # change password with incorrect data 1
@@ -215,7 +214,8 @@ class ApiUsersTestCase(ApiBaseTestCase):
                 "email": "test@domain.lan"
                 }
         self.result(client.post, self.get_url('user'), 201, data)
-        self.result(client.post, self.get_url('user'), 409, data)
+        user_exists_error = self.result(client.post, self.get_url('user'), 400, data)
+        self.assertIn('username already exists', str(user_exists_error))
         self._logout(client)
 
     def test_api_users_insert_and_delete(self):
@@ -256,7 +256,7 @@ class ApiUsersTestCase(ApiBaseTestCase):
         execute_method.reset_mock()
         execute_method.side_effect = side_effect_method
         result = self.result(client.post, self.get_url('user'), 201, user_data)
-        self.assertEquals(execute_method.call_count, 2)
+        self.assertEquals(execute_method.call_count, 1)
         execute_method.reset_mock()
         self.assertTrue(self.sended, "Raised on sending.")
         self.assertEqual(result["username"], "test_user")
@@ -345,14 +345,14 @@ class APITestCase(ProjectTestCase, OApiTestCase):
 
     def test_api_versions_list(self):
         result = self.get_result("get", "/api/")
-        self.assertEqual(len(result['available_versions']), 1)
+        self.assertEqual(len(result['available_versions']), 2)
         self.assertTrue(result['available_versions'].get(self._settings('VST_API_VERSION'), False))
 
     def test_api_v1_list(self):
         result = self.get_result('get', self.get_url())
         self.assertTrue(result.get('user', False))
         self.assertTrue(result.get('host', False))
-        self.assertTrue(result.get('group', False))
+        self.assertTrue(result.get('groups', False))
         self.assertTrue(result.get('inventory', False))
         self.assertTrue(result.get('project', False))
         self.assertTrue(result.get('history', False))
@@ -457,10 +457,11 @@ class APITestCase(ProjectTestCase, OApiTestCase):
 
         results = self.bulk(bulk_data)
         self.assertEqual(results[0]['status'], 200)
-        self.assertEqual(results[0]['data']['count'], 2)
+        # 4 languages translation
+        self.assertEqual(results[0]['data']['count'], 4)
         self.assertEqual(results[1]['data']['code'], 'en')
         self.assertEqual(results[1]['data']['name'], 'English')
         self.assertEqual(results[1]['data']['translations']['pmwuserscounter'], 'users counter')
         self.assertEqual(results[2]['data']['code'], 'ru')
-        self.assertEqual(results[2]['data']['name'], 'Russian')
+        self.assertEqual(results[2]['data']['name'], 'Русский')
         self.assertEqual(results[2]['data']['translations']['pmwuserscounter'], 'счетчик пользователей')

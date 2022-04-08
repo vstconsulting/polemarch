@@ -2,10 +2,11 @@
 from __future__ import unicode_literals
 
 import logging
+import os
+import subprocess
 
 import sys
 import re
-import os
 import json
 from os.path import dirname
 
@@ -14,14 +15,15 @@ try:
 except ImportError:  # nocv
     from yaml import Loader, Dumper, load, dump
 
+from django.core.validators import ValidationError
+
 from vstutils.utils import (
-    ON_POSIX,
     tmp_file_context,
     BaseVstObject,
     Executor,
-    UnhandledExecutor,
-    subprocess
+    UnhandledExecutor, ON_POSIX,
 )
+
 
 from . import __file__ as file
 
@@ -113,7 +115,7 @@ class BaseTask(PMObject):
         :param args: -- any args for tasks
         :param kwargs: -- any kwargs for tasks
         """
-        super(BaseTask, self).__init__()
+        super().__init__()
         self.app = app
         self.args, self.kwargs = args, kwargs
         self.task_class = self.__class__
@@ -169,7 +171,7 @@ class PMAnsible(PMObject):
             env = os.environ.copy()
             env.update(self.env)
             result = subprocess.check_output(
-                cmd, stderr=self._stderr,
+                cmd, stderr=self.__stderr__,
                 bufsize=0, universal_newlines=True,
                 cwd=cwd, env=env,
                 close_fds=ON_POSIX
@@ -178,6 +180,7 @@ class PMAnsible(PMObject):
             return self.output
 
     def __init__(self, execute_path: str = '/tmp/'):
+        super().__init__()
         self.execute_path = execute_path
 
     def get_ansible_cache(self):
@@ -227,7 +230,7 @@ class AnsibleArgumentsReference(PMAnsible):
     ]
 
     def __init__(self):
-        super(AnsibleArgumentsReference, self).__init__()
+        super().__init__()
         self.raw_dict = self._extract_from_cli()
 
     def is_valid_value(self, command: str, argument: str, value):
@@ -246,14 +249,13 @@ class AnsibleArgumentsReference(PMAnsible):
             for argument, value in args.items():
                 self.is_valid_value(command, argument, value)
         except (KeyError, ValueError, AssertionError) as e:
-            from django.core.validators import ValidationError
             raise ValidationError({
                 command: "Incorrect argument: {}.".format(str(e)),
                 'argument': argument
-            })
+            }) from e
 
     def get_args(self):
-        cmd = super(AnsibleArgumentsReference, self).get_args()
+        cmd = super().get_args()
         for cmd_name in self._EXCLUDE_ARGS:
             cmd += ['--exclude', cmd_name]
         return cmd
@@ -280,13 +282,13 @@ class AnsibleModules(PMAnsible):
     ref_name = 'modules'
 
     def __init__(self, detailed=False, paths=None):
-        super(AnsibleModules, self).__init__()
+        super().__init__()
         self.detailed = detailed
         self.key = None
         self.module_paths = paths
 
     def get_args(self):  # nocv
-        cmd = super(AnsibleModules, self).get_args()
+        cmd = super().get_args()
         cmd += ['--cachedir', 'NoCache']
         if self.detailed:
             cmd += ['--detail']
@@ -298,7 +300,7 @@ class AnsibleModules(PMAnsible):
         return cmd
 
     def get_ref(self, cache=False):
-        ref = super(AnsibleModules, self).get_ref(cache)
+        ref = super().get_ref(cache)
         if cache and self.key:
             ref += '-{}'.format(self.key)
         if cache and self.detailed:
@@ -319,13 +321,13 @@ class AnsibleInventoryParser(PMAnsible):
     ref_name = 'inventory_parser'
 
     def get_ansible_cache(self):
-        cache = super(AnsibleInventoryParser, self).get_ansible_cache()
+        cache = super().get_ansible_cache()
         cache.get = lambda: None
         cache.set = lambda value: None
         return cache
 
     def get_args(self):
-        args = super(AnsibleInventoryParser, self).get_args()
+        args = super().get_args()
         args += [self.path]
         return args
 

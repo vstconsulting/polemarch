@@ -18,6 +18,7 @@ from vstutils.utils import ModelHandlers, raise_context_decorator_with_default, 
 # pylint: disable=no-name-in-module
 from vstutils import custom_model
 from yaml import load
+
 try:
     from yaml import CLoader as Loader
 except ImportError:  # nocv
@@ -29,7 +30,6 @@ from ..exceptions import PMException
 from .base import ManyToManyFieldACL, BQuerySet, BModel
 from .hooks import Hook
 from ..utils import AnsibleModules, AnsibleConfigParser, SubCacheInterface
-
 
 logger = logging.getLogger("polemarch")
 HISTORY_ID = TypeVar('HISTORY_ID', int, None)  # pylint: disable=C0103
@@ -85,14 +85,14 @@ class ProjectQuerySet(AbstractVarsQuerySet):
 
 class Project(AbstractModel):
     # pylint: disable=too-many-public-methods
-    objects       = ProjectQuerySet.as_manager()
+    objects = ProjectQuerySet.as_manager()
     repo_handlers = objects._queryset_class.repo_handlers
     task_handlers = objects._queryset_class.task_handlers
-    repository    = models.CharField(max_length=2*1024)
-    status        = models.CharField(max_length=32, default="NEW")
-    inventories   = ManyToManyFieldACL(hosts_models.Inventory, blank=True, null=True)
-    hosts         = ManyToManyFieldACL(hosts_models.Host, blank=True, null=True)
-    groups        = ManyToManyFieldACL(hosts_models.Group, blank=True, null=True)
+    repository = models.CharField(max_length=2 * 1024)
+    status = models.CharField(max_length=32, default="NEW")
+    inventories = ManyToManyFieldACL(hosts_models.Inventory, blank=True)
+    hosts = ManyToManyFieldACL(hosts_models.Host, blank=True)
+    groups = ManyToManyFieldACL(hosts_models.Group, blank=True)
 
     class Meta:
         default_related_name = "projects"
@@ -162,7 +162,7 @@ class Project(AbstractModel):
         return str(self.name)  # pragma: no cover
 
     def get_hook_data(self, when: Text) -> Dict:
-        data = super(Project, self).get_hook_data(when)
+        data = super().get_hook_data(when)
         data['type'] = self.type
         data['repository'] = self.repository
         return data
@@ -213,7 +213,7 @@ class Project(AbstractModel):
 
     def __parse_yaml_view(self, data: Dict[Text, Any]) -> Dict[Text, Dict]:
         valid_formats = self.PM_YAML_FORMATS
-        parsed_data = dict(fields=dict(), playbooks=dict())
+        parsed_data = {'fields': {}, 'playbooks': {}}
         # Parse fields
         for fieldname, field_data in data['fields'].items():
             parsed_data['fields'][fieldname] = dict(
@@ -259,7 +259,7 @@ class Project(AbstractModel):
             return cache_data
         try:
             cache.clear()
-            with open(yaml_path, 'r') as fd:
+            with open(yaml_path, 'r', encoding='utf-8') as fd:
                 data = load(fd.read(), Loader=Loader)
             cache.set(data)
             return data
@@ -384,11 +384,10 @@ class TaskFilterQuerySet(BQuerySet):
 
 
 class Task(BModel):
-    objects     = TaskFilterQuerySet.as_manager()
-    project     = models.ForeignKey(Project, on_delete=models.CASCADE,
-                                    related_query_name="playbook")
-    name        = models.CharField(max_length=251, default=uuid.uuid1)
-    playbook    = models.CharField(max_length=256)
+    objects = TaskFilterQuerySet.as_manager()
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_query_name="playbook")
+    name = models.CharField(max_length=251, default=uuid.uuid1)
+    playbook = models.CharField(max_length=256)
 
     class Meta:
         default_related_name = "playbook"
@@ -403,12 +402,14 @@ class ModulesQuerySet(BQuerySet):
 
 class Module(BModel):
     objects = ModulesQuerySet.as_manager()
-    path        = models.CharField(max_length=1024)
-    _data       = models.CharField(max_length=4096, default='{}')
-    project     = models.ForeignKey(Project,
-                                    on_delete=models.CASCADE,
-                                    related_query_name="modules",
-                                    null=True, blank=True, default=None)
+    path = models.CharField(max_length=1024)
+    _data = models.CharField(max_length=4096, default='{}')
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        related_query_name="modules",
+        null=True, blank=True, default=None,
+    )
 
     class Meta:
         default_related_name = "modules"
@@ -450,16 +451,12 @@ class ProjectTemplate(custom_model.FileModel):
     _template_types = (t for t in Project.repo_handlers.keys() if t != 'MANUAL')
     _auth_types = ['NONE', 'KEY', 'PASSWORD']
 
-    id = custom_model.IntegerField(primary_key=True)
+    id = models.PositiveIntegerField(primary_key=True)
     name = custom_model.CharField(max_length=1024)
     description = custom_model.TextField()
-    repository = custom_model.CharField(max_length=2*1024)
-    type = custom_model.CharField(max_length=256,
-                                  choices=list_to_choices(_template_types),
-                                  default='GIT')
-    repo_auth = custom_model.CharField(max_length=256,
-                                       choices=list_to_choices(_auth_types),
-                                       default='NONE')
+    repository = custom_model.CharField(max_length=2 * 1024)
+    type = custom_model.CharField(max_length=256, choices=list_to_choices(_template_types), default='GIT')
+    repo_auth = custom_model.CharField(max_length=256, choices=list_to_choices(_auth_types), default='NONE')
     auth_data = custom_model.TextField(blank=True, null=True, default=None)
 
     class Meta:

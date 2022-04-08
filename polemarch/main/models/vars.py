@@ -13,7 +13,6 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from vstutils.utils import tmp_file
 from .base import ACLModel, BQuerySet, BModel, models
 
-
 logger = logging.getLogger("polemarch")
 
 
@@ -32,7 +31,7 @@ class VariablesQuerySet(BQuerySet):
     use_for_related_fields = True
 
     def sort_by_key(self) -> BQuerySet:
-        args, kwargs = [], dict()
+        args, kwargs = [], {}
         keys = self.model.variables_keys
         index = keys.index
         for key in keys:
@@ -43,16 +42,16 @@ class VariablesQuerySet(BQuerySet):
         return self.annotate(sort_idx=Case(*args, **kwargs)).order_by("sort_idx", "key")
 
     def cleared(self) -> BQuerySet:
-        return super(VariablesQuerySet, self).cleared().sort_by_key()
+        return super().cleared().sort_by_key()
 
 
 class Variable(BModel):
     objects = VariablesQuerySet.as_manager()
-    content_type   = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id      = models.PositiveIntegerField()
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
-    key            = models.CharField(max_length=512)
-    value          = models.TextField(null=True)
+    key = models.CharField(max_length=512)
+    value = models.TextField(null=True)
 
     variables_keys = [
         "ansible_host",
@@ -98,10 +97,9 @@ class AbstractVarsQuerySet(BQuerySet):
 
 
 class AbstractModel(ACLModel):
-    objects     = AbstractVarsQuerySet.as_manager()
-    name        = models.CharField(max_length=512, default=uuid.uuid1)
-    variables   = GenericRelation(Variable, related_query_name="variables",
-                                  object_id_field="object_id")
+    objects = AbstractVarsQuerySet.as_manager()
+    name = models.CharField(max_length=512, default=uuid.uuid1)
+    variables = GenericRelation(Variable, related_query_name="variables", object_id_field="object_id")
 
     class Meta:
         abstract = True
@@ -142,7 +140,7 @@ class AbstractModel(ACLModel):
         return reduce(update_boolean, self.BOOLEAN_VARS, OrderedDict(qs))
 
     def get_vars_prefixed(self, prefix: Text):
-        vars_by_prefix_dict = dict()
+        vars_by_prefix_dict = {}
         search_prefix = prefix + '_'
         search_prefix_len = len(search_prefix)
         for var_obj in self.variables.filter(key__startswith=prefix):

@@ -1,25 +1,26 @@
 # pylint: disable=no-member,unused-argument,too-many-lines,c-extension-no-member
 from __future__ import unicode_literals
-from typing import Dict, List
+
+from collections import OrderedDict
+
 import json
 import uuid
 from pathlib import Path
-from collections import OrderedDict
+from typing import Dict, List
+
 from django.contrib.auth import get_user_model
-from django.utils.functional import cached_property
 from django.db import transaction
-from rest_framework import serializers, exceptions, status, fields
-from vstutils.api import serializers as vst_serializers, fields as vst_fields
+from rest_framework import serializers, exceptions, fields
+
 from vstutils.api import auth as vst_auth
+from vstutils.api import serializers as vst_serializers, fields as vst_fields
 from vstutils.api.serializers import DataSerializer, EmptySerializer
-from vstutils.api.base import Response
-from ...main.utils import AnsibleArgumentsReference
-from ...main.settings import LANGUAGES
-from ...main.validators import path_validator
 
+from .base_serializers import with_signals, UserSerializer, _WithPermissionsSerializer, _SignalSerializer
 from ...main import models
-from ..signals import api_post_save, api_pre_save
-
+from ...main.settings import LANGUAGES
+from ...main.utils import AnsibleArgumentsReference
+from ...main.validators import path_validator
 
 User = get_user_model()
 
@@ -60,16 +61,21 @@ class MultiTypeField(serializers.CharField):
 
 
 class InventoryDependEnumField(vst_fields.DependEnumField):
+    def to_internal_value(self, data):
+        data = super().to_internal_value(data)
+        return data
+
     def to_representation(self, value):
+        value = super().to_representation(value)
         if isinstance(value, models.Inventory):
-            value = value.id  # nocv
-        return super(InventoryDependEnumField, self).to_representation(value)
+            value = value.id
+        return value
 
 
 class InventoryAutoCompletionField(vst_fields.AutoCompletionField):
 
     def to_internal_value(self, data):
-        inventory = super(InventoryAutoCompletionField, self).to_internal_value(data)
+        inventory = super().to_internal_value(data)
         try:
             inventory = models.Inventory.objects.get(id=int(inventory))
             user = self.context['request'].user
@@ -87,33 +93,13 @@ class InventoryAutoCompletionField(vst_fields.AutoCompletionField):
         self.root.project.check_path(inventory)
 
 
-def with_signals(func):
-    '''
-    Decorator for send api_pre_save and api_post_save signals from serializers.
-    '''
-    def func_wrapper(*args, **kwargs):
-        user = args[0].context['request'].user
-        with transaction.atomic():
-            instance = func(*args, **kwargs)
-            api_pre_save.send(
-                sender=instance.__class__, instance=instance, user=user
-            )
-        with transaction.atomic():
-            api_post_save.send(
-                sender=instance.__class__, instance=instance, user=user
-            )
-        return instance
-
-    return func_wrapper
-
-
 # Serializers
 class ActionResponseSerializer(DataSerializer, EmptySerializer):
     detail = vst_fields.VSTCharField()
 
 
 class ExecuteResponseSerializer(ActionResponseSerializer):
-    history_id = vst_fields.RedirectIntegerField(default=None, allow_null=True)
+    history_id = vst_fields.RedirectIntegerField(default=None, allow_null=True, operation_name='history')
     executor = serializers.IntegerField(default=None, allow_null=True)
 
 
@@ -136,62 +122,11 @@ class SetOwnerSerializer(DataSerializer):
     def current_user(self) -> User:
         return self.context['request'].user
 
-    def to_representation(self, value: User):
+    def to_representation(self, value: User):  # pylint: disable=arguments-renamed
         return dict(user_id=value.pk)
 
     def to_internal_value(self, data: dict):
         return dict(pk=data['user_id'])
-
-
-class _SignalSerializer(serializers.ModelSerializer):
-    @cached_property
-    def _writable_fields(self) -> List:
-        writable_fields = super(_SignalSerializer, self)._writable_fields
-        fields_of_serializer = []
-        attrs = [
-            'field_name', 'source_attrs', 'source',
-            'read_only', 'required', 'write_only', 'default'
-        ]
-        for field in writable_fields:
-            if not isinstance(field, DataSerializer):
-                fields_of_serializer.append(field)
-                continue
-            field_object = serializers.DictField()
-            for attr in attrs:
-                setattr(field_object, attr, getattr(field, attr, None))
-            fields_of_serializer.append(field_object)
-        return fields_of_serializer
-
-    @with_signals
-    def create(self, validated_data):
-        return super(_SignalSerializer, self).create(validated_data)
-
-    @with_signals
-    def update(self, instance, validated_data):
-        return super(_SignalSerializer, self).update(instance, validated_data)
-
-
-class _WithPermissionsSerializer(_SignalSerializer):
-    perms_msg = "You do not have permission to perform this action."
-
-    def is_valid(self, *args, **kwargs):
-        result = super(_WithPermissionsSerializer, self).is_valid(*args, **kwargs)
-        if not hasattr(self, 'instance') or self.instance is None:  # noce
-            self.validated_data['owner'] = self.validated_data.get(
-                'owner', self.current_user()
-            )
-        return result
-
-    def current_user(self) -> User:
-        return self.context['request'].user  # noce
-
-
-class UserSerializer(vst_auth.UserSerializer):
-    is_staff = serializers.HiddenField(default=True, label='Staff')
-
-    @with_signals
-    def update(self, instance: User, validated_data: Dict):
-        return super(UserSerializer, self).update(instance, validated_data)
 
 
 class CreateUserSerializer(vst_auth.CreateUserSerializer):
@@ -205,7 +140,7 @@ class ChangePasswordSerializer(vst_auth.ChangePasswordSerializer):
 
     @with_signals
     def update(self, instance: User, validated_data: Dict) -> User:
-        return super(ChangePasswordSerializer, self).update(instance, validated_data)
+        return super().update(instance, validated_data)
 
 
 class OneUserSerializer(UserSerializer):
@@ -347,14 +282,8 @@ class OneHistorySerializer(_SignalSerializer):
                   "raw_stdout",
                   "raw_inventory",)
 
-    def get_raw(self, request) -> str:
-        return self.instance.get_raw(request.query_params.get("color", "no") == "yes")
-
     def get_raw_stdout(self, obj: models.History):
         return self.context.get('request').build_absolute_uri("raw/")
-
-    def get_facts(self, request):
-        return self.instance.facts
 
 
 class HistoryLinesSerializer(_SignalSerializer):
@@ -398,7 +327,7 @@ class VariableSerializer(_SignalSerializer):
         )
 
     def to_representation(self, instance: models.Variable):
-        result = super(VariableSerializer, self).to_representation(instance)
+        result = super().to_representation(instance)
         if instance.key in getattr(instance.content_object, 'HIDDEN_VARS', []):
             result['value'] = "[~~ENCRYPTED~~]"
         elif instance.key in getattr(instance.content_object, 'BOOLEAN_VARS', []):
@@ -443,7 +372,7 @@ class ProjectVariableSerializer(VariableSerializer):
 class _WithVariablesSerializer(_WithPermissionsSerializer):
     @transaction.atomic
     def _do_with_vars(self, method_name: str, *args, **kwargs):
-        method = getattr(super(_WithVariablesSerializer, self), method_name)
+        method = getattr(super(), method_name)
         instance = method(*args, **kwargs)
         return instance
 
@@ -457,8 +386,7 @@ class _WithVariablesSerializer(_WithPermissionsSerializer):
         return representation.get('vars', None)
 
     def to_representation(self, instance, hidden_vars: List[str] = None):
-        rep = super(_WithVariablesSerializer, self).to_representation(instance)
-        hv = hidden_vars
+        rep = super().to_representation(instance)
         hv = getattr(instance, 'HIDDEN_VARS', []) if hidden_vars is None else hidden_vars
         vars = self.get_vars(rep)
         if vars is not None:
@@ -525,120 +453,6 @@ class ModuleSerializer(vst_serializers.VSTSerializer):
         )
 
 
-class OneModuleSerializer(ModuleSerializer):
-    data = fields.JSONField(read_only=True)
-
-    class Meta:
-        model = models.Module
-        fields = (
-            'id',
-            'path',
-            'name',
-            'data',
-        )
-
-
-class PeriodictaskSerializer(_WithVariablesSerializer):
-    kind = serializers.ChoiceField(
-        choices=[(k, k) for k in models.PeriodicTask.kinds],
-        required=False,
-        default=models.PeriodicTask.kinds[0],
-        label='Task type'
-    )
-    type = serializers.ChoiceField(
-        choices=[(k, k) for k in models.PeriodicTask.types],
-        required=False,
-        default=models.PeriodicTask.types[0],
-        label='Interval type'
-    )
-
-    template_opt = vst_fields.DependEnumField(
-        allow_blank=True,
-        required=False,
-        allow_null=True,
-        field='kind',
-        types={
-            'PLAYBOOK': 'hidden',
-            'MODULE': 'hidden',
-            'TEMPLATE': 'autocomplete',
-        }
-    )
-
-    schedule = vst_fields.DependEnumField(
-        allow_blank=True, field='type', types={
-            'CRONTAB': 'crontab',
-            'INTERVAL': 'integer',
-        }
-    )
-
-    mode = vst_fields.DependEnumField(
-        allow_blank=True, required=False, field='kind', types={
-            'PLAYBOOK': 'fk_autocomplete',
-            'MODULE': 'fk_autocomplete',
-            'TEMPLATE': 'hidden',
-        }
-    )
-
-    inventory = InventoryDependEnumField(
-        allow_blank=True, required=False, field='kind', types={
-            'PLAYBOOK': 'fk_autocomplete',
-            'MODULE': 'fk_autocomplete',
-            'TEMPLATE': 'hidden',
-        }
-    )
-
-    class Meta:
-        model = models.PeriodicTask
-        fields = ('id',
-                  'name',
-                  'kind',
-                  'mode',
-                  'inventory',
-                  'save_result',
-                  'template',
-                  'template_opt',
-                  'enabled',
-                  'type',
-                  'schedule',)
-
-    @transaction.atomic
-    def _do_with_vars(self, *args, **kwargs):
-        kw = kwargs['validated_data']
-        if kw.get('kind', None) == 'TEMPLATE':
-            kw['inventory'] = ''
-            kw['mode'] = ''
-            kwargs['validated_data'] = kw
-        return super(PeriodictaskSerializer, self)._do_with_vars(*args, **kwargs)
-
-
-class OnePeriodictaskSerializer(PeriodictaskSerializer):
-    notes = vst_fields.TextareaField(required=False, allow_blank=True)
-
-    class Meta:
-        model = models.PeriodicTask
-        fields = ('id',
-                  'name',
-                  'kind',
-                  'mode',
-                  'inventory',
-                  'save_result',
-                  'template',
-                  'template_opt',
-                  'enabled',
-                  'type',
-                  'schedule',
-                  'notes',)
-
-    def execute(self) -> Response:
-        inventory = self.instance.inventory
-        rdata = ExecuteResponseSerializer(data=dict(
-            detail="Started at inventory {}.".format(inventory),
-            history_id=self.instance.execute(sync=False)
-        ))
-        rdata.is_valid(True)
-        return Response(rdata.data, status.HTTP_201_CREATED)
-
-
 class TemplateSerializer(_WithVariablesSerializer):
     data = DataSerializer(required=True, write_only=True)
     options = DataSerializer(write_only=True)
@@ -686,7 +500,7 @@ class TemplateSerializer(_WithVariablesSerializer):
         data = OrderedDict()
         if instance.kind in ["Task", "Module"]:
             hidden_vars = models.PeriodicTask.HIDDEN_VARS
-            data = super(TemplateSerializer, self).to_representation(
+            data = super().to_representation(
                 instance, hidden_vars=hidden_vars
             )
             self.repr_options(instance, data, hidden_vars)
@@ -711,15 +525,13 @@ class OneTemplateSerializer(TemplateSerializer):
             'options_list',
         )
 
-    def execute(self, request):
-        return self.instance.execute(request.user, request.data.get('option', None))
-
 
 class TemplateExecSerializer(DataSerializer):
-    option = vst_fields.VSTCharField(
-        help_text='Option name from template options.',
-        min_length=0, allow_blank=True,
-        required=False
+    option = vst_fields.FkField(
+        select='TemplateOption',
+        autocomplete_property='name',
+        autocomplete_represent='name',
+        allow_null=True,
     )
 
 
@@ -728,42 +540,6 @@ class TemplateExecSerializer(DataSerializer):
 # with hosts and groups
 class _InventoryOperations(_WithVariablesSerializer):
     pass
-
-
-###################################
-
-class GroupSerializer(_WithVariablesSerializer):
-    children = serializers.BooleanField(read_only=True)
-    from_project = serializers.BooleanField(read_only=True, label='Project Based')
-
-    class Meta:
-        model = models.Group
-        fields = ('id',
-                  'name',
-                  'children',
-                  'from_project')
-
-
-class OneGroupSerializer(GroupSerializer, _InventoryOperations):
-    owner = UserSerializer(read_only=True)
-    notes = vst_fields.TextareaField(required=False, allow_blank=True)
-
-    class Meta:
-        model = models.Group
-        fields = ('id',
-                  'name',
-                  'notes',
-                  'children',
-                  'owner',)
-
-    class ValidationException(exceptions.ValidationError):
-        status_code = 409
-
-
-class GroupCreateMasterSerializer(OneGroupSerializer):
-    children = serializers.BooleanField(write_only=True,
-                                        label='Contains groups',
-                                        default=False)
 
 
 class InventorySerializer(_WithVariablesSerializer):
@@ -788,7 +564,7 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
                   'owner',)
 
 
-class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer, _WithPermissionsSerializer):
+class ProjectCreateMasterSerializer(_WithPermissionsSerializer):
     types = models.list_to_choices(models.Project.repo_handlers.keys())
     auth_types = ['NONE', 'KEY', 'PASSWORD']
     branch_auth_types = {t: "hidden" for t in models.Project.repo_handlers.keys()}
@@ -850,7 +626,7 @@ class ProjectCreateMasterSerializer(vst_serializers.VSTSerializer, _WithPermissi
         repo_branch = validated_data.pop('branch', None)
         playbook_path = validated_data.pop('additional_playbook_path', '')
 
-        instance = super(ProjectCreateMasterSerializer, self).create(validated_data)
+        instance = super().create(validated_data)
         instance.variables.create(key='repo_type', value=repo_type)
         if repo_auth_type != 'NONE':  # nocv
             key = 'repo_{}'.format(repo_auth_type.lower())
@@ -935,7 +711,7 @@ class ProjectSerializer(_InventoryOperations):
 
     @transaction.atomic
     def _do_with_vars(self, *args, **kw):
-        instance = super(ProjectSerializer, self)._do_with_vars(*args, **kw)
+        instance = super()._do_with_vars(*args, **kw)
         return instance if instance.repo_class else None
 
 
@@ -959,67 +735,8 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'readme_content',
                   'execute_view_data',)
 
-    @transaction.atomic()
-    def sync(self) -> Response:
-        self.instance.start_repo_task("sync")
-        serializer = ActionResponseSerializer(
-            data=dict(detail="Sync with {}.".format(self.instance.repository))
-        )
-        serializer.is_valid(True)
-        return Response(serializer.data, status.HTTP_200_OK)
 
-    def _get_ansible_serializer(self, kind: str) -> serializers.Serializer:
-        view = self.context['view']
-        exec_method = getattr(view, 'execute_{}'.format(kind), None)
-        if exec_method is None:  # nocv
-            raise Exception('Unknown kind')
-        serializer_class = exec_method.kwargs['serializer_class']
-        serializer = serializer_class(context=self.context)
-        serializer.project = self.instance
-        return serializer
-
-    def _execution(self, kind: str, data: Dict, user: User, **kwargs) -> Response:
-        template = data.pop("template", None)
-        inventory = data.get("inventory", None)
-        msg = "Started in the inventory {}.".format(
-            inventory if inventory else 'specified in the project configuration.'
-        )
-        if template is not None:
-            init_type = "template"
-            obj_id = template
-            msg = 'Start template [id={}].'.format(template)
-        else:
-            init_type = "project"
-            obj_id = self.instance.id
-            serializer = self._get_ansible_serializer(kind.lower())
-            data = {
-                k: v for k, v in serializer.to_internal_value(data).items()
-                if k in data.keys() or v
-            }
-        target = data.pop(kind)
-        try:
-            target = str(target)
-        except UnicodeEncodeError:  # nocv
-            target = target.encode('utf-8')
-        history_id = self.instance.execute(
-            kind, str(target),
-            initiator=obj_id, initiator_type=init_type, executor=user, **data
-        )
-        rdata = ExecuteResponseSerializer(data=dict(
-            detail=msg,
-            history_id=history_id, executor=user.id
-        ))
-        rdata.is_valid(raise_exception=True)
-        return Response(rdata.data, status.HTTP_201_CREATED)
-
-    def execute_playbook(self, request) -> Response:
-        return self._execution("playbook", dict(request.data), request.user)
-
-    def execute_module(self, request) -> Response:
-        return self._execution("module", dict(request.data), request.user)
-
-
-def generate_fileds(ansible_reference: AnsibleArgumentsReference, ansible_type: str) -> OrderedDict:
+def generate_fileds(ansible_reference: AnsibleArgumentsReference, ansible_type: str, no_default=False) -> OrderedDict:
     if ansible_type is None:
         return OrderedDict()  # nocv
 
@@ -1036,7 +753,7 @@ def generate_fileds(ansible_reference: AnsibleArgumentsReference, ansible_type: 
             kwargs['default'] = False
         elif ref_type == 'int':
             field = serializers.IntegerField
-        elif ref_type == 'string' or 'choice':
+        elif ref_type in ('string', 'choice'):
             field = vst_fields.VSTCharField
             kwargs['allow_blank'] = True
 
@@ -1057,6 +774,8 @@ def generate_fileds(ansible_reference: AnsibleArgumentsReference, ansible_type: 
                 kwargs['default'] = 'all'
 
         field_name = ref.replace('-', '_')
+        if no_default:
+            kwargs['default'] = fields.empty
         fields_of_serializer[field_name] = field(**kwargs)
 
     return fields_of_serializer

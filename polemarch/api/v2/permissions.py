@@ -4,7 +4,7 @@ from rest_framework import permissions
 class ModelPermission(permissions.IsAuthenticated):
     def has_permission(self, request, view):
         # pylint: disable=useless-super-delegation
-        return super(ModelPermission, self).has_permission(request, view)
+        return super().has_permission(request, view)
 
     def get_user_permission(self, request, view, obj):  # nocv
         # pylint: disable=unused-argument

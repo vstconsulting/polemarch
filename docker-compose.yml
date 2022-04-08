@@ -1,35 +1,51 @@
 version: '3'
+
 services:
+
   polemarch:
     build: .
     restart: unless-stopped
-    environment:
-      POLEMARCH_DB_TYPE: mysql
-      POLEMARCH_DB_NAME: project-db
-      POLEMARCH_DB_USER: project-user
-      POLEMARCH_DB_PASSWORD: project-pas
-      POLEMARCH_DB_PORT: 3306
-      POLEMARCH_DB_HOST: mysql
-      DB_INIT_CMD: "SET sql_mode='STRICT_TRANS_TABLES', default_storage_engine=INNODB, NAMES 'utf8', CHARACTER SET 'utf8', SESSION collation_connection = 'utf8_unicode_ci'"
-      CACHE_LOCATION: 'redis://redis:6379/0'
-      RPC_ENGINE: 'redis://redis:6379/1'
-      RPC_CONCURRENCY: 15
-      POLEMARCH_LOG_LEVEL: DEBUG
-      POLEMARCH_DEBUG: 'true'
-      TIMEZONE: 'Asia/Vladivostok'
+    depends_on:
+      - redis
+      - database
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/api/health/" ]
+      interval: 3s
+      timeout: 3s
+      retries: 3
+    tty: true
+    volumes:
+      - ./settings.ini:/etc/polemarch/settings.ini:ro
     ports:
       - "8080:8080"
+
   redis:
-    image: "redis:alpine"
-  mysql:
-    image: "mysql:5.7"
+    image: "redis:6"
+    restart: unless-stopped
+
+  database:
+    image: mariadb:10.5
+    restart: unless-stopped
+    tty: true
     environment:
-      MYSQL_USER: project-user
-      MYSQL_PASSWORD: project-pas
-      MYSQL_DATABASE: project-db
-      MYSQL_ROOT_PASSWORD: project-root
+      MYSQL_USER: project_user
+      MYSQL_PASSWORD: project_pas
+      MYSQL_DATABASE: project_db
+      MYSQL_ROOT_PASSWORD: project_root
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "root", "-p${POLEMARCH_SQL_ROOT_PASSWORD:-project_root}" ]
+      interval: 3s
+      timeout: 3s
+      retries: 3
     volumes:
       - data-volume:/var/lib/mysql
 
 volumes:
   data-volume:
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.100.100.0/24"

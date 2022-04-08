@@ -7,7 +7,7 @@ POLEMARCH_VERSION = PROJECT_VERSION
 APACHE = False if ("runserver" in sys.argv) else True
 
 # Directory for git projects
-PROJECTS_DIR = main.get("projects_dir", fallback="{LIB}/projects")
+PROJECTS_DIR = main.get("projects_dir", fallback=os.getenv("POLEMARCH_PROJECTS_DIR", "{LIB}/projects"))
 os.makedirs(PROJECTS_DIR) if not os.path.exists(PROJECTS_DIR) else None
 
 # Polemarch apps
@@ -32,29 +32,42 @@ AUTH_PASSWORD_VALIDATORS += [
 ]
 
 # API settings
-VST_API_VERSION = 'v2'
+VST_API_VERSION = 'v3'
 
 REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = [
-    "{}.api.{}.permissions.ModelPermission".format(VST_PROJECT_LIB_NAME, VST_API_VERSION),
+    "{}.api.v2.permissions.ModelPermission".format(VST_PROJECT_LIB_NAME),
 ]
 
 API_URL = VST_API_URL
 DEFAULT_API_URL = "/{}/{}".format(API_URL, VST_API_VERSION)
 API = {
-    VST_API_VERSION: OrderedDict(
+    'v2': OrderedDict(
         project={'view': '{}.api.v2.views.ProjectViewSet'.format(VST_PROJECT_LIB_NAME)},
         community_template={'view': '{}.api.v2.views.ProjectTemplateViewSet'.format(VST_PROJECT_LIB_NAME)},
         inventory={'view': '{}.api.v2.views.InventoryViewSet'.format(VST_PROJECT_LIB_NAME)},
         group={'view': '{}.api.v2.views.GroupViewSet'.format(VST_PROJECT_LIB_NAME)},
         host={'view': '{}.api.v2.views.HostViewSet'.format(VST_PROJECT_LIB_NAME)},
         history={'view': '{}.api.v2.views.HistoryViewSet'.format(VST_PROJECT_LIB_NAME), "op_types": ['get', 'del', 'mod']},
-        _bulk={'view': '{}.api.v2.views.BulkViewSet'.format(VST_PROJECT_LIB_NAME), 'type': 'view'},
         user={'view': '{}.api.v2.views.UserViewSet'.format(VST_PROJECT_LIB_NAME)},
         team={'view': '{}.api.v2.views.TeamViewSet'.format(VST_PROJECT_LIB_NAME)},
         token={'view': '{}.api.v2.views.TokenView'.format(VST_PROJECT_LIB_NAME), 'type': 'view'},
         hook={'view': '{}.api.v2.views.HookViewSet'.format(VST_PROJECT_LIB_NAME)},
-        stats={'view': '{}.api.v2.views.StatisticViewSet'.format(VST_PROJECT_LIB_NAME), 'op_types': ['get']})
+        stats={'view': '{}.api.v2.views.StatisticViewSet'.format(VST_PROJECT_LIB_NAME), 'op_types': ['get']}
+    )
 }
+API[VST_API_VERSION] = {
+    **API['v2'],
+    'groups': {
+        'view': '{}.api.v3.views.GroupViewSet'.format(VST_PROJECT_LIB_NAME)
+    },
+    'inventory': {
+        'view': '{}.api.v3.views.InventoryViewSet'.format(VST_PROJECT_LIB_NAME)
+    },
+    'project': {
+        'view': '{}.api.v3.views.ProjectViewSet'.format(VST_PROJECT_LIB_NAME)
+    },
+}
+del API[VST_API_VERSION]['group']
 
 PROJECT_GUI_MENU = [
     {
@@ -74,7 +87,7 @@ PROJECT_GUI_MENU = [
         'sublinks': [
             {
                 'name': 'Groups',
-                'url': '/group',
+                'url': '/groups',
                 'span_class': 'fas fa-server',
             },
             {
