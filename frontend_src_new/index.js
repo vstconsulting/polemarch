@@ -7,7 +7,7 @@ import './templates';
 
 import Home from './Home.vue';
 import { UserObjectField } from './fields/UserObjectField';
-spa.router.mixins.customRoutesComponentsTemplates.home.mixins.push(Home);
+spa.router.mixins.customRoutesComponentsTemplates.home = Home;
 
 spa.signals.once('APP_CREATED', (app) => {
     const ownerField = {

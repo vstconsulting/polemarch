@@ -14,10 +14,11 @@ module.exports = {
     rules: {
         'no-debugger': 'warn',
         'prettier/prettier': 'warn',
+        'vue/component-tags-order': 'off',
         'vue/html-indent': ['error', 4],
         'vue/html-self-closing': ['error', { html: { void: 'any' } }],
         'vue/max-attributes-per-line': 'off',
-        'vue/component-tags-order': 'off',
+        'vue/multi-word-component-names': 'off',
     },
     globals: {
         spa: 'readonly',

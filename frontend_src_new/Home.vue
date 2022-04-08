@@ -4,7 +4,7 @@
             <div v-for="box in smallBoxes" :key="box.key" class="col-6 col-lg-2">
                 <SmallBoxWidget
                     :value="smallBoxesValues[box.key]"
-                    :label="$t(box.label)"
+                    :label="$u.capitalize($tc(box.key + ' counter', smallBoxesValues[box.key]))"
                     :href="box.href"
                     :icon-class="box.icon"
                     :loading="isLoading"
@@ -37,7 +37,7 @@
                     { key: 'templates', label: 'Templates', icon: 'fa fa-cog' },
                     { key: 'projects', label: 'Projects', href: '#/project', icon: 'fa fa-cog' },
                     { key: 'inventories', label: 'Inventories', href: '#/inventory', icon: 'fas fa-cog' },
-                    { key: 'groups', label: 'Groups', href: '#/group', icon: 'fa fa-cog' },
+                    { key: 'groups', label: 'Groups', href: '#/groups', icon: 'fa fa-cog' },
                     { key: 'hosts', label: 'Hosts', href: '#/host', icon: 'fa fa-cog' },
                     { key: 'users', label: 'Users', href: '#/user', icon: 'fa fa-cog' },
                 ],
@@ -45,6 +45,9 @@
             };
         },
         computed: {
+            title() {
+                return this.$t('Dashboard');
+            },
             isLoading() {
                 return !this.statsData;
             },

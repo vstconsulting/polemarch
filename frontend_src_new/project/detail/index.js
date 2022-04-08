@@ -6,8 +6,26 @@ const ProjectDetailViewMixin = {
         beforeFieldsGroupsComponent() {
             return RunPlaybook;
         },
-        modelsFieldsWrapperClasses() {
-            return 'col-md-6';
+        fieldsGroups() {
+            const groups = [
+                {
+                    title: '',
+                    fields: [
+                        'id',
+                        'name',
+                        'repository',
+                        'status',
+                        'revision',
+                        'branch',
+                        'owner',
+                        'execute_view_data',
+                    ],
+                },
+            ];
+            if (this.data.readme_content || this.data.notes) {
+                groups.unshift({ title: 'Info', fields: ['readme_content', 'notes'] });
+            }
+            return groups;
         },
     },
 };

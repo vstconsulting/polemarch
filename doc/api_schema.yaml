@@ -68,7 +68,7 @@ info:
   x-versions:
     application: 1.8.5
     library: 1.8.5
-    vstutils: 5.0.0b116
+    vstutils: 5.0.0b118
     django: 3.2.12
     djangorestframework: 3.13.1
     drf_yasg: 1.20.0
@@ -10671,7 +10671,7 @@ definitions:
         type: string
         minLength: 1
       children:
-        title: Children
+        title: Contains groups
         type: boolean
         readOnly: true
       owner:
