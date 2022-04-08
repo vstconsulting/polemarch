@@ -1,98 +1,81 @@
-const webpack = require("webpack");
-const TerserPlugin = require("terser-webpack-plugin");
-const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
-const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const VueLoaderPlugin = require("vue-loader/lib/plugin");
+const path = require('path');
+const { VueLoaderPlugin } = require('vue-loader');
 
-require("dotenv").config();
-const ENV = process.env.APP_ENV;
-const isProd = ENV === "prod";
-
-const enableAnalyzer = process.env.BUNDLE_ANALYZER === "true";
+require('dotenv').config();
+const isProd = process.env.APP_ENV === 'prod';
 
 const KB = 1024;
-const entrypoints_dir = __dirname + "/frontend_src_new";
+const frontendSrc = path.resolve(__dirname, 'frontend_src_new');
 
-function setMode() {
-  if (isProd) {
-    return "production";
-  } else {
-    return "development";
-  }
-}
+module.exports = {
+    mode: isProd ? 'production' : 'development',
+    entry: {
+        pmlib: path.resolve(frontendSrc, 'index.js'),
+    },
+    output: {
+        path: path.resolve(__dirname, 'polemarch/static/polemarch'),
+        filename: '[name].js',
+        chunkFilename: '[name].chunk.js',
+        library: '[name]',
+        libraryTarget: 'window',
+        clean: true,
+    },
+    plugins: [
+        new VueLoaderPlugin(),
+    ],
+    externals: {
+        moment: 'moment',
+    },
+    module: {
+        rules: [
+            {
+                test: /\.js$/,
+                loader: 'babel-loader',
+                exclude: [/node_modules/]
+            },
+            {
+                test: /\.((css)|(scss))$/i,
+                use: [
+                    'style-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            url: {
+                                filter: (url) => !url.startsWith('/static/')
+                            }
+                        }
+                    },
+                    {
+                        loader: 'sass-loader',
+                        options: {
+                            sassOptions: {
+                                quietDeps: true
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                test: /.woff2$/,
+                type: 'asset',
+                parser: {
+                    dataUrlCondition: {maxSize: 100 * KB},
+                },
 
-const config = {
-  mode: setMode(),
-  entry: {
-    pmlib: entrypoints_dir + "/index.js",
-  },
-  output: {
-    path: __dirname + "/polemarch/static/polemarch",
-    filename: "[name].js",
-    chunkFilename: "[name].chunk.js",
-    publicPath: "/static/polemarch/",
-    library: "[name]",
-    libraryTarget: "window"
+            },
+            {
+                test: /.(png|jpg|jpeg|gif|svg|woff|ttf|eot)$/,
+                type: 'asset',
+                parser: {
+                    dataUrlCondition: {maxSize: 10 * KB},
+                },
 
-  },
-  plugins: [
-    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
-    new CleanWebpackPlugin(),
-    new VueLoaderPlugin()
-  ],
-  externals: {
-    moment: 'moment',
-  },
-  module: {
-    rules: [
-      {
-        test: /\.js$/,
-        loader: "babel-loader",
-        exclude: [/node_modules/]
-      },
-      {
-        test: /\.((css)|(scss))$/i,
-        use: ["style-loader", "css-loader", "sass-loader"]
-      },
-      {
-        test: /.woff2$/,
-        use: {
-          loader: "url-loader",
-          options: {
-            limit: 100 * KB
-          }
-        }
-      },
-      {
-        test: /.(png|jpg|jpeg|gif|svg|woff|ttf|eot)$/,
-        use: {
-          loader: "url-loader",
-          options: {
-            limit: 10 * KB
-          }
-        }
-      },
-      {
-        test: /\.vue$/,
-        loader: "vue-loader"
-      }
-    ]
-  },
-  optimization: {
-    chunkIds: "natural",
-    minimize: true,
-    minimizer: [
-      new TerserPlugin({
-        parallel: true
-      }),
-      new OptimizeCSSAssetsPlugin()
-    ]
-  }
+            },
+            {
+                test: /\.vue$/,
+                loader: 'vue-loader'
+            }
+        ]
+    },
+    cache: isProd ? false : { type: 'filesystem' },
 };
-
-if (enableAnalyzer) {
-  config.plugins.push(new BundleAnalyzerPlugin());
-}
-
-module.exports = config;

@@ -74,4 +74,36 @@ export function setupPeriodicTasks() {
                 .items();
         });
     });
+
+    spa.signals.connect('allViews.created', ({ views }) => {
+        const mixin = {
+            computed: {
+                fieldsGroups() {
+                    return [
+                        {
+                            title: 'Schedule',
+                            fields: ['enabled', 'type', 'schedule'],
+                            wrapperClasses: 'col-12',
+                        },
+                        {
+                            title: '',
+                            fields: ['name', 'notes'],
+                        },
+                        {
+                            title: 'Execute parameters',
+                            fields: ['kind', 'mode', 'inventory', 'template', 'template_opt', 'save_result'],
+                        },
+                    ];
+                },
+            },
+        };
+        for (const path of [
+            '/project/{id}/periodic_task/new/',
+            '/project/{id}/periodic_task/{periodic_task_id}/',
+            '/project/{id}/periodic_task/{periodic_task_id}/edit/',
+        ]) {
+            const view = views.get(path);
+            view.mixins.push(mixin);
+        }
+    });
 }

@@ -1,5 +1,5 @@
 <template>
-    <div v-if="executeData" class="col-md-6">
+    <div v-if="executeData" class="col-12">
         <Card :title="$t('Quick playbook execution form')">
             <ModelFields
                 :editable="true"
@@ -49,13 +49,21 @@
         },
         computed: {
             ArgsModel() {
+                const properties = {};
+                for (const [name, field] of Object.entries(this.executeData.fields)) {
+                    properties[name] = {
+                        ...field,
+                        description: field.help,
+                    };
+                }
+
                 return this.$app.modelsResolver.bySchemaObject({
                     type: 'object',
-                    properties: { ...this.executeData.fields },
+                    properties,
                 });
             },
             executeData() {
-                const data = this.page.data.execute_view_data._data;
+                const data = this.page.instance._data.execute_view_data;
                 if (!data || !data.playbooks) {
                     return null;
                 }

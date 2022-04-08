@@ -161,7 +161,7 @@ class Group(InventoryItems):
         }
         _override_detail_fields = {
             'owner': UserSerializer(read_only=True),
-            'children': fields.BooleanField(read_only=True),
+            'children': fields.BooleanField(read_only=True, label='Contains groups'),
         }
         _serializer_class = _WithPermissionsSerializer
         _extra_serializer_classes = {

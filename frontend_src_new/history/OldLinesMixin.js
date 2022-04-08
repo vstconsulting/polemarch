@@ -1,3 +1,4 @@
+/* eslint-disable */
 // Old logic is used for now, code style may be bad but it is working
 // TODO: Probably need to rewrite it
 

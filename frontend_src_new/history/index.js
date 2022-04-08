@@ -1,8 +1,8 @@
 /* eslint-disable vue/one-component-per-file */
 import { InventoryField } from '../inventory';
-
-import './style.scss';
 import OutputLines from './OutputLines.vue';
+import { RawInventoryField } from './raw-inventory';
+import './style.scss';
 
 const HISTORY_MODELS = ['History', 'OneHistory', 'ProjectHistory'];
 const HISTORY_LIST_PATHS = ['/history/', '/project/{id}/history/'];
@@ -148,8 +148,9 @@ for (const modelName of HISTORY_MODELS) {
 
 spa.signals.once('models[OneHistory].fields.beforeInit', (fields) => {
     fields.execute_args.format = 'json';
+    fields.raw_inventory.format = RawInventoryField.format;
 
-    for (const field of ['raw_args', 'raw_stdout', 'inventory', 'raw_inventory']) {
+    for (const field of ['raw_args', 'raw_stdout', 'inventory']) {
         fields[field].hidden = true;
     }
 });
@@ -177,6 +178,31 @@ const HistoryDetailView = {
         },
         isInProgress() {
             return ['RUN', 'DELAY'].includes(this.instance && this.instance.status);
+        },
+        fieldsGroups() {
+            return [
+                {
+                    title: '',
+                    wrapperClasses: 'col-12',
+                    fields: [
+                        'id',
+                        'status',
+                        'executor',
+                        'revision',
+                        'mode',
+                        'execute_args',
+                        'execution_time',
+                        'start_time',
+                        'stop_time',
+                        'initiator',
+                    ],
+                },
+                {
+                    title: 'Raw inventory',
+                    wrapperClasses: 'col-12',
+                    fields: ['raw_inventory'],
+                },
+            ];
         },
     },
     watch: {

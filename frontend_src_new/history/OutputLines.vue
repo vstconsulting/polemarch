@@ -1,8 +1,5 @@
 <template>
     <div class="col-md-6 output-lines">
-        <Card v-if="rawInventory" :title="$t('Raw inventory')">
-            <pre style="white-space: pre-wrap">{{ rawInventory }}</pre>
-        </Card>
         <Card card-body-classes="p-0" :title="title" :is-collapsable="false">
             <template #tools>
                 <button v-show="loading" type="button" class="btn btn-tool">
@@ -11,7 +8,7 @@
                 <a
                     class="btn btn-tool"
                     :href="page.instance.raw_stdout"
-                    :title="$t('full raw stdout') | capitalize"
+                    :title="$t('Full raw stdout')"
                     target="_blank"
                 >
                     <i class="fas fa-align-justify" />
@@ -21,9 +18,10 @@
                 </button>
                 <button type="button" class="btn btn-tool d-none d-md-block" @click="toggleMaximize">
                     <i class="far fa-window-maximize" />
-                    <i class="far fa-window-minimize" style="display: none;" />
+                    <i class="far fa-window-minimize" style="display: none" />
                 </button>
             </template>
+            <!-- eslint-disable-next-line -->
             <pre ref="output" class="history-stdout" @scroll="scrollHandler" v-html="linesHTML" />
         </Card>
     </div>
@@ -45,12 +43,12 @@
         }),
         computed: {
             title() {
-                return `${this.$u.capitalize(this.$t('execution output'))} (${this.$t('stdout')})`;
+                return `${this.$t('Execution output')} (${this.$t('stdout')})`;
             },
             instance() {
                 return this.page.instance;
             },
-            rawInventory(){
+            rawInventory() {
                 return this.instance.raw_inventory;
             },
         },
@@ -115,8 +113,8 @@
         color: #ececec;
         overflow-x: auto;
         overflow-y: scroll;
-        min-height: 300px;
-        max-height: 350px;
+        min-height: 638px;
+        max-height: 638px;
         padding: 0 15px;
         margin: 0;
         font-weight: normal !important;
