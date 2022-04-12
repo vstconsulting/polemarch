@@ -3,6 +3,7 @@ version: '3'
 services:
 
   polemarch:
+    image: polemarch
     build: .
     restart: unless-stopped
     depends_on:
