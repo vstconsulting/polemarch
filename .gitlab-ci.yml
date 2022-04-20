@@ -151,7 +151,7 @@ release_pypi:
 
 publish_docker:
   stage: publish
-  image: vstconsulting/images:tox
+  image: vstconsulting/images:ubuntu
   services:
     - name: 'docker:19.03-dind'
       alias: 'docker_service_host'

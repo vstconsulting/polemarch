@@ -3,6 +3,7 @@ import { InventoryField } from '../inventory';
 import OutputLines from './OutputLines.vue';
 import { RawInventoryField } from './raw-inventory';
 import './style.scss';
+import { ExecutionTimeField } from './ExecutionTimeField.js';
 
 const HISTORY_MODELS = ['History', 'OneHistory', 'ProjectHistory'];
 const HISTORY_LIST_PATHS = ['/history/', '/project/{id}/history/'];
@@ -149,6 +150,7 @@ for (const modelName of HISTORY_MODELS) {
 spa.signals.once('models[OneHistory].fields.beforeInit', (fields) => {
     fields.execute_args.format = 'json';
     fields.raw_inventory.format = RawInventoryField.format;
+    fields.execution_time.format = ExecutionTimeField.format;
 
     for (const field of ['raw_args', 'raw_stdout', 'inventory']) {
         fields[field].hidden = true;

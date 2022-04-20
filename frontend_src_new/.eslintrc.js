@@ -19,6 +19,7 @@ module.exports = {
         'vue/html-self-closing': ['error', { html: { void: 'any' } }],
         'vue/max-attributes-per-line': 'off',
         'vue/multi-word-component-names': 'off',
+        'vue/one-component-per-file': 'off',
     },
     globals: {
         spa: 'readonly',
