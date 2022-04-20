@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import threading
 from typing import NoReturn, Text, Any, Iterable, Tuple, List, Dict, Union
 import os
 import re
@@ -13,6 +14,7 @@ from pathlib import Path
 from collections import namedtuple, OrderedDict
 from subprocess import Popen
 from functools import reduce
+from django.apps import apps
 from django.utils import timezone
 from vstutils.utils import tmp_file, KVExchanger, raise_context
 from vstutils.tools import get_file_value
@@ -63,7 +65,7 @@ class DummyHistory:
 
 
 class Executor(CmdExecutor):
-    __slots__ = 'history', 'counter', 'exchanger'
+    __slots__ = 'history', 'counter', 'exchanger', 'notificator',  'notificator_lock', 'notification_last_time'
 
     def __init__(self, history: History):
         super().__init__()
@@ -74,6 +76,13 @@ class Executor(CmdExecutor):
         if self.history.project is not None:
             env_vars = self.history.project.env_vars
         self.env = env_vars
+        if isinstance(history, DummyHistory):
+            self.notificator = None
+        else:
+            notificator_class = apps.get_app_config('vstutils_api').module.notificator_class
+            self.notificator = notificator_class([], channel='history_lines')
+            self.notificator_lock = threading.Lock()
+            self.notification_last_time = 0
 
     @property
     def output(self) -> Text:
@@ -99,10 +108,18 @@ class Executor(CmdExecutor):
             proc.kill()
             proc.wait()
         super().working_handler(proc)
+        if self.notificator and time.time() - self.notification_last_time > 1:
+            with self.notificator_lock:
+                if self.notificator.queue:
+                    self.notification_last_time = time.time()
+                    self.notificator.send()
 
     def write_output(self, line: Text):
         self.counter += 1
         self.history.write_line(line, self.counter, '\n')
+        if self.notificator:
+            with self.notificator_lock:
+                self.notificator.create_notification_from_instance(self.history)
 
     def execute(self, cmd: Iterable[Text], cwd: Text):
         pm_ansible_path = ' '.join(self.pm_ansible())
@@ -113,7 +130,10 @@ class Executor(CmdExecutor):
                     one_cmd = one_cmd.decode('utf-8')
             new_cmd.append(one_cmd)
         self.history.raw_args = " ".join(new_cmd).replace(pm_ansible_path, '').lstrip()
-        return super().execute(new_cmd, cwd)
+        ret = super().execute(new_cmd, cwd)
+        if self.notificator:
+            self.notificator.disconnect_all()
+        return ret
 
 
 class AnsibleCommand(PMObject):

@@ -32,6 +32,8 @@ RUN --mount=type=cache,target=/var/cache/apt \
         git \
         sudo \
         sshpass \
+        libpcre3 \
+        libpcre3-dev \
         python3.8-dev \
         libldap2-dev \
         libldap-2.4-2 \
@@ -53,6 +55,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     mkdir -p /projects /hooks /run/openldap /etc/polemarch/hooks && \
     python3.8 -m pip install /polemarch_env/dist/$(ls /polemarch_env/dist/ | grep "\.tar\.gz" | tail -1)[mysql,postgresql] && \
     apt remove -y \
+        libpcre3-dev \
         python3.8-dev \
         libldap2-dev \
         libsasl2-dev \
