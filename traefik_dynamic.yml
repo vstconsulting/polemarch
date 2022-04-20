@@ -1,0 +1,26 @@
+http:
+  middlewares:
+    compress:
+      compress: {}
+
+  services:
+    polemarch:
+      loadBalancer:
+        servers:
+          - url: "http://polemarch:8080/"
+
+    centrifugo:
+      loadBalancer:
+        servers:
+          - url: "http://centrifugo:8000/"
+
+  routers:
+    centrifugo:
+      rule: "PathPrefix(`/connection/websocket`)"
+      service: centrifugo
+
+    polemarch:
+      rule: "PathPrefix(`/`)"
+      service: polemarch
+      middlewares:
+        - "compress"

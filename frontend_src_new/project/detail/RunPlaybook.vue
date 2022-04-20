@@ -81,12 +81,14 @@
             async executePlaybook(name) {
                 const actionView = this.$app.views.get('/project/{id}/execute_playbook/');
                 try {
+                    const mainDataInstance = new this.AnsibleModule();
+                    mainDataInstance._validateAndSetData(this.mainData);
                     const response = await this.$app.api.makeRequest({
                         useBulk: true,
                         method: spa.utils.HttpMethods.POST,
                         path: spa.utils.formatPath(actionView.path, { id: this.page.getInstancePk() }),
                         data: {
-                            ...this.mainData,
+                            ...mainDataInstance._getInnerData(),
                             playbook: name,
                             extra_vars: JSON.stringify(this.argsData),
                         },

@@ -1,15 +1,13 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
 
-from typing import NoReturn, Any, Dict, List, Tuple, Iterable, TypeVar, Generator, Text
+from typing import NoReturn, Any, Dict, List, Tuple, Iterable, TypeVar, Text
 import logging
 from collections import OrderedDict
 from datetime import timedelta, datetime
-from functools import partial
 import json
 
 import re
-import io
 from celery.schedules import crontab
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
@@ -28,7 +26,7 @@ from vstutils.custom_model import ListModel, CustomQuerySet
 from vstutils.utils import BaseEnum, translate as _
 from . import Inventory
 from ..exceptions import DataNotReady, NotApplicable
-from .base import ForeignKeyACL, BModel, ACLModel, BQuerySet, models
+from .base import ForeignKeyACL, BModel, ACLModel, BQuerySet, models, BaseModel
 from .vars import AbstractModel, AbstractVarsQuerySet
 from .projects import Project, HISTORY_ID
 
@@ -591,32 +589,18 @@ class History(BModel):
             counter += 1
             self.write_line(number=counter, value=line)
 
-    def __create_line(self, gnum: int, num: int, val: str, hidden: bool = False) -> BModel:
-        return HistoryLines(
-            history=self, line_gnumber=gnum, line_number=num, line=val, hidden=hidden
-        )
-
-    def __bulking_lines(self, value: str, number: int, endl: str) -> Generator:
-        out = io.StringIO(value)
-        nline = 0
-        for line in iter(partial(out.read, 2 * 1024 - 100), ''):
-            nline += 1
-            yield self.__create_line(number, nline, line)
-        if endl:
-            yield self.__create_line(number, nline, endl)
-
     def write_line(self, value: str, number: int, endl: Text = "") -> NoReturn:
-        self.raw_history_line.bulk_create(
-            map(lambda l: l, self.__bulking_lines(value, number, endl))
-        )
+        self.raw_history_line.bulk_create([
+            HistoryLines(line_gnumber=number, line_number=1, line=value + endl, history=self)
+        ])
 
 
-class HistoryLines(BModel):
-    line         = models.CharField(default="", max_length=2*1024)
-    line_number  = models.IntegerField(default=0)
+class HistoryLines(BaseModel):
+    id = models.BigAutoField(primary_key=True)
+    line = models.TextField(default="")
+    line_number = models.IntegerField(default=0)
     line_gnumber = models.IntegerField(default=0)
-    history      = models.ForeignKey(History, on_delete=models.CASCADE,
-                                     related_query_name="raw_history_line")
+    history = models.ForeignKey(History, on_delete=models.CASCADE, related_query_name="raw_history_line")
 
     class Meta:
         default_related_name = "raw_history_line"

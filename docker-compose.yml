@@ -1,6 +1,22 @@
 version: '3'
 
 services:
+  traefik:
+    image: traefik:2.6
+    restart: unless-stopped
+    volumes:
+      - ./traefik_dynamic.yml:/traefik_dynamic.yml:ro
+    environment:
+      TRAEFIK_PROVIDERS_FILE_FILENAME: "/traefik_dynamic.yml"
+      TRAEFIK_PING: "true"
+      TRAEFIK_ENTRYPOINTS_HTTP_ADDRESS: ":80"
+    healthcheck:
+      test: [ "CMD", "traefik", "healthcheck" ]
+      interval: 3s
+      timeout: 3s
+      retries: 3
+    ports:
+      - "8080:80"
 
   polemarch:
     image: polemarch
@@ -17,8 +33,6 @@ services:
     tty: true
     volumes:
       - ./settings.ini:/etc/polemarch/settings.ini:ro
-    ports:
-      - "8080:8080"
 
   redis:
     image: "redis:6"
@@ -40,6 +54,27 @@ services:
       retries: 3
     volumes:
       - data-volume:/var/lib/mysql
+
+  centrifugo:
+    image: centrifugo/centrifugo:v3
+    restart: unless-stopped
+    tty: true
+    environment:
+      CENTRIFUGO_TOKEN_HMAC_SECRET_KEY: "d4074fd2-607c-41b0-ab83-f2bc55fae0ec"
+      CENTRIFUGO_API_KEY: "a08caef0-f1ad-40de-9e59-dd2cec07e2eb"
+      CENTRIFUGO_ADMIN: "true"
+      CENTRIFUGO_ADMIN_PASSWORD: "01a18ca9-9328-4ee7-a8de-7e5b231d1df4"
+      CENTRIFUGO_ADMIN_SECRET: "7e91c9c1-6303-42b1-9f28-1cdfbf58dcf9"
+      CENTRIFUGO_HISTORY_SIZE: "10"
+      CENTRIFUGO_HISTORY_TTL: "300s"
+      CENTRIFUGO_HEALTH: "true"
+      CENTRIFUGO_ALLOWED_ORIGINS: "*"
+    healthcheck:
+      test: [ "CMD", "sh", "-c", "wget -nv -O - http://localhost:8000/health" ]
+      interval: 3s
+      timeout: 3s
+      retries: 3
+    command: centrifugo
 
 volumes:
   data-volume:

@@ -2,6 +2,10 @@
 // Old logic is used for now, code style may be bad but it is working
 // TODO: Probably need to rewrite it
 
+function isSameLine(first, second) {
+    return first.line_number === second.line_number && first.line_gnumber === second.line_gnumber;
+}
+
 /** @vue/component */
 export default {
     mixins: [spa.autoupdate.ComponentWithAutoUpdate],
@@ -27,6 +31,10 @@ export default {
              * Property, that stores stdout DOM element.
              */
             stdout_el: undefined,
+            /**
+             * Centrifuge subscription to history_lines channel
+             */
+            subscription: null,
         };
     },
 
@@ -65,20 +73,6 @@ export default {
             return obj;
         },
         /**
-         * Property, that return lines ready to represent - gluedLines with appropriate ansi_up CSS classes.
-         */
-        linesHTML() {
-            let html = [];
-
-            for (let key in this.gluedLines) {
-                if (this.gluedLines.hasOwnProperty(key)) {
-                    html.push(spa.colors.ansiToHTML(this.gluedLines[key].text));
-                }
-            }
-
-            return html.join('');
-        },
-        /**
          * Property, that return boolean values, that means: need to load additional lines on scroll event or not.
          * @return {boolean}
          */
@@ -96,6 +90,9 @@ export default {
             }
 
             return true;
+        },
+        pk() {
+            return this.page.instance.getPkValue();
         },
     },
 
@@ -116,8 +113,16 @@ export default {
             setTimeout(() => {
                 $(this.stdout_el).scrollTop($(this.stdout_el).prop('scrollHeight'));
             }, 300);
-            this.startAutoUpdate();
+            if (['RUN', 'DELAY'].includes(this.instance.status)) {
+                this.startUpdate();
+            }
         });
+    },
+
+    beforeDestroy() {
+        if (this.subscription) {
+            this.subscription.unsubscribe();
+        }
     },
 
     mounted() {
@@ -125,6 +130,18 @@ export default {
     },
 
     methods: {
+        startUpdate() {
+            if (this.$app.centrifugoClient) {
+                this.subscription = this.$app.centrifugoClient.subscribe('history_lines', (msg) => {
+                    if (msg.data.pk === this.pk && !this.loading) {
+                        this.updateData();
+                    }
+                });
+            } else {
+                this.startAutoUpdate();
+            }
+        },
+
         autoAutoUpdateActionName() {
             return 'updateData';
         },
@@ -256,20 +273,12 @@ export default {
         },
         /**
          * Method, that saves only lines, that were not saved before.
-         * @param {array} new_lines Array with potential new lines.
+         * @param {array} newLines Array with potential new lines.
          */
-        saveNewLines(new_lines = []) {
-            for (let index = 0; index < new_lines.length; index++) {
-                let new_line = new_lines[index];
-
-                let filtered = this.lines.filter((line) => {
-                    if (spa.utils.deepEqual(line, new_line)) {
-                        return line;
-                    }
-                });
-
-                if (filtered.length == 0) {
-                    this.lines.push(new_line);
+        saveNewLines(newLines = []) {
+            for (const newLine of newLines) {
+                if (!this.lines.some((line) => isSameLine(line, newLine))) {
+                    this.lines.push(newLine);
                 }
             }
         },

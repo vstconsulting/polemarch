@@ -21,8 +21,11 @@
                     <i class="far fa-window-minimize" style="display: none" />
                 </button>
             </template>
-            <!-- eslint-disable-next-line -->
-            <pre ref="output" class="history-stdout" @scroll="scrollHandler" v-html="linesHTML" />
+            <pre
+                ref="output"
+                class="history-stdout"
+                @scroll="scrollHandler"
+            ><HistoryLine v-for="line in gluedLines" :key="line.id" :content="line.text" /></pre>
         </Card>
     </div>
 </template>
@@ -30,9 +33,25 @@
 <script>
     import OldLinesMixin from './OldLinesMixin.js';
 
+    /** @vue/component */
+    const HistoryLine = {
+        props: {
+            content: { type: String, required: true },
+        },
+        computed: {
+            htmlContent() {
+                return spa.colors.ansiToHTML(this.content);
+            },
+        },
+        render(h) {
+            return h('span', { domProps: { innerHTML: this.htmlContent } });
+        },
+    };
+
     export default {
         components: {
             Card: spa.components.Card,
+            HistoryLine,
         },
         mixins: [OldLinesMixin],
         props: {
@@ -113,10 +132,10 @@
         color: #ececec;
         overflow-x: auto;
         overflow-y: scroll;
-        min-height: 638px;
-        max-height: 638px;
+        height: 638px;
         padding: 0 15px;
         margin: 0;
         font-weight: normal !important;
+        white-space: pre-wrap;
     }
 </style>

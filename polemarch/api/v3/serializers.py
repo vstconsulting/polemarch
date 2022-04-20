@@ -51,13 +51,13 @@ class TaskTemplateParameters(BaseSerializer):
 
 
 class ModuleTemplateParameters(BaseSerializer):
-    group = fields.CharField()
+    group = fields.CharField(default='all')
     module = vst_fields.AutoCompletionField(
         autocomplete='Module',
         autocomplete_property='name',
         autocomplete_represent='path'
     )
-    args = fields.CharField(label=__('Arguments'))
+    args = fields.CharField(label=__('Arguments'), required=False, default='', allow_blank=True)
     vars = ModuleTemplateVariablesSerializer(required=False)
 
 
