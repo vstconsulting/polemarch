@@ -29,15 +29,15 @@ class TemplateVariablesMetaSerializer(serializers.SerializerMetaclass):
         return super().__new__(mcs, name, bases, attrs)
 
 
-class TemplateVariablesSerializer(BaseSerializer, metaclass=TemplateVariablesMetaSerializer):
+class BaseAnsibleArgumentsSerializer(BaseSerializer, metaclass=TemplateVariablesMetaSerializer):
     pass
 
 
-class TaskTemplateVariablesSerializer(TemplateVariablesSerializer):
+class PlaybookAnsibleArgumentsSerializer(BaseAnsibleArgumentsSerializer):
     type = 'playbook'
 
 
-class ModuleTemplateVariablesSerializer(TemplateVariablesSerializer):
+class ModuleAnsibleArgumentsSerializer(BaseAnsibleArgumentsSerializer):
     type = 'module'
 
 
@@ -47,7 +47,7 @@ class TaskTemplateParameters(BaseSerializer):
         autocomplete_property='playbook',
         autocomplete_represent='playbook',
     )
-    vars = TaskTemplateVariablesSerializer(required=False)
+    vars = PlaybookAnsibleArgumentsSerializer(required=False)
 
 
 class ModuleTemplateParameters(BaseSerializer):
@@ -58,7 +58,7 @@ class ModuleTemplateParameters(BaseSerializer):
         autocomplete_represent='path'
     )
     args = fields.CharField(label=__('Arguments'), required=False, default='', allow_blank=True)
-    vars = ModuleTemplateVariablesSerializer(required=False)
+    vars = ModuleAnsibleArgumentsSerializer(required=False)
 
 
 class ExecutionTemplateSerializer(_WithVariablesSerializer):
