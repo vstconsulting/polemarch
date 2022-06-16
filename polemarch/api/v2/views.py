@@ -26,8 +26,8 @@ action_kw = {**default_action}
 action_kw.update({'response_serializer': sers.ActionResponseSerializer, 'response_code': status.HTTP_200_OK})
 execute_kw = default_action.copy()
 execute_kw.update({
-    'serializer_class': sers.ExecuteResponseSerializer,
-    'response_serializer': sers.EmptySerializer,
+    'serializer_class': sers.EmptySerializer,
+    'response_serializer': sers.ExecuteResponseSerializer,
     'response_code': status.HTTP_201_CREATED
 })
 
@@ -93,7 +93,7 @@ class __VarsViewSet(base.ModelViewSet):
     """
     model = sers.models.Variable
     serializer_class = sers.VariableSerializer
-    filter_class = filters.VariableFilter
+    filterset_class = filters.VariableFilter
     optimize_get_by_values = False
 
 
@@ -259,7 +259,7 @@ class TeamViewSet(OwnedView):
     model = sers.models.UserGroup
     serializer_class = sers.TeamSerializer
     serializer_class_one = sers.OneTeamSerializer
-    filter_class = filters.TeamFilter
+    filterset_class = filters.TeamFilter
     copy_related = ['users']
 
 
@@ -267,7 +267,7 @@ class __HistoryLineViewSet(base.ReadOnlyModelViewSet):
     schema = None
     model = sers.models.HistoryLines
     serializer_class = sers.HistoryLinesSerializer
-    filter_class = filters.HistoryLinesFilter
+    filterset_class = filters.HistoryLinesFilter
 
 
 @method_decorator(name='lines_list', decorator=swagger_auto_schema(auto_schema=None))
@@ -289,7 +289,7 @@ class HistoryViewSet(base.HistoryModelViewSet):
     model = sers.models.History
     serializer_class = sers.HistorySerializer
     serializer_class_one = sers.OneHistorySerializer
-    filter_class = filters.HistoryFilter
+    filterset_class = filters.HistoryFilter
     POST_WHITE_LIST = ['cancel']
 
     @deco.action(detail=yes, serializer_class=sers.EmptySerializer)
@@ -358,7 +358,7 @@ class HostViewSet(OwnedView, _VariablesCopyMixin):
     model = sers.models.Host
     serializer_class = sers.HostSerializer
     serializer_class_one = sers.OneHostSerializer
-    filter_class = filters.HostFilter
+    filterset_class = filters.HostFilter
     permission_classes = concat_classes(
         OwnedView.permission_classes,
         _VariablesCopyMixin.permission_classes,
@@ -387,7 +387,7 @@ class _BaseGroupViewSet(OwnedView, sers.models.Group.generated_view):  # pylint:
     update:
         Update a group.
     """
-    filter_class = filters.GroupFilter
+    filterset_class = filters.GroupFilter
 
     class ValidationException(excepts.ValidationError):
         status_code = 409
@@ -449,7 +449,7 @@ class InventoryViewSet(_GroupMixin):
     serializer_class = sers.InventorySerializer
     serializer_class_one = sers.OneInventorySerializer
     serializer_class_import_inventory = sers.InventoryImportSerializer  # pylint: disable=invalid-name
-    filter_class = filters.InventoryFilter
+    filterset_class = filters.InventoryFilter
     permission_classes = concat_classes(
         _GroupMixin.permission_classes,
         InventoryItemsPermission
@@ -500,7 +500,7 @@ class __PlaybookViewSet(base.ReadOnlyModelViewSet):
     model = sers.models.Task
     serializer_class = sers.PlaybookSerializer
     serializer_class_one = sers.OnePlaybookSerializer
-    filter_class = filters.TaskFilter
+    filterset_class = filters.TaskFilter
 
 
 class __ModuleViewSet(base.ReadOnlyModelViewSet):
@@ -517,7 +517,7 @@ class __ModuleViewSet(base.ReadOnlyModelViewSet):
     model = sers.models.Module
     serializer_class = sers.ModuleSerializer
     serializer_class_one = sers3.OneModuleSerializer
-    filter_class = filters.ModuleFilter
+    filterset_class = filters.ModuleFilter
 
 
 @deco.nested_view('variables', 'id', view=__PeriodicTaskVarsViewSet)
@@ -546,7 +546,7 @@ class __PeriodicTaskViewSet(base.ModelViewSet):
     model = sers.models.PeriodicTask
     serializer_class = sers3.PeriodictaskSerializer
     serializer_class_one = sers3.OnePeriodictaskSerializer
-    filter_class = filters.PeriodicTaskFilter
+    filterset_class = filters.PeriodicTaskFilter
 
     @deco.subaction(**{
         **execute_kw,
@@ -583,7 +583,7 @@ class __TemplateViewSet(base.ModelViewSet):
     model = sers.models.Template
     serializer_class = sers.TemplateSerializer
     serializer_class_one = sers.OneTemplateSerializer
-    filter_class = filters.TemplateFilter
+    filterset_class = filters.TemplateFilter
     POST_WHITE_LIST = ['execute']
 
     @deco.subaction(**{
@@ -634,7 +634,7 @@ class ProjectViewSet(OwnedView, _VariablesCopyMixin):
     serializer_class = sers.ProjectSerializer
     serializer_class_one = sers.OneProjectSerializer
     serializer_class_create = sers.ProjectCreateMasterSerializer
-    filter_class = filters.ProjectFilter
+    filterset_class = filters.ProjectFilter
     POST_WHITE_LIST = ['sync', 'execute_playbook', 'execute_module']
     copy_related = ['inventories']
 
@@ -775,7 +775,7 @@ class HookViewSet(base.ModelViewSet):
     """
     model = sers.models.Hook
     serializer_class = sers.HookSerializer
-    filter_class = filters.HookFilter
+    filterset_class = filters.HookFilter
     permission_classes = (StaffPermission,)
 
 

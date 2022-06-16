@@ -1,9 +1,11 @@
 import './style.scss';
 import './layout';
-import './inventory';
+import * as inventory from './inventory';
 import './project';
 import './history';
 import './templates';
+
+export { inventory };
 
 import Home from './Home.vue';
 import { UserObjectField } from './fields/UserObjectField';
