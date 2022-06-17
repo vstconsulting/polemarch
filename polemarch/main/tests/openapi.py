@@ -46,11 +46,6 @@ class OApiTestCase(BaseTestCase):
         del openapi_schema_yml['definitions']['_MainSettings']
         del schema['definitions']['_MainSettings']
 
-        for key, value in openapi_schema_yml.items():
-            cmp_value = schema.get(key, None)
-            if isinstance(value, dict):
-                self.assertDictEqual(value, cmp_value, key)
-            elif isinstance(value, list):
-                self.assertListEqual(value, cmp_value, key)
-            else:
-                self.assertEqual(value, cmp_value, key)
+        for module in ('paths', 'definitions'):
+            for key, value in openapi_schema_yml[module].items():
+                self.assertDictEqual(value, schema[module].get(key, None), key)

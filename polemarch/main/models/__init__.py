@@ -176,7 +176,7 @@ def validate_type_and_name(instance: Host, **kwargs) -> None:
 
 @receiver(signals.pre_save, sender=Template)
 def validate_template_keys(instance: Template, **kwargs) -> None:
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     # Deprecated, because moved to serializers
     if instance.kind not in instance.template_fields.keys():
@@ -194,7 +194,7 @@ def validate_template_keys(instance: Template, **kwargs) -> None:
 
 @receiver(signals.pre_save, sender=Template)
 def validate_template_args(instance: Template, **kwargs) -> None:
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     if instance.kind in ["Host", "Group"]:
         return  # nocv
@@ -237,7 +237,7 @@ def save_to_beat(instance: PeriodicTask, **kwargs) -> None:
     :param kwargs:
     :return:
     """
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
 
     if not instance.enabled:
@@ -375,7 +375,7 @@ def check_if_inventory_linked_project(instance: Inventory, **kwargs) -> None:
 
 @receiver(signals.pre_save, sender=Hook)
 def check_hook(instance: Hook, **kwargs) -> None:
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     errors = instance.handlers.validate(instance)
     if errors:
@@ -406,7 +406,7 @@ def user_add_hook(instance: BaseUser, **kwargs) -> None:
 @receiver([signals.post_save, signals.post_delete], sender=Group)
 @receiver([signals.post_save, signals.post_delete], sender=Host)
 def polemarch_hook(instance: Any, **kwargs) -> None:
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     created = kwargs.get('created', None)
     when = "on_object_add"
@@ -431,7 +431,7 @@ def create_settings_for_user(instance: BaseUser, **kwargs) -> None:
 
 @receiver(signals.pre_save, sender=Template)
 def update_ptasks_with_templates(instance: Template, **kwargs) -> None:
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # noce
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     instance.periodic_task.all().update(project=instance.project)
 
