@@ -3,7 +3,7 @@ from functools import reduce
 from operator import or_
 from django.db.models import Q
 from django_filters import CharFilter, NumberFilter, IsoDateTimeFilter
-from vstutils.api.filters import DefaultIDFilter, extra_filter, name_filter, filters
+from vstutils.api.filters import DefaultIDFilter, DefaultNameFilter, extra_filter, name_filter, filters
 from ...main import models
 from ...main.models.hosts import variables_filter, vars_help
 
@@ -38,9 +38,8 @@ class VariableFilter(DefaultIDFilter):
         )
 
 
-class _BaseFilter(DefaultIDFilter):
-    name__not = CharFilter(method=name_filter, help_text=name_help)
-    name = CharFilter(method=name_filter, help_text=name_help)
+class _BaseFilter(DefaultIDFilter, DefaultNameFilter):
+    pass
 
 
 class _TypedFilter(_BaseFilter):
