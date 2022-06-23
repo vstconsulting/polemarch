@@ -68,7 +68,7 @@ info:
   x-versions:
     application: 2.0.0b2
     library: 2.0.0b2
-    vstutils: 5.0.0b134
+    vstutils: 5.0.0b139
     django: 3.2.13
     djangorestframework: 3.13.1
     drf_yasg: 1.20.0
