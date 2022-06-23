@@ -46,6 +46,12 @@ class OApiTestCase(BaseTestCase):
         del openapi_schema_yml['definitions']['_MainSettings']
         del schema['definitions']['_MainSettings']
 
+        try:
+            openapi_schema_yml['definitions']['ProjectDir']['properties']['content']["x-options"]['types'] = \
+                schema['definitions']['ProjectDir']['properties']['content']["x-options"]['types']
+        except Exception:  # pylint: disable=broad-except
+            pass
+
         for module in ('paths', 'definitions'):
             for key, value in openapi_schema_yml[module].items():
                 self.assertDictEqual(value, schema[module].get(key, None), key)
