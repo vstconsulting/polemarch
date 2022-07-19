@@ -16,6 +16,9 @@
                 <TasksChart :jobs="jobs" @request-data="updateData($event)" />
             </div>
         </div>
+        <div class="row">
+            <component :is="component" v-for="component in additionalSections" />
+        </div>
     </div>
 </template>
 
@@ -45,6 +48,9 @@
             };
         },
         computed: {
+            additionalSections() {
+                return []
+            },
             title() {
                 return this.$t('Dashboard');
             },

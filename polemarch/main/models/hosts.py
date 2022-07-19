@@ -126,6 +126,11 @@ class GroupCreateMasterSerializer(VSTSerializer):
     class Meta:
         __inject_from__ = 'detail'
 
+    def create(self, validated_data):
+        if 'owner' not in validated_data and 'request' in self.context:
+            validated_data['owner'] = self.context['request'].user
+        return super().create(validated_data)
+
 
 class Group(InventoryItems):
     CiclicDependencyError = CiclicDependencyError
