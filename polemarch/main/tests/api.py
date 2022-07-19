@@ -465,3 +465,15 @@ class APITestCase(ProjectTestCase, OApiTestCase):
         self.assertEqual(results[2]['data']['code'], 'ru')
         self.assertEqual(results[2]['data']['name'], 'Русский')
         self.assertEqual(results[2]['data']['translations']['pmwuserscounter'], 'счетчик пользователей')
+
+    def test_groups(self):
+        user = self._create_user(is_super_user=True, username='user1', email='user1@users.vst')
+
+        with self.user_as(self, user):
+            results = self.bulk([
+                {'method': 'post', 'path': 'groups', 'data': {'name': 'goup1'}},
+                {'method': 'get', 'path': ['groups', '<<0[data][id]>>']},
+            ])
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[1]['data']['owner']['id'], user.id)

@@ -786,27 +786,30 @@ class HookViewSet(base.ModelViewSet):
 class StatisticViewSet(base.ListNonModelViewSet):
     base_name = "stats"
 
-    def _get_count_by_user(self, model):
+    def _get_by_user(self, model):
         user = self.request.user
         filter_models = (sers.User,)
         if model not in filter_models:
-            return model.objects.all().user_filter(user).count()
-        return model.objects.all().count()
+            return model.objects.all().user_filter(user)
+        return model.objects.all()
 
     def _get_history_stats(self, request):
         qs = sers.models.History.objects.all()
         qs = qs.user_filter(self.request.user)
         return qs.stats(int(request.query_params.get("last", "14")))
 
+    def _get_by_user_projects(self, model):
+        return model.objects.filter(project__in=self._get_by_user(sers.models.Project).values('id'))
+
     def list(self, request, *args, **kwargs):
         # pylint: disable=unused-argument
         stats = OrderedDict()
-        stats['projects'] = self._get_count_by_user(sers.models.Project)
-        stats['templates'] = self._get_count_by_user(sers.models.Template)
-        stats['inventories'] = self._get_count_by_user(sers.models.Inventory)
-        stats['groups'] = self._get_count_by_user(sers.models.Group)
-        stats['hosts'] = self._get_count_by_user(sers.models.Host)
-        stats['teams'] = self._get_count_by_user(sers.models.UserGroup)
-        stats['users'] = self._get_count_by_user(sers.User)
+        stats['projects'] = self._get_by_user(sers.models.Project).count()
+        stats['templates'] = self._get_by_user_projects(sers.models.Template).count()
+        stats['inventories'] = self._get_by_user(sers.models.Inventory).count()
+        stats['groups'] = self._get_by_user(sers.models.Group).count()
+        stats['hosts'] = self._get_by_user(sers.models.Host).count()
+        stats['teams'] = self._get_by_user(sers.models.UserGroup).count()
+        stats['users'] = self._get_by_user(sers.User).count()
         stats['jobs'] = self._get_history_stats(request)
         return HTTP_200_OK(stats)

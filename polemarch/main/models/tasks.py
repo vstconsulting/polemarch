@@ -391,7 +391,7 @@ class HistoryQuerySet(BQuerySet):
         return values
 
     def stats(self, last: int) -> OrderedDict:
-        qs = self.filter(start_time__gte=now()-timedelta(days=last))
+        qs = self.filter(start_time__gte=timezone.now()-timedelta(days=last))
         qs = qs.annotate(
             day=dbfunc.TruncDay('start_time'),
             month=dbfunc.TruncMonth('start_time'),
