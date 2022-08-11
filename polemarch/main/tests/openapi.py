@@ -1,8 +1,9 @@
 from pathlib import Path
 from unittest import skipUnless
+from django.conf import settings
 import yaml
 from ._base import BaseTestCase
-from ..openapi import PROJECT_MENU, get_system_menu
+from ..openapi import PROJECT_MENU
 
 openapi_schema_yaml = Path.cwd().parent.parent / 'doc' / 'api_schema.yaml'
 if not openapi_schema_yaml.exists():
@@ -52,6 +53,7 @@ class OApiTestCase(BaseTestCase):
         except Exception:  # pylint: disable=broad-except
             pass
 
+        # MENU SCHEMA TEST
         for module in ('paths', 'definitions'):
             for key, value in openapi_schema_yml[module].items():
                 self.assertDictEqual(value, schema[module].get(key, None), key)
@@ -61,7 +63,100 @@ class OApiTestCase(BaseTestCase):
         with self.user_as(self, user_reg):
             reg_schema = self.endpoint_schema()
 
-        self.assertEqual(reg_schema['info']['x-menu'], PROJECT_MENU + [get_system_menu(False)])
+        if settings.VST_PROJECT == 'polemarch':  # noee
+            system_user = {
+                'name': 'System',
+                'span_class': 'fa fa-cog',
+                'sublinks': [
+                    {
+                        'name': 'Users',
+                        'url': '/user',
+                        'span_class': 'fa fa-user',
+                    },
+                ]
+            }
 
-        # SUPERUSER SCHEMA
-        self.assertEqual(schema['info']['x-menu'], PROJECT_MENU + [get_system_menu(True)])
+            system_staff = {
+                'name': 'System',
+                'span_class': 'fa fa-cog',
+                'sublinks': [
+                    {
+                        'name': 'Users',
+                        'url': '/user',
+                        'span_class': 'fa fa-user',
+                    },
+                    {
+                        'name': 'Hooks',
+                        'url': '/hook',
+                        'span_class': 'fa fa-plug'
+                    }
+                ]
+            }
+            self.assertEqual(reg_schema['info']['x-menu'], PROJECT_MENU + [system_user])
+
+            # SUPERUSER SCHEMA
+            self.assertEqual(schema['info']['x-menu'], PROJECT_MENU + [system_staff])
+
+        elif settings.VST_PROJECT == 'polemarchplus':  # noce
+            system_user = {
+                'name': 'System',
+                'span_class': 'fa fa-cog',
+                'sublinks': [
+                    {
+                        'name': 'Users',
+                        'url': '/user',
+                        'span_class': 'fa fa-user',
+                    },
+                    {
+                        'name': 'Teams',
+                        'url': '/team',
+                        'span_class': 'fa fa-users',
+                    },
+                    {
+                        'name': 'RPC Workers',
+                        'url': '/worker',
+                        'span_class': 'fas fa-exchange-alt'
+                    }
+                ]
+            }
+
+            system_staff = {
+                'name': 'System',
+                'span_class': 'fa fa-cog',
+                'sublinks': [
+                    {
+                        'name': 'Users',
+                        'url': '/user',
+                        'span_class': 'fa fa-user',
+                    },
+                    {
+                        'name': 'Hooks',
+                        'url': '/hook',
+                        'span_class': 'fa fa-plug'
+                    },
+                    {
+                        'name': 'Teams',
+                        'url': '/team',
+                        'span_class': 'fa fa-users',
+                    },
+                    {
+                        'name': 'RPC Workers',
+                        'url': '/worker',
+                        'span_class': 'fas fa-exchange-alt'
+                    },
+                    {
+                        'name': 'Event Log',
+                        'url': '/eventlog',
+                        'span_class': 'fa fa-history'
+                    },
+                    {
+                        'name': 'License',
+                        'url': '/plk',
+                        'span_class': 'fa fa-id-card'
+                    }
+                ]
+            }
+            self.assertEqual(reg_schema['info']['x-menu'], PROJECT_MENU + [system_user])
+
+            # SUPERUSER SCHEMA
+            self.assertEqual(schema['info']['x-menu'], PROJECT_MENU + [system_staff])
