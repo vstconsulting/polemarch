@@ -2,7 +2,7 @@ from pathlib import Path
 from unittest import skipUnless
 import yaml
 from ._base import BaseTestCase
-
+from ..openapi import PROJECT_MENU, get_system_menu
 
 openapi_schema_yaml = Path.cwd().parent.parent / 'doc' / 'api_schema.yaml'
 if not openapi_schema_yaml.exists():
@@ -27,7 +27,7 @@ class OApiTestCase(BaseTestCase):
                                     --user admin \
                                     -m doc/api_schema.yaml
         """
-        schema = self.get_result('get', '/api/endpoint/?format=openapi')
+        schema = self.endpoint_schema()
 
         with openapi_schema_yaml.open('r') as fin:
             openapi_schema_yml = yaml.load(fin, Loader=yaml.SafeLoader)
@@ -55,3 +55,13 @@ class OApiTestCase(BaseTestCase):
         for module in ('paths', 'definitions'):
             for key, value in openapi_schema_yml[module].items():
                 self.assertDictEqual(value, schema[module].get(key, None), key)
+
+        # REGULAR USER
+        user_reg = self._create_user(False)
+        with self.user_as(self, user_reg):
+            reg_schema = self.endpoint_schema()
+
+        self.assertEqual(reg_schema['info']['x-menu'], PROJECT_MENU + [get_system_menu(False)])
+
+        # SUPERUSER SCHEMA
+        self.assertEqual(schema['info']['x-menu'], PROJECT_MENU + [get_system_menu(True)])
