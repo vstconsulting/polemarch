@@ -58,4 +58,6 @@ def get_system_menu(is_superuser):
 
 
 def set_gui_menu_ce(request, schema):
-    schema['info']['x-menu'] = PROJECT_MENU + [get_system_menu(request.user.is_superuser or request.user.is_staff)]
+    schema['info']['x-menu'] = PROJECT_MENU + [
+        get_system_menu(request.user.is_superuser or request.user.is_staff)
+    ]  # noee
