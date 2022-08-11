@@ -69,55 +69,10 @@ API[VST_API_VERSION] = {
 }
 del API[VST_API_VERSION]['group']
 
-PROJECT_GUI_MENU = [
-    {
-        'name': 'Projects',
-        'url': '/project',
-        'span_class': 'fas fa-cubes',
-    },
-    {
-        'name': 'Community',
-        'url': '/community_template',
-        'span_class': 'fa fa-cloud',
-    },
-    {
-        'name': 'Inventories',
-        'url': '/inventory',
-        'span_class': 'fa fa-folder',
-        'sublinks': [
-            {
-                'name': 'Groups',
-                'url': '/groups',
-                'span_class': 'fas fa-server',
-            },
-            {
-                'name': 'Hosts',
-                'url': '/host',
-                'span_class': 'fas fa-hdd',
-            },
-        ]
-    },
-    {
-        'name': 'History',
-        'url': '/history',
-        'span_class': 'fa fa-calendar',
-    },
-    {
-        'name': 'System',
-        'span_class': 'fa fa-cog',
-        'sublinks': [
-            {
-                'name': 'Users',
-                'url': '/user',
-                'span_class': 'fa fa-user',
-            },
-            {
-                'name': 'Hooks',
-                'url': '/hook',
-                'span_class': 'fa fa-plug'
-            },
-        ]
-    },
+PROJECT_GUI_MENU = []
+
+OPENAPI_HOOKS = [
+    'polemarch.main.openapi.set_gui_menu_ce'
 ]
 
 SWAGGER_SETTINGS['DEFAULT_INFO'] = '{}.api.v2.swagger.api_info'.format(VST_PROJECT_LIB_NAME)

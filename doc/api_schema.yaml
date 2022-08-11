@@ -68,10 +68,10 @@ info:
   x-versions:
     application: 2.0.0b2
     library: 2.0.0b2
-    vstutils: 5.0.0b139
-    django: 3.2.13
+    vstutils: 5.0.0b155
+    django: 3.2.15
     djangorestframework: 3.13.1
-    drf_yasg: 1.20.0
+    drf_yasg: 1.21.3
     ansible: 2.9.27
   version: v3
 host: localhost:8080
@@ -11446,6 +11446,9 @@ definitions:
         description: use this file to authenticate the connection
         type: string
         format: secretfile
+        x-options:
+          media_types:
+            - '*/*'
       scp_extra_args:
         title: Scp extra args
         description: specify extra arguments to pass to scp only (e.g. -l)
@@ -11484,6 +11487,9 @@ definitions:
         description: vault password file
         type: string
         format: secretfile
+        x-options:
+          media_types:
+            - '*/*'
       verbose:
         title: Verbose
         description: verbose mode (-vvv for more, -vvvv to enable connection debugging)
@@ -11653,6 +11659,9 @@ definitions:
         description: use this file to authenticate the connection
         type: string
         format: secretfile
+        x-options:
+          media_types:
+            - '*/*'
       scp_extra_args:
         title: Scp extra args
         description: specify extra arguments to pass to scp only (e.g. -l)
@@ -11704,6 +11713,9 @@ definitions:
         description: vault password file
         type: string
         format: secretfile
+        x-options:
+          media_types:
+            - '*/*'
       verbose:
         title: Verbose
         description: verbose mode (-vvv for more, -vvvv to enable connection debugging)
@@ -11917,6 +11929,9 @@ definitions:
                       description: use this file to authenticate the connection
                       type: string
                       format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
                     scp_extra_args:
                       title: Scp extra args
                       description: specify extra arguments to pass to scp only (e.g.
@@ -11959,6 +11974,9 @@ definitions:
                       description: vault password file
                       type: string
                       format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
                     verbose:
                       title: Verbose
                       description: verbose mode (-vvv for more, -vvvv to enable connection
@@ -12065,6 +12083,9 @@ definitions:
                       description: use this file to authenticate the connection
                       type: string
                       format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
                     scp_extra_args:
                       title: Scp extra args
                       description: specify extra arguments to pass to scp only (e.g.
@@ -12120,6 +12141,9 @@ definitions:
                       description: vault password file
                       type: string
                       format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
                     verbose:
                       title: Verbose
                       description: verbose mode (-vvv for more, -vvvv to enable connection
@@ -12282,6 +12306,9 @@ definitions:
                       description: use this file to authenticate the connection
                       type: string
                       format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
                     scp_extra_args:
                       title: Scp extra args
                       description: specify extra arguments to pass to scp only (e.g.
@@ -12324,6 +12351,9 @@ definitions:
                       description: vault password file
                       type: string
                       format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
                     verbose:
                       title: Verbose
                       description: verbose mode (-vvv for more, -vvvv to enable connection
@@ -12430,6 +12460,9 @@ definitions:
                       description: use this file to authenticate the connection
                       type: string
                       format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
                     scp_extra_args:
                       title: Scp extra args
                       description: specify extra arguments to pass to scp only (e.g.
@@ -12485,6 +12518,9 @@ definitions:
                       description: vault password file
                       type: string
                       format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
                     verbose:
                       title: Verbose
                       description: verbose mode (-vvv for more, -vvvv to enable connection
@@ -12680,6 +12716,9 @@ definitions:
                       description: use this file to authenticate the connection
                       type: string
                       format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
                     scp_extra_args:
                       title: Scp extra args
                       description: specify extra arguments to pass to scp only (e.g.
@@ -12722,6 +12761,9 @@ definitions:
                       description: vault password file
                       type: string
                       format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
                     verbose:
                       title: Verbose
                       description: verbose mode (-vvv for more, -vvvv to enable connection
@@ -12828,6 +12870,9 @@ definitions:
                       description: use this file to authenticate the connection
                       type: string
                       format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
                     scp_extra_args:
                       title: Scp extra args
                       description: specify extra arguments to pass to scp only (e.g.
@@ -12883,6 +12928,9 @@ definitions:
                       description: vault password file
                       type: string
                       format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
                     verbose:
                       title: Verbose
                       description: verbose mode (-vvv for more, -vvvv to enable connection
@@ -13032,6 +13080,9 @@ definitions:
                       description: use this file to authenticate the connection
                       type: string
                       format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
                     scp_extra_args:
                       title: Scp extra args
                       description: specify extra arguments to pass to scp only (e.g.
@@ -13074,6 +13125,9 @@ definitions:
                       description: vault password file
                       type: string
                       format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
                     verbose:
                       title: Verbose
                       description: verbose mode (-vvv for more, -vvvv to enable connection
@@ -13180,6 +13234,9 @@ definitions:
                       description: use this file to authenticate the connection
                       type: string
                       format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
                     scp_extra_args:
                       title: Scp extra args
                       description: specify extra arguments to pass to scp only (e.g.
@@ -13235,6 +13292,9 @@ definitions:
                       description: vault password file
                       type: string
                       format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
                     verbose:
                       title: Verbose
                       description: verbose mode (-vvv for more, -vvvv to enable connection
