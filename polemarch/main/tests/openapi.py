@@ -53,11 +53,11 @@ class OApiTestCase(BaseTestCase):
         except Exception:  # pylint: disable=broad-except
             pass
 
-        # MENU SCHEMA TEST
         for module in ('paths', 'definitions'):
             for key, value in openapi_schema_yml[module].items():
                 self.assertDictEqual(value, schema[module].get(key, None), key)
 
+        # MENU SCHEMA TEST
         # REGULAR USER
         user_reg = self._create_user(False)
         with self.user_as(self, user_reg):
@@ -98,6 +98,11 @@ class OApiTestCase(BaseTestCase):
             self.assertEqual(schema['info']['x-menu'], PROJECT_MENU + [system_staff])
 
         elif settings.VST_PROJECT == 'polemarchplus':  # noce
+            # STAFF
+            user_staff = self._create_user(is_super_user=False, is_staff=True)
+            with self.user_as(self, user_staff):
+                staff_schema = self.endpoint_schema()
+
             system_user = {
                 'name': 'System',
                 'span_class': 'fa fa-cog',
@@ -148,6 +153,38 @@ class OApiTestCase(BaseTestCase):
                         'name': 'Event Log',
                         'url': '/eventlog',
                         'span_class': 'fa fa-history'
+                    }
+                ]
+            }
+
+            system_superuser = {
+                'name': 'System',
+                'span_class': 'fa fa-cog',
+                'sublinks': [
+                    {
+                        'name': 'Users',
+                        'url': '/user',
+                        'span_class': 'fa fa-user',
+                    },
+                    {
+                        'name': 'Hooks',
+                        'url': '/hook',
+                        'span_class': 'fa fa-plug'
+                    },
+                    {
+                        'name': 'Teams',
+                        'url': '/team',
+                        'span_class': 'fa fa-users',
+                    },
+                    {
+                        'name': 'RPC Workers',
+                        'url': '/worker',
+                        'span_class': 'fas fa-exchange-alt'
+                    },
+                    {
+                        'name': 'Event Log',
+                        'url': '/eventlog',
+                        'span_class': 'fa fa-history'
                     },
                     {
                         'name': 'License',
@@ -156,7 +193,12 @@ class OApiTestCase(BaseTestCase):
                     }
                 ]
             }
+
+            # REGULAR USER SCHEMA
             self.assertEqual(reg_schema['info']['x-menu'], PROJECT_MENU + [system_user])
 
+            # STAFF SCHEMA
+            self.assertEqual(staff_schema['info']['x-menu'], PROJECT_MENU + [system_staff])
+
             # SUPERUSER SCHEMA
-            self.assertEqual(schema['info']['x-menu'], PROJECT_MENU + [system_staff])
+            self.assertEqual(schema['info']['x-menu'], PROJECT_MENU + [system_superuser])
