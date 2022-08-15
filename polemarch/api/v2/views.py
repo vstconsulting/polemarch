@@ -14,7 +14,7 @@ from vstutils.utils import KVExchanger
 from vstutils.api.responses import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from . import filters
-from .permissions import InventoryItemsPermission
+from .permissions import InventoryItemsPermission, CreateUsersPermission
 from . import serializers as sers
 from ..v3 import serializers as sers3
 from ...main import utils
@@ -208,6 +208,7 @@ class UserViewSet(vst_auth.UserViewSet, base.CopyMixin):
     serializer_class_one = sers.OneUserSerializer
     serializer_class_create = sers.CreateUserSerializer
     serializer_class_change_password = sers.ChangePasswordSerializer  # pylint: disable=invalid-name
+    permission_classes = vst_auth.UserViewSet.permission_classes + (CreateUsersPermission, )
 
     copy_related = ['groups']
     copy_field_name = 'username'
