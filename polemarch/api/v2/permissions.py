@@ -26,3 +26,10 @@ class InventoryItemsPermission(permissions.IsAuthenticated):
         elif obj.master_project is None:
             return True
         return False
+
+
+class CreateUsersPermission(permissions.IsAuthenticated):
+    def has_permission(self, request, view):
+        if view.action == 'create':
+            return request.user.is_staff or request.user.is_superuser
+        return super().has_permission(request, view)
