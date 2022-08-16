@@ -25,7 +25,7 @@ from ..validators import RegexValidator
 logger = logging.getLogger("polemarch")
 
 
-vars_help = 'List of variables to filter. Comma separeted "key:value" list.'
+vars_help = 'List of variables to filter. Comma separated "key:value" list.'
 
 
 def variables_filter(queryset, field, value):

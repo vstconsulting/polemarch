@@ -402,7 +402,7 @@ class HostSerializer(_WithVariablesSerializer):
         required=False,
         default='HOST'
     )
-    from_project = serializers.BooleanField(read_only=True, label='Project Based')
+    from_project = serializers.BooleanField(read_only=True, label='Project based')
 
     class Meta:
         model = models.Host
@@ -543,7 +543,7 @@ class _InventoryOperations(_WithVariablesSerializer):
 
 
 class InventorySerializer(_WithVariablesSerializer):
-    from_project = serializers.BooleanField(read_only=True, label='Project Based')
+    from_project = serializers.BooleanField(read_only=True, label='Project based')
 
     class Meta:
         model = models.Inventory

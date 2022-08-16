@@ -21,7 +21,7 @@
             </div>
             <div class="col-lg-4">
                 <h5 class="text-center" style="margin-top: 20px">
-                    {{ $t('Statistic') }}
+                    {{ $t('Statistics') }}
                 </h5>
                 <div v-for="line in progressBarData" :key="line.name" class="progress-group">
                     {{ line.label }}
