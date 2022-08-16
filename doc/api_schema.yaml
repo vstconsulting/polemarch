@@ -227,7 +227,7 @@ paths:
           type: string
         - name: variables
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
+          description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
         - name: id__not
@@ -436,7 +436,7 @@ paths:
           type: string
         - name: variables
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
+          description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
         - name: id__not
@@ -675,7 +675,7 @@ paths:
           type: string
         - name: variables
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
+          description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -1376,7 +1376,7 @@ paths:
           type: string
         - name: variables
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
+          description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -2448,7 +2448,7 @@ paths:
           type: string
         - name: variables
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
+          description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -2859,7 +2859,7 @@ paths:
           type: string
         - name: variables
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
+          description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -3059,7 +3059,7 @@ paths:
           type: string
         - name: variables
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
+          description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -3197,7 +3197,7 @@ paths:
           type: string
         - name: variables
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
+          description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -3356,7 +3356,7 @@ paths:
           type: string
         - name: variables
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
+          description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -3786,7 +3786,7 @@ paths:
           type: string
         - name: variables
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
+          description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -4487,7 +4487,7 @@ paths:
           type: string
         - name: variables
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
+          description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -5148,7 +5148,7 @@ paths:
           type: string
         - name: variables
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
+          description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
         - name: status__not
@@ -6097,7 +6097,7 @@ paths:
           type: string
         - name: variables
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
+          description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -6337,7 +6337,7 @@ paths:
           type: string
         - name: variables
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
+          description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -6487,7 +6487,7 @@ paths:
           type: string
         - name: variables
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
+          description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -6664,7 +6664,7 @@ paths:
           type: string
         - name: variables
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
+          description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -7120,7 +7120,7 @@ paths:
           type: string
         - name: variables
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
+          description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -7866,7 +7866,7 @@ paths:
           type: string
         - name: variables
           in: query
-          description: List of variables to filter. Comma separeted "key:value" list.
+          description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
         - name: ordering
@@ -10704,7 +10704,7 @@ definitions:
           - RANGE
         default: HOST
       from_project:
-        title: Project Based
+        title: Project based
         type: boolean
         readOnly: true
     x-properties-groups:
@@ -11099,7 +11099,7 @@ definitions:
         maxLength: 512
         minLength: 1
       from_project:
-        title: Project Based
+        title: Project based
         type: boolean
         readOnly: true
     x-properties-groups:

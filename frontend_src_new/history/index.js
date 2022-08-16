@@ -170,7 +170,7 @@ spa.signals.once('allModels.created', ({ models }) => {
 const HistoryDetailView = {
     computed: {
         title() {
-            return 'History';
+            return this.$t('History');
         },
         beforeFieldsGroupsComponent() {
             return OutputLines;
