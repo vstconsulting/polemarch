@@ -4,6 +4,7 @@ from operator import or_
 from django.db.models import Q
 from django_filters import CharFilter, NumberFilter, IsoDateTimeFilter
 from vstutils.api.filters import DefaultIDFilter, DefaultNameFilter, extra_filter, name_filter, filters
+from vstutils.utils import lazy_translate as __
 from ...main import models
 from ...main.models.hosts import variables_filter, vars_help
 
@@ -26,8 +27,8 @@ def playbook_filter(queryset, field, value):
 
 
 class VariableFilter(DefaultIDFilter):
-    key = CharFilter(method=name_filter, help_text=name_help.replace('name', 'key name'))
-    value = CharFilter(method=name_filter, help_text='A value of instance.')
+    key = CharFilter(method=name_filter, help_text=__(name_help.replace('name', 'key name')))
+    value = CharFilter(method=name_filter, help_text=__('A value of instance.'))
 
     class Meta:
         model = models.Variable
@@ -43,12 +44,12 @@ class _BaseFilter(DefaultIDFilter, DefaultNameFilter):
 
 
 class _TypedFilter(_BaseFilter):
-    type = CharFilter(help_text='Instance type.')
+    type = CharFilter(help_text=__('Instance type.'))
 
 
 class TemplateFilter(_BaseFilter):
-    kind = CharFilter(help_text='A kind of template.')
-    inventory = CharFilter(help_text='The inventory id or path in project.')
+    kind = CharFilter(help_text=__('A kind of template.'))
+    inventory = CharFilter(help_text=__('The inventory id or path in project.'))
 
     class Meta:
         model = models.Template
@@ -61,9 +62,9 @@ class TemplateFilter(_BaseFilter):
 
 
 class ModuleFilter(filters.FilterSet):
-    path__not = CharFilter(method=name_filter, help_text='Full path to module.')
-    path = CharFilter(method=name_filter, help_text='Full path to module.')
-    name = CharFilter(method=filter_name_endswith, help_text='Name of module.')
+    path__not = CharFilter(method=name_filter, help_text=__('Full path to module.'))
+    path = CharFilter(method=name_filter, help_text=__('Full path to module.'))
+    name = CharFilter(method=filter_name_endswith, help_text=__('Name of module.'))
 
     class Meta:
         model = models.Module
@@ -84,7 +85,7 @@ class HookFilter(_TypedFilter):
 
 
 class _BaseHGIFilter(_BaseFilter):
-    variables = CharFilter(method=variables_filter, help_text=vars_help)
+    variables = CharFilter(method=variables_filter, help_text=__(vars_help))
 
 
 class HostFilter(_TypedFilter, _BaseHGIFilter):
@@ -110,8 +111,8 @@ class InventoryFilter(_BaseHGIFilter):
 
 
 class ProjectFilter(_BaseHGIFilter):
-    status = CharFilter(method=extra_filter, help_text='Project sync status.')
-    status__not = CharFilter(method=extra_filter, help_text='Project sync status.')
+    status = CharFilter(method=extra_filter, help_text=__('Project sync status.'))
+    status__not = CharFilter(method=extra_filter, help_text=__('Project sync status.'))
 
     class Meta:
         model = models.Project
@@ -121,9 +122,9 @@ class ProjectFilter(_BaseHGIFilter):
 
 
 class TaskFilter(_BaseFilter):
-    playbook__not = CharFilter(method=name_filter, help_text='Playbook filename.')
-    playbook = CharFilter(method=name_filter, help_text='Playbook filename.')
-    pb_filter = CharFilter(method=playbook_filter, help_text='Playbook filename - filter for prefetch.')
+    playbook__not = CharFilter(method=name_filter, help_text=__('Playbook filename.'))
+    playbook = CharFilter(method=name_filter, help_text=__('Playbook filename.'))
+    pb_filter = CharFilter(method=playbook_filter, help_text=__('Playbook filename - filter for prefetch.'))
 
     class Meta:
         model = models.Task
@@ -134,15 +135,15 @@ class TaskFilter(_BaseFilter):
 
 
 class HistoryFilter(_BaseFilter):
-    status = CharFilter(help_text='Status of execution.')
-    mode = CharFilter(help_text='Module or playbook name.')
-    kind = CharFilter(help_text='Kind of execution.')
+    status = CharFilter(help_text=__('Status of execution.'))
+    mode = CharFilter(help_text=__('Module or playbook name.'))
+    kind = CharFilter(help_text=__('Kind of execution.'))
     older = IsoDateTimeFilter(field_name="start_time",
                               lookup_expr=('lt'),
-                              help_text='Older then this time')
+                              help_text=__('Older then this time'))
     newer = IsoDateTimeFilter(field_name="start_time",
                               lookup_expr=('gt'),
-                              help_text='Newer then this time')
+                              help_text=__('Newer then this time'))
 
     class Meta:
         model = models.History
@@ -153,10 +154,10 @@ class HistoryFilter(_BaseFilter):
 
 
 class PeriodicTaskFilter(_TypedFilter):
-    mode = CharFilter(help_text='Periodic task module or playbook name.')
-    kind = CharFilter(help_text='Kind of periodic task.')
+    mode = CharFilter(help_text=__('Periodic task module or playbook name.'))
+    kind = CharFilter(help_text=__('Kind of periodic task.'))
     template = NumberFilter(
-        help_text='A unique integer id of template used in periodic task.'
+        help_text=__('A unique integer id of template used in periodic task.')
     )
 
     class Meta:
