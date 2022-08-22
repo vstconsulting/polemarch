@@ -64,7 +64,7 @@ class InventoryDumper(Dumper):
 
 
 # Helpfull exceptions
-class CiclicDependencyError(ex.PMException):
+class CyclicDependencyError(ex.PMException):
     _def_message = "A cyclic dependence was found. {}"
 
     def __init__(self, tp: Text = ""):
@@ -133,7 +133,7 @@ class GroupCreateMasterSerializer(VSTSerializer):
 
 
 class Group(InventoryItems):
-    CiclicDependencyError = CiclicDependencyError
+    CyclicDependencyError = CyclicDependencyError
 
     hosts = ManyToManyFieldACL(Host, related_query_name="groups")
     parents = ManyToManyFieldACLReverse('Group', blank=True, related_query_name="childrens")

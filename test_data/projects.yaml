@@ -1,0 +1,5 @@
+---
+- id: 1
+  name: TestProject
+  type: GIT
+  repository: %(repo_url)s

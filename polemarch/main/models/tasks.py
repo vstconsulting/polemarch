@@ -556,6 +556,7 @@ class History(BModel):
         )
         subst = '"\\1": {\n\t"status": "\\2", \n\\3},'
         result = re.sub(regex, subst, data, 0, re.MULTILINE)
+        result = re.findall(r'^".*":[\s\S]*$', result, re.MULTILINE)[0]
         result = "{" + result[:-1] + "\n}"
         return json.loads(result)
 

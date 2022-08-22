@@ -68,7 +68,7 @@ info:
   x-versions:
     application: 2.0.0b2
     library: 2.0.0b2
-    vstutils: 5.0.0b155
+    vstutils: 5.0.1
     django: 3.2.15
     djangorestframework: 3.13.1
     drf_yasg: 1.21.3
@@ -2208,7 +2208,7 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/Data'
+            $ref: '#/definitions/Facts'
       tags:
         - history
       x-subscribe-labels:
@@ -6042,7 +6042,7 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/Data'
+            $ref: '#/definitions/Facts'
       tags:
         - project
       x-subscribe-labels:
@@ -9987,95 +9987,6 @@ paths:
         required: true
         type: integer
         description: A unique integer value identifying instance of this users sublist.
-  /team/{id}/user/{user_id}/settings/:
-    get:
-      operationId: team_user_settings_get
-      summary: |-
-        A settings object that allows REST Framework settings to be accessed as
-            properties. For example:
-      description: |-
-        from rest_framework.settings import api_settings
-                print(api_settings.DEFAULT_RENDERER_CLASSES)
-
-            Any setting with string import paths will be automatically resolved
-            and return the class, rather than the string literal.
-
-            Note:
-            This is an internal class that is only compatible with settings namespaced
-            under the REST_FRAMEWORK name. It is not intended to be used by 3rd-party
-            apps, and test helpers like `override_settings` may not work as expected.
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/UserSettings'
-      tags:
-        - team
-      x-subscribe-labels:
-        - auth.User
-    post:
-      operationId: team_user_settings_add
-      summary: |-
-        A settings object that allows REST Framework settings to be accessed as
-            properties. For example:
-      description: |-
-        from rest_framework.settings import api_settings
-                print(api_settings.DEFAULT_RENDERER_CLASSES)
-
-            Any setting with string import paths will be automatically resolved
-            and return the class, rather than the string literal.
-
-            Note:
-            This is an internal class that is only compatible with settings namespaced
-            under the REST_FRAMEWORK name. It is not intended to be used by 3rd-party
-            apps, and test helpers like `override_settings` may not work as expected.
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/UserSettings'
-      responses:
-        '201':
-          description: CREATED
-          schema:
-            $ref: '#/definitions/UserSettings'
-      tags:
-        - team
-    delete:
-      operationId: team_user_settings_remove
-      summary: |-
-        A settings object that allows REST Framework settings to be accessed as
-            properties. For example:
-      description: |-
-        from rest_framework.settings import api_settings
-                print(api_settings.DEFAULT_RENDERER_CLASSES)
-
-            Any setting with string import paths will be automatically resolved
-            and return the class, rather than the string literal.
-
-            Note:
-            This is an internal class that is only compatible with settings namespaced
-            under the REST_FRAMEWORK name. It is not intended to be used by 3rd-party
-            apps, and test helpers like `override_settings` may not work as expected.
-      parameters: []
-      responses:
-        '204':
-          description: NO CONTENT
-      tags:
-        - team
-    parameters:
-      - name: id
-        in: path
-        description: A unique integer value identifying this user group.
-        required: true
-        type: integer
-      - name: user_id
-        in: path
-        required: true
-        type: integer
-        description: A unique integer value identifying instance of this users sublist.
   /team/{id}/user/{user_id}/twofa/:
     get:
       operationId: team_user_twofa_get
@@ -10387,51 +10298,6 @@ paths:
           description: CREATED
           schema:
             $ref: '#/definitions/User'
-      tags:
-        - user
-    parameters:
-      - name: id
-        in: path
-        description: A unique integer value identifying this user.
-        required: true
-        type: integer
-  /user/{id}/settings/:
-    get:
-      operationId: user_settings_get
-      description: Return user settings.
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/UserSettings'
-      tags:
-        - user
-      x-subscribe-labels:
-        - auth.User
-    post:
-      operationId: user_settings_add
-      description: Return user settings.
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/UserSettings'
-      responses:
-        '201':
-          description: CREATED
-          schema:
-            $ref: '#/definitions/UserSettings'
-      tags:
-        - user
-    delete:
-      operationId: user_settings_remove
-      description: Return user settings.
-      parameters: []
-      responses:
-        '204':
-          description: NO CONTENT
       tags:
         - user
     parameters:
@@ -11031,12 +10897,18 @@ definitions:
       '':
         - detail
     x-view-field-name: detail
-  Data:
+  Facts:
     type: object
-    properties: {}
+    properties:
+      facts:
+        title: Facts
+        type: string
+        format: json
+        readOnly: true
     x-properties-groups:
-      '': []
-    x-view-field-name: null
+      '':
+        - facts
+    x-view-field-name: facts
   Hook:
     required:
       - type
@@ -11286,6 +11158,13 @@ definitions:
         - branch
         - additional_playbook_path
     x-view-field-name: name
+  Data:
+    type: object
+    properties: {}
+    x-nullable: true
+    x-properties-groups:
+      '': []
+    x-view-field-name: null
   OneProject:
     type: object
     properties:
@@ -13404,7 +13283,7 @@ definitions:
       name:
         title: Name
         type: string
-        pattern: (^[^\.]+?$)|(^([\.][\\//])?([\.]*[\w\d\-_]+?[\.]*[\w\d\-_]*[\\//]*)+?$)
+        pattern: ^([\w\d_\-]+|[\.][\/\w\d_\-\+=\^,])(\.?[\w\d\-\/\\_()\+=\^,]+)+$
         minLength: 1
       raw_data:
         title: Raw data
@@ -13838,7 +13717,18 @@ definitions:
               - TAR
           field: key
           types:
-            ci_template: fk
+            ci_template:
+              type: integer
+              format: fk
+              x-options:
+                dependence: null
+                filters: null
+                makeLink: true
+                model:
+                  $ref: '#/definitions/ExecutionTemplate'
+                usePrefetch: true
+                value_field: id
+                view_field: name
             repo_key: secretfile
             repo_password: password
             repo_sync_on_run_timeout: uptime
@@ -14057,164 +13947,6 @@ definitions:
         - password
         - password2
     x-view-field-name: password
-  ChartLineSetting:
-    type: object
-    properties:
-      active:
-        title: Active
-        type: boolean
-        default: true
-    x-properties-groups:
-      '':
-        - active
-    x-view-field-name: active
-  ChartLineSettings:
-    required:
-      - all_tasks
-      - delay
-      - ok
-      - error
-      - interrupted
-      - offline
-    type: object
-    properties:
-      all_tasks:
-        $ref: '#/definitions/ChartLineSetting'
-      delay:
-        $ref: '#/definitions/ChartLineSetting'
-      ok:
-        $ref: '#/definitions/ChartLineSetting'
-      error:
-        $ref: '#/definitions/ChartLineSetting'
-      interrupted:
-        $ref: '#/definitions/ChartLineSetting'
-      offline:
-        $ref: '#/definitions/ChartLineSetting'
-    x-properties-groups:
-      '':
-        - all_tasks
-        - delay
-        - ok
-        - error
-        - interrupted
-        - offline
-    x-view-field-name: delay
-  CounterWidgetSetting:
-    type: object
-    properties:
-      active:
-        title: Active
-        type: boolean
-        default: true
-      collapse:
-        title: Collapse
-        type: boolean
-        readOnly: true
-        default: false
-      sort:
-        title: Sort
-        type: integer
-        default: 0
-    x-properties-groups:
-      '':
-        - active
-        - collapse
-        - sort
-    x-view-field-name: collapse
-  WidgetSetting:
-    type: object
-    properties:
-      active:
-        title: Active
-        type: boolean
-        default: true
-      collapse:
-        title: Collapse
-        type: boolean
-        default: false
-      sort:
-        title: Sort
-        type: integer
-        default: 0
-    x-properties-groups:
-      '':
-        - active
-        - collapse
-        - sort
-    x-view-field-name: collapse
-  WidgetSettings:
-    required:
-      - pmwUsersCounter
-      - pmwProjectsCounter
-      - pmwTemplatesCounter
-      - pmwInventoriesCounter
-      - pmwGroupsCounter
-      - pmwHostsCounter
-      - pmwChartWidget
-    type: object
-    properties:
-      pmwUsersCounter:
-        $ref: '#/definitions/CounterWidgetSetting'
-      pmwProjectsCounter:
-        $ref: '#/definitions/CounterWidgetSetting'
-      pmwTemplatesCounter:
-        $ref: '#/definitions/CounterWidgetSetting'
-      pmwInventoriesCounter:
-        $ref: '#/definitions/CounterWidgetSetting'
-      pmwGroupsCounter:
-        $ref: '#/definitions/CounterWidgetSetting'
-      pmwHostsCounter:
-        $ref: '#/definitions/CounterWidgetSetting'
-      pmwChartWidget:
-        $ref: '#/definitions/WidgetSetting'
-    x-properties-groups:
-      '':
-        - pmwUsersCounter
-        - pmwProjectsCounter
-        - pmwTemplatesCounter
-        - pmwInventoriesCounter
-        - pmwGroupsCounter
-        - pmwHostsCounter
-        - pmwChartWidget
-    x-view-field-name: pmwProjectsCounter
-  UserSettings:
-    required:
-      - chartLineSettings
-      - widgetSettings
-    type: object
-    properties:
-      lang:
-        title: Lang
-        type: string
-        enum:
-          - en
-          - ru
-          - cn
-          - vi
-        default: en
-      autoupdateInterval:
-        title: Autoupdateinterval
-        type: integer
-        default: 15000
-      chartLineSettings:
-        $ref: '#/definitions/ChartLineSettings'
-      widgetSettings:
-        $ref: '#/definitions/WidgetSettings'
-      selectedSkin:
-        title: Selectedskin
-        type: string
-        minLength: 1
-      skinsSettings:
-        $ref: '#/definitions/Data'
-    x-properties-groups:
-      '':
-        - lang
-        - autoupdateInterval
-        - chartLineSettings
-        - widgetSettings
-        - selectedSkin
-        - skinsSettings
-    x-view-field-name: autoupdateInterval
   TwoFA:
     type: object
     properties:

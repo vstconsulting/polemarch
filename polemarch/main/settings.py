@@ -213,7 +213,7 @@ TASKS_HANDLERS = {
     "REPO": {
         "BACKEND": "{}.main.tasks.tasks.RepoTask".format(VST_PROJECT_LIB_NAME)
     },
-    "SCHEDUER": {
+    "SCHEDULER": {
         "BACKEND": "{}.main.tasks.tasks.ScheduledTask".format(VST_PROJECT_LIB_NAME)
     },
     "MODULE": {

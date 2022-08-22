@@ -1,0 +1,6 @@
+---
+all:
+  hosts:
+    localhost:
+  vars:
+    ansible_connection: local

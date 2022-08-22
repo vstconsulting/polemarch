@@ -19,7 +19,6 @@ class ModelPermission(permissions.IsAuthenticated):
 
 
 class InventoryItemsPermission(permissions.IsAuthenticated):
-
     def has_object_permission(self, request, view, obj):
         if request.method.lower() == 'get':
             return True
