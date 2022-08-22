@@ -1,0 +1,62 @@
+---
+sync_on_run: true
+templates:
+  test module:
+    data:
+      args: ''
+      group: all
+      inventory: localhost,
+      module: ping
+      vars: {}
+    kind: Module
+    notes: Module test template.
+    options:
+      uptime:
+        args: uptime
+        module: shell
+  test playbook:
+    data:
+      inventory: ./inventory.ini
+      playbook: main.yml
+      vars:
+        become: true
+    kind: Task
+    notes: Playbook test template.
+    options:
+      update:
+        playbook: other.yml
+templates_rewrite: false
+view:
+  fields:
+    str_field:
+      title: str field
+      default: lol
+      format: string
+      help: lol
+    integer_field:
+      title: integer field
+      default: 1337
+      format: integer
+    float_field:
+      title: float field
+      default: 1337.01
+      format: float
+    boolean_field:
+      title: boolean field
+      default: false
+      format: boolean
+    unknown_field:
+      title: unknown field
+      format: lol
+    enum_field:
+      format: lol
+      title: enum_field
+      enum:
+        - lol
+        - kek
+  playbooks:
+    main.yml:
+      title: Main playbook
+      help: lol_help
+    additional_pb_path.yml:
+      title: additional_pb_path

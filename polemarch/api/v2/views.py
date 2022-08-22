@@ -4,7 +4,7 @@ from collections import OrderedDict
 from django.db import transaction
 from django.http.response import HttpResponse
 from django.utils.decorators import method_decorator
-from rest_framework import exceptions as excepts, status, permissions
+from rest_framework import exceptions as excepts, status
 from rest_framework.authtoken import views as token_views
 from drf_yasg.utils import swagger_auto_schema
 from vstutils.api import auth as vst_auth
@@ -213,28 +213,6 @@ class UserViewSet(vst_auth.UserViewSet, base.CopyMixin):
     copy_related = ['groups']
     copy_field_name = 'username'
 
-    def copy_instance(self, instance):
-        new_instance = super().copy_instance(instance)
-        new_instance.settings.data = instance.settings.get_settings_copy()
-        new_instance.settings.save()
-        return new_instance
-
-    @deco.action(
-        ["post", "delete", "get"], url_path="settings",
-        detail=yes, serializer_class=sers.UserSettingsSerializer,
-        permission_classes=(permissions.IsAuthenticated,)
-    )
-    def user_settings(self, request, *args, **kwargs):
-        """
-        Return user settings.
-        """
-        obj = self.get_object()
-        method = request.method
-        if method != "GET":
-            obj.settings.data = request.data if method == "POST" else {}
-            obj.settings.save()
-        return HTTP_200_OK(obj.settings.data)
-
 
 @deco.nested_view('user', 'id', allow_append=yes, manager_name='users', view=UserViewSet)
 class TeamViewSet(OwnedView):
@@ -310,12 +288,13 @@ class HistoryViewSet(base.HistoryModelViewSet):
         exch.send(True, 60) if obj.working else None
         return HTTP_200_OK(f"Task canceled: {obj.id}")
 
-    @deco.action(["get", "head"], detail=yes, serializer_class=sers.DataSerializer)
+    @deco.action(["get", "head"], detail=yes, serializer_class=sers.FactsSerializer)
     def facts(self, request, *args, **kwargs):
         """
         Get compilated history facts (only for execution 'module' with module 'setup').
         """
-        return HTTP_200_OK(self.get_object().facts)
+        serializer = self.get_serializer(instance=self.get_object().facts)
+        return HTTP_200_OK({'facts': serializer.data})
 
     @deco.subaction(methods=["delete"], detail=yes, serializer_class=sers.EmptySerializer)
     def clear(self, request, *args, **kwargs):

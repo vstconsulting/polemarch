@@ -19,7 +19,7 @@ from vstutils.utils import raise_context, KVExchanger
 from .vars import Variable
 from .hosts import Host, Group, Inventory
 from .projects import Project, Task, Module, ProjectTemplate, list_to_choices
-from .users import get_user_model, UserGroup, ACLPermission, UserSettings
+from .users import get_user_model, UserGroup, ACLPermission
 from .tasks import PeriodicTask, History, HistoryLines, Template, TemplateOption, ExecutionTypes
 from .hooks import Hook
 from ..validators import RegexValidator, validate_hostname, path_validator
@@ -134,11 +134,11 @@ def check_circular_deps(instance: Group, action: Text, pk_set: Iterable, *args, 
         return
     if (action in ["pre_add", "post_add"]) and ('loaddata' not in sys.argv):
         if instance.id in pk_set:
-            raise instance.CiclicDependencyError("The group can not refer to itself.")
+            raise instance.CyclicDependencyError("The group can not refer to itself.")
         parents = instance.parents.all().get_parents()
-        childrens = instance.groups.all().get_children()
-        if instance in (parents | childrens) or parents.filter(id__in=pk_set).count():
-            raise instance.CiclicDependencyError("The group has a dependence on itself.")
+        children = instance.groups.all().get_children()
+        if instance in (parents | children) or parents.filter(id__in=pk_set).count():
+            raise instance.CyclicDependencyError("The group has a dependence on itself.")
 
 
 @receiver(signals.pre_save, sender=PeriodicTask)
@@ -178,9 +178,6 @@ def validate_type_and_name(instance: Host, **kwargs) -> None:
 def validate_template_keys(instance: Template, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
-    # Deprecated, because moved to serializers
-    if instance.kind not in instance.template_fields.keys():
-        raise UnknownTypeException(instance.kind)
     errors = {}
     for _, data in chain(((None, instance.data),), instance.options.items()):
         for key in data.keys():
@@ -252,7 +249,7 @@ def save_to_beat(instance: PeriodicTask, **kwargs) -> None:
 
     # Try get Celery Periodic Task, that linked with Polemarch Periodic Task
     celery_task = CPTask.objects.filter(
-        name=str(instance.id), task=settings.TASKS_HANDLERS["SCHEDUER"]["BACKEND"]
+        name=str(instance.id), task=settings.TASKS_HANDLERS["SCHEDULER"]["BACKEND"]
     ).last()
 
     # Prepare data for Schedule
@@ -299,7 +296,7 @@ def save_to_beat(instance: PeriodicTask, **kwargs) -> None:
         # Create new Celery Periodic Task, if it doesn't  exist
         CPTask.objects.create(
             name=str(instance.id),
-            task=settings.TASKS_HANDLERS["SCHEDUER"]["BACKEND"],
+            task=settings.TASKS_HANDLERS["SCHEDULER"]["BACKEND"],
             args=json.dumps([instance.id]),
             **{instance_pt_type: types_dict[instance_pt_type].objects.get_or_create(**schedule_data)[0]}
         )
@@ -319,7 +316,7 @@ def delete_from_beat(instance: PeriodicTask, **kwargs) -> None:
 
     # Get Celery Periodic Task
     celery_task = CPTask.objects.filter(
-        name=str(instance.id), task=settings.TASKS_HANDLERS["SCHEDUER"]["BACKEND"]
+        name=str(instance.id), task=settings.TASKS_HANDLERS["SCHEDULER"]["BACKEND"]
     ).last()
 
     if celery_task:
@@ -351,7 +348,6 @@ def check_if_inventory_linked(instance: Inventory, action: Text, **kwargs) -> No
                 linked_periodic_tasks.values_list('id', flat=True)
             ),
         )
-
 
 @receiver(signals.pre_delete, sender=Inventory)
 def delete_imported_file_inventories(instance: Inventory, **kwargs) -> None:
@@ -426,7 +422,6 @@ def polemarch_hook(instance: Any, **kwargs) -> None:
 def create_settings_for_user(instance: BaseUser, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
-    UserSettings.objects.get_or_create(user=instance)
 
 
 @receiver(signals.pre_save, sender=Template)

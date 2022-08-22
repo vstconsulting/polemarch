@@ -388,25 +388,9 @@ ext_list = []
 if 'develop' in sys.argv:
     ext_list = []
 
-additional_test_files = [
-    'polemarch/main/tests/facts_stdout',
-    'polemarch/main/tests/raw_stdout.txt',
-    'polemarch/main/tests/test_repo.tar.gz',
-    'polemarch/main/tests/stdout.txt'
-]
-
-exclude = []
-data_files = []
-
-if not os.environ.get('COMPILE_WITH_TESTS'):
-    exclude += ['polemarch.main.tests', 'polemarch.main.unittests']
-else:
-    data_files.append(['', additional_test_files])
-
 kwargs = dict(
     name='polemarch',
-    packages=find_packages(exclude=exclude),
-    data_files=data_files,
+    packages=find_packages(),
     ext_modules_list=ext_list,
     static_exclude_min=[
         'polemarch/templates/gui/service-worker.js',

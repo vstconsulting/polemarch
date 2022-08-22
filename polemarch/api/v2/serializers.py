@@ -94,6 +94,10 @@ class InventoryAutoCompletionField(vst_fields.AutoCompletionField):
 
 
 # Serializers
+class FactsSerializer(DataSerializer):
+    facts = serializers.JSONField(read_only=True)
+
+
 class ActionResponseSerializer(DataSerializer, EmptySerializer):
     detail = vst_fields.VSTCharField()
 
@@ -182,15 +186,6 @@ class WidgetSettingsSerializer(vst_serializers.JsonObjectSerializer):
     pmwGroupsCounter = CounterWidgetSettingSerializer()
     pmwHostsCounter = CounterWidgetSettingSerializer()
     pmwChartWidget = WidgetSettingSerializer()
-
-
-class UserSettingsSerializer(vst_serializers.JsonObjectSerializer):
-    lang = serializers.ChoiceField(choices=LANG_CHOICES, default=LANG_CHOICES[0])
-    autoupdateInterval = serializers.IntegerField(default=15000)
-    chartLineSettings = ChartLineSettingsSerializer()
-    widgetSettings = WidgetSettingsSerializer()
-    selectedSkin = serializers.CharField(required=False)
-    skinsSettings = vst_serializers.DataSerializer(required=False)
 
 
 class TeamSerializer(_WithPermissionsSerializer):
@@ -365,7 +360,7 @@ class ProjectVariableSerializer(VariableSerializer):
         'repo_password': 'password',
         'repo_key': 'secretfile',
         'repo_sync_on_run_timeout': 'uptime',
-        'ci_template': 'fk'
+        'ci_template': vst_fields.FkField(select='ExecutionTemplate')
     })
 
 
@@ -453,6 +448,7 @@ class ModuleSerializer(vst_serializers.VSTSerializer):
         )
 
 
+# NOTE: deprecated. Remove this with tests after breaking v2 api support
 class TemplateSerializer(_WithVariablesSerializer):
     data = DataSerializer(required=True, write_only=True)
     options = DataSerializer(write_only=True)

@@ -1,0 +1,22 @@
+---
+all:
+  children:
+    child-group:
+      children:
+        slaves:
+          hosts:
+            127.0.0.[2:3]:
+              lol: 'no'
+    master:
+      hosts:
+        127.0.0.1:
+      vars:
+        lol: 'yes'
+    slaves:
+      hosts:
+        127.0.0.[2:3]:
+          lol: 'no'
+  hosts:
+    127.0.0.[1:3]:
+  vars:
+    lol: depends

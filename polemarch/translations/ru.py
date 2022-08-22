@@ -1,6 +1,8 @@
 # flake8: noqa: E501
 TRANSLATION = {
     'User settings were successfully saved.': 'Пользовательские настройки были успешно сохранены.',
+    'Invalid path. Path must not contain ".." or any special characters.':
+        'Неправильный путь. Путь не должен содержать ".." и другие специальные символы.',
 
     # field titles and names
     'project id': 'id проекта',
