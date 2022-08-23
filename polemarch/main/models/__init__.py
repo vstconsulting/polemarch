@@ -418,12 +418,6 @@ def polemarch_hook(instance: Any, **kwargs) -> None:
     send_polemarch_models(when, instance)
 
 
-@receiver(signals.post_save, sender=BaseUser)
-def create_settings_for_user(instance: BaseUser, **kwargs) -> None:
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
-        return
-
-
 @receiver(signals.pre_save, sender=Template)
 def update_ptasks_with_templates(instance: Template, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv

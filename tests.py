@@ -2464,23 +2464,26 @@ class HookTestCase(BaseProjectTestCase):
         self.assertEqual(results[1]['status'], 400)
 
     def test_hook_when(self):
-        def check_hook(when, trigger, trigger_arg, call_count=1):
-            self.get_model_class('main.Hook').objects.all().delete()
-            self.get_model_class('main.Hook').objects.create(type='HTTP', recipients='lols', when=when)
-            with self.patch('requests.api.request') as cmd:
-                self.assertEqual(cmd.call_count, 0)
-                trigger(trigger_arg)
-                self.assertEqual(cmd.call_count, call_count)
+        self._login()
+
+        @self.patch('requests.api.request')
+        def check_hook(request, when, bulk_data, call_count=1, status=None):
+            status = {status} if status else set()
+            request.assert_not_called()
+            self.get_model_filter('main.Hook').all().delete()
+            self.get_model_filter('main.Hook').create(type='HTTP', recipients='lols', when=when)
+            results = self.bulk(bulk_data, relogin=False)
+            self.assertIn(results[0]['status'], status or {200, 201, 204}, results[0]['data'])
+            self.assertEqual(request.call_count, call_count)
 
         # check wrong when
         with self.assertRaises(ValidationError):
-            check_hook(when='lol', trigger=lambda: None, trigger_arg=None)
+            self.get_model_filter('main.Hook').create(type='HTTP', recipients='lols', when='lol')
 
         # *_execution
         check_hook(
             when='on_execution',
-            trigger=self.bulk,
-            trigger_arg=[
+            bulk_data=[
                 {
                     'method': 'post',
                     'path': ['project', self.project.id, 'execute_module'],
@@ -2490,8 +2493,7 @@ class HookTestCase(BaseProjectTestCase):
         )
         check_hook(
             when='after_execution',
-            trigger=self.bulk,
-            trigger_arg=[
+            bulk_data=[
                 {
                     'method': 'post',
                     'path': ['project', self.project.id, 'execute_module'],
@@ -2503,25 +2505,22 @@ class HookTestCase(BaseProjectTestCase):
         # on_object_*
         check_hook(
             when='on_object_add',
-            trigger=self.bulk,
-            trigger_arg=[{'method': 'post', 'path': 'host', 'data': {}}]
+            bulk_data=[{'method': 'post', 'path': 'host', 'data': {}}]
         )
         host = self.get_model_filter('main.Host').first()
         check_hook(
             when='on_object_upd',
-            trigger=self.bulk,
-            trigger_arg=[{'method': 'patch', 'path': ['host', host.id], 'data': {'name': 'lol'}}]
+            bulk_data=[{'method': 'patch', 'path': ['host', host.id], 'data': {'name': 'lol'}}]
         )
         check_hook(
             when='on_object_del',
-            trigger=self.bulk,
-            trigger_arg=[{'method': 'delete', 'path': ['host', host.id]}]
+            bulk_data=[{'method': 'delete', 'path': ['host', host.id]}]
         )
+
         # on_user_*
         check_hook(
             when='on_user_add',
-            trigger=self.bulk,
-            trigger_arg=[
+            bulk_data=[
                 {
                     'method': 'post',
                     'path': 'user',
@@ -2534,46 +2533,46 @@ class HookTestCase(BaseProjectTestCase):
             ]
         )
         user = User.objects.get(username='lol_user')
-        # FIXME: this triggers 2 times instead of 1
         check_hook(
             when='on_user_upd',
-            trigger=self.bulk,
-            trigger_arg=[{'method': 'patch', 'path': ['user', user.id], 'data': {'username': 'kek_user'}}],
-            call_count=2
+            bulk_data=[{'method': 'patch', 'path': ['user', user.id], 'data': {'username': 'kek_user'}}],
         )
         check_hook(
             when='on_user_del',
-            trigger=self.bulk,
-            trigger_arg=[{'method': 'delete', 'path': ['user', user.id]}]
+            bulk_data=[{'method': 'delete', 'path': ['user', user.id]}]
         )
 
         # check successful change password triggers on_user_upd
         check_hook(
             when='on_user_upd',
-            trigger=self.bulk,
-            trigger_arg=[
+            bulk_data=[
                 {
                     'method': 'post',
                     'path': ['user', 'profile', 'change_password'],
                     'data': {
-                        'old_password': 'lol_pass',
+                        'old_password': self.user.data['password'],
                         'password': 'kek_pass',
                         'password2': 'kek_pass',
                     }
                 }
             ]
         )
-        # check unsuccessful change password triggers on_user_upd
+        # check unsuccessful attempt to change password not triggers on_user_upd
         check_hook(
             when='on_user_upd',
-            trigger=self.bulk,
-            trigger_arg=[
+            bulk_data=[
                 {
                     'method': 'post',
                     'path': ['user', 'profile', 'change_password'],
-                    'data': {}
+                    'data': {
+                        'old_password': self.user.data['password'],
+                        'password': 'kek_pass',
+                        'password2': 'pass_kek',
+                    }
                 }
-            ]
+            ],
+            status=403,
+            call_count=0
         )
 
     def check_output_run_script(self, check_data, *args, **kwargs):
