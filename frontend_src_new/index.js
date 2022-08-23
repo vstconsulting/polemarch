@@ -1,14 +1,18 @@
 import './style.scss';
 import './layout';
+import './hooks';
+import './periodic_task';
+import './users';
 import * as inventory from './inventory';
 import './project';
-import './history';
+import * as history from './history';
 import './templates';
 
-export { inventory };
+export { inventory, history };
 
 import Home from './Home.vue';
 import { UserObjectField } from './fields/UserObjectField';
+
 spa.router.mixins.customRoutesComponentsTemplates.home = Home;
 
 spa.signals.once('APP_CREATED', (app) => {

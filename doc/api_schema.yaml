@@ -10694,6 +10694,7 @@ definitions:
     x-view-field-name: key
   History:
     required:
+      - executor
       - mode
     type: object
     properties:
@@ -10707,8 +10708,42 @@ definitions:
         format: date-time
       executor:
         title: Executor
-        type: integer
-        x-nullable: true
+        type: string
+        format: dynamic
+        x-options:
+          choices: {}
+          field: initiator_type
+          types:
+            project:
+              type: integer
+              format: fk
+              x-options:
+                dependence: null
+                filters: null
+                makeLink: true
+                model:
+                  $ref: '#/definitions/User'
+                usePrefetch: true
+                value_field: id
+                view_field: username
+            scheduler:
+              type: string
+              x-format: static_value
+              x-options:
+                realField: string
+                staticValue: system
+            template:
+              type: integer
+              format: fk
+              x-options:
+                dependence: null
+                filters: null
+                makeLink: true
+                model:
+                  $ref: '#/definitions/User'
+                usePrefetch: true
+                value_field: id
+                view_field: username
       initiator:
         title: Initiator
         type: integer
@@ -10771,6 +10806,7 @@ definitions:
     x-view-field-name: start_time
   OneHistory:
     required:
+      - executor
       - mode
       - execution_time
     type: object
@@ -10791,8 +10827,42 @@ definitions:
           - INTERRUPTED
       executor:
         title: Executor
-        type: integer
-        x-nullable: true
+        type: string
+        format: dynamic
+        x-options:
+          choices: {}
+          field: initiator_type
+          types:
+            project:
+              type: integer
+              format: fk
+              x-options:
+                dependence: null
+                filters: null
+                makeLink: true
+                model:
+                  $ref: '#/definitions/User'
+                usePrefetch: true
+                value_field: id
+                view_field: username
+            scheduler:
+              type: string
+              x-format: static_value
+              x-options:
+                realField: string
+                staticValue: system
+            template:
+              type: integer
+              format: fk
+              x-options:
+                dependence: null
+                filters: null
+                makeLink: true
+                model:
+                  $ref: '#/definitions/User'
+                usePrefetch: true
+                value_field: id
+                view_field: username
       project:
         title: Project
         type: integer
@@ -11028,7 +11098,10 @@ definitions:
       raw_data:
         title: Raw data
         type: string
-        minLength: 1
+        format: file
+        x-options:
+          media_types:
+            - '*/*'
     x-properties-groups:
       '':
         - inventory_id
@@ -13189,6 +13262,7 @@ definitions:
     x-view-field-name: name
   ProjectHistory:
     required:
+      - executor
       - mode
     type: object
     properties:
@@ -13202,8 +13276,42 @@ definitions:
         format: date-time
       executor:
         title: Executor
-        type: integer
-        x-nullable: true
+        type: string
+        format: dynamic
+        x-options:
+          choices: {}
+          field: initiator_type
+          types:
+            project:
+              type: integer
+              format: fk
+              x-options:
+                dependence: null
+                filters: null
+                makeLink: true
+                model:
+                  $ref: '#/definitions/User'
+                usePrefetch: true
+                value_field: id
+                view_field: username
+            scheduler:
+              type: string
+              x-format: static_value
+              x-options:
+                realField: string
+                staticValue: system
+            template:
+              type: integer
+              format: fk
+              x-options:
+                dependence: null
+                filters: null
+                makeLink: true
+                model:
+                  $ref: '#/definitions/User'
+                usePrefetch: true
+                value_field: id
+                view_field: username
       initiator:
         title: Initiator
         type: integer

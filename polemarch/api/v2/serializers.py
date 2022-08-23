@@ -214,6 +214,22 @@ class OneTeamSerializer(TeamSerializer):
 
 class HistorySerializer(_SignalSerializer):
     status = serializers.ChoiceField(choices=models.History.statuses, required=False)
+    executor = vst_fields.DependEnumField(field='initiator_type', types={
+        'project': vst_fields.FkModelField(select=UserSerializer,
+                                           autocomplete_property='id',
+                                           autocomplete_represent='username'),
+        'template': vst_fields.FkModelField(select=UserSerializer,
+                                            autocomplete_property='id',
+                                            autocomplete_represent='username'),
+        'scheduler': {
+            'type': 'string',
+            'x-format': 'static_value',
+            'x-options': {
+                'staticValue': 'system',
+                'realField': 'string',
+            }
+        },
+    })
 
     class Meta:
         model = models.History
@@ -251,8 +267,7 @@ class ProjectHistorySerializer(HistorySerializer):
         )
 
 
-class OneHistorySerializer(_SignalSerializer):
-    status = serializers.ChoiceField(choices=models.History.statuses, required=False)
+class OneHistorySerializer(HistorySerializer):
     raw_stdout = serializers.SerializerMethodField(read_only=True)
     execution_time = vst_fields.UptimeField()
 
@@ -850,7 +865,7 @@ class InventoryImportSerializer(serializers.Serializer):
     # pylint: disable=abstract-method
     inventory_id = vst_fields.RedirectIntegerField(default=None, allow_null=True, read_only=True)
     name = serializers.CharField(required=True)
-    raw_data = vst_fields.VSTCharField()
+    raw_data = vst_fields.FileInStringField()
 
     def create(self, validated_data: Dict) -> Dict:
         return models.Inventory.import_inventory_from_string(**validated_data)
