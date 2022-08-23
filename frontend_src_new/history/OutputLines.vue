@@ -13,7 +13,7 @@
                 >
                     <i class="fas fa-align-justify" />
                 </a>
-                <button type="button" class="btn btn-tool" title="Clear" @click="clear">
+                <button type="button" class="btn btn-tool" :title="$t('Clear')" @click="clear">
                     <i class="fa fa-trash fa-lg" />
                 </button>
                 <button type="button" class="btn btn-tool d-none d-md-block" @click="toggleMaximize">

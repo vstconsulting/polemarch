@@ -9,26 +9,6 @@ const HISTORY_MODELS = ['History', 'OneHistory', 'ProjectHistory'];
 const HISTORY_LIST_PATHS = ['/history/', '/project/{id}/history/'];
 const HISTORY_DETAIL_PATHS = ['/history/{id}/', '/project/{id}/history/{history_id}/'];
 
-const executorSchedulerField = new spa.fields.staticValue.StaticValueField({
-    name: 'executor',
-    format: 'static_value',
-    'x-options': {
-        staticValue: 'system',
-        realField: 'string',
-    },
-});
-const executorUserField = new spa.fields.fk.fk.FKField({
-    name: 'executor',
-    format: 'fk',
-    'x-options': {
-        model: { $ref: '#/definitions/User' },
-        value_field: 'id',
-        view_field: 'username',
-        makeLink: true,
-        usePrefetch: true,
-    },
-});
-
 class ProjectBasedFkField extends spa.fields.fk.fk.FKField {
     _formatQuerysetPath(queryset) {
         return super
@@ -41,7 +21,7 @@ spa.signals.once('APP_CREATED', (app) => {
     app.fieldsResolver.registerField('integer', ProjectBasedFkField.format, ProjectBasedFkField);
 });
 
-const modePlaybookField = (projectId) => ({
+export const modePlaybookField = (projectId) => ({
     name: 'mode',
     format: ProjectBasedFkField.format,
     'x-options': {
@@ -56,7 +36,7 @@ const modePlaybookField = (projectId) => ({
     },
 });
 
-const modeModuleField = (projectId) => ({
+export const modeModuleField = (projectId) => ({
     name: 'mode',
     format: ProjectBasedFkField.format,
     'x-options': {
@@ -109,42 +89,50 @@ const initiatorField = {
 };
 
 for (const modelName of HISTORY_MODELS) {
+    setupModel(modelName);
+}
+
+export function setupModel(modelName) {
     spa.signals.once(`models[${modelName}].fields.beforeInit`, (fields) => {
-        fields.executor.format = 'dynamic';
-        fields.executor['x-options'] = {
-            types: {
-                project: executorUserField,
-                template: executorUserField,
-                scheduler: executorSchedulerField,
-            },
-            field: 'initiator_type',
-        };
+        if (fields.initiator) {
+            fields.initiator.format = 'dynamic';
+            fields.initiator['x-options'] = {
+                callback: ({ initiator_type, project = app.application.$route.params.id }) =>
+                    initiatorField[initiator_type](project),
+                field: ['initiator_type', 'project'],
+            };
+        }
+        if (fields.inventory) {
+            fields.inventory.format = InventoryField.format;
+        }
+        if (fields.mode) {
+            fields.mode.format = 'dynamic';
+            fields.mode['x-options'] = {
+                callback: ({ kind, project = app.application.$route.params.id }) => {
+                    if (kind === 'PLAYBOOK') {
+                        return modePlaybookField(project);
+                    } else if (kind === 'MODULE') {
+                        return modeModuleField(project);
+                    }
+                },
+                field: ['kind', 'project'],
+            };
+        }
+    });
+}
 
-        fields.initiator.format = 'dynamic';
-        fields.initiator['x-options'] = {
-            callback: ({ initiator_type, project = app.application.$route.params.id }) =>
-                initiatorField[initiator_type](project),
-            field: ['initiator_type', 'project'],
-        };
+const modelListFields = ['options', 'initiator_type', 'kind', 'project'];
 
-        fields.inventory.format = InventoryField.format;
-
-        fields.mode.format = 'dynamic';
-        fields.mode['x-options'] = {
-            callback: ({ kind, project = app.application.$route.params.id }) => {
-                if (kind === 'PLAYBOOK') {
-                    return modePlaybookField(project);
-                } else if (kind === 'MODULE') {
-                    return modeModuleField(project);
-                }
-            },
-            field: ['kind', 'project'],
-        };
-
-        for (const field of ['options', 'initiator_type', 'kind', 'project']) {
+export function hideListColumns(modelName, listFields) {
+    spa.signals.once(`models[${modelName}].fields.beforeInit`, (fields) => {
+        for (const field of listFields) {
             if (fields[field]) fields[field].hidden = true;
         }
     });
+}
+
+for (const modelName of HISTORY_MODELS) {
+    hideListColumns(modelName, modelListFields);
 }
 
 spa.signals.once('models[OneHistory].fields.beforeInit', (fields) => {
@@ -269,15 +257,26 @@ const HideListOperationsMixin = {
     },
 };
 
-spa.signals.once('allViews.created', ({ views }) => {
-    for (const detailPath of HISTORY_DETAIL_PATHS) {
-        const detailView = views.get(detailPath);
+for (const path of HISTORY_DETAIL_PATHS) {
+    setupDetailView(path);
+}
+
+for (const path of HISTORY_LIST_PATHS) {
+    setupListView(path);
+}
+
+export function setupDetailView(path) {
+    spa.signals.once('allViews.created', ({ views }) => {
+        const detailView = views.get(path);
         detailView.mixins.push(HistoryDetailView, HideDetailOperationsMixin);
-    }
-    for (const listPath of HISTORY_LIST_PATHS) {
-        const listView = views.get(listPath);
+    });
+}
+
+export function setupListView(path) {
+    spa.signals.once('allViews.created', ({ views }) => {
+        const listView = views.get(path);
         listView.mixins.push(HideListOperationsMixin);
         listView.multiActions.delete('cancel');
         listView.multiActions.delete('clear');
-    }
-});
+    });
+}

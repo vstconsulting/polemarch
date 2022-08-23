@@ -35,7 +35,7 @@ TRANSLATION = {
     'Type': 'Тип',
     'Save result': 'Сохранять результат',
     'Template': 'Шаблон',
-    'template opt': 'опция шаблона',
+    'Template opt': 'Опция шаблона',
     'Enabled': 'Доступен',
 
     'New owner': 'Новый владелец',

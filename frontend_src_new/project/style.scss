@@ -1,0 +1,12 @@
+.list-Project {
+    @media (max-width: 1000px) {
+        .column-status {
+            display: none;
+        }
+    }
+    @media (max-width: 1400px) {
+        .column-type {
+            display: none;
+        }
+    }
+}

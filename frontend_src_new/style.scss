@@ -1,27 +1,27 @@
 @use "sass:map";
 
 body {
-    --history-status-ok: #276900;
-    --history-status-error: #dc3545;
-    --history-status-interrupted: #9b97e4;
-    --history-status-delay: #808419;
-    --history-status-offline: #9e9e9e;
-    --history-status-run: #0085ff;
+    --status-ok: #27ae60;
+    --status-error: #dc3545;
+    --status-interrupted: #9b97e4;
+    --status-delay: #808419;
+    --status-offline: #808080;
+    --status-run: #0085ff;
 
-    --project-status-new: #8c8c8c;
+    --project-status-new: #808080;
     --project-status-error: #dc3545;
-    --project-status-ok: #276900;
+    --project-status-ok: #27ae60;
     --project-status-wait-sync: #0085ff;
     --project-status-sync: #ff8c00;
 }
 
 $history-status-colors: (
-        "OK": var(--history-status-ok),
-        "ERROR": var(--history-status-error),
-        "INTERRUPTED": var(--history-status-interrupted),
-        "DELAY": var(--history-status-delay),
-        "OFFLINE": var(--history-status-offline),
-        "RUN": var(--history-status-run),
+        "OK": var(--status-ok),
+        "ERROR": var(--status-error),
+        "INTERRUPTED": var(--status-interrupted),
+        "DELAY": var(--status-delay),
+        "OFFLINE": var(--status-offline),
+        "RUN": var(--status-run),
 );
 
 $project-status-colors: (
@@ -32,8 +32,20 @@ $project-status-colors: (
         "SYNC": var(--project-status-sync),
 );
 
+@each $status, $color in $history-status-colors {
+    .model-History.field-component.name-status.value-#{$status} {
+        color: #{$color};
+    }
+    .model-OneHistory.field-component.name-status.value-#{$status} {
+        color: #{$color};
+    }
+}
+
 @each $status, $color in $project-status-colors {
-    .field-component.name-status.value-#{$status} {
+    .model-Project.field-component.name-status.value-#{$status} {
+        color: #{$color};
+    }
+    .model-OneProject.field-component.name-status.value-#{$status} {
         color: #{$color};
     }
 }
