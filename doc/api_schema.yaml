@@ -199,9 +199,9 @@ paths:
         description: A unique value identifying this project template.
         required: true
         type: integer
-  /groups/:
+  /group/:
     get:
-      operationId: groups_list
+      operationId: group_list
       description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters:
         - name: __deep_parent
@@ -302,12 +302,12 @@ paths:
                 items:
                   $ref: '#/definitions/Group'
       tags:
-        - groups
+        - group
       x-subscribe-labels:
         - main.Group
       x-deep-nested-view: groups
     post:
-      operationId: groups_add
+      operationId: group_add
       description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters:
         - name: data
@@ -321,11 +321,11 @@ paths:
           schema:
             $ref: '#/definitions/GroupCreateMaster'
       tags:
-        - groups
+        - group
     parameters: []
-  /groups/{id}/:
+  /group/{id}/:
     get:
-      operationId: groups_get
+      operationId: group_get
       description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters: []
       responses:
@@ -334,12 +334,12 @@ paths:
           schema:
             $ref: '#/definitions/OneGroup'
       tags:
-        - groups
+        - group
       x-subscribe-labels:
         - main.Group
       x-deep-nested-view: groups
     put:
-      operationId: groups_update
+      operationId: group_update
       description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters:
         - name: data
@@ -353,9 +353,9 @@ paths:
           schema:
             $ref: '#/definitions/OneGroup'
       tags:
-        - groups
+        - group
     patch:
-      operationId: groups_edit
+      operationId: group_edit
       description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters:
         - name: data
@@ -369,25 +369,25 @@ paths:
           schema:
             $ref: '#/definitions/OneGroup'
       tags:
-        - groups
+        - group
     delete:
-      operationId: groups_remove
+      operationId: group_remove
       description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters: []
       responses:
         '204':
           description: NO CONTENT
       tags:
-        - groups
+        - group
     parameters:
       - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /groups/{id}/copy/:
+  /group/{id}/copy/:
     post:
-      operationId: groups_copy
+      operationId: group_copy
       description: Endpoint which copy instance with deps.
       parameters:
         - name: data
@@ -401,16 +401,16 @@ paths:
           schema:
             $ref: '#/definitions/Group'
       tags:
-        - groups
+        - group
     parameters:
       - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /groups/{id}/groups/:
+  /group/{id}/groups/:
     get:
-      operationId: groups_groups_list
+      operationId: group_groups_list
       description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters:
         - name: __deep_parent
@@ -511,11 +511,11 @@ paths:
                 items:
                   $ref: '#/definitions/Group'
       tags:
-        - groups
+        - group
       x-subscribe-labels:
         - main.Group
     post:
-      operationId: groups_groups_add
+      operationId: group_groups_add
       description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters:
         - name: data
@@ -529,7 +529,7 @@ paths:
           schema:
             $ref: '#/definitions/GroupCreateMaster'
       tags:
-        - groups
+        - group
       x-allow-append: true
     parameters:
       - name: id
@@ -537,9 +537,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /groups/{id}/groups/{groups_id}/:
+  /group/{id}/groups/{groups_id}/:
     get:
-      operationId: groups_groups_get
+      operationId: group_groups_get
       description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters: []
       responses:
@@ -548,11 +548,11 @@ paths:
           schema:
             $ref: '#/definitions/OneGroup'
       tags:
-        - groups
+        - group
       x-subscribe-labels:
         - main.Group
     put:
-      operationId: groups_groups_update
+      operationId: group_groups_update
       description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters:
         - name: data
@@ -566,9 +566,9 @@ paths:
           schema:
             $ref: '#/definitions/OneGroup'
       tags:
-        - groups
+        - group
     patch:
-      operationId: groups_groups_edit
+      operationId: group_groups_edit
       description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters:
         - name: data
@@ -582,16 +582,16 @@ paths:
           schema:
             $ref: '#/definitions/OneGroup'
       tags:
-        - groups
+        - group
     delete:
-      operationId: groups_groups_remove
+      operationId: group_groups_remove
       description: Group(id, hidden, notes, owner, name, master_project, children)
       parameters: []
       responses:
         '204':
           description: NO CONTENT
       tags:
-        - groups
+        - group
     parameters:
       - name: groups_id
         in: path
@@ -603,9 +603,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /groups/{id}/groups/{groups_id}/copy/:
+  /group/{id}/groups/{groups_id}/copy/:
     post:
-      operationId: groups_groups_copy
+      operationId: group_groups_copy
       description: Endpoint which copy instance with deps.
       parameters:
         - name: data
@@ -619,7 +619,7 @@ paths:
           schema:
             $ref: '#/definitions/Group'
       tags:
-        - groups
+        - group
     parameters:
       - name: groups_id
         in: path
@@ -631,9 +631,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /groups/{id}/groups/{groups_id}/hosts/:
+  /group/{id}/groups/{groups_id}/hosts/:
     get:
-      operationId: groups_groups_hosts_list
+      operationId: group_groups_hosts_list
       description: Return all hosts.
       parameters:
         - name: id
@@ -734,11 +734,11 @@ paths:
                 items:
                   $ref: '#/definitions/Host'
       tags:
-        - groups
+        - group
       x-subscribe-labels:
         - main.Host
     post:
-      operationId: groups_groups_hosts_add
+      operationId: group_groups_hosts_add
       description: Create a new host.
       parameters:
         - name: data
@@ -752,7 +752,7 @@ paths:
           schema:
             $ref: '#/definitions/OneHost'
       tags:
-        - groups
+        - group
       x-allow-append: true
     parameters:
       - name: groups_id
@@ -765,9 +765,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /groups/{id}/groups/{groups_id}/hosts/{hosts_id}/:
+  /group/{id}/groups/{groups_id}/hosts/{hosts_id}/:
     get:
-      operationId: groups_groups_hosts_get
+      operationId: group_groups_hosts_get
       description: Return a host instance.
       parameters: []
       responses:
@@ -776,11 +776,11 @@ paths:
           schema:
             $ref: '#/definitions/OneHost'
       tags:
-        - groups
+        - group
       x-subscribe-labels:
         - main.Host
     put:
-      operationId: groups_groups_hosts_update
+      operationId: group_groups_hosts_update
       description: Update a host.
       parameters:
         - name: data
@@ -794,9 +794,9 @@ paths:
           schema:
             $ref: '#/definitions/OneHost'
       tags:
-        - groups
+        - group
     patch:
-      operationId: groups_groups_hosts_edit
+      operationId: group_groups_hosts_edit
       description: Update one or more fields on an existing host.
       parameters:
         - name: data
@@ -810,16 +810,16 @@ paths:
           schema:
             $ref: '#/definitions/OneHost'
       tags:
-        - groups
+        - group
     delete:
-      operationId: groups_groups_hosts_remove
+      operationId: group_groups_hosts_remove
       description: Remove an existing host.
       parameters: []
       responses:
         '204':
           description: NO CONTENT
       tags:
-        - groups
+        - group
     parameters:
       - name: groups_id
         in: path
@@ -836,9 +836,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /groups/{id}/groups/{groups_id}/hosts/{hosts_id}/copy/:
+  /group/{id}/groups/{groups_id}/hosts/{hosts_id}/copy/:
     post:
-      operationId: groups_groups_hosts_groups_copy
+      operationId: group_groups_hosts_groups_copy
       description: Endpoint which copy instance with deps.
       parameters:
         - name: data
@@ -852,7 +852,7 @@ paths:
           schema:
             $ref: '#/definitions/Host'
       tags:
-        - groups
+        - group
     parameters:
       - name: groups_id
         in: path
@@ -869,9 +869,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /groups/{id}/groups/{groups_id}/hosts/{hosts_id}/set_owner/:
+  /group/{id}/groups/{groups_id}/hosts/{hosts_id}/set_owner/:
     post:
-      operationId: groups_groups_hosts_groups_set_owner
+      operationId: group_groups_hosts_groups_set_owner
       description: Change instance owner.
       parameters:
         - name: data
@@ -885,7 +885,7 @@ paths:
           schema:
             $ref: '#/definitions/SetOwner'
       tags:
-        - groups
+        - group
     parameters:
       - name: groups_id
         in: path
@@ -902,9 +902,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /groups/{id}/groups/{groups_id}/hosts/{hosts_id}/variables/:
+  /group/{id}/groups/{groups_id}/hosts/{hosts_id}/variables/:
     get:
-      operationId: groups_groups_hosts_variables_list
+      operationId: group_groups_hosts_variables_list
       description: Return all variables of instance.
       parameters:
         - name: id
@@ -995,11 +995,11 @@ paths:
                 items:
                   $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
       x-subscribe-labels:
         - main.Variable
     post:
-      operationId: groups_groups_hosts_variables_add
+      operationId: group_groups_hosts_variables_add
       description: Create a new variable of instance.
       parameters:
         - name: data
@@ -1013,7 +1013,7 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
       x-allow-append: false
     parameters:
       - name: groups_id
@@ -1031,9 +1031,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /groups/{id}/groups/{groups_id}/hosts/{hosts_id}/variables/{variables_id}/:
+  /group/{id}/groups/{groups_id}/hosts/{hosts_id}/variables/{variables_id}/:
     get:
-      operationId: groups_groups_hosts_variables_get
+      operationId: group_groups_hosts_variables_get
       description: Return a variable of instance.
       parameters: []
       responses:
@@ -1042,11 +1042,11 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
       x-subscribe-labels:
         - main.Variable
     put:
-      operationId: groups_groups_hosts_variables_update
+      operationId: group_groups_hosts_variables_update
       description: Update variable value.
       parameters:
         - name: data
@@ -1060,9 +1060,9 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
     patch:
-      operationId: groups_groups_hosts_variables_edit
+      operationId: group_groups_hosts_variables_edit
       description: Update one or more fields on an existing variable.
       parameters:
         - name: data
@@ -1076,16 +1076,16 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
     delete:
-      operationId: groups_groups_hosts_variables_remove
+      operationId: group_groups_hosts_variables_remove
       description: Remove an existing variable.
       parameters: []
       responses:
         '204':
           description: NO CONTENT
       tags:
-        - groups
+        - group
     parameters:
       - name: groups_id
         in: path
@@ -1108,9 +1108,9 @@ paths:
         type: integer
         description: A unique integer value identifying instance of this variables
           sublist.
-  /groups/{id}/groups/{groups_id}/set_owner/:
+  /group/{id}/groups/{groups_id}/set_owner/:
     post:
-      operationId: groups_groups_set_owner
+      operationId: group_groups_set_owner
       description: Change instance owner.
       parameters:
         - name: data
@@ -1124,7 +1124,7 @@ paths:
           schema:
             $ref: '#/definitions/SetOwner'
       tags:
-        - groups
+        - group
     parameters:
       - name: groups_id
         in: path
@@ -1136,9 +1136,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /groups/{id}/groups/{groups_id}/variables/:
+  /group/{id}/groups/{groups_id}/variables/:
     get:
-      operationId: groups_groups_variables_list
+      operationId: group_groups_variables_list
       description: Return all variables of instance.
       parameters:
         - name: id
@@ -1229,11 +1229,11 @@ paths:
                 items:
                   $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
       x-subscribe-labels:
         - main.Variable
     post:
-      operationId: groups_groups_variables_add
+      operationId: group_groups_variables_add
       description: Create a new variable of instance.
       parameters:
         - name: data
@@ -1247,7 +1247,7 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
       x-allow-append: false
     parameters:
       - name: groups_id
@@ -1260,9 +1260,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /groups/{id}/groups/{groups_id}/variables/{variables_id}/:
+  /group/{id}/groups/{groups_id}/variables/{variables_id}/:
     get:
-      operationId: groups_groups_variables_get
+      operationId: group_groups_variables_get
       description: Return a variable of instance.
       parameters: []
       responses:
@@ -1271,11 +1271,11 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
       x-subscribe-labels:
         - main.Variable
     put:
-      operationId: groups_groups_variables_update
+      operationId: group_groups_variables_update
       description: Update variable value.
       parameters:
         - name: data
@@ -1289,9 +1289,9 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
     patch:
-      operationId: groups_groups_variables_edit
+      operationId: group_groups_variables_edit
       description: Update one or more fields on an existing variable.
       parameters:
         - name: data
@@ -1305,16 +1305,16 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
     delete:
-      operationId: groups_groups_variables_remove
+      operationId: group_groups_variables_remove
       description: Remove an existing variable.
       parameters: []
       responses:
         '204':
           description: NO CONTENT
       tags:
-        - groups
+        - group
     parameters:
       - name: groups_id
         in: path
@@ -1332,9 +1332,9 @@ paths:
         type: integer
         description: A unique integer value identifying instance of this variables
           sublist.
-  /groups/{id}/hosts/:
+  /group/{id}/hosts/:
     get:
-      operationId: groups_hosts_list
+      operationId: group_hosts_list
       description: Return all hosts.
       parameters:
         - name: id
@@ -1435,11 +1435,11 @@ paths:
                 items:
                   $ref: '#/definitions/Host'
       tags:
-        - groups
+        - group
       x-subscribe-labels:
         - main.Host
     post:
-      operationId: groups_hosts_add
+      operationId: group_hosts_add
       description: Create a new host.
       parameters:
         - name: data
@@ -1453,7 +1453,7 @@ paths:
           schema:
             $ref: '#/definitions/OneHost'
       tags:
-        - groups
+        - group
       x-allow-append: true
     parameters:
       - name: id
@@ -1461,9 +1461,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /groups/{id}/hosts/{hosts_id}/:
+  /group/{id}/hosts/{hosts_id}/:
     get:
-      operationId: groups_hosts_get
+      operationId: group_hosts_get
       description: Return a host instance.
       parameters: []
       responses:
@@ -1472,11 +1472,11 @@ paths:
           schema:
             $ref: '#/definitions/OneHost'
       tags:
-        - groups
+        - group
       x-subscribe-labels:
         - main.Host
     put:
-      operationId: groups_hosts_update
+      operationId: group_hosts_update
       description: Update a host.
       parameters:
         - name: data
@@ -1490,9 +1490,9 @@ paths:
           schema:
             $ref: '#/definitions/OneHost'
       tags:
-        - groups
+        - group
     patch:
-      operationId: groups_hosts_edit
+      operationId: group_hosts_edit
       description: Update one or more fields on an existing host.
       parameters:
         - name: data
@@ -1506,16 +1506,16 @@ paths:
           schema:
             $ref: '#/definitions/OneHost'
       tags:
-        - groups
+        - group
     delete:
-      operationId: groups_hosts_remove
+      operationId: group_hosts_remove
       description: Remove an existing host.
       parameters: []
       responses:
         '204':
           description: NO CONTENT
       tags:
-        - groups
+        - group
     parameters:
       - name: hosts_id
         in: path
@@ -1527,9 +1527,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /groups/{id}/hosts/{hosts_id}/copy/:
+  /group/{id}/hosts/{hosts_id}/copy/:
     post:
-      operationId: groups_hosts_copy
+      operationId: group_hosts_copy
       description: Endpoint which copy instance with deps.
       parameters:
         - name: data
@@ -1543,7 +1543,7 @@ paths:
           schema:
             $ref: '#/definitions/Host'
       tags:
-        - groups
+        - group
     parameters:
       - name: hosts_id
         in: path
@@ -1555,9 +1555,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /groups/{id}/hosts/{hosts_id}/set_owner/:
+  /group/{id}/hosts/{hosts_id}/set_owner/:
     post:
-      operationId: groups_hosts_set_owner
+      operationId: group_hosts_set_owner
       description: Change instance owner.
       parameters:
         - name: data
@@ -1571,7 +1571,7 @@ paths:
           schema:
             $ref: '#/definitions/SetOwner'
       tags:
-        - groups
+        - group
     parameters:
       - name: hosts_id
         in: path
@@ -1583,9 +1583,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /groups/{id}/hosts/{hosts_id}/variables/:
+  /group/{id}/hosts/{hosts_id}/variables/:
     get:
-      operationId: groups_hosts_variables_list
+      operationId: group_hosts_variables_list
       description: Return all variables of instance.
       parameters:
         - name: id
@@ -1676,11 +1676,11 @@ paths:
                 items:
                   $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
       x-subscribe-labels:
         - main.Variable
     post:
-      operationId: groups_hosts_variables_add
+      operationId: group_hosts_variables_add
       description: Create a new variable of instance.
       parameters:
         - name: data
@@ -1694,7 +1694,7 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
       x-allow-append: false
     parameters:
       - name: hosts_id
@@ -1707,9 +1707,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /groups/{id}/hosts/{hosts_id}/variables/{variables_id}/:
+  /group/{id}/hosts/{hosts_id}/variables/{variables_id}/:
     get:
-      operationId: groups_hosts_variables_get
+      operationId: group_hosts_variables_get
       description: Return a variable of instance.
       parameters: []
       responses:
@@ -1718,11 +1718,11 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
       x-subscribe-labels:
         - main.Variable
     put:
-      operationId: groups_hosts_variables_update
+      operationId: group_hosts_variables_update
       description: Update variable value.
       parameters:
         - name: data
@@ -1736,9 +1736,9 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
     patch:
-      operationId: groups_hosts_variables_edit
+      operationId: group_hosts_variables_edit
       description: Update one or more fields on an existing variable.
       parameters:
         - name: data
@@ -1752,16 +1752,16 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
     delete:
-      operationId: groups_hosts_variables_remove
+      operationId: group_hosts_variables_remove
       description: Remove an existing variable.
       parameters: []
       responses:
         '204':
           description: NO CONTENT
       tags:
-        - groups
+        - group
     parameters:
       - name: hosts_id
         in: path
@@ -1779,9 +1779,9 @@ paths:
         type: integer
         description: A unique integer value identifying instance of this variables
           sublist.
-  /groups/{id}/set_owner/:
+  /group/{id}/set_owner/:
     post:
-      operationId: groups_set_owner
+      operationId: group_set_owner
       description: Change instance owner.
       parameters:
         - name: data
@@ -1795,16 +1795,16 @@ paths:
           schema:
             $ref: '#/definitions/SetOwner'
       tags:
-        - groups
+        - group
     parameters:
       - name: id
         in: path
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /groups/{id}/variables/:
+  /group/{id}/variables/:
     get:
-      operationId: groups_variables_list
+      operationId: group_variables_list
       description: Return all variables of instance.
       parameters:
         - name: id
@@ -1895,11 +1895,11 @@ paths:
                 items:
                   $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
       x-subscribe-labels:
         - main.Variable
     post:
-      operationId: groups_variables_add
+      operationId: group_variables_add
       description: Create a new variable of instance.
       parameters:
         - name: data
@@ -1913,7 +1913,7 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
       x-allow-append: false
     parameters:
       - name: id
@@ -1921,9 +1921,9 @@ paths:
         description: A unique integer value identifying this group.
         required: true
         type: integer
-  /groups/{id}/variables/{variables_id}/:
+  /group/{id}/variables/{variables_id}/:
     get:
-      operationId: groups_variables_get
+      operationId: group_variables_get
       description: Return a variable of instance.
       parameters: []
       responses:
@@ -1932,11 +1932,11 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
       x-subscribe-labels:
         - main.Variable
     put:
-      operationId: groups_variables_update
+      operationId: group_variables_update
       description: Update variable value.
       parameters:
         - name: data
@@ -1950,9 +1950,9 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
     patch:
-      operationId: groups_variables_edit
+      operationId: group_variables_edit
       description: Update one or more fields on an existing variable.
       parameters:
         - name: data
@@ -1966,16 +1966,16 @@ paths:
           schema:
             $ref: '#/definitions/InventoryVariable'
       tags:
-        - groups
+        - group
     delete:
-      operationId: groups_variables_remove
+      operationId: group_variables_remove
       description: Remove an existing variable.
       parameters: []
       responses:
         '204':
           description: NO CONTENT
       tags:
-        - groups
+        - group
     parameters:
       - name: id
         in: path

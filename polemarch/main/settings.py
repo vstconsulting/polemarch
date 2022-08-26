@@ -57,7 +57,7 @@ API = {
 }
 API[VST_API_VERSION] = {
     **API['v2'],
-    'groups': {
+    'group': {
         'view': '{}.api.v3.views.GroupViewSet'.format(VST_PROJECT_LIB_NAME)
     },
     'inventory': {
@@ -67,7 +67,6 @@ API[VST_API_VERSION] = {
         'view': '{}.api.v3.views.ProjectViewSet'.format(VST_PROJECT_LIB_NAME)
     },
 }
-del API[VST_API_VERSION]['group']
 
 PROJECT_GUI_MENU = []
 
