@@ -141,7 +141,7 @@ Install from PyPI
 
 
    #. Create directory for `log` and `pid` files:
-      
+
       .. sourcecode:: bash
 
             mkdir /opt/polemarch/logs /opt/polemarch/pid
@@ -221,10 +221,11 @@ For run Polemarch docker image use command:
 
     .. sourcecode:: bash
 
-        docker run -d --name polemarch --restart always -v /opt/polemarch/projects:/projects -v /opt/polemarch/hooks:/hooks vstconsulting/polemarch
+        docker run -d --name polemarch --restart always -v /opt/polemarch/projects:/projects -v /opt/polemarch/hooks:/hooks -p 8080:8080 vstconsulting/polemarch
 
 Using this command download official docker image and run it with default settings. Dont use default SQLite installation with filecache in production.
 
+Ensure, that `/opt/polemarch/projects` and `/opt/polemarch/hooks` has uid/gid `1000`/`1000` as owner.
 Polemarch will be run with web interface on port `8080`
 
 
@@ -301,20 +302,20 @@ Run latest version of Polemarch in docker and connect to MySQL on server:
 
     .. sourcecode:: bash
 
-        docker run -d --name polemarch --restart always -v /opt/polemarch/projects:/projects -v /opt/polemarch/hooks:/hooks --env POLEMARCH_DB_TYPE=mysql --env POLEMARCH_DB_NAME=polemarch --env POLEMARCH_DB_USER=polemarch --env POLEMARCH_DB_PASSWORD=polemarch --env POLEMARCH_DB_PORT=3306 --env POLEMARCH_DB_HOST=polemarch_db vstconsulting/polemarch
+        docker run -d --name polemarch --restart always -v /opt/polemarch/projects:/projects -v /opt/polemarch/hooks:/hooks --env POLEMARCH_DB_TYPE=mysql --env POLEMARCH_DB_NAME=polemarch --env POLEMARCH_DB_USER=polemarch --env POLEMARCH_DB_PASSWORD=polemarch --env POLEMARCH_DB_PORT=3306 --env POLEMARCH_DB_HOST=polemarch_db -p 8080:8080 vstconsulting/polemarch
 
 Run Polemarch with Memcache and RabbitMQ and SQLite3. Polemarch log-level=INFO, secret-key=mysecretkey
 
     .. sourcecode:: bash
 
-        docker run -d --name polemarch --restart always -v /opt/polemarch/projects:/projects -v /opt/polemarch/hooks:/hooks --env RPC_ENGINE=amqp://polemarch:polemarch@rabbitmq-server:5672/polemarch --env CACHE_LOCATION=memcached-server:11211 --env POLEMARCH_LOG_LEVEL=INFO --env SECRET_KEY=mysecretkey vstconsulting/polemarch
+        docker run -d --name polemarch --restart always -v /opt/polemarch/projects:/projects -v /opt/polemarch/hooks:/hooks --env RPC_ENGINE=amqp://polemarch:polemarch@rabbitmq-server:5672/polemarch --env CACHE_LOCATION=memcached-server:11211 --env POLEMARCH_LOG_LEVEL=INFO --env SECRET_KEY=mysecretkey -p 8080:8080 vstconsulting/polemarch
 
 
 Also you can use `.env` file with all variable you want use on run docker:
 
     .. sourcecode:: bash
 
-        docker run -d --name polemarch --restart always -v /opt/polemarch/projects:/projects -v /opt/polemarch/hooks:/hooks --env-file /path/to/file vstconsulting/polemarch
+        docker run -d --name polemarch --restart always -v /opt/polemarch/projects:/projects -v /opt/polemarch/hooks:/hooks --env-file /path/to/file -p 8080:8080 vstconsulting/polemarch
 
 
 Run from the sources with docker-compose (PoleMarch+MySQL+Redis):
