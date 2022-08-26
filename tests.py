@@ -464,9 +464,9 @@ class InventoryTestCase(BaseProjectTestCase):
 
     def test_nested_groups(self):
         results = self.bulk([
-            {'method': 'post', 'path': 'groups', 'data': {'children': False}},
-            {'method': 'get', 'path': ['groups', '<<0[data][id]>>', 'groups']},
-            {'method': 'post', 'path': ['groups', '<<0[data][id]>>', 'groups'], 'data': {'lol': 'kek'}},
+            {'method': 'post', 'path': 'group', 'data': {'children': False}},
+            {'method': 'get', 'path': ['group', '<<0[data][id]>>', 'groups']},
+            {'method': 'post', 'path': ['group', '<<0[data][id]>>', 'groups'], 'data': {'lol': 'kek'}},
         ])
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[1]['status'], 409)
@@ -475,9 +475,9 @@ class InventoryTestCase(BaseProjectTestCase):
         self.assertEqual(results[2]['data'], ['Group is not children.'])
 
         results = self.bulk([
-            {'method': 'post', 'path': 'groups', 'data': {'children': True}},
-            {'method': 'get', 'path': ['groups', '<<0[data][id]>>', 'hosts']},
-            {'method': 'post', 'path': ['groups', '<<0[data][id]>>', 'hosts'], 'data': {'lol': 'kek'}},
+            {'method': 'post', 'path': 'group', 'data': {'children': True}},
+            {'method': 'get', 'path': ['group', '<<0[data][id]>>', 'hosts']},
+            {'method': 'post', 'path': ['group', '<<0[data][id]>>', 'hosts'], 'data': {'lol': 'kek'}},
         ])
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[1]['status'], 409)
@@ -486,8 +486,8 @@ class InventoryTestCase(BaseProjectTestCase):
         self.assertEqual(results[2]['data'], ['Group is children.'])
 
         results = self.bulk([
-            {'method': 'post', 'path': 'groups', 'data': {'children': True}},
-            {'method': 'post', 'path': ['groups', '<<0[data][id]>>', 'groups'], 'data': {'id': '<<0[data][id]>>'}},
+            {'method': 'post', 'path': 'group', 'data': {'children': True}},
+            {'method': 'post', 'path': ['group', '<<0[data][id]>>', 'groups'], 'data': {'id': '<<0[data][id]>>'}},
         ])
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[1]['status'], 400)
@@ -499,7 +499,7 @@ class InventoryTestCase(BaseProjectTestCase):
         with self.patch('sys.argv', ['loaddata']):
             group = self.get_model_class('main.Group').objects.create(children=True)
             group.parents.add(group)
-        results = self.bulk([{'method': 'post', 'path': ['groups', group.id, 'groups'], 'data': {}}])
+        results = self.bulk([{'method': 'post', 'path': ['group', group.id, 'groups'], 'data': {}}])
         self.assertEqual(results[0]['status'], 400)
         self.assertEqual(
             results[0]['data']['detail'],
@@ -510,10 +510,10 @@ class InventoryTestCase(BaseProjectTestCase):
         user = self._create_user(is_super_user=True, username='user1', email='user1@users.vst')
         with self.user_as(self, user):
             results = self.bulk([
-                {'method': 'post', 'path': 'groups', 'data': {'name': 'group1'}},
-                {'method': 'get', 'path': ['groups', '<<0[data][id]>>']},
+                {'method': 'post', 'path': 'group', 'data': {'name': 'group1'}},
+                {'method': 'get', 'path': ['group', '<<0[data][id]>>']},
             ])
-        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[0]['status'], 201, results[0])
         self.assertEqual(results[1]['status'], 200)
         self.assertEqual(results[1]['data']['owner']['id'], user.id)
 
@@ -2362,7 +2362,7 @@ class VariableTestCase(BaseProjectTestCase):
         self.check_vars(['host', self.host.id])
 
     def test_group_vars(self):
-        self.check_vars(['groups', self.group.id])
+        self.check_vars(['group', self.group.id])
 
     def test_inventory_vars(self):
         self.check_vars(['inventory', self.inventory.id])
@@ -2386,21 +2386,21 @@ class VariableTestCase(BaseProjectTestCase):
         results = self.bulk([
             {  # [0] get all
                 'method': 'get',
-                'path': 'groups',
+                'path': 'group',
             },
             {  # [1] should find 1
                 'method': 'get',
-                'path': 'groups',
+                'path': 'group',
                 'query': 'variables=lol:kek'
             },
             {  # [2] should find 0
                 'method': 'get',
-                'path': 'groups',
+                'path': 'group',
                 'query': 'variables=unknown:unknown'
             },
             {  # [3] should raise list index out of range (FIXME: really ??)
                 'method': 'get',
-                'path': 'groups',
+                'path': 'group',
                 'query': 'variables=kek'
             },
         ])
@@ -2737,6 +2737,7 @@ class UserTestCase(VSTBaseTestCase):
 
 class BaseOpenAPITestCase(VSTBaseTestCase):
     maxDiff = None
+    _schema = None
 
     system_tab = {
         'name': 'System',
@@ -2762,8 +2763,29 @@ class BaseOpenAPITestCase(VSTBaseTestCase):
             cls.openapi_schema_yaml = Path.cwd() / 'doc' / 'api_schema.yaml'
         assert Path(cls.openapi_schema_yaml).is_file(), "OpenAPI schema file doesn't exist."
 
-    def check_schema(self):
-        schema = self.endpoint_schema()
+    def schema(self):
+        if self._schema is None:
+            self._schema = self.endpoint_schema()
+        return self._schema
+
+
+class OpenAPITestCase(BaseOpenAPITestCase):
+    """
+    Regenerate new doc schema:
+
+    Examples:
+    .. sourcecode:: bash
+
+        python -m polemarch generate_swagger \
+                                --format yaml \
+                                --overwrite \
+                                --url 'http://localhost:8080/' \
+                                --user admin \
+                                -m doc/api_schema.yaml
+    """
+
+    def test_schema(self):
+        schema = self.schema()
         openapi_schema_yml = yaml.load(Path(self.openapi_schema_yaml).read_text(), Loader=yaml.SafeLoader)
 
         openapi_schema_yml['host'] = self.server_name
@@ -2788,33 +2810,15 @@ class BaseOpenAPITestCase(VSTBaseTestCase):
             for key, value in openapi_schema_yml[module].items():
                 self.assertDictEqual(value, schema[module].get(key), key)
 
-        return schema
-
-
-@skipIf(settings.VST_PROJECT_LIB_NAME != 'polemarch', 'OpenAPI schema may vary')
-class OpenAPITestCase(BaseOpenAPITestCase):
-    """
-    Regenerate new doc schema:
-
-    Examples:
-    .. sourcecode:: bash
-
-        python -m polemarch generate_swagger \
-                                --format yaml \
-                                --overwrite \
-                                --url 'http://localhost:8080/' \
-                                --user admin \
-                                -m doc/api_schema.yaml
-    """
-
-    def test_schema(self):
-        schema = self.check_schema()
+    @skipIf(settings.VST_PROJECT_LIB_NAME != 'polemarch', 'Menu may vary')
+    def test_menu(self):
+        schema = self.schema()
         # superuser menu
         system_tab_superuser = self.system_tab
         system_tab_superuser['sublinks'] = [self.users_sublink, self.hooks_sublink]
         self.assertEqual(schema['info']['x-menu'], PROJECT_MENU + [system_tab_superuser])
 
-    def test_menu_schema_as_regular_user(self):
+        # regular user menu
         user_reg = self._create_user(is_super_user=False)
         with self.user_as(self, user_reg):
             reg_schema = self.endpoint_schema()

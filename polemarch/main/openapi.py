@@ -22,7 +22,7 @@ PROJECT_MENU = [
         'sublinks': [
             {
                 'name': 'Groups',
-                'url': '/groups',
+                'url': '/group',
                 'span_class': 'fas fa-server',
             },
             {
