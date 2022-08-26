@@ -1,3 +1,5 @@
+@import "../style";
+
 .list-History, .list-ProjectHistory {
     @media (max-width: 600px) {
         .column-start_time {
@@ -23,5 +25,11 @@
         .column-stop_time {
             display: none;
         }
+    }
+}
+
+@each $status, $color in $history-status-colors {
+    .model-ProjectHistory.field-component.name-status.value-#{$status} {
+        color: #{$color};
     }
 }

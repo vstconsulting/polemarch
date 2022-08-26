@@ -41,7 +41,7 @@ info:
       sublinks:
         - name: Groups
           span_class: fas fa-server
-          url: /groups
+          url: /group
         - name: Hosts
           span_class: fas fa-hdd
           url: /host
@@ -68,7 +68,7 @@ info:
   x-versions:
     application: 2.0.0b2
     library: 2.0.0b2
-    vstutils: 5.0.1
+    vstutils: 5.0.2
     django: 3.2.15
     djangorestframework: 3.13.1
     drf_yasg: 1.21.3
@@ -13935,11 +13935,11 @@ definitions:
       password:
         title: Password
         type: string
-        minLength: 1
+        format: password
       password2:
         title: Repeat password
         type: string
-        minLength: 1
+        format: password
     x-properties-groups:
       '':
         - id
