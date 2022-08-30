@@ -698,9 +698,7 @@ class ProjectViewSet(OwnedView, _VariablesCopyMixin):
         exec_method = getattr(self, 'execute_{}'.format(kind), None)
         if exec_method is None:  # nocv
             raise Exception('Unknown kind')
-        serializer: sers.serializers.Serializer = exec_method.kwargs['serializer_class'](
-            context=self.get_serializer_context()
-        )
+        serializer: sers.serializers.Serializer = self.get_serializer()
         serializer.project = self.get_object()
         return serializer
 
