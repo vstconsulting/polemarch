@@ -29,6 +29,7 @@ from ..exceptions import DataNotReady, NotApplicable
 from .base import ForeignKeyACL, BModel, ACLModel, BQuerySet, models, BaseModel
 from .vars import AbstractModel, AbstractVarsQuerySet
 from .projects import Project, HISTORY_ID
+from ..constants import CYPHER, HiddenArg
 
 
 logger = logging.getLogger("polemarch")
@@ -136,7 +137,7 @@ class Template(ACLModel):
 
     def __encrypt(self, new_vars: Dict, data_name: Text = 'data') -> Dict:
         old_vars = getattr(self, data_name).get('vars', {})
-        for key in filter(lambda k: new_vars[k] == '[~~ENCRYPTED~~]', new_vars.keys()):
+        for key in filter(lambda k: new_vars[k] == CYPHER, new_vars.keys()):
             new_vars[key] = old_vars.get(key, new_vars[key])
         return new_vars
 
@@ -258,6 +259,10 @@ class TemplateOption(ListModel):
         self.template.set_options_data(options)
         self.template.save()
 
+    @property
+    def kind(self):
+        return self.template.kind
+
 
 class PeriodicTaskQuerySet(AbstractVarsQuerySet):
     use_for_related_fields = True
@@ -285,16 +290,6 @@ class PeriodicTask(AbstractModel):
 
     kinds = ["PLAYBOOK", "MODULE", "TEMPLATE"]
     types = ["CRONTAB", "INTERVAL"]
-    HIDDEN_VARS = [
-        'key-file',
-        'key_file',
-        'private-key',
-        'private_key',
-        'vault-password-file',
-        'vault_password_file',
-        'new-vault-password-file',
-        'new_vault_password_file',
-    ]
 
     class Meta:
         default_related_name = "periodic_task"
@@ -512,9 +507,7 @@ class History(BModel):
         if not isinstance(value, dict):
             raise ValidationError(dict(args="Should be a dict."))
         data = {k: v for k, v in value.items() if k not in ['group']}
-        for key in PeriodicTask.HIDDEN_VARS:
-            if key in data:
-                data[key] = "[~~ENCRYPTED~~]"
+        HiddenArg.hide_values(data)
         self.json_args = json.dumps(data)
 
     # options

@@ -7,6 +7,7 @@ from vstutils.utils import lazy_translate as __
 from ...main import models
 from ...main.models import ExecutionTypes
 from ...main.utils import AnsibleArgumentsReference
+from ...main.constants import HiddenArg
 from ..v2.serializers import (
     _WithVariablesSerializer,
     AnsiblePlaybookSerializer,
@@ -30,7 +31,10 @@ class TemplateVariablesMetaSerializer(serializers.SerializerMetaclass):
 
 
 class BaseAnsibleArgumentsSerializer(BaseSerializer, metaclass=TemplateVariablesMetaSerializer):
-    pass
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        HiddenArg.hide_values(representation)
+        return representation
 
 
 class PlaybookAnsibleArgumentsSerializer(BaseAnsibleArgumentsSerializer):

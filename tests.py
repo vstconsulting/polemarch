@@ -22,8 +22,10 @@ from django.conf import settings
 try:
     from polemarch.main import tasks
     from polemarch.main.openapi import PROJECT_MENU
+    from polemarch.main.constants import CYPHER
 except ImportError:
     from pmlib.main import tasks
+    from pmlib.main.constants import CYPHER
 
 
 TEST_DATA_DIR = Path(__file__).parent.absolute()
@@ -1850,7 +1852,13 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
                 'path': ['project', self.project.id, 'execution_templates', template_id, 'option'],
                 'data': {
                     'name': 'Option 1',
-                    'data': {'module': 'other_module', 'vars': {'playbook_dir': 'some_dir'}},
+                    'data': {
+                        'module': 'other_module',
+                        'vars': {
+                            'playbook_dir': 'some_dir',
+                            'private_key': 'lol-key',
+                        }
+                    },
                 }
             },
             # [2] Get options list
@@ -1868,7 +1876,13 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
                 ],
                 'data': {
                     'name': 'New name',
-                    'data': {'module': 'other_module', 'vars': {'playbook_dir': 'some_dir'}},
+                    'data': {
+                        'module': 'other_module',
+                        'vars': {
+                            'playbook_dir': 'some_dir',
+                            'private_key': 'lol-key',
+                        }
+                    },
                 }
             },
             # [4] Get option detail view
@@ -1905,11 +1919,19 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
 
         # Check that option successfully created
         self.assertEqual(results[1]['status'], 201)
-        self.assertEqual(results[1]['data'], {
+        self.assertDictEqual(results[1]['data'], {
             'id': 'option-1',
             'kind': 'Module',
             'name': 'Option 1',
-            'data': {'module': 'other_module', 'vars': {'playbook_dir': 'some_dir'}},
+            'data': {
+                'args': '',
+                'group': 'all',
+                'module': 'other_module',
+                'vars': {
+                    'playbook_dir': 'some_dir',
+                    'private_key': CYPHER,
+                }
+            },
         })
 
         # Check that list contains created option
@@ -1922,11 +1944,19 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
 
         # Check detail view of the option
         self.assertEqual(results[4]['status'], 200)
-        self.assertEqual(results[4]['data'], {
+        self.assertDictEqual(results[4]['data'], {
             'id': 'option-1',
             'kind': 'Module',
             'name': 'Option 1',
-            'data': {'module': 'other_module', 'vars': {'playbook_dir': 'some_dir'}},
+            'data': {
+                'args': '',
+                'group': 'all',
+                'module': 'other_module',
+                'vars': {
+                    'playbook_dir': 'some_dir',
+                    'private_key': CYPHER,
+                }
+            },
         })
 
         # Check that option removed
@@ -2015,7 +2045,7 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
                         'group': 'all',
                         'inventory': self.inventory.id,
                         'args': '',
-                        'vars': {'forks': 8, 'connection': 'local'},
+                        'vars': {'forks': 8, 'connection': 'local', 'vault_password_file': 'lol-key'},
                     },
                     'options': {
                         'one': {'module': 'shell', 'args': 'uname', 'vars': {'verbose': 3}},
@@ -2061,15 +2091,16 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
                     'name': 'Kek template',
                     'data': {
                         'playbook': 'playbook.yml',
-                        'vars': {'private_key': '[~~ENCRYPTED~~]'}
+                        'vars': {'private_key': CYPHER}
                     },
                 }
             }
         ])
         for result in results:
             self.assertIn(result['status'], {200, 201})
-        self.assertEqual(results[6]['data']['options']['two']['vars']['private_key'], '[~~ENCRYPTED~~]')
-        self.assertEqual(results[7]['data']['data']['vars']['private_key'], '[~~ENCRYPTED~~]')
+        self.assertEqual(results[0]['data']['data']['vars']['vault_password_file'], CYPHER)
+        self.assertEqual(results[6]['data']['options']['two']['vars']['private_key'], CYPHER)
+        self.assertEqual(results[7]['data']['data']['vars']['private_key'], CYPHER)
 
         module_template = results[0]['data']
         task_template = results[1]['data']
@@ -2225,7 +2256,7 @@ class VariableTestCase(BaseProjectTestCase):
             },
         ])
         self.assertEqual(results[0]['status'], 201)
-        self.assertEqual(results[0]['data']['value'], '[~~ENCRYPTED~~]')
+        self.assertEqual(results[0]['data']['value'], CYPHER)
 
         self.assertEqual(results[1]['status'], 201)
         self.assertTrue(results[1]['data']['value'])
@@ -2313,7 +2344,7 @@ class VariableTestCase(BaseProjectTestCase):
         self.assertEqual(variables_qs[0].value, '2')
 
     def check_vars(self, base_path):
-        results = self.bulk([
+        results = self.bulk_transactional([
             {  # [0] hidden var
                 'method': 'post',
                 'path': [*base_path, 'variables'],
@@ -2349,9 +2380,7 @@ class VariableTestCase(BaseProjectTestCase):
                 },
             },
         ])
-        for result in results:
-            self.assertEqual(result['status'], 201)
-        self.assertEqual(results[0]['data']['value'], '[~~ENCRYPTED~~]')
+        self.assertEqual(results[0]['data']['value'], CYPHER)
         self.assertTrue(results[1]['data']['value'])
         self.assertEqual(results[2]['data']['value'], 'kek')
         self.assertEqual(results[3]['data']['value'], 'kek_user')
@@ -2415,6 +2444,78 @@ class VariableTestCase(BaseProjectTestCase):
 
         self.assertEqual(results[3]['status'], 400)
         self.assertEqual(results[3]['data']['detail'], 'list index out of range')
+
+    def test_execution_template_private_vars(self):
+        results = self.bulk([
+            # [0]
+            self.create_execution_template_bulk_data(
+                kind='Module',
+                data={
+                    'module': 'ping',
+                    'vars': {
+                        'private_key': 'lol-key',
+                        'vault_password_file': 'lol-file',
+                    }
+                }
+            ),
+            # [1]
+            self.create_execution_template_bulk_data(
+                kind='Task',
+                data={
+                    'playbook': 'bootstrap.yml',
+                    'vars': {
+                        'private_key': 'lol-key',
+                        'vault_password_file': 'lol-file',
+                    }
+                }
+            ),
+            # [2] get module template
+            {'method': 'get', 'path': ['project', self.project.id, 'execution_templates', '<<0[data][id]>>']},
+            # [3] get task template
+            {'method': 'get', 'path': ['project', self.project.id, 'execution_templates', '<<1[data][id]>>']},
+        ])
+        for result in results:
+            self.assertIn(result['status'], {200, 201}, result)
+        self.assertEqual(results[-2]['data']['data']['vars']['private_key'], CYPHER)
+        self.assertEqual(results[-2]['data']['data']['vars']['vault_password_file'], CYPHER)
+        self.assertEqual(results[-1]['data']['data']['vars']['private_key'], CYPHER)
+        self.assertEqual(results[-1]['data']['data']['vars']['vault_password_file'], CYPHER)
+
+    def test_periodic_task_private_vars(self):
+        results = self.bulk_transactional([
+            self.create_periodic_task_bulk_data(),
+            {
+                'method': 'post',
+                'path': ['project', self.project.id, 'periodic_task', '<<0[data][id]>>', 'variables'],
+                'data': {'key': 'private_key', 'value': 'lol-key'}
+            },
+            {
+                'method': 'post',
+                'path': ['project', self.project.id, 'periodic_task', '<<0[data][id]>>', 'variables'],
+                'data': {'key': 'vault_password_file', 'value': 'lol-file'}
+            },
+            {
+                'method': 'get',
+                'path': ['project', self.project.id, 'periodic_task', '<<0[data][id]>>', 'variables'],
+            },
+        ])
+        self.assertEqual(results[-1]['data']['count'], 2)
+        self.assertEqual(results[-1]['data']['results'][0]['key'], 'private_key')
+        self.assertEqual(results[-1]['data']['results'][0]['value'], CYPHER)
+        self.assertEqual(results[-1]['data']['results'][1]['key'], 'vault_password_file')
+        self.assertEqual(results[-1]['data']['results'][1]['value'], CYPHER)
+
+    def test_history_raw_inventory_private_vars(self):
+        results = self.bulk_transactional([
+            {
+                'method': 'post',
+                'path': ['inventory', self.inventory.id, 'variables'],
+                'data': {'key': 'ansible_ssh_pass', 'value': 'lol-pass'}
+            },
+            self.execute_module_bulk_data(inventory=self.inventory.id),
+            {'method': 'get', 'path': ['history', '<<1[data][history_id]>>']},
+        ])
+        self.assertIn('ansible_ssh_pass: [~~ENCRYPTED~~]', results[-1]['data']['raw_inventory'])
 
 
 @own_projects_dir

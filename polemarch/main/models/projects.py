@@ -107,11 +107,6 @@ class Project(AbstractModel):
         Object for getting readme with different extention.
         """
 
-    HIDDEN_VARS = [
-        'repo_password',
-        'repo_key',
-    ]
-
     BOOLEAN_VARS = [
         'repo_sync_on_run'
     ]
