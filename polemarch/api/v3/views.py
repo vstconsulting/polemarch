@@ -86,7 +86,7 @@ TemplateOptionViewSet = create_view(
     override_detail_fields={
         'id': fields.CharField(read_only=True),
         'name': fields.CharField(read_only=True),
-        'kind': fields.CharField(read_only=True, source='template.kind'),
+        'kind': fields.CharField(read_only=True),
         'data': DependEnumField(field='kind', types={
             'Task': TaskTemplateParameters(),
             'Module': ModuleTemplateParameters(),

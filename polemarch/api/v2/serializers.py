@@ -6,7 +6,7 @@ from collections import OrderedDict
 import json
 import uuid
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -21,6 +21,7 @@ from ...main import models
 from ...main.settings import LANGUAGES
 from ...main.utils import AnsibleArgumentsReference
 from ...main.validators import path_validator
+from ...main.constants import HiddenArg, HiddenVar, CYPHER
 
 User = get_user_model()
 
@@ -327,6 +328,7 @@ class HookSerializer(serializers.ModelSerializer):
 
 class VariableSerializer(_SignalSerializer):
     value = MultiTypeField(default="", allow_blank=True)
+    hidden_enum = HiddenVar
 
     class Meta:
         model = models.Variable
@@ -338,8 +340,8 @@ class VariableSerializer(_SignalSerializer):
 
     def to_representation(self, instance: models.Variable):
         result = super().to_representation(instance)
-        if instance.key in getattr(instance.content_object, 'HIDDEN_VARS', []):
-            result['value'] = "[~~ENCRYPTED~~]"
+        if instance.key in self.hidden_enum.get_values():
+            result['value'] = CYPHER
         elif instance.key in getattr(instance.content_object, 'BOOLEAN_VARS', []):
             result['value'] = instance.value == 'True'
         return result
@@ -360,7 +362,7 @@ class InventoryVariableSerializer(VariableSerializer):
 
 
 class PeriodicTaskVariableSerializer(VariableSerializer):
-    pass
+    hidden_enum = HiddenArg
 
 
 class ProjectVariableSerializer(VariableSerializer):
@@ -392,18 +394,13 @@ class _WithVariablesSerializer(_WithPermissionsSerializer):
     def update(self, instance, validated_data: Dict):
         return self._do_with_vars("update", instance, validated_data=validated_data)
 
-    def get_vars(self, representation):
-        return representation.get('vars', None)
+    def represent_vars(self, representation):
+        HiddenVar.hide_values(representation.get('vars'))
 
-    def to_representation(self, instance, hidden_vars: List[str] = None):
-        rep = super().to_representation(instance)
-        hv = getattr(instance, 'HIDDEN_VARS', []) if hidden_vars is None else hidden_vars
-        vars = self.get_vars(rep)
-        if vars is not None:
-            for mask_key in hv:
-                if mask_key in vars.keys():
-                    vars[mask_key] = "[~~ENCRYPTED~~]"
-        return rep
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        self.represent_vars(representation)
+        return representation
 
 
 class HostSerializer(_WithVariablesSerializer):
@@ -486,35 +483,16 @@ class TemplateSerializer(_WithVariablesSerializer):
             'options_list',
         )
 
-    def get_vars(self, representation):
-        try:
-            return representation['data']['vars']
-        except KeyError:  # nocv
-            return None
+    def represent_vars(self, representation):
+        if 'data' in representation:
+            HiddenArg.hide_values(representation['data'].get('vars'))
 
-    def set_opts_vars(self, rep, hidden_vars: List[str]):
-        if not rep.get('vars', None):
-            return rep
-        var = rep['vars']
-        for mask_key in hidden_vars:
-            if mask_key in var.keys():
-                var[mask_key] = "[~~ENCRYPTED~~]"
-        return rep
-
-    def repr_options(self, instance: models.Template, data: Dict, hidden_vars: List):
-        hv = hidden_vars
-        hv = instance.HIDDEN_VARS if hv is None else hv
-        for name, rep in data.get('options', {}).items():
-            data['options'][name] = self.set_opts_vars(rep, hv)
-
-    def to_representation(self, instance, hidden_vars: List[str] = None) -> OrderedDict:
+    def to_representation(self, instance) -> OrderedDict:
         data = OrderedDict()
         if instance.kind in ["Task", "Module"]:
-            hidden_vars = models.PeriodicTask.HIDDEN_VARS
-            data = super().to_representation(
-                instance, hidden_vars=hidden_vars
-            )
-            self.repr_options(instance, data, hidden_vars)
+            data = super().to_representation(instance)
+            for option in data.get('options', {}).values():
+                HiddenArg.hide_values(option.get('vars'))
         return data
 
 
@@ -771,7 +749,7 @@ def generate_fileds(ansible_reference: AnsibleArgumentsReference, ansible_type: 
         if ref == 'verbose':
             field = serializers.IntegerField
             kwargs.update(dict(max_value=4, default=0))
-        if ref in models.PeriodicTask.HIDDEN_VARS:
+        if ref in HiddenArg.get_values():
             field = vst_fields.SecretFileInString
         if ref == 'inventory':
             kwargs['autocomplete'] = 'Inventory'
