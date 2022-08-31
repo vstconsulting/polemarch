@@ -753,7 +753,7 @@ class SyncTestCase(BaseProjectTestCase):
         self.assertEqual(results[1]['data']['detail'], f'Sync with {repo_dir}.')
         self.assertEqual(results[2]['status'], 200)
         self.assertEqual(results[2]['data']['status'], 'ERROR')
-        self.assertEqual(results[2]['data']['branch'], 'waiting...')
+        self.assertEqual(results[2]['data']['branch'], 'waiting... => invalid_branch')
         self.assertEqual(results[3]['status'], 201)
         self.assertEqual(results[4]['status'], 200)
         self.assertEqual(results[4]['data']['detail'], f'Sync with {repo_dir}.')
@@ -853,6 +853,307 @@ class SyncTestCase(BaseProjectTestCase):
             self.assertEqual(results[1]['status'], 200)
             self.assertEqual(results[2]['status'], 200)
             self.assertEqual(results[2]['data']['status'], 'OK')
+
+    @override_settings(CACHES={
+        **settings.CACHES,
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'test_sync_after_repo_change',
+        }
+    })
+    @use_temp_dir
+    def test_sync_after_repo_change(self, temp_dir):
+        def create_repo(num):
+            repo_dir = Path(temp_dir) / f'repo{num}'
+            repo_dir.mkdir()
+            (repo_dir / f'playbook{num}.yml').touch()
+            (repo_dir / '.polemarch.yaml').write_text(
+                'view:\n'
+                '   fields: {}\n'
+                '   playbooks:\n'
+                f'       playbook{num}.yml:\n'
+                '           title: Test deploy\n'
+            )
+            repo = git.Repo.init(repo_dir)
+            repo.git.add(all=True)
+            repo.index.commit('Initial commit')
+            return repo
+
+        repo1 = create_repo(1)
+        repo1.create_head('init_branch')
+        results = self.bulk([
+            # [0] Create project
+            self.create_project_bulk_data(type='GIT', repository=repo1.working_dir, branch='init_branch'),
+            # [1] Sync project
+            self.sync_project_bulk_data('<<0[data][id]>>'),
+            # [2] Get project detail to check revision and execute_view_data
+            self.get_project_bulk_data('<<0[data][id]>>'),
+            # [3] Get project playbooks
+            {'method': 'get', 'path': ['project', '<<0[data][id]>>', 'playbook']},
+        ])
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[2]['data']['revision'], repo1.head.commit.hexsha)
+        self.assertIn('playbook1.yml', results[2]['data']['execute_view_data']['playbooks'])
+        self.assertNotIn('playbook2.yml', results[2]['data']['execute_view_data']['playbooks'])
+        self.assertIn('playbook1', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertNotIn('playbook2', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertNotIn('new_playbook', (playbook['name'] for playbook in results[3]['data']['results']))
+
+        project_id = results[0]['data']['id']
+
+        repo_in_project = git.Repo(Path(settings.PROJECTS_DIR) / str(project_id))
+        # Create remote to track when project will be removed and recreated
+        repo_in_project.create_remote('TEST_REMOTE', 'url')
+        self.assertEqual(repo_in_project.active_branch.name, 'init_branch')
+
+        # Create branch changed_branch and commit 'new_playbook.yml'
+        repo1.create_head('changed_branch').checkout()
+        (Path(repo1.working_dir) / 'new_playbook.yml').touch()
+        repo1.git.add(all=True)
+        repo1.index.commit('Second commit')
+
+        # Set project branch to changed_branch
+        results = self.bulk([
+            # [0] Update project branch
+            {
+                'method': 'post',
+                'path': ['project', project_id, 'variables'],
+                'data': {'key': 'repo_branch', 'value': 'changed_branch'},
+            },
+            # [1] Sync project
+            self.sync_project_bulk_data(project_id),
+            # [2] Get project detail to check revision and execute_view_data
+            self.get_project_bulk_data(project_id),
+            # [3] Get project playbooks
+            {'method': 'get', 'path': ['project', project_id, 'playbook']},
+        ])
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[2]['data']['revision'], repo1.heads.changed_branch.commit.hexsha)
+        self.assertIn('playbook1.yml', results[2]['data']['execute_view_data']['playbooks'])
+        self.assertNotIn('playbook2.yml', results[2]['data']['execute_view_data']['playbooks'])
+        self.assertIn('playbook1', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertNotIn('playbook2', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertIn('new_playbook', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertIn('TEST_REMOTE', repo_in_project.remotes)
+
+        # Create new commit in init_branch with init_branch_playbook.yml
+        repo1.heads.init_branch.checkout()
+        (Path(repo1.working_dir) / 'init_branch_playbook.yml').touch()
+        repo1.git.add(all=True)
+        repo1.index.commit('Add playbook to init_branch')
+
+        # Remove current active branch
+        repo1.delete_head(repo1.heads.changed_branch, force=True)
+
+        results = self.bulk([
+            # [0] Select init_branch as current branch
+            {
+                'method': 'post',
+                'path': ['project', project_id, 'variables'],
+                'data': {'key': 'repo_branch', 'value': 'init_branch'},
+            },
+            # [1] Sync project
+            self.sync_project_bulk_data(project_id),
+            # [2] Get project detail to check revision and execute_view_data
+            self.get_project_bulk_data(project_id),
+            # [3] Get project playbooks
+            {'method': 'get', 'path': ['project', project_id, 'playbook']},
+        ])
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[2]['data']['revision'], repo1.heads.init_branch.commit.hexsha)
+        self.assertIn('playbook1.yml', results[2]['data']['execute_view_data']['playbooks'])
+        self.assertNotIn('playbook2.yml', results[2]['data']['execute_view_data']['playbooks'])
+        self.assertIn('playbook1', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertNotIn('playbook2', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertIn('init_branch_playbook', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertIn('TEST_REMOTE', repo_in_project.remotes)
+
+        # Move original repository to new location
+        new_location = Path(repo1.working_dir).with_name('new_location')
+        shutil.move(repo1.working_dir, new_location)
+        repo1 = git.Repo(new_location)
+
+        # Set project repository to new location
+        results = self.bulk([
+            # [0] Update project repository
+            {'method': 'patch', 'path': ['project', project_id], 'data': {'repository': str(new_location)}},
+            # [1] Sync project
+            self.sync_project_bulk_data(project_id),
+            # [2] Get project detail to check revision and execute_view_data
+            self.get_project_bulk_data(project_id),
+            # [3] Get project playbooks
+            {'method': 'get', 'path': ['project', project_id, 'playbook']},
+        ])
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[2]['data']['revision'], repo1.heads.init_branch.commit.hexsha)
+        self.assertIn('playbook1.yml', results[2]['data']['execute_view_data']['playbooks'])
+        self.assertNotIn('playbook2.yml', results[2]['data']['execute_view_data']['playbooks'])
+        self.assertIn('playbook1', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertNotIn('playbook2', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertIn('init_branch_playbook', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertIn('TEST_REMOTE', repo_in_project.remotes)
+
+        # Create second repository
+        repo2 = create_repo(2)
+        repo2.create_tag('without_repo2_new_playbook')
+        (Path(repo2.working_dir) / 'repo2_new_playbook.yml').touch()
+        repo2.git.add(all=True)
+        repo2.index.commit('Add repo2_new_playbook')
+
+        # Set project repository to repo2 but selected branch does not exist
+        results = self.bulk([
+            # [0] Update project repository
+            {'method': 'patch', 'path': ['project', project_id], 'data': {'repository': repo2.working_dir}},
+            # [1] Sync project
+            self.sync_project_bulk_data(project_id),
+            # [2] Get project detail to check revision and execute_view_data
+            self.get_project_bulk_data(project_id),
+            # [3] Get project playbooks
+            {'method': 'get', 'path': ['project', project_id, 'playbook']},
+        ])
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[2]['data']['status'], 'ERROR')
+        self.assertEqual(results[2]['data']['revision'], 'ERROR')
+        self.assertIsNone(results[2]['data']['execute_view_data'])
+        self.assertIn('playbook1', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertNotIn('playbook2', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertNotIn('TEST_REMOTE', repo_in_project.remotes)
+
+        # Select branch that does exist in repo2
+        results = self.bulk([
+            # [0] Select existing as current branch
+            {
+                'method': 'post',
+                'path': ['project', project_id, 'variables'],
+                'data': {'key': 'repo_branch', 'value': repo2.active_branch.name},
+            },
+            # [1] Sync project
+            self.sync_project_bulk_data(project_id),
+            # [2] Get project detail to check revision and execute_view_data
+            self.get_project_bulk_data(project_id),
+            # [3] Get project playbooks
+            {'method': 'get', 'path': ['project', project_id, 'playbook']},
+        ])
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[2]['data']['status'], 'OK')
+        self.assertEqual(results[2]['data']['revision'], repo2.active_branch.commit.hexsha)
+        self.assertNotIn('playbook1.yml', results[2]['data']['execute_view_data']['playbooks'])
+        self.assertIn('playbook2.yml', results[2]['data']['execute_view_data']['playbooks'])
+        self.assertNotIn('playbook1', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertIn('playbook2', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertIn('repo2_new_playbook', (playbook['name'] for playbook in results[3]['data']['results']))
+
+        repo_in_project.create_remote('TEST_REMOTE', 'url')
+
+        results = self.bulk([
+            # [0] Select tag
+            {
+                'method': 'post',
+                'path': ['project', project_id, 'variables'],
+                'data': {'key': 'repo_branch', 'value': 'tags/without_repo2_new_playbook'},
+            },
+            # [1] Sync project
+            self.sync_project_bulk_data(project_id),
+            # [2] Get project detail to check revision and execute_view_data
+            self.get_project_bulk_data(project_id),
+            # [3] Get project playbooks
+            {'method': 'get', 'path': ['project', project_id, 'playbook']},
+        ])
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[2]['data']['status'], 'OK')
+        self.assertEqual(results[2]['data']['revision'], repo2.tags['without_repo2_new_playbook'].commit.hexsha)
+        self.assertEqual(results[2]['data']['branch'], 'tags/without_repo2_new_playbook')
+        self.assertNotIn('playbook1.yml', results[2]['data']['execute_view_data']['playbooks'])
+        self.assertIn('playbook2.yml', results[2]['data']['execute_view_data']['playbooks'])
+        self.assertNotIn('playbook1', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertIn('playbook2', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertNotIn('repo2_new_playbook', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertIn('TEST_REMOTE', repo_in_project.remotes)
+
+        results = self.bulk([
+            # [0] Select commit
+            {
+                'method': 'post',
+                'path': ['project', project_id, 'variables'],
+                'data': {'key': 'repo_branch', 'value': repo2.active_branch.commit.hexsha},
+            },
+            # [1] Sync project
+            self.sync_project_bulk_data(project_id),
+            # [2] Get project detail to check revision and execute_view_data
+            self.get_project_bulk_data(project_id),
+            # [3] Get project playbooks
+            {'method': 'get', 'path': ['project', project_id, 'playbook']},
+        ])
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[2]['data']['status'], 'OK')
+        self.assertEqual(results[2]['data']['revision'], repo2.active_branch.commit.hexsha)
+        self.assertEqual(results[2]['data']['branch'], repo2.active_branch.commit.hexsha)
+        self.assertNotIn('playbook1.yml', results[2]['data']['execute_view_data']['playbooks'])
+        self.assertIn('playbook2.yml', results[2]['data']['execute_view_data']['playbooks'])
+        self.assertNotIn('playbook1', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertIn('playbook2', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertIn('repo2_new_playbook', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertIn('TEST_REMOTE', repo_in_project.remotes)
+
+        # Create new repo and tag commit
+        repo3 = create_repo(3)
+        (Path(repo3.working_dir) / 'repo_3_playbook.yml').touch()
+        repo3.git.add(all=True)
+        repo3.index.commit('repo3 commit')
+        repo3.create_tag('repo3_tag')
+
+        # Set project repository to repo3 and branch to repo3_tag
+        results = self.bulk([
+            # [0] Update project repository
+            {'method': 'patch', 'path': ['project', project_id], 'data': {'repository': repo3.working_dir}},
+            # [1] Select tag as current branch
+            {
+                'method': 'post',
+                'path': ['project', project_id, 'variables'],
+                'data': {'key': 'repo_branch', 'value': 'tags/repo3_tag'},
+            },
+            # [2] Sync project
+            self.sync_project_bulk_data(project_id),
+            # [3] Get project detail to check revision and execute_view_data
+            self.get_project_bulk_data(project_id),
+            # [4] Get project playbooks
+            {'method': 'get', 'path': ['project', project_id, 'playbook']},
+        ])
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(results[1]['status'], 201)
+        self.assertEqual(results[2]['status'], 200)
+        self.assertEqual(results[3]['data']['revision'], repo3.active_branch.commit.hexsha)
+        self.assertIn('playbook3.yml', results[3]['data']['execute_view_data']['playbooks'])
+        self.assertNotIn('playbook2.yml', results[3]['data']['execute_view_data']['playbooks'])
+        self.assertIn('playbook3', (playbook['name'] for playbook in results[4]['data']['results']))
+        self.assertNotIn('playbook2', (playbook['name'] for playbook in results[4]['data']['results']))
+
+        # Set project repository to repo2 that does not have selected tag
+        results = self.bulk([
+            # [0] Update project repository
+            {'method': 'patch', 'path': ['project', project_id], 'data': {'repository': repo2.working_dir}},
+            # [1] Sync project
+            self.sync_project_bulk_data(project_id),
+            # [2] Get project detail to check revision and execute_view_data
+            self.get_project_bulk_data(project_id),
+            # [3] Get project playbooks
+            {'method': 'get', 'path': ['project', project_id, 'playbook']},
+        ])
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[2]['data']['status'], 'ERROR')
+        self.assertEqual(results[2]['data']['revision'], 'ERROR')
+        self.assertIsNone(results[2]['data']['execute_view_data'])
+        self.assertIn('playbook3', (playbook['name'] for playbook in results[3]['data']['results']))
+        self.assertNotIn('playbook2', (playbook['name'] for playbook in results[3]['data']['results']))
 
     def test_sync_tar(self):
         with self.patch(

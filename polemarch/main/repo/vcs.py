@@ -56,14 +56,13 @@ class Git(_VCS):
             self._update_submodules(repo)
         return repo
 
-    @raise_context()
     def _fetch_from_remote(self, repo: git.Repo, env: ENV_VARS_TYPE):
         with repo.git.custom_environment(**env):
             kwargs = self.options.get("FETCH_KWARGS", {})
             fetch_method_name = 'fetch'
             if not repo.head.is_detached:
                 fetch_method_name = 'pull'
-            result = getattr(repo.remotes[0], fetch_method_name)(**kwargs)
+            result = getattr(repo.remote('origin'), fetch_method_name)(**kwargs)
             self._update_submodules(repo)
             return result
 
@@ -111,22 +110,26 @@ class Git(_VCS):
         return repo, None
 
     def _get_or_create_repo(self, env: ENV_VARS_TYPE) -> git.Repo:
-        try:
-            repo = self.get_repo()
-            branch = self.target_branch
-            with raise_context():
-                repo.git.checkout(branch)
-            is_not_detached = not repo.head.is_detached
-            if branch and is_not_detached and repo.active_branch.name != branch:
-                self.delete()
+        repo = self.get_repo()
+        origin = repo.remote('origin')
+        branch = self.target_branch
+
+        if origin.url != self.proj.repository:
+            origin.set_url(self.proj.repository)
+            if repo.head.is_detached:
                 raise git.NoSuchPathError
-        except git.NoSuchPathError:
-            repo = self.make_clone(env)[0]
+
+        if branch not in origin.refs:
+            with repo.git.custom_environment(**env):
+                origin.fetch(**self.options.get('FETCH_KWARGS', {}))
+
+        repo.git.checkout(branch)
         return repo
 
     def make_update(self, env: ENV_VARS_TYPE) -> Tuple[git.Repo, Any]:  # pylint: disable=arguments-renamed
         try:
             repo = self._get_or_create_repo(env)
+            result = self.vcs_update(repo, env)
         except git.InvalidGitRepositoryError:
             logger.info('Convert project [{}] to GIT.'.format(self.proj.id))
             repo = git.Repo.init(self.path)
@@ -134,7 +137,7 @@ class Git(_VCS):
             with repo.git.custom_environment(**env):
                 kwargs = self.options.get("FETCH_KWARGS", {})
                 origin = repo.remote('origin')
-                logger.debug('Fetch remote brances for project [{}].'.format(self.proj.id))
+                logger.debug('Fetch remote branches for project [{}].'.format(self.proj.id))
                 origin.fetch(**kwargs)
                 if not list(origin.refs):
                     config_writer = repo.config_writer()
@@ -148,10 +151,12 @@ class Git(_VCS):
                     logger.debug('Push project [{}] as master.'.format(self.proj.id))
                     repo.git.push('--set-upstream', 'origin', 'master')
 
-        results = repo, self.vcs_update(repo, env)
-        with raise_context():
-            repo.git.checkout(self.target_branch)
-        return results
+            result = self.vcs_update(repo, env)
+        except (git.GitCommandError, git.NoSuchPathError):
+            self.delete()
+            return self.make_clone(env)
+
+        return (repo, result)
 
     def get_revision(self, *args, **kwargs):
         # pylint: disable=unused-argument

@@ -356,6 +356,15 @@ class Project(AbstractModel):
         return self.repo_class.get_branch_name()
 
     @property
+    @raise_context_decorator_with_default()
+    def project_branch(self) -> str:
+        required_branch = getattr(self.variables.filter(key='repo_branch').first(), 'value', None)
+        current_branch = self.branch
+        if required_branch is None or required_branch == current_branch:
+            return current_branch
+        return f'{current_branch} => {required_branch}'
+
+    @property
     def module(self) -> BQuerySet:
         return Module.objects.filter(Q(project=self) | Q(project=None))
 
