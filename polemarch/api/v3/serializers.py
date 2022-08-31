@@ -163,8 +163,8 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
         allow_blank=True,
         field='type',
         types={
-            'CRONTAB': 'crontab',
-            'INTERVAL': 'integer',
+            'CRONTAB': {'type': 'string', 'format': 'crontab', 'default': '* * * * *', 'required': True},
+            'INTERVAL': vst_fields.UptimeField(default=0),
         }
     )
     mode = vst_fields.DependEnumField(

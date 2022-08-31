@@ -11172,24 +11172,37 @@ definitions:
       repository:
         title: Repo url
         type: string
+        format: dynamic
         default: MANUAL
-        minLength: 1
+        x-options:
+          choices: {}
+          field: type
+          types:
+            GIT: string
+            MANUAL: hidden
+            TAR: string
       repo_auth:
         title: Repo auth type
         type: string
         format: dynamic
         default: NONE
         x-options:
-          choices:
-            GIT:
-              - NONE
-              - KEY
-              - PASSWORD
+          choices: {}
           field: type
           types:
-            GIT: string
-            MANUAL: hidden
-            TAR: hidden
+            GIT:
+              default: NONE
+              enum:
+                - NONE
+                - KEY
+                - PASSWORD
+              type: string
+            MANUAL:
+              format: hidden
+              type: string
+            TAR:
+              format: hidden
+              type: string
       auth_data:
         title: Repo auth data
         type: string
@@ -11203,16 +11216,20 @@ definitions:
             NONE: hidden
             PASSWORD: password
       branch:
-        title: Branch for GIT(branch/tag/SHA) or TAR(subdir)
+        title: Branch for GIT (branch/tag/SHA) or TAR (subdir)
         type: string
         format: dynamic
         x-options:
           choices: {}
           field: type
           types:
-            GIT: string
-            MANUAL: hidden
-            TAR: string
+            GIT:
+              type: string
+            MANUAL:
+              format: hidden
+              type: string
+            TAR:
+              type: string
         x-nullable: true
       additional_playbook_path:
         title: Directory with playbooks
@@ -11220,16 +11237,18 @@ definitions:
         minLength: 1
         x-nullable: true
     x-properties-groups:
-      '':
-        - id
+      General:
         - name
-        - status
         - type
+        - additional_playbook_path
+      Repository:
         - repository
+        - branch
         - repo_auth
         - auth_data
-        - branch
-        - additional_playbook_path
+      '':
+        - id
+        - status
     x-view-field-name: name
   Data:
     type: object
@@ -13568,8 +13587,15 @@ definitions:
           choices: {}
           field: type
           types:
-            CRONTAB: crontab
-            INTERVAL: integer
+            CRONTAB:
+              default: '* * * * *'
+              format: crontab
+              required: true
+              type: string
+            INTERVAL:
+              type: integer
+              format: uptime
+              default: 0
     x-properties-groups:
       '':
         - id
@@ -13694,8 +13720,15 @@ definitions:
           choices: {}
           field: type
           types:
-            CRONTAB: crontab
-            INTERVAL: integer
+            CRONTAB:
+              default: '* * * * *'
+              format: crontab
+              required: true
+              type: string
+            INTERVAL:
+              type: integer
+              format: uptime
+              default: 0
       notes:
         title: Notes
         type: string
@@ -13839,7 +13872,10 @@ definitions:
                 view_field: name
             repo_key: secretfile
             repo_password: password
-            repo_sync_on_run_timeout: uptime
+            repo_sync_on_run_timeout:
+              type: integer
+              format: uptime
+              default: 0
     x-properties-groups:
       '':
         - id

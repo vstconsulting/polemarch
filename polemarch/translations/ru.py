@@ -38,6 +38,7 @@ TRANSLATION = {
     'Template opt': 'Опция шаблона',
     'Enabled': 'Доступен',
 
+    'General': 'Общее',
     'New owner': 'Новый владелец',
     'Project based': 'Основан на проекте',
     'Repo type': 'Тип репозитория',
@@ -45,7 +46,7 @@ TRANSLATION = {
     'Auth data': 'Данные авторизации',
     'Repo auth type': 'Тип авторизации в репозитории',
     'Repo auth data': 'Данные авторизации в репозитории',
-    'Branch for git(branch/tag/sha) or tar(subdir)': 'Ветка для git(branch/tag/sha) или tar(subdir)',
+    'Branch for GIT (branch/tag/SHA) or TAR (subdir)': 'Ветка для GIT (branch/tag/SHA) или TAR (поддиректория)',
     'Directory with playbooks': 'Каталог с плейбуками',
     'Information': 'Информация',
     'Arguments': 'Аргументы',

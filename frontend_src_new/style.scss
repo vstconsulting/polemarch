@@ -57,3 +57,13 @@ $project-status-colors: (
 .field-children-true .operation__host {
     display: none;
 }
+
+.entity-view.field-type-MANUAL {
+    .fields-group-Repository {
+        display: none;
+    }
+    .fields-group-General {
+        flex: initial;
+        max-width: 100%;
+    }
+}
