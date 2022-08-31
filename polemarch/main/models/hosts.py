@@ -144,9 +144,9 @@ class Group(InventoryItems):
 
     class Meta:
         default_related_name = "groups"
-        index_together = [
-            ["children"],
-            ["children", "id"],
+        indexes = [
+            models.Index(fields=["children"]),
+            models.Index(fields=["children", "id"]),
         ]
         _list_fields = (
             'id',

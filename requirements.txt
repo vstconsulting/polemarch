@@ -11,5 +11,5 @@ gitdb2~=4.0.2
 requests~=2.25.1
 
 # Ansible required packages
-polemarch-ansible~=2.1.0
+polemarch-ansible~=2.2.0
 netaddr

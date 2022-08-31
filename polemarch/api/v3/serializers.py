@@ -16,6 +16,7 @@ from ..v2.serializers import (
     ModuleSerializer,
     InventoryDependEnumField,
     ExecuteResponseSerializer,
+    OneProjectSerializer as V2OneProjectSerializer,
 )
 
 
@@ -239,3 +240,7 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
         ))
         rdata.is_valid(True)
         return rdata.data
+
+
+class OneProjectSerializer(V2OneProjectSerializer):
+    branch = vst_fields.VSTCharField(read_only=True, source='project_branch', allow_blank=True)

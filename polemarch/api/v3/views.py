@@ -25,6 +25,7 @@ from .serializers import (
     CreateExecutionTemplateSerializer,
     TaskTemplateParameters,
     ModuleTemplateParameters,
+    OneProjectSerializer,
 )
 
 
@@ -107,3 +108,4 @@ class ExecutionTemplateViewSet(__TemplateViewSet):
 @nested_view('template', 'id', manager_name='template', view=__TemplateViewSet, schema=None)
 class ProjectViewSet(ProjectViewSetV2):
     __doc__ = ProjectViewSetV2.__doc__
+    serializer_class_one = OneProjectSerializer

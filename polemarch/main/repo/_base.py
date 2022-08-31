@@ -110,6 +110,7 @@ class _Base:
         :param data: all data from file
         '''
         # pylint: disable=unused-argument
+        self.proj.get_yaml_subcache().clear()
         self.proj.get_yaml_subcache('view').clear()
         self.message(self.proj.execute_view_data, 'debug')
 

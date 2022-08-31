@@ -151,7 +151,7 @@ class SubCacheInterface(PMObject):
         return load(cache, Loader=Loader) if cache else None
 
     def clear(self):
-        self.set(None)
+        self.cache.delete(self.key)
 
 
 class AnsibleCache(SubCacheInterface):
