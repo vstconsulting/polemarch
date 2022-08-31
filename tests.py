@@ -1823,7 +1823,7 @@ class PlaybookAndModuleTestCase(BaseProjectTestCase):
             {
                 'method': 'post',
                 'path': ['project', self.project.id, 'variables'],
-                'data': {'key': 'repo_sync_on_run_timeout', 'value': False}
+                'data': {'key': 'repo_sync_on_run_timeout', 'value': 12}
             },
         ])
         for result in results:
@@ -2484,7 +2484,7 @@ class VariableTestCase(BaseProjectTestCase):
             {  # [0] add variable to project
                 'method': 'post',
                 'path': ['project', self.project.id, 'variables'],
-                'data': {'key': 'repo_sync_on_run_timeout', 'value': 'lol_variable'}
+                'data': {'key': 'repo_sync_on_run_timeout', 'value': 12}
             },
             {  # [1] copy project
                 'method': 'post',
@@ -2511,7 +2511,7 @@ class VariableTestCase(BaseProjectTestCase):
         self.assertEqual(results[2]['data']['name'], 'copy')
 
         self.assertEqual(results[4]['data']['key'], 'repo_sync_on_run_timeout')
-        self.assertEqual(results[4]['data']['value'], 'lol_variable')
+        self.assertEqual(results[4]['data']['value'], 12)
 
     def test_add_vars_to_project(self):
         results = self.bulk([

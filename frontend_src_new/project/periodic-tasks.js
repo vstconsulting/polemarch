@@ -1,6 +1,6 @@
 import { InventoryField } from '../inventory';
 
-const periodicTaskInventoryField = {
+const periodicTaskInventoryField = () => ({
     type: 'string',
     format: 'dynamic',
     'x-options': {
@@ -12,7 +12,7 @@ const periodicTaskInventoryField = {
             return { type: 'string', format: InventoryField.format };
         },
     },
-};
+});
 
 const templateOptionField = (template) => ({
     type: 'string',
@@ -55,8 +55,8 @@ export function setupPeriodicTasks() {
             .split('/')
             .at(-1);
 
-        schema.definitions[periodicTasksListModelName].properties.inventory = periodicTaskInventoryField;
-        schema.definitions[periodicTaskCreateModelName].properties.inventory = periodicTaskInventoryField;
+        schema.definitions[periodicTasksListModelName].properties.inventory = periodicTaskInventoryField();
+        schema.definitions[periodicTaskCreateModelName].properties.inventory = periodicTaskInventoryField();
 
         schema.definitions[periodicTaskCreateModelName].properties.template_opt = {
             type: 'string',

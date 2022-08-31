@@ -376,7 +376,7 @@ class ProjectVariableSerializer(VariableSerializer):
     }, types={
         'repo_password': 'password',
         'repo_key': 'secretfile',
-        'repo_sync_on_run_timeout': 'uptime',
+        'repo_sync_on_run_timeout': vst_fields.UptimeField(default=0),
         'ci_template': vst_fields.FkField(select='ExecutionTemplate')
     })
 
@@ -555,40 +555,73 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
 
 class ProjectCreateMasterSerializer(_WithPermissionsSerializer):
     types = models.list_to_choices(models.Project.repo_handlers.keys())
-    auth_types = ['NONE', 'KEY', 'PASSWORD']
-    branch_auth_types = {t: "hidden" for t in models.Project.repo_handlers.keys()}
-    branch_auth_types['GIT'] = 'string'
-    branch_types = dict(**branch_auth_types)
-    branch_types['TAR'] = 'string'
 
     status = vst_fields.VSTCharField(read_only=True)
     type = serializers.ChoiceField(choices=types, default='MANUAL', label='Repo type')
-    repository = vst_fields.VSTCharField(default='MANUAL', label='Repo url')
-    repo_auth = vst_fields.DependEnumField(default='NONE',
-                                           field='type',
-                                           choices={"GIT": auth_types},
-                                           types=branch_auth_types,
-                                           label='Repo auth type',
-                                           write_only=True)
-    auth_data = vst_fields.DependEnumField(allow_blank=True,
-                                           write_only=True,
-                                           default='',
-                                           field='repo_auth',
-                                           label='Repo auth data',
-                                           types={
-                                               'KEY': 'secretfile',
-                                               'PASSWORD': 'password',
-                                               'NONE': 'hidden'
-                                           })
-    branch = vst_fields.DependEnumField(allow_blank=True,
-                                        required=False,
-                                        allow_null=True,
-                                        label='Branch for GIT(branch/tag/SHA) or TAR(subdir)',
-                                        field='type',
-                                        types=branch_types)
-    additional_playbook_path = vst_fields.VSTCharField(required=False,
-                                                       allow_null=True,
-                                                       label='Directory with playbooks')
+    repository = vst_fields.DependEnumField(
+        field='type',
+        default='MANUAL',
+        label='Repo url',
+        types={'MANUAL': 'hidden', 'GIT': 'string', 'TAR': 'string'},
+    )
+    repo_auth = vst_fields.DependEnumField(
+        field='type',
+        default='NONE',
+        types={
+            'MANUAL': {'type': 'string', 'format': 'hidden'},
+            'TAR': {'type': 'string', 'format': 'hidden'},
+            'GIT': {
+                'type': 'string',
+                'enum': ('NONE', 'KEY', 'PASSWORD'),
+                'default': 'NONE',
+            },
+        },
+        label='Repo auth type',
+        write_only=True
+    )
+    auth_data = vst_fields.DependEnumField(
+        allow_blank=True,
+        write_only=True,
+        default='',
+        field='repo_auth',
+        label='Repo auth data',
+        types={
+            'KEY': 'secretfile',
+            'PASSWORD': 'password',
+            'NONE': 'hidden'
+        }
+    )
+    branch = vst_fields.DependEnumField(
+        allow_blank=True,
+        required=False,
+        allow_null=True,
+        label='Branch for GIT (branch/tag/SHA) or TAR (subdir)',
+        field='type',
+        types={
+            'MANUAL': {'type': 'string', 'format': 'hidden'},
+            'GIT': {'type': 'string'},
+            'TAR': {'type': 'string'},
+        }
+    )
+    additional_playbook_path = vst_fields.VSTCharField(
+        required=False,
+        allow_null=True,
+        label='Directory with playbooks'
+    )
+
+    _schema_properties_groups = {
+        'General': (
+            'name',
+            'type',
+            'additional_playbook_path',
+        ),
+        'Repository': (
+            'repository',
+            'branch',
+            'repo_auth',
+            'auth_data',
+        ),
+    }
 
     class Meta:
         model = models.Project
@@ -604,7 +637,7 @@ class ProjectCreateMasterSerializer(_WithPermissionsSerializer):
             'additional_playbook_path',
         )
         extra_kwargs = {
-            'name': {'required': True}
+            'name': {'required': True},
         }
 
     @transaction.atomic
