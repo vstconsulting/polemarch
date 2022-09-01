@@ -26,37 +26,6 @@ def create_admin_user(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    replaces = [('main', '0001_initial'), ('main', '0002_initial'),
-                ('main', '0003_initial'), ('main', '0004_auto_20170710_0857'),
-                ('main', '0005_auto_20170711_1118'), ('main', '0006_auto_20170711_1546'),
-                ('main', '0007_history_task_id'), ('main', '0008_auto_20170717_1437'),
-                ('main', '0009_remove_history_task_id'),
-                ('main', '0010_auto_20170721_0441'), ('main', '0011_auto_20170724_0139'),
-                ('main', '0012_auto_20170725_0122'), ('main', '0013_auto_20170725_2314'),
-                ('main', '0014_auto_20170727_0618'), ('main', '0015_auto_20170814_1731'),
-                ('main', '0016_typespermissions_template'),
-                ('main', '0017_periodictask_save_result'),
-                ('main', '0018_auto_20170929_0657'), ('main', '0019_auto_20171025_0104'),
-                ('main', '0020_auto_20171031_0400'), ('main', '0021_usergroup'),
-                ('main', '0022_auto_20171110_0857'), ('main', '0023_auto_20171110_1709'),
-                ('main', '0024_migrate_templates'), ('main', '0025_auto_20171120_1126'),
-                ('main', '0026_auto_20171122_0145'),
-                ('main', '0027_migrate_periodic_task'),
-                ('main', '0028_auto_20171123_0532'), ('main', '0029_auto_20171127_0801'),
-                ('main', '0030_auto_20171127_0801'),
-                ('main', '0031_periodictask_inventory_file'),
-                ('main', '0032_history_json_args'), ('main', '0033_auto_20171211_0732'),
-                ('main', '0034_periodictask_enabled'), ('main', '0035_usersettings'),
-                ('main', '0035_template_options_data'),
-                ('main', '0036_merge_20180226_0050'),
-                ('main', '0037_auto_20180403_0113'), ('main', '0038_history_executor'),
-                ('main', '0039_migrate_history'), ('main', '0040_history_json_options'),
-                ('main', '0041_auto_20180502_2355'), ('main', '0038_auto_20180420_0836'),
-                ('main', '0039_auto_20180420_0908'),
-                ('main', '0042_merge_20180504_0359'), ('main', '0043_usergroup_notes'),
-                ('main', '0044_auto_20180515_0304'), ('main', '0045_hook_enable'),
-                ('main', '0046_auto_20180608_0658'), ('main', '0047_fix_templates'),
-                ('main', '0048_auto_20180614_0211')]
 
     dependencies = [
         ('contenttypes', '0002_remove_content_type_name'),
