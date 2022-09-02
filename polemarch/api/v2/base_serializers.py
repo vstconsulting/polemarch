@@ -32,12 +32,16 @@ def with_signals(func):
     return func_wrapper
 
 
-class UserSerializer(vst_auth.UserSerializer):
-    is_staff = serializers.HiddenField(default=True, label='Staff')
+class UserSerializer(vst_auth.UserSerializer):  # noee
+    is_staff = None
 
     @with_signals
     def update(self, instance: User, validated_data: Dict):
+        validated_data['is_staff'] = True
         return super().update(instance, validated_data)
+
+    class Meta(vst_auth.UserSerializer.Meta):
+        fields = tuple(filter(lambda field: field != 'is_staff', vst_auth.UserSerializer.Meta.fields))
 
 
 class _SignalSerializer(vst_serializers.VSTSerializer):

@@ -134,11 +134,16 @@ class SetOwnerSerializer(DataSerializer):
         return dict(pk=data['user_id'])
 
 
-class CreateUserSerializer(vst_auth.CreateUserSerializer):
+class CreateUserSerializer(vst_auth.CreateUserSerializer):  # noee
+    is_staff = None
 
     @with_signals
     def create(self, validated_data: Dict) -> User:
+        validated_data['is_staff'] = True
         return super().create(validated_data)
+
+    class Meta(vst_auth.CreateUserSerializer.Meta):
+        fields = tuple(filter(lambda field: field != 'is_staff', vst_auth.CreateUserSerializer.Meta.fields))
 
 
 class ChangePasswordSerializer(vst_auth.ChangePasswordSerializer):
@@ -152,7 +157,7 @@ class OneUserSerializer(UserSerializer):
     email = serializers.EmailField(required=False)
 
     class Meta(vst_auth.OneUserSerializer.Meta):
-        pass
+        fields = tuple(filter(lambda field: field != 'is_staff', vst_auth.OneUserSerializer.Meta.fields))
 
 
 class ChartLineSettingSerializer(vst_serializers.JsonObjectSerializer):
