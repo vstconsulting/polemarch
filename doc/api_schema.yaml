@@ -13951,10 +13951,6 @@ definitions:
         title: Is active
         type: boolean
         default: true
-      is_staff:
-        title: Is staff
-        type: boolean
-        default: false
       first_name:
         title: First name
         type: string
@@ -13981,7 +13977,6 @@ definitions:
         - id
         - username
         - is_active
-        - is_staff
         - first_name
         - last_name
         - email

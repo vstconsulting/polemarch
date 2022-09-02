@@ -3063,12 +3063,11 @@ class UserTestCase(VSTBaseTestCase):
         user_staff = self._create_user(is_super_user=False, is_staff=True)
         user_reg = self._create_user(is_super_user=False, is_staff=False)
 
-        superuser_results = self.bulk([
+        results = self.bulk([
             {'method': 'post', 'path': 'user', 'data': {
                 'email': 'msh@example.com',
                 'first_name': 'Msh',
                 'is_active': True,
-                'is_staff': False,
                 'last_name': 'Msh',
                 'username': 'msh',
                 'password': '1q2w3e',
@@ -3076,7 +3075,8 @@ class UserTestCase(VSTBaseTestCase):
             }}
         ])
 
-        self.assertEqual(superuser_results[0]['status'], 201)
+        self.assertEqual(results[0]['status'], 201)
+        self.assertTrue(User.objects.get(id=results[0]['data']['id']).is_staff)
 
         with self.user_as(self, user_staff):
             results = self.bulk([
@@ -3084,7 +3084,6 @@ class UserTestCase(VSTBaseTestCase):
                     'email': 'example@example.com',
                     'first_name': 'User',
                     'is_active': True,
-                    'is_staff': False,
                     'last_name': 'User',
                     'username': 'user',
                     'password': 'user',
@@ -3093,6 +3092,7 @@ class UserTestCase(VSTBaseTestCase):
             ])
 
         self.assertEqual(results[0]['status'], 201)
+        self.assertTrue(User.objects.get(id=results[0]['data']['id']).is_staff)
 
         with self.user_as(self, user_reg):
             results = self.bulk([
@@ -3100,7 +3100,6 @@ class UserTestCase(VSTBaseTestCase):
                     'email': 'example1@example.com',
                     'first_name': 'User1',
                     'is_active': True,
-                    'is_staff': False,
                     'last_name': 'User1',
                     'username': 'user1',
                     'password': 'user1',
