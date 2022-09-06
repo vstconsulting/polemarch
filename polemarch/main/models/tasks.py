@@ -79,7 +79,10 @@ class Template(ACLModel):
         data = json.loads(self.template_data)
         if "inventory" in self.template_fields[self.kind] and self.inventory:
             try:
-                data['inventory'] = int(self.inventory)
+                if isinstance(self.inventory, Inventory):
+                    data['inventory'] = self.inventory.id
+                else:
+                    data['inventory'] = int(self.inventory)
             except ValueError:
                 data['inventory'] = self.inventory
         return data
@@ -310,17 +313,12 @@ class PeriodicTask(AbstractModel):
 
     @inventory.setter
     def inventory(self, inventory: InvOrString) -> NoReturn:
-        if isinstance(inventory, Inventory):  # nocv
+        if isinstance(inventory, Inventory):
             self._inventory = inventory
             self.inventory_file = None
-        elif isinstance(inventory, (str, int)):
-            try:
-                self._inventory = self.project.inventories.get(pk=int(inventory))
-                self.inventory_file = None
-            except (ValueError, Inventory.DoesNotExist):
-                self.project.check_path(inventory)
-                self.inventory_file = inventory
-                self._inventory = None
+        elif isinstance(inventory, str):
+            self.inventory_file = inventory
+            self._inventory = None
 
     @property
     def crontab_kwargs(self) -> Dict:

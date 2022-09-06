@@ -12,9 +12,9 @@ from ..v2.serializers import (
     _WithVariablesSerializer,
     AnsiblePlaybookSerializer,
     AnsibleModuleSerializer,
+    InventoryAutoCompletionField,
     generate_fileds,
     ModuleSerializer,
-    InventoryDependEnumField,
     ExecuteResponseSerializer,
     OneProjectSerializer as V2OneProjectSerializer,
 )
@@ -84,6 +84,7 @@ class CreateExecutionTemplateSerializer(ExecutionTemplateSerializer):
         ExecutionTypes.Task.value: TaskTemplateParameters(),
         ExecutionTypes.Module.value: ModuleTemplateParameters(),
     })
+    inventory = InventoryAutoCompletionField(allow_blank=True, required=False)
 
     class Meta(ExecutionTemplateSerializer.Meta):
         fields = ExecutionTemplateSerializer.Meta.fields + ['notes', 'inventory', 'data']
@@ -185,7 +186,7 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
             'TEMPLATE': 'hidden',
         }
     )
-    inventory = InventoryDependEnumField(allow_blank=True, required=False, field='kind')
+    inventory = InventoryAutoCompletionField(allow_blank=True, required=False)
 
     class Meta:
         model = models.PeriodicTask

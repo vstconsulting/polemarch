@@ -1,12 +1,3 @@
-import { InventoryField } from '../inventory';
-
-spa.signals.once('models[OneExecutionTemplate].fields.beforeInit', (fields) => {
-    fields.inventory = {
-        type: 'string',
-        format: InventoryField.format,
-    };
-});
-
 /** @vue/component */
 const OptionCreatePageMixin = {
     data() {

@@ -61,19 +61,7 @@ class MultiTypeField(serializers.CharField):
         )
 
 
-class InventoryDependEnumField(vst_fields.DependEnumField):
-    def to_internal_value(self, data):
-        data = super().to_internal_value(data)
-        return data
-
-    def to_representation(self, value):
-        value = super().to_representation(value)
-        if isinstance(value, models.Inventory):
-            value = value.id
-        return value
-
-
-class InventoryAutoCompletionField(vst_fields.AutoCompletionField):
+class InventoryAutoCompletionField(vst_fields.VSTCharField):
 
     def to_internal_value(self, data):
         inventory = super().to_internal_value(data)
@@ -85,13 +73,9 @@ class InventoryAutoCompletionField(vst_fields.AutoCompletionField):
                     "You don't have permission to inventory."
                 )  # noce
         except (ValueError, KeyError):
-            self.check_path(inventory)
+            if ',' not in inventory:
+                path_validator(inventory)
         return inventory
-
-    def check_path(self, inventory):
-        if not hasattr(self.root, 'project'):  # nocv
-            return
-        self.root.project.check_path(inventory)
 
 
 # Serializers
@@ -790,7 +774,6 @@ def generate_fileds(ansible_reference: AnsibleArgumentsReference, ansible_type: 
         if ref in HiddenArg.get_values():
             field = vst_fields.SecretFileInString
         if ref == 'inventory':
-            kwargs['autocomplete'] = 'Inventory'
             field = InventoryAutoCompletionField
 
         if field is None:  # nocv

@@ -1,5 +1,4 @@
 /* eslint-disable vue/one-component-per-file */
-import { InventoryField } from '../inventory';
 import OutputLines from './OutputLines.vue';
 import { RawInventoryField } from './raw-inventory';
 import './style.scss';
@@ -101,9 +100,6 @@ export function setupModel(modelName) {
                     initiatorField[initiator_type](project),
                 field: ['initiator_type', 'project'],
             };
-        }
-        if (fields.inventory) {
-            fields.inventory.format = InventoryField.format;
         }
         if (fields.mode) {
             fields.mode.format = 'dynamic';

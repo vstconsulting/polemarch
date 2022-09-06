@@ -4,100 +4,135 @@
             <button
                 type="button"
                 class="btn"
-                :class="disabled ? 'btn-outline-secondary' : 'btn-success'"
+                :class="disabled ? 'btn-secondary' : 'btn-success'"
                 @click="toggleDisabled"
             >
                 <i class="fa fa-power-off" />
             </button>
             <button
                 type="button"
-                class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
                 data-toggle="dropdown"
                 aria-haspopup="true"
                 aria-expanded="false"
                 style="margin-right: 1px"
                 :disabled="disabled"
             >
-                <span style="margin-right: 1ch">{{ $t(realField.title) }}</span>
+                <span style="margin-right: 1ch">{{ $t(types[type]) }}</span>
             </button>
             <div class="dropdown-menu">
                 <button
-                    v-for="field in field.types"
-                    :key="field.title"
+                    v-for="(title, type) in types"
+                    :key="type"
                     class="dropdown-item"
                     type="button"
-                    :data-type="field.title"
-                    @click="$emit('select-field', field)"
+                    :data-type="type"
+                    @click="setType"
                 >
-                    {{ $t(field.title) }}
+                    {{ $t(title) }}
                 </button>
             </div>
         </div>
-        <InventoryFKEdit
-            v-if="displayFk"
+        <component
+            :is="$parent.fkField.component"
+            v-if="type === 'fk'"
+            hide-title
+            :field="$parent.fkField"
+            :data="{ [$parent.fkField.name]: realValue }"
             type="edit"
-            :field="field.types.Inventory"
-            :data="data"
-            :value="fkValue"
-            :disabled="disabled"
-            @set-value="setValue"
+            style="flex: 2"
+            @set-value="({ value }) => setValue({ type: 'fk', value })"
         />
-        <input
-            v-else
-            type="text"
-            class="form-control"
-            :disabled="disabled"
-            @[inputEventName]="setValue($event.target.value)"
+        <template v-else-if="type === 'path'">
+            <div class="input-group-prepend">
+                <span class="input-group-text">./</span>
+            </div>
+            <input
+                type="text"
+                class="form-control"
+                :value="realValue"
+                @change="(e) => setValue({ type: 'path', value: e.target.value })"
+            />
+        </template>
+        <TagsSelector
+            v-else-if="type === 'hosts'"
+            :value="realValue"
+            :validator="validateHost"
+            @change="(value) => setValue({ type: 'hosts', value })"
         />
     </div>
 </template>
 
 <script>
-    import InventoryFKEdit from './InventoryFKEdit.js';
-
     export default {
         name: 'InventoryFieldEdit',
-        components: { InventoryFKEdit },
-        mixins: [spa.fields.base.BaseFieldContentEdit],
-        props: {
-            realField: { type: Object, required: true },
+        components: {
+            TagsSelector: spa.components.TagsSelector,
         },
+        mixins: [spa.fields.base.BaseFieldContentEdit],
         data() {
             return {
                 disabled: Boolean(!this.value),
-                fkValue: null,
+                types: {
+                    fk: 'Inventory',
+                    hosts: 'Hosts list',
+                    path: 'Inventory path',
+                },
             };
         },
         computed: {
-            displayFk() {
-                return Boolean(this.realField.fkModel);
+            type() {
+                return this.value?.type || 'fk';
+            },
+            realValue() {
+                return this.value?.value;
             },
         },
-        watch: {
-            value: {
-                immediate: true,
-                handler(value) {
-                    if (this.realField.fkModel) {
-                        this.fkValue = value;
+        mounted() {
+            this.$watch(
+                'disabled',
+                (value) => {
+                    if (this.type === 'fk') {
+                        this.$el.querySelector('select').disabled = value;
                     }
                 },
-            },
+                { immediate: true },
+            );
         },
         methods: {
+            setType(e) {
+                this.setValue({ type: e.target.dataset.type, value: undefined });
+            },
             toggleDisabled() {
                 if (this.disabled) {
                     this.disabled = false;
                 } else {
                     this.disabled = true;
-                    this.setValue(null);
+                    this.setValue(this.field.required ? null : undefined);
+                }
+            },
+            validateHost(host) {
+                if (host && !host.includes(',')) {
+                    return host;
                 }
             },
         },
     };
 </script>
 
-<style>
-    .field-component.format-inventory .select2-selection {
-        width: 100%;
+<style lang="scss">
+    .field-component.format-inventory {
+        .tags-selector {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            flex: 2;
+        }
+        .select2-selection {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        input {
+            height: auto;
+        }
     }
 </style>

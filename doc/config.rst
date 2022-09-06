@@ -334,6 +334,32 @@ session_timeout, static_files_url or pagination limit.
 
 .. note:: You can find more Web options in :ref:`vstutils:web`.
 
+
+.. _centrifugo:
+
+Centrifugo client settings
+--------------------------
+
+Section ``[centrifugo]``.
+
+To install app with centrifugo client, ``[centrifugo]`` section must be set.
+Centrifugo is used by application to auto-update page data.
+When user change some data, other clients get notification on ``subscriptions_update`` channel
+with model label and primary key. Without the service all GUI-clients get page data
+every 5 seconds (by default). Centrifugo server v3 is supported.
+
+* **address** - Centrifugo server address.
+* **api_key** - API key for clients.
+* **token_hmac_secret_key** - API key for jwt-token generation.
+* **timeout** - Connection timeout.
+* **verify** - Connection verification.
+
+.. note::
+    These settings also add parameters to the OpenApi schema and change how the auto-update system works in the GUI.
+    ``token_hmac_secret_key`` is used for jwt-token generation (based on
+    session expiration time). Token will be used for Centrifugo-JS client.
+
+
 .. _git:
 
 Git settings
@@ -354,6 +380,9 @@ Here placed settings related to web-server used by Polemarch in production
 (logging, PID-file and so on).
 
 .. note:: More settings in :doc:`uwsgi:Configuration`.
+
+.. warning:: In production, it is recommended to use Centrifugo in order to reduce the load on the backend from automatic page updates.
+
 
 Configuration options
 -----------------------------

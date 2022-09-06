@@ -1,125 +1,30 @@
 import './style.scss';
 import { hideListColumns } from '../history';
 
-const modelListFields = ['mode', 'inventory', 'template', 'template_opt'];
+hideListColumns('Periodictask', ['mode', 'inventory', 'template', 'template_opt']);
 
-hideListColumns('Periodictask', modelListFields);
-
-const variablesReadonlyMixin = {
+const fetchKindMixin = {
     data() {
         return {
             kind: null,
         };
     },
-    computed: {
-        valueField() {
-            return this.$app.fieldsResolver.resolveField({
-                type: 'string',
-                name: 'value',
-                title: 'Value',
-                format: 'dynamic',
-                'x-options': {
-                    field: 'key',
-                    types:
-                        this.kind === 'MODULE'
-                            ? this.$app.schema.definitions.AnsibleModule.properties
-                            : this.$app.schema.definitions.AnsiblePlaybook.properties,
-                },
-            });
-        },
-        fieldsGroups() {
-            return [
-                {
-                    title: '',
-                    fields: [this.model.fields.get('id'), this.model.fields.get('key'), this.valueField],
-                },
-            ];
-        },
-    },
     methods: {
         fetchKind() {
-            return (
-                this.view.type === spa.utils.ViewTypes.PAGE_EDIT
-                    ? this.view.parent.parent.parent
-                    : this.view.parent.parent
-            ).objects
-                .formatPath(this.$route.params)
+            return this.$app.views
+                .get('/project/{id}/periodic_task/')
+                .objects.formatPath(this.$route.params)
                 .get(this.$route.params.periodic_task_id)
-                .then((task) => (this.kind = task.kind))
+                .then((task) => task.kind)
                 .catch((error) => {
                     this.setLoadingError(error || {});
                 });
         },
         onCreatedHandler() {
-            this.fetchData().then(() => this.fetchKind());
-        },
-    },
-};
-
-const variablesEditMixin = {
-    mixins: [variablesReadonlyMixin],
-    data() {
-        return {
-            cachedValues: new Map(),
-        };
-    },
-    computed: {
-        keyField() {
-            const model = this.$app.modelsResolver.get(
-                this.kind === 'MODULE' ? 'AnsibleModule' : 'AnsiblePlaybook',
-            );
-            return this.$app.fieldsResolver.resolveField({
-                type: 'string',
-                name: 'key',
-                title: 'Key',
-                enum: Array.from(model.fields.keys()).filter((key) => {
-                    if (this.kind === 'MODULE') {
-                        return key !== 'module';
-                    } else if (this.kind === 'PLAYBOOK') {
-                        return key !== 'playbook';
-                    }
-                }),
-            });
-        },
-        valueField() {
-            const props =
-                this.kind === 'MODULE'
-                    ? this.$app.schema.definitions.AnsibleModule.properties
-                    : this.$app.schema.definitions.AnsiblePlaybook.properties;
-            return this.$app.fieldsResolver.resolveField({
-                type: 'string',
-                ...props[this.sandbox.key],
-                name: 'value',
-            });
-        },
-        fieldsGroups() {
-            return [{ title: '', fields: [this.keyField, this.valueField] }];
-        },
-    },
-    watch: {
-        'sandbox.key'(key) {
-            if (this.cachedValues.has(key)) {
-                this.setFieldValue({ field: 'value', value: this.cachedValues.get(key) });
-            } else {
-                this.setFieldValue({ field: 'value', value: this.valueField.getInitialValue() });
-            }
-        },
-        'sandbox.value'(value) {
-            if (this.sandbox.key) {
-                this.cachedValues.set(this.sandbox.key, value);
-            }
-        },
-    },
-    methods: {
-        onCreatedHandler() {
             this.fetchData()
                 .then(() => this.fetchKind())
-                .then(() => {
-                    this.commitMutation('setInstance', this.instance);
-                    if (this.sandbox.key && this.sandbox.value) {
-                        this.cachedValues.set(this.sandbox.key, this.sandbox.value);
-                    }
-                    this.setLoadingSuccessful();
+                .then((kind) => {
+                    this.commitMutation('setFieldValue', { field: 'kind', value: kind });
                 });
         },
     },
@@ -133,10 +38,40 @@ spa.signals.once('allViews.created', ({ views }) => {
     const oneVariablesPage = views.get(
         '/project/{id}/periodic_task/{periodic_task_id}/variables/{variables_id}/',
     );
+    const variablesListPage = views.get('/project/{id}/periodic_task/{periodic_task_id}/variables/');
 
-    variablesCreatePage.mixins.push(variablesEditMixin);
-    variablesEditPage.mixins.push(variablesEditMixin);
-    oneVariablesPage.mixins.push(variablesReadonlyMixin);
+    class VariablesQuerySet extends variablesListPage.objects.constructor {
+        _getKind() {
+            const params = app.router.currentRoute.params;
+            return window.app.views
+                .get('/project/{id}/periodic_task/')
+                .objects.get(params.periodic_task_id, { id: params.id })
+                .then((task) => task.kind);
+        }
+        async get(...args) {
+            const [variable, kind] = await Promise.all([super.get(...args), this._getKind()]);
+            variable._data.kind = kind;
+            return variable;
+        }
+        async items(...args) {
+            const [variables, kind] = await Promise.all([super.items(...args), this._getKind()]);
+            for (const variable of variables) {
+                variable._data.kind = kind;
+            }
+            return variables;
+        }
+    }
+
+    for (const view of [variablesEditPage, oneVariablesPage, variablesListPage]) {
+        view.objects = new VariablesQuerySet(
+            view.objects.pattern,
+            view.objects.models,
+            {},
+            view.objects.pathParams,
+        );
+    }
+
+    variablesCreatePage.mixins.push(fetchKindMixin);
 });
 
 const HideSublinksMixin = {
