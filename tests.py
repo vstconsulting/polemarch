@@ -1483,8 +1483,9 @@ class PeriodicTaskTestCase(BaseProjectTestCase):
         self.assertEqual(results[5]['data']['status'], 'OK')
         self.assertEqual(results[7]['data']['status'], 'OK')
 
-        # check template with inventory path
         template = self.get_model_class('main.Template').objects.get(pk=template_id)
+
+        # check template without inventory
         template.inventory = None
         template.save(update_fields=['inventory'])
         results = self.bulk([
@@ -1501,7 +1502,7 @@ class PeriodicTaskTestCase(BaseProjectTestCase):
         self.assertEqual(results[1]['status'], 200)
         self.assertEqual(results[1]['data']['status'], 'OK')
 
-        # check template without inventory
+        # check template with inventory path
         template.inventory = self.inventory_path
         template.save(update_fields=['inventory'])
         results = self.bulk([

@@ -17,7 +17,7 @@
             </div>
         </div>
         <div class="row">
-            <component :is="component" v-for="component in additionalSections" />
+            <component :is="component" v-for="(component, idx) in additionalSections" :key="idx" />
         </div>
     </div>
 </template>
@@ -40,7 +40,7 @@
                     { key: 'templates', label: 'Templates', icon: 'fa fa-cog' },
                     { key: 'projects', label: 'Projects', href: '#/project', icon: 'fa fa-cog' },
                     { key: 'inventories', label: 'Inventories', href: '#/inventory', icon: 'fas fa-cog' },
-                    { key: 'groups', label: 'Groups', href: '#/groups', icon: 'fa fa-cog' },
+                    { key: 'groups', label: 'Groups', href: '#/group', icon: 'fa fa-cog' },
                     { key: 'hosts', label: 'Hosts', href: '#/host', icon: 'fa fa-cog' },
                     { key: 'users', label: 'Users', href: '#/user', icon: 'fa fa-cog' },
                 ],
@@ -49,7 +49,7 @@
         },
         computed: {
             additionalSections() {
-                return []
+                return [];
             },
             title() {
                 return this.$t('Dashboard');

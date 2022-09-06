@@ -68,7 +68,7 @@ info:
   x-versions:
     application: 2.0.0b2
     library: 2.0.0b2
-    vstutils: 5.0.4
+    vstutils: 5.0.6
     django: 3.2.15
     djangorestframework: 3.13.1
     drf_yasg: 1.21.3
@@ -10760,6 +10760,7 @@ definitions:
         title: Inventory
         type: integer
         x-nullable: true
+        format: inventory
       kind:
         title: Kind
         type: string
@@ -10876,6 +10877,7 @@ definitions:
         title: Inventory
         type: integer
         x-nullable: true
+        format: inventory
       kind:
         title: Kind
         type: string
@@ -11381,13 +11383,7 @@ definitions:
         description: specify inventory host path or comma separated host list. --inventory-file
           is deprecated
         type: string
-        format: fk_autocomplete
-        x-options:
-          model:
-            $ref: '#/definitions/Inventory'
-          usePrefetch: true
-          value_field: id
-          view_field: name
+        format: inventory
       limit:
         title: Limit
         description: further limit selected hosts to an additional pattern
@@ -11599,13 +11595,7 @@ definitions:
         description: specify inventory host path or comma separated host list. --inventory-file
           is deprecated
         type: string
-        format: fk_autocomplete
-        x-options:
-          model:
-            $ref: '#/definitions/Inventory'
-          usePrefetch: true
-          value_field: id
-          view_field: name
+        format: inventory
       limit:
         title: Limit
         description: further limit selected hosts to an additional pattern
@@ -11782,8 +11772,7 @@ definitions:
       inventory:
         title: Inventory
         type: string
-        maxLength: 128
-        x-nullable: true
+        format: inventory
       data:
         title: Data
         type: string
@@ -11865,13 +11854,7 @@ definitions:
                       description: specify inventory host path or comma separated
                         host list. --inventory-file is deprecated
                       type: string
-                      format: fk_autocomplete
-                      x-options:
-                        model:
-                          $ref: '#/definitions/Inventory'
-                        usePrefetch: true
-                        value_field: id
-                        view_field: name
+                      format: inventory
                     limit:
                       title: Limit
                       description: further limit selected hosts to an additional pattern
@@ -12025,13 +12008,7 @@ definitions:
                       description: specify inventory host path or comma separated
                         host list. --inventory-file is deprecated
                       type: string
-                      format: fk_autocomplete
-                      x-options:
-                        model:
-                          $ref: '#/definitions/Inventory'
-                        usePrefetch: true
-                        value_field: id
-                        view_field: name
+                      format: inventory
                     limit:
                       title: Limit
                       description: further limit selected hosts to an additional pattern
@@ -12159,8 +12136,7 @@ definitions:
       inventory:
         title: Inventory
         type: string
-        maxLength: 128
-        x-nullable: true
+        format: inventory
       data:
         title: Data
         type: string
@@ -12242,13 +12218,7 @@ definitions:
                       description: specify inventory host path or comma separated
                         host list. --inventory-file is deprecated
                       type: string
-                      format: fk_autocomplete
-                      x-options:
-                        model:
-                          $ref: '#/definitions/Inventory'
-                        usePrefetch: true
-                        value_field: id
-                        view_field: name
+                      format: inventory
                     limit:
                       title: Limit
                       description: further limit selected hosts to an additional pattern
@@ -12402,13 +12372,7 @@ definitions:
                       description: specify inventory host path or comma separated
                         host list. --inventory-file is deprecated
                       type: string
-                      format: fk_autocomplete
-                      x-options:
-                        model:
-                          $ref: '#/definitions/Inventory'
-                        usePrefetch: true
-                        value_field: id
-                        view_field: name
+                      format: inventory
                     limit:
                       title: Limit
                       description: further limit selected hosts to an additional pattern
@@ -12652,13 +12616,7 @@ definitions:
                       description: specify inventory host path or comma separated
                         host list. --inventory-file is deprecated
                       type: string
-                      format: fk_autocomplete
-                      x-options:
-                        model:
-                          $ref: '#/definitions/Inventory'
-                        usePrefetch: true
-                        value_field: id
-                        view_field: name
+                      format: inventory
                     limit:
                       title: Limit
                       description: further limit selected hosts to an additional pattern
@@ -12812,13 +12770,7 @@ definitions:
                       description: specify inventory host path or comma separated
                         host list. --inventory-file is deprecated
                       type: string
-                      format: fk_autocomplete
-                      x-options:
-                        model:
-                          $ref: '#/definitions/Inventory'
-                        usePrefetch: true
-                        value_field: id
-                        view_field: name
+                      format: inventory
                     limit:
                       title: Limit
                       description: further limit selected hosts to an additional pattern
@@ -13016,13 +12968,7 @@ definitions:
                       description: specify inventory host path or comma separated
                         host list. --inventory-file is deprecated
                       type: string
-                      format: fk_autocomplete
-                      x-options:
-                        model:
-                          $ref: '#/definitions/Inventory'
-                        usePrefetch: true
-                        value_field: id
-                        view_field: name
+                      format: inventory
                     limit:
                       title: Limit
                       description: further limit selected hosts to an additional pattern
@@ -13176,13 +13122,7 @@ definitions:
                       description: specify inventory host path or comma separated
                         host list. --inventory-file is deprecated
                       type: string
-                      format: fk_autocomplete
-                      x-options:
-                        model:
-                          $ref: '#/definitions/Inventory'
-                        usePrefetch: true
-                        value_field: id
-                        view_field: name
+                      format: inventory
                     limit:
                       title: Limit
                       description: further limit selected hosts to an additional pattern
@@ -13348,6 +13288,7 @@ definitions:
         title: Inventory
         type: integer
         x-nullable: true
+        format: inventory
       kind:
         title: Kind
         type: string
@@ -13529,11 +13470,7 @@ definitions:
       inventory:
         title: Inventory
         type: string
-        format: dynamic
-        x-options:
-          choices: {}
-          field: kind
-          types: {}
+        format: inventory
       save_result:
         title: Save result
         type: boolean
@@ -13662,11 +13599,7 @@ definitions:
       inventory:
         title: Inventory
         type: string
-        format: dynamic
-        x-options:
-          choices: {}
-          field: kind
-          types: {}
+        format: inventory
       save_result:
         title: Save result
         type: boolean
@@ -13758,14 +13691,377 @@ definitions:
         type: integer
         readOnly: true
       key:
+        format: dynamic
+        name: key
         title: Key
         type: string
-        maxLength: 512
-        minLength: 1
+        x-options:
+          field: kind
+          types:
+            MODULE:
+              enum:
+                - args
+                - background
+                - become
+                - become_method
+                - check
+                - connection
+                - diff
+                - extra_vars
+                - forks
+                - limit
+                - list_hosts
+                - one_line
+                - playbook_dir
+                - poll
+                - private_key
+                - scp_extra_args
+                - sftp_extra_args
+                - ssh_common_args
+                - ssh_extra_args
+                - syntax_check
+                - timeout
+                - tree
+                - user
+                - vault_password_file
+                - verbose
+                - group
+              type: string
+            PLAYBOOK:
+              enum:
+                - args
+                - become
+                - become_method
+                - check
+                - connection
+                - diff
+                - extra_vars
+                - flush_cache
+                - force_handlers
+                - forks
+                - limit
+                - list_hosts
+                - list_tags
+                - list_tasks
+                - private_key
+                - scp_extra_args
+                - sftp_extra_args
+                - skip_tags
+                - ssh_common_args
+                - ssh_extra_args
+                - start_at_task
+                - step
+                - syntax_check
+                - tags
+                - timeout
+                - user
+                - vault_password_file
+                - verbose
+              type: string
       value:
+        format: dynamic
+        name: value
         title: Value
         type: string
-        default: ''
+        x-options:
+          field: kind
+          types:
+            MODULE:
+              format: dynamic
+              type: string
+              x-options:
+                field: key
+                types:
+                  args:
+                    title: Args
+                    description: host pattern
+                    type: string
+                  background:
+                    title: Background
+                    description: run asynchronously, failing after X seconds (default=N/A)
+                    type: integer
+                  become:
+                    title: Become
+                    description: run operations with become (does not imply password
+                      prompting)
+                    type: boolean
+                    default: false
+                  become_method:
+                    title: Become method
+                    description: privilege escalation method to use (default=sudo),
+                      use `ansible-doc -t become -l` to list valid choices.
+                    type: string
+                  check:
+                    title: Check
+                    description: don't make any changes; instead, try to predict some
+                      of the changes that may occur
+                    type: boolean
+                    default: false
+                  connection:
+                    title: Connection
+                    description: connection type to use (default=smart)
+                    type: string
+                  diff:
+                    title: Diff
+                    description: when changing (small) files and templates, show the
+                      differences in those files; works great with --check
+                    type: boolean
+                    default: false
+                  extra_vars:
+                    title: Extra vars
+                    description: set additional variables as key=value or YAML/JSON,
+                      if filename prepend with @
+                    type: string
+                  forks:
+                    title: Forks
+                    description: specify number of parallel processes to use (default=5)
+                    type: integer
+                  group:
+                    title: Group
+                    type: string
+                    default: all
+                  limit:
+                    title: Limit
+                    description: further limit selected hosts to an additional pattern
+                    type: string
+                  list_hosts:
+                    title: List hosts
+                    description: outputs a list of matching hosts; does not execute
+                      anything else
+                    type: boolean
+                    default: false
+                  one_line:
+                    title: One line
+                    description: condense output
+                    type: boolean
+                    default: false
+                  playbook_dir:
+                    title: Playbook dir
+                    description: Since this tool does not use playbooks, use this
+                      as a substitute playbook directory.This sets the relative path
+                      for many features including roles/ group_vars/ etc.
+                    type: string
+                  poll:
+                    title: Poll
+                    description: set the poll interval if using -B (default=15)
+                    type: integer
+                  private_key:
+                    title: Private key
+                    description: use this file to authenticate the connection
+                    type: string
+                    format: secretfile
+                    x-options:
+                      media_types:
+                        - '*/*'
+                  scp_extra_args:
+                    title: Scp extra args
+                    description: specify extra arguments to pass to scp only (e.g.
+                      -l)
+                    type: string
+                  sftp_extra_args:
+                    title: Sftp extra args
+                    description: specify extra arguments to pass to sftp only (e.g.
+                      -f, -l)
+                    type: string
+                  ssh_common_args:
+                    title: Ssh common args
+                    description: specify common arguments to pass to sftp/scp/ssh
+                      (e.g. ProxyCommand)
+                    type: string
+                  ssh_extra_args:
+                    title: Ssh extra args
+                    description: specify extra arguments to pass to ssh only (e.g.
+                      -R)
+                    type: string
+                  syntax_check:
+                    title: Syntax check
+                    description: perform a syntax check on the playbook, but do not
+                      execute it
+                    type: boolean
+                    default: false
+                  timeout:
+                    title: Timeout
+                    description: override the connection timeout in seconds (default=10)
+                    type: integer
+                  tree:
+                    title: Tree
+                    description: log output to this directory
+                    type: string
+                  user:
+                    title: User
+                    description: connect as this user (default=None)
+                    type: string
+                  vault_password_file:
+                    title: Vault password file
+                    description: vault password file
+                    type: string
+                    format: secretfile
+                    x-options:
+                      media_types:
+                        - '*/*'
+                  verbose:
+                    title: Verbose
+                    description: verbose mode (-vvv for more, -vvvv to enable connection
+                      debugging)
+                    type: integer
+                    default: 0
+                    maximum: 4
+            PLAYBOOK:
+              format: dynamic
+              type: string
+              x-options:
+                field: key
+                types:
+                  args:
+                    title: Args
+                    description: Playbook(s)
+                    type: string
+                  become:
+                    title: Become
+                    description: run operations with become (does not imply password
+                      prompting)
+                    type: boolean
+                    default: false
+                  become_method:
+                    title: Become method
+                    description: privilege escalation method to use (default=sudo),
+                      use `ansible-doc -t become -l` to list valid choices.
+                    type: string
+                  check:
+                    title: Check
+                    description: don't make any changes; instead, try to predict some
+                      of the changes that may occur
+                    type: boolean
+                    default: false
+                  connection:
+                    title: Connection
+                    description: connection type to use (default=smart)
+                    type: string
+                  diff:
+                    title: Diff
+                    description: when changing (small) files and templates, show the
+                      differences in those files; works great with --check
+                    type: boolean
+                    default: false
+                  extra_vars:
+                    title: Extra vars
+                    description: set additional variables as key=value or YAML/JSON,
+                      if filename prepend with @
+                    type: string
+                  flush_cache:
+                    title: Flush cache
+                    description: clear the fact cache for every host in inventory
+                    type: boolean
+                    default: false
+                  force_handlers:
+                    title: Force handlers
+                    description: run handlers even if a task fails
+                    type: boolean
+                    default: false
+                  forks:
+                    title: Forks
+                    description: specify number of parallel processes to use (default=5)
+                    type: integer
+                  limit:
+                    title: Limit
+                    description: further limit selected hosts to an additional pattern
+                    type: string
+                  list_hosts:
+                    title: List hosts
+                    description: outputs a list of matching hosts; does not execute
+                      anything else
+                    type: boolean
+                    default: false
+                  list_tags:
+                    title: List tags
+                    description: list all available tags
+                    type: boolean
+                    default: false
+                  list_tasks:
+                    title: List tasks
+                    description: list all tasks that would be executed
+                    type: boolean
+                    default: false
+                  private_key:
+                    title: Private key
+                    description: use this file to authenticate the connection
+                    type: string
+                    format: secretfile
+                    x-options:
+                      media_types:
+                        - '*/*'
+                  scp_extra_args:
+                    title: Scp extra args
+                    description: specify extra arguments to pass to scp only (e.g.
+                      -l)
+                    type: string
+                  sftp_extra_args:
+                    title: Sftp extra args
+                    description: specify extra arguments to pass to sftp only (e.g.
+                      -f, -l)
+                    type: string
+                  skip_tags:
+                    title: Skip tags
+                    description: only run plays and tasks whose tags do not match
+                      these values
+                    type: string
+                  ssh_common_args:
+                    title: Ssh common args
+                    description: specify common arguments to pass to sftp/scp/ssh
+                      (e.g. ProxyCommand)
+                    type: string
+                  ssh_extra_args:
+                    title: Ssh extra args
+                    description: specify extra arguments to pass to ssh only (e.g.
+                      -R)
+                    type: string
+                  start_at_task:
+                    title: Start at task
+                    description: start the playbook at the task matching this name
+                    type: string
+                  step:
+                    title: Step
+                    description: 'one-step-at-a-time: confirm each task before running'
+                    type: boolean
+                    default: false
+                  syntax_check:
+                    title: Syntax check
+                    description: perform a syntax check on the playbook, but do not
+                      execute it
+                    type: boolean
+                    default: false
+                  tags:
+                    title: Tags
+                    description: only run plays and tasks tagged with these values
+                    type: string
+                  timeout:
+                    title: Timeout
+                    description: override the connection timeout in seconds (default=10)
+                    type: integer
+                  user:
+                    title: User
+                    description: connect as this user (default=None)
+                    type: string
+                  vault_password_file:
+                    title: Vault password file
+                    description: vault password file
+                    type: string
+                    format: secretfile
+                    x-options:
+                      media_types:
+                        - '*/*'
+                  verbose:
+                    title: Verbose
+                    description: verbose mode (-vvv for more, -vvvv to enable connection
+                      debugging)
+                    type: integer
+                    default: 0
+                    maximum: 4
+      kind:
+        name: kind
+        readOnly: true
+        type: string
+        x-hidden: true
     x-properties-groups:
       '':
         - id

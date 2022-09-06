@@ -12,7 +12,6 @@ from docutils.core import publish_parts as rst_gen
 from markdown2 import Markdown
 from django.conf import settings
 from django.db.models import Q
-from django.core.validators import ValidationError
 from django.core.cache import caches
 from vstutils.utils import ModelHandlers, raise_context_decorator_with_default, classproperty
 # pylint: disable=no-name-in-module
@@ -25,6 +24,7 @@ except ImportError:  # nocv
     from yaml import Loader
 
 from . import hosts as hosts_models
+from ..validators import path_validator
 from .vars import AbstractModel, AbstractVarsQuerySet, models
 from ..exceptions import PMException
 from .base import ManyToManyFieldACL, BQuerySet, BModel
@@ -278,10 +278,7 @@ class Project(AbstractModel):
     def check_path(self, inventory) -> NoReturn:
         if not isinstance(inventory, str):  # nocv
             return
-        path = "{}/{}".format(self.path, inventory)
-        path = os.path.abspath(os.path.expanduser(path))
-        if self.path not in path:  # nocv
-            raise ValidationError(dict(inventory="Inventory should be in project dir."))
+        path_validator(inventory)
 
     def _prepare_kw(self, kind: str, mod_name: str, inventory=None, **extra) -> Dict:
         if not mod_name:  # nocv

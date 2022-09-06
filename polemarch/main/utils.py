@@ -17,6 +17,7 @@ except ImportError:  # nocv
 
 from django.core.validators import ValidationError
 
+from vstutils.tasks import TaskClass
 from vstutils.utils import (
     tmp_file_context,
     BaseVstObject,
@@ -93,6 +94,7 @@ class task(object):
     def __call__(self, task_cls):
 
         self.kwargs["name"] = "{c.__module__}.{c.__name__}".format(c=task_cls)
+        self.kwargs["base"] = TaskClass
 
         @self.app.task(*self.args, **self.kwargs)
         def wrapper(*args, **kwargs):
