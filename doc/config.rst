@@ -67,7 +67,7 @@ example than general howto) you must do such steps:
 
 #. Create polemarch systemd service:
 
-   #. Firtsly, create a file ``/etc/systemd/system/polemarch.service``:
+   #. Firstly, create a file ``/etc/systemd/system/polemarch.service``:
 
        .. sourcecode:: ini
 
@@ -163,17 +163,22 @@ So in this case authorization logic will be the following:
      server creates session for him.
 
 
-* **debug** - Enable debug mode. Default: false.
-* **allowed_hosts** - Comma separated list of domains, which allowed to serve. Default: ``*``.
+* **debug** - Enable debug mode. ``Default: false``.
+* **allowed_hosts** - Comma separated list of domains, which allowed to serve. ``Default: *``.
 * **ldap-server** - LDAP server connection.
 * **ldap-default-domain** - Default domain for auth.
-* **timezone** - Timezone of web-application. Default: UTC.
-* **log_level** - Logging level. Default: WARNING.
-* **enable_admin_panel** - Enable or disable Django Admin panel. Defaul: false.
+* **timezone** - Timezone of web-application. ``Default: UTC``.
+* **log_level** - Logging level. ``Default: WARNING``.
 * **projects_dir** - Path where projects will be stored.
 * **hooks_dir** - Path where hook scripts stored.
 * **executor_path** - Path for polemarch-ansible wrapper binary.
-
+* **enable_django_logs** - Enable or disable Django logger to output. Useful for debugging. ``Default: false``.
+* **enable_user_self_remove** - Enable or disable user self-removing. ``Default: false``.
+* **auth-cache-user** - Enable or disable user instance caching. It increases session performance
+  on each request but saves model instance in unsafe storage (default django cache).
+  The instance is serialized to a string using the :mod:`standard python module pickle <pickle>`
+  and then encrypted with :wiki:`Vigenère cipher <Vigenère cipher>`.
+  Read more in the :class:`vstutils.utils.SecurePickling` documentation. ``Default: false``.
 
 .. _database:
 
@@ -186,8 +191,7 @@ Here you can change settings related to database system, which Polemarch will
 use. Polemarch supports all databases supported by ``django``. List of
 supported out of the box: SQLite (default choice), MySQL, Oracle, or
 PostgreSQL. Configuration details you can look at
-`Django database documentation
-<https://docs.djangoproject.com/en/1.11/ref/settings/#databases>`_.
+:django_docs:`Django database documentation <settings/#databases>`.
 If you run Polemarch at multiple nodes (clusterization), you should
 use some of client-server database (SQLite not suitable) shared for all nodes.
 
@@ -221,6 +225,8 @@ Finally, you should add some options to MariaDB configuration:
       character-set-server=utf8
       collation-server=utf8_unicode_ci
 
+.. note:: You can find more database options in :ref:`vstutils:database`.
+
 
 .. _cache:
 
@@ -233,9 +239,8 @@ This section is for settings related to cache backend used by Polemarch.
 Polemarch supports all cache backends that Django supports.
 Currently is: filesystem, in-memory, memcached out of the box and many more by
 additional plugins. You can find details about cache configuration at
-`Django caches documentation
-<https://docs.djangoproject.com/en/1.11/ref/settings/#caches>`_. In
-clusterization scenario we advice to share cache between nodes to speedup their
+:django_docs:`Django caches documentation <settings/#caches>`.
+In clusterization scenario we advice to share cache between nodes to speedup their
 work using client-server cache realizations.
 We recommend to use Redis in production environments.
 
@@ -286,11 +291,14 @@ worker-processes per node and some settings used for troubleshoot
 server-broker-worker interaction problems.
 
 
-* **connection** - Celery broker connection. Read more: http://docs.celeryproject.org/en/latest/userguide/configuration.html#conf-broker-settings Default: ``filesystem:///var/tmp``.
-* **concurrency** - Count of celery worker threads. Default: 4.
-* **heartbeat** - Interval between sending heartbeat packages, which says that connection still alive. Default: 10.
-* **enable_worker** - Enable or disable worker with webserver. Default: true.
-* **clone_retry_count** - Count of retrys on project sync operation.
+* **connection** - Celery broker connection.
+  Read more: :ref:`celery:conf-broker-settings`. ``Default: filesystem:///var/tmp``.
+* **concurrency** - Celery count worker threads. ``Default: 4``.
+* **heartbeat** - Interval between sending heartbeat packages, which says that connection still alive. ``Default: 10``.
+* **enable_worker** - Enable or disable worker with webserver. ``Default: true``.
+* **clone_retry_count** - Retries count on project sync operation.
+
+.. note:: You can find more RPC options in :ref:`vstutils:rpc`.
 
 
 .. _worker:
@@ -303,9 +311,9 @@ Section ``[worker]``.
 Celery worker options for start. Useful settings:
 
 * **loglevel** - Celery worker logging level. Default: from main section ``log_level``.
-* **pidfile** - Celery worker pidfile. Default: ``/run/polemarch_worker.pid``
+* **pidfile** - Celery worker pidfile. ``Default: /run/polemarch_worker.pid``
 * **autoscale** - Options for autoscaling. Two comma separated numbers: max,min.
-* **beat** - Enable or disable celery beat scheduler. Default: true.
+* **beat** - Enable or disable celery beat scheduler. ``Default: true``.
 
 Other settings can be getted from command ``celery worker --help``.
 
@@ -320,10 +328,11 @@ Section ``[web]``.
 Here placed settings related to web-server. Those settings like:
 session_timeout, static_files_url or pagination limit.
 
-* **session_timeout** - Session life-cycle time. Default: 2w (two weeks).
-* **rest_page_limit** - Default limit of objects in API list. Default: 1000.
-* **public_openapi** - Allow to have access to OpenAPI schema from public. Default: ``false``.
+* **session_timeout** - Session life-cycle time. ``Default: 2w`` (two weeks).
+* **rest_page_limit** - Default limit of objects in API list. ``Default: 1000``.
+* **public_openapi** - Allow to have access to OpenAPI schema from public. ``Default: false``.
 
+.. note:: You can find more Web options in :ref:`vstutils:web`.
 
 .. _git:
 
@@ -343,8 +352,8 @@ Section ``[uwsgi]``.
 Here placed settings related to web-server used by Polemarch in production
 (for deb and rpm packages by default). Most of them related to system paths
 (logging, PID-file and so on).
-More settings in `uWSGI docs
-<http://uwsgi-docs.readthedocs.io/en/latest/Configuration.html>`_.
+
+.. note:: More settings in :doc:`uwsgi:Configuration`.
 
 Configuration options
 -----------------------------
@@ -361,24 +370,4 @@ This section contains additional information for configure additional elements.
 
 #. We strictly do not recommend running the web server from root. Use HTTP proxy to run on privileged ports.
 
-
-
-Installation of additional packages to Polemarch
-------------------------------------------------
-
-.. warning::
-    .rpm or .deb installation methods are depracated.
-
-If you want to install some additional package to Polemarch from .rpm or .deb,
-you should run next command:
-
-.. sourcecode:: bash
-
-        sudo -U polemarch /opt/polemarch/bin/pip install package_name
-
-For correct work all requirements for this package should be installed in your system.
-Notice, that after package reinstallation or after package update you should
-set all this requirements again.
-
-If you want to install some additional package from github or gitlab,
-you should just install this package to your system or to your virtual environment.
+.. note:: If you need more options you can find it in :doc:`vstutils:config` in the official vstutils documentation .

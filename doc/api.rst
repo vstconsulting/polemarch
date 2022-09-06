@@ -13,7 +13,7 @@ This is an example of api schema, but you can find actual schema on Polemarch ho
 Structure
 -----------------------
 
-In Polemarch we have some entities that can be nested to another entities. Below examples of such entites:
+In Polemarch we have some entities that can be nested to another entities. Below examples of such entities:
 
 **Inventory** can be nested into **Project**
 
