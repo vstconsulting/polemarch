@@ -2,7 +2,7 @@ version: '3'
 
 services:
   traefik:
-    image: traefik:2.6
+    image: traefik:2.8
     restart: unless-stopped
     volumes:
       - ./traefik_dynamic.yml:/traefik_dynamic.yml:ro
@@ -33,6 +33,7 @@ services:
     tty: true
     volumes:
       - ./settings.ini:/etc/polemarch/settings.ini:ro
+      - projects-volume:/projects
 
   redis:
     image: "redis:6"
@@ -78,6 +79,7 @@ services:
 
 volumes:
   data-volume:
+  projects-volume:
 
 networks:
   default:
