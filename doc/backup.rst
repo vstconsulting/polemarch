@@ -2,7 +2,7 @@ Backup
 ------
 
 Regular uploading of backups is a guarantee of the reliability of the application.
-We recomended use SQL backup or copy database.
+We recommend use SQL backup or copy database.
 
 There are examples of SQL backup for MySQL and PostgreSQL below.
 

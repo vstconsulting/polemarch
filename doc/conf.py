@@ -37,7 +37,10 @@ except ImportError:
 # ones.
 extensions = [
     'sphinxcontrib.httpdomain',
-    'vstutils.api.doc_generator'
+    'vstutils.api.doc_generator',
+    'sphinx.ext.autosectionlabel',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.extlinks',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -53,7 +56,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Polemarch'
-copyright = '2019, VST Consulting'
+copyright = 'VST Consulting, 2019-2022'
 author = 'VST Consulting'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -100,12 +103,15 @@ html_theme_options = {
     "github_repo": "polemarch",
     "github_button": True,
     "github_banner": True,
+    'style_nav_header_background': '#343131',
+    'logo_only': True
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static', polemarch.__path__[0]+'/static', vstutils.__path__[0]+'/static']
+html_logo = 'img/html_logo.png'
 
 
 # -- Options for HTMLHelp output ------------------------------------------
@@ -119,7 +125,7 @@ htmlhelp_basename = 'Polemarchdoc'
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
-    # 'papersize': 'letterpaper',
+'papersize': 'a4paper',
 
     # The font size ('10pt', '11pt' or '12pt').
     #
@@ -127,11 +133,15 @@ latex_elements = {
 
     # Additional stuff for the LaTeX preamble.
     #
-    # 'preamble': '',
-
+    'preamble': r'''
+\let\ORIincludegraphics\includegraphics
+\renewcommand{\includegraphics}[2][]{\ORIincludegraphics[scale=0.55,#1]{#2}}
+    ''',
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
+
+    # 'maketitle': '',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
@@ -141,6 +151,7 @@ latex_documents = [
     (master_doc, 'Polemarch.tex', 'Polemarch Documentation',
      'VST Consulting', 'manual'),
 ]
+latex_logo = 'img/latex_logo.png'
 
 
 # -- Options for manual page output ---------------------------------------
@@ -163,3 +174,18 @@ texinfo_documents = [
      author, 'Polemarch', 'One line description of project.',
      'Miscellaneous'),
 ]
+
+
+intersphinx_mapping = {
+    'environ': ('https://django-environ.readthedocs.io/en/stable', None),
+    'vstutils': ('https://vstutils.vstconsulting.net/en/stable', None),
+    'python': ('https://docs.python.org/3.6', None),
+    'uwsgi': ('https://uwsgi-docs.readthedocs.io/en/latest', None),
+    'celery': ('https://docs.celeryq.dev/en/latest/', None),
+}
+intersphinx_disabled_reftypes = []
+
+extlinks = {
+    'wiki': ('https://en.wikipedia.org/wiki/%s', None),
+    'django_docs': ('https://docs.djangoproject.com/en/3.2/ref/%s', None),
+}

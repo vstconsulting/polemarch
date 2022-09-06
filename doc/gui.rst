@@ -1,3 +1,16 @@
+.. |id_field_def| replace:: the unique key of object in database
+.. |owner_field_def| replace:: user, who owns this
+.. |create_button_def| replace:: this button opens the page for creation of new
+.. |edit_button_def| replace:: this button turns on edit mod for this page
+.. |save_new_button_def| replace:: this button saves new
+.. |save_button_def| replace:: this button saves all changes you have made on this page
+.. |reload_button_def| replace:: this button resets all changes that you have done on this page
+.. |copy_button_def| replace:: this button opens "copy" action page
+.. |set_owner_button_def| replace:: this button opens "set owner" action page
+.. |remove_button_def| replace:: this button deletes
+.. |exec_button_def| replace:: this button starts action execution
+
+
 GUI workflow
 ==============
 
@@ -8,26 +21,18 @@ In this section of our documentation we will tell you about Polemarch GUI's oppo
 
 Let's begin with Dashboard page:
 
-.. image:: gui_screenshots/dashboard.png
+.. image:: new_screenshots/dashboard.png
 
 As you can see, Polemarch GUI provides user with 2 menus:
 
 * the first one is located in the left sidebar and it is aimed
-  to provide user with navigation between main system objects, like projects, inventories, history records and ect.
+  to provide user with navigation between main system objects, like projects, inventories, history records and etc.
 
 * the second one is located at the top of browser window and it is aimed
   to navigate user to API section, to user's page and to logout page.
 
-Also there are some widgets on content block of Dashboard page. User can customize Dashboard page as he wish.
-For example, user can change widgets' position, hide some widgets or collapse them.
-To do it user should open UserSettings page from his profile page.
-
-.. To change widgets' position user should click on 'lock' button. After this button has been clicked,
-   user is able to change widgets' position by Drag and Drop.
-
-.. To collapse or to hide/show some widgets user should click on 'cogwheel' button. After this button has been clicked,
-   Polemarch opens modal window, where user can activate or collapse some widgets.
-
+Also there are some widgets on content block of Dashboard page.
+For example, there you can check the statistics of your tasks for different periods of time.
 
 Before you start
 ----------------
@@ -39,7 +44,8 @@ Polemarch's functions are linked to the project.
 Projects
 --------
 
-So, to start your work with Polemarch you should create project.
+So, to start your work with Polemarch you should create project. To do this, you need to select 'Projects' in the left side menu
+and click the :guilabel:`Create` button.
 
 There are 3 project types in Polemarch:
 
@@ -56,39 +62,50 @@ There are 3 project types in Polemarch:
 
 Let's look at the example of GIT project's creation:
 
-.. image:: gui_screenshots/create_project.png
+.. image:: new_screenshots/create_project.png
 
-As you can see, the form of new project creation consists of 5 fields:
+As you can see, the form of new project creation consists of 7 fields:
 
-* **name** - name of your project.
+General:
 
-* **repo type** - type of project repository (GIT, TAR, MANUAL).
+* **Name** - name of your project;
 
-* **repo URL** - URL to your repository.
+* **Repo type** - type of project repository (GIT, TAR, MANUAL);
 
-* **repo auth type** - type of authentication (NONE, KEY, PASSWORD).
+* **Directory with playbooks** - you can specify the path to the directory with playbooks.
 
-* **repo auth data** - key or password value.
+Repository:
 
-Before continue we tell about structure of our project, we used `ansible best practice <https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html#directory-layout>`_ and run playbooks from project.
+* **Repo URL** - URL to your repository;
+
+* **Branch for GIT (branch/tag/SHA) or TAR (subdir)** - you can specify the branch you want or leave this field blank
+  to get the default branch;
+
+* **Repo auth type** - type of authentication (NONE, KEY, PASSWORD);
+
+* **Repo auth data** - key or password value (if you choose KEY or PASSWORD authentication type);
+
+Before we continue talking about the structure of our project, we used
+`ansible best practice <https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html#directory-layout>`_
+and run playbooks from project:
 
     * ``ansible.cfg`` - used to setup settings. For detailed information about configuration file read `settings reference <https://docs.ansible.com/ansible/latest/reference_appendices/config.html#ansible-configuration-settings-locations>`_.
 
-        If you setup modules directory, we import all modules from this directory and set name ``polemarch.project.[module_name]``.
+      If you setup modules directory, we import all modules from this directory and set name ``polemarch.project.[module_name]``.
 
-    * Playbook - import all files with ``.yml`` extention from root directory of the **Project**
+    * Playbook - import all files with ``.yml`` extention from root directory of the **Project**.
 
-    * If you need set variables global, not only for run, you can use ``group_vars`` and ``host_vars`` in root directory of project
+    * If you need to set variables globally, not only for run, you can use ``group_vars`` and ``host_vars`` in root directory of project.
 
-After project creation you will see the next page:
+After project creation you'll see the next page:
 
-.. image:: gui_screenshots/test_project_1.png
+.. image:: new_screenshots/test_project_1.png
 
 As you can see there are some new fields on this page:
 
-* **id** - |id_field_def|
+* **Id**: |id_field_def|.
 
-* **status** - Polemarch project status.
+* **Status**: Polemarch project status.
   Possible values are:
 
   * NEW - newly created project,
@@ -97,79 +114,59 @@ As you can see there are some new fields on this page:
   * ERROR - synchronization failed,
   * OK - project is synchronized.
 
-* **revision** - GIT project revision.
+* **Revision** - GIT project revision.
 
-* **branch** - branch of your GIT project, to what your Polemarch project was synced.
+* **Branch** - branch of your GIT project, to what your Polemarch project was synced.
 
-* **owner** - |owner_field_def| project.
-
-* **notes** - not required field for some user’s notes, for example,
-  for what purpose this project was created or something like this.
-
-* **information** - if project has “readme.md” or “readme.rst” file in it’s project directory,
-  Polemarch will add content of this file to this field.
-
-.. |id_field_def| replace:: the unique key of object in database.
-.. |owner_field_def| replace:: user, who owns this
+* **Owner** - |owner_field_def| project.
 
 Also there are some new buttons:
 
+* :guilabel:`Edit` - |edit_button_def|;
+* :guilabel:`Remove` - |remove_button_def| project.
+
 Sublinks buttons:
 
-* **history** - this button opens project executions' history list.
-* **inventory** - this button opens project's inventory list.
-* **module** - this button opens project's module list.
-* **periodic task** - this button opens project's periodic task list.
-* **playbook** - this button opens project's playbook list.
-* **template** - this button opens project's template list.
-* **variables** - this button opens project's variables list.
+* :guilabel:`Execution template` - this button opens project's template list;
+* :guilabel:`History` - this button opens project executions' history list;
+* :guilabel:`Inventory` - this button opens project's inventory list;
+* :guilabel:`Module` - this button opens project's module list;
+* :guilabel:`Periodic task` - this button opens project's periodic task list;
+* :guilabel:`Playbook` - this button opens project's playbook list;
+* :guilabel:`Variables` - this button opens project's variables list.
 
 Action buttons:
 
-* **edit** - |edit_button_def|
-* **copy** - |copy_button_def|
-* **execute module** - this button opens "execute module" action page.
-* **execute playbook** - this button opens "execute plabook" action page.
-* **set owner** - |set_owner_button_def|
-* **sync** - this button syncs your Polemarch project with GIT repository.
-* **remove** - |remove_button_def| project.
+* :guilabel:`Copy` - |copy_button_def|;
+* :guilabel:`Execute module` - this button opens "execute module" action page;
+* :guilabel:`Execute playbook` - this button opens "execute playbook" action page;
+* :guilabel:`Set owner` - |set_owner_button_def|;
+* :guilabel:`Sync` - this button syncs your Polemarch project with GIT repository.
 
-.. |create_button_def| replace:: this button opens page for creation of new
-.. |edit_button_def| replace:: this button turns on edit mod for this page.
-.. |save_new_button_def| replace:: this button saves new
-.. |save_button_def| replace:: this button saves all changes you have made on this page.
-.. |reload_button_def| replace:: this button resets all changes that you have done on this page.
-.. |copy_button_def| replace:: this button opens "copy" action page.
-.. |set_owner_button_def| replace:: this button opens "set owner" action page.
-.. |remove_button_def| replace:: this button deletes
+If you want to edit values of some fields on any page in Polemarch, you should click the
+:guilabel:`Edit` button to activate edit mod.
 
+.. image:: new_screenshots/test_project_1_edit.png
 
-If you want to edit values of some fields on any page in Polemarch, you should click on
-"Edit" button to activate edit mod.
+In this mode, you can change the project's name, update the repository URL, and make notes about your project.
 
-.. image:: gui_screenshots/test_project_1_edit.png
-
-As you can see, edit mod looks exactly the same as read only mod, except several points:
-
-* you have opportunity to change values of editable fields;
-* there are **save** button - |save_button_def|
-* and **reload** button - |reload_button_def|
+* :guilabel:`Save` - |save_button_def|.
+* :guilabel:`Reload` - |reload_button_def|.
 
 Now, let's back to read only mod of our project page.
 
-.. image:: gui_screenshots/test_project_1.png
+.. image:: new_screenshots/test_project_1.png
 
-As you can see, now project's status is "NEW", so we need to click on "sync" button
+As you can see, now project's status is "NEW", so we need to click the :guilabel:`Sync` button
 to get all needed data from your GIT project.
 
-.. image:: gui_screenshots/test_project_2.png
-.. image:: gui_screenshots/test_project_3.png
+.. image:: new_screenshots/test_project_2.png
+.. image:: new_screenshots/test_project_3.png
 
-After your project's status has been changed into "OK" you can confidently start working with Polemarch.
+Once your project status changes to "OK", you can start working with Polemarch.
 
-.. warning::
-    If you update something in your GIT repository, don't forget to run sync in
-    Polemarch for pulling your changes.
+.. warning:: If you update something in your GIT repository, don't forget to run sync in
+             Polemarch for pulling your changes.
 
 
 Project variables
@@ -178,85 +175,86 @@ Project variables
 If you need to change some properties of your project (for example, branch, key or password of project),
 you can do it on the "variables" page of your project:
 
-.. image:: gui_screenshots/test_project_variables_1.png
+.. image:: new_screenshots/test_project_variables_1.png
 
 As you can see, now current project has only 2 variables:
 
 * **repo_branch** - branch of GIT repository;
 * **repo_type** - type of Polemarch project.
 
-Other available project variables, that you can add with clicking on "Create" button:
+Other available project variables, that you can add with clicking the :guilabel:`Create` button:
 
-* **repo_sync_on_run** - boolean, if true, Polemarch will sync project before every task execution (dont use in concurrent executions, experimental);
+* **repo_sync_on_run** - boolean, if true, Polemarch will sync project before every task execution (don't use in concurrent executions, experimental);
+* **repo_sync_on_run_timeout** - you can select a timeout when "repo_sync_on_run" will stop the sync attempt;
 * **repo_password** - GIT repository password;
-* **repo_key** - GIT repository key.
+* **repo_key** - GIT repository key;
+* **playbook_path** - path to playbook;
+* **ci_template** - runs the selected template during project synchronization;
 * Environment variables, with key starting from **env_**. For example **env_test_var** would create environment variable ``test_var`` on run tasks from this project.
 
-Let's edit **repo_branch** variable. To do it you need click on **repo_branch** item in list.
+Let's edit **repo_branch** variable. To do it you need click the **repo_branch** item in list.
 Then you will see the following page:
 
-.. image:: gui_screenshots/test_project_variables_2.png
+.. image:: new_screenshots/test_project_variables_2.png
 
-After clicking on "edit" button you will see:
+After clicking the :guilabel:`Edit` button you need to change branch name of 'value' field. Then click the :guilabel:`Save` button.
 
-.. image:: gui_screenshots/test_project_variables_3.png
-
-Then you need to change branch name of 'value' field and click on "save" button.
-
-.. image:: gui_screenshots/test_project_variables_3.png
-
-.. note::
-    If your need to choose branch with tag name
-    you should use following format of branch name "``tags/[tag_name]``".
+.. image:: new_screenshots/test_project_variables_3.png
 
 After changing of **repo_branch** variable you need to sync your Polemarch project
 to get files from selected branch.
+Until you synchronize the project, you'll see in the "Branch" field your old branch and the new one.
+
+.. image:: new_screenshots/test_project_variables_3_1.png
+
+.. note::
+    If your need to choose branch with tag name
+    you should use following format of branch name ``tags/[tag_name]``.
+
 After successful project synchronization you will see selected branch name in 'branch' field:
 
-.. image:: gui_screenshots/test_project_variables_4.png
+.. image:: new_screenshots/test_project_variables_4.png
 
 
 Module execution
 ----------------
 
 The simplest way to start using Polemarch is to execute module.
-To make this action click on 'execute module' button on project page.
+To make this action click the :guilabel:`Execute module` button on project page.
 
-.. image:: gui_screenshots/execute_module_1.png
+.. image:: new_screenshots/execute_module_1.png
 
-As you can see, there are 2 fields on this page:
+As you can see, there are two fields on this page:
 
-* **module** - autocomplete field with the list of project's modules.
-* **add field** - select field, that provides user with new variables fields for module execution.
+* **Module** - autocomplete field with the list of project's modules.
+* **Add field** - select field, that provides user with new variables fields for module execution.
 
 Also there is only one button on this page:
 
-* **execute** - |exec_button_def|
+* :guilabel:`Execute module` - |exec_button_def|.
 
-.. |exec_button_def| replace:: this button starts action execution.
-
-For example, let's execute module **shell** on **localhost** with argument **uptime**.
+For example, let's execute module ``shell`` on ``localhost`` with argument ``uptime``.
 To do it we need to add next fields:
 
-* **inventory** - it can be inventory from Polemarch system or just list of hosts, that are separated by ",".
-* **group** - to which hosts from inventory execute this module.
-* **connection** - type of connection.
-* **args** - list of arguments for current module.
+* **Inventory** - it can be inventory from Polemarch system, list of hosts, that are separated by ``,``, or path to your inventory in project folder.
+* **Group** - to which hosts from inventory execute this module.
+* **Connection** - type of connection.
+* **Args** - list of arguments for current module.
 
 After all fields have been filled, our page started look like:
 
-.. image:: gui_screenshots/execute_module_2.png
+.. image:: new_screenshots/execute_module_2.png
 
-So, let's execute our first task on Polemarch! To do it click on "execute" button.
+So, let's execute our first task on Polemarch! To do it click the :guilabel:`Execute module` button.
 
 When status of your module execution changes to "OK" you will see the next page:
 
-.. image:: gui_screenshots/execute_module_3.png
-.. image:: gui_screenshots/execute_module_4.png
+.. image:: new_screenshots/execute_module_3.png
+.. image:: new_screenshots/execute_module_4.png
 
 
-Template
---------
+Execution templates
+-------------------
 
 In previous abstract to execute module we needed to fill several fields.
 To do it before every module/playbook execution is rather inconvenient.
@@ -264,109 +262,78 @@ In this case Polemarch templates save our time and nerves.
 Polemarch template is an object, that saves all options that user used during task execution.
 
 For example, let's create task template (template that uses playbooks).
-To do it click on "template" button on project page.
-
-.. image:: gui_screenshots/create_template.png
-
+To do it click the :guilabel:`Execution templates` button on project page.
 As you can see, there are no templates in the project's template list now.
+
+.. image:: new_screenshots/create_template.png
 
 There is only one button here:
 
-* **new** - |create_button_def| template.
+* :guilabel:`Create` - |create_button_def| template.
 
-To create template click on "new" button on this page.
+To create template click the :guilabel:`Create` button on this page.
 
-.. image:: gui_screenshots/create_template_2.png
+.. image:: new_screenshots/create_template_2.png
 
 As you can see, there are several fields on this page:
 
-* **name** - name of template.
+* **Name** - name of template.
 
-* **notes** - not required field for some user’s notes, for example,
+* **Type** - type of template (MODULE or TASK).
+
+* **Notes** - not required field for some user’s notes, for example,
   for what purpose this template was created or something like this.
 
-* **type** - type of template (MODULE or TASK).
+* **Inventory** - it can be inventory from Polemarch system, list of hosts, that are separated by ``,``, or path to your inventory in project folder.
 
-* **inventory** - it can be inventory from Polemarch system or just list of hosts, that are separated by ",".
+* **Playbook** - name of playbook, which template will be used during execution.
 
-* **playbook** - name of playbook, which template will use during execution.
+* **Add fields** - here you can add variables for this template. In our case we need to create variable ``connection=local``,
+  because we use "localhost" as inventory.
 
 After all fields have been filled, our page started look like:
 
-.. image:: gui_screenshots/create_template_3.png
+.. image:: new_screenshots/create_template_3.png
 
 After template creation you will see the next page:
 
-.. image:: gui_screenshots/create_template_4.png
+.. image:: new_screenshots/create_template_4.png
 
 As you can see there is only one new field on this page:
 
-* **id** - |id_field_def|
+* **Id** - |id_field_def|.
 
-Also there are several buttons here:
+There are also several buttons here:
+
+* :guilabel:`Edit` - |edit_button_def|.
+* :guilabel:`Remove` - |remove_button_def| template.
 
 Sublinks buttons:
 
-* **option** - this button opens template's option list.
-* **variables** - this button opens project's variables list.
+* :guilabel:`Option` - this button opens template's option list.
 
 Action buttons:
 
-* **edit** - |edit_button_def|
-* **execute** - this button opens "execute template" action page.
-* **remove** - |remove_button_def| template.
+* :guilabel:`Execute` - this button opens "execute template" action page.
 
-Before template execution we need to create variable "connection=local",
-because we use "localhost" as inventory.
+Now we are ready to execute our template. To do it you need to click the :guilabel:`Execute` button.
 
-To do it, click on "variables" button.
+.. image:: new_screenshots/execute_template_1.png
 
-.. image:: gui_screenshots/create_template_variable.png
+As you can see, there is only one field on this page:
 
-As you can see, there are no variables in the template's variables list now.
-
-There is only one button here:
-
-* **new** - |create_button_def| variable.
-
-To create variable click on "new" button on this page.
-
-.. image:: gui_screenshots/create_template_variable_2.png
-
-As you can see, there are only 2 fields on this page:
-
-* **key** - key of variable.
-
-* **value** - value of variable.
-
-There is only one button here:
-
-* **save** - |save_new_button_def| variable.
-
-To save our variable click on "save" button.
-
-Now we are ready to execute our template. To do it come back to template page:
-
-.. image:: gui_screenshots/create_template_4.png
-
-And click on "execute" button.
-
-.. image:: gui_screenshots/execute_template_1.png
-
-As you can see, there is only 1 field on this page:
-
-* **option** - autocomplete field with the list of template's options.
+* **Option** - autocomplete field with the list of template's options.
 
 Also there is only one button on this page:
 
-* **execute** - |exec_button_def|
+* :guilabel:`Execute` - |exec_button_def|
 
-We do not have any template's options in our system, so just click on "execute" button.
+We don't have any template's options in our system, so just click the :guilabel:`Execute` button.
 
 When status of your template execution changes to "OK" you will see the next page:
 
-.. image:: gui_screenshots/execute_template_2.png
-.. image:: gui_screenshots/execute_template_3.png
+.. image:: new_screenshots/execute_template_2.png
+.. image:: new_screenshots/execute_template_3.png
 
 
 Periodic tasks
@@ -381,297 +348,314 @@ In this case, Polemarch has such useful object type, as periodic task.
 Periodic task - is a module/playbook/template execution
 which Polemarch makes by himself with some interval.
 
-Let's create periodic task, based on our "test-task-template".
+Let's create periodic task based on our "test-task-template".
 To do it open project page:
 
-.. image:: gui_screenshots/test_project_2.png
+.. image:: new_screenshots/test_project_variables_4.png
 
-And click on "periodic task" button:
+And choose :menuselection:`Sublinks --> Periodic task`:
 
-.. image:: gui_screenshots/periodic_task_empty_list.png
+.. image:: new_screenshots/periodic_task_empty_list.png
 
 As you can see, there are no periodic tasks in the project's periodic task list now.
 
 There is only one button here:
 
-* **new** - |create_button_def| periodic task.
+* :guilabel:`Create` - |create_button_def| periodic task.
 
-To create periodic task click on "new" button on this page.
+To create periodic task click the :guilabel:`Create` button on this page.
 
-.. image:: gui_screenshots/create_periodic_task_1.png
+.. image:: new_screenshots/create_periodic_task_1.png
 
 As you can see, the form of new periodic task creation consists of following fields:
 
-* **name** - name of your periodic task.
+* **Name** - name of your periodic task.
 
-* **task type** - type of periodic task (PLAYBOOK, MODULE, TEMPLATE).
+* **Notes** - not required field for some user’s notes, for example,
+  for what purpose this periodic task was created or something like this.
 
-* **mode** - name of module or playbook (for periodic tasks with PLAYBOOK/MODULE type only).
+**Execute Parameters**
 
-* **inventory** - it can be inventory from Polemarch system or just list of hosts, that are separated by ","
+* **Task type** - type of periodic task (PLAYBOOK, MODULE, TEMPLATE).
+
+* **Mode** - name of module or playbook (for periodic tasks with PLAYBOOK/MODULE type only).
+
+* **Inventory** - it can be inventory from Polemarch system, list of hosts, that are separated by ``,``, or path to your inventory in project folder
   (for periodic tasks with PLAYBOOK/MODULE type only).
 
-* **template** - name of template (for periodic tasks with TEMPLATE type only).
+* **Template** - name of template (for periodic tasks with TEMPLATE type only).
 
-* **template opt** - name of template's option (for periodic tasks with TEMPLATE type only).
+* **Template opt** - name of template's option (for periodic tasks with TEMPLATE type only).
 
-* **save result** - boolean field, it means to save or not to save results of periodic tasks execution in history.
+* **Save result** - boolean field, it means to save or not to save results of periodic tasks execution in history.
 
-* **enable** - - boolean field, it means to activate or deactivate periodic task.
+**Schedule**
 
-* **interval type** - type of execution interval (CRONTAB, INTERVAL).
+* **Enable** - boolean field, it means to activate or deactivate periodic task.
 
-* **schedule** - value of execution interval.
-  If "interval type" = INTERVAL, value of this field means amount of seconds.
-  If "interval type" = CRONTAB, value of this field means CRONTAB interval.
+* **Interval type** - type of execution interval (CRONTAB, INTERVAL).
 
-* **notes** - not required field for some user’s notes, for example,
-  for what purpose this periodic task was created or something like this.
+* **Schedule** - value of execution interval.
+
+  * If "interval type" = INTERVAL, value of this field means amount of seconds.
+  * If "interval type" = CRONTAB, value of this field means CRONTAB interval.
 
 After all fields have been filled, our page started look like:
 
-.. image:: gui_screenshots/create_periodic_task_2.png
+.. image:: new_screenshots/create_periodic_task_2.png
 
 After periodic task creation you will see the next page:
 
-.. image:: gui_screenshots/test_periodic_task.png
+.. image:: new_screenshots/test_periodic_task.png
 
 As you can see there is only one new fields on this page:
 
-* **id** - |id_field_def|
+* **Id** - |id_field_def|.
 
-Also there are several buttons here:
+There are also several buttons here:
+
+* :guilabel:`Edit` - |edit_button_def|.
+* :guilabel:`Remove` - |remove_button_def| periodic task.
+
+Sublinks buttons:
+
+* :guilabel:`Variables` - this button opens project’s variables list (for periodic tasks with PLAYBOOK/MODULE type only).
 
 Action buttons:
 
-* **edit** - |edit_button_def|
-* **execute** - this button opens "execute periodic task" action page.
-* **remove** - |remove_button_def| periodic task.
+* :guilabel:`Execute` - this button opens "execute periodic task" action page.
 
-Let's start our periodic task execution. To do it click on "execute" button.
+Let's start our periodic task execution. To do it click the :guilabel:`Execute` button.
 
-.. image:: gui_screenshots/periodic_task_execution_history.png
+.. image:: new_screenshots/periodic_task_execution_1.png
+.. image:: new_screenshots/periodic_task_execution_2.png
 
 As you can see on history page, our 'test-periodic-task' executes every 10 seconds,
 as we set it during periodic task creation.
+
+.. image:: new_screenshots/periodic_task_execution_history.png
 
 
 Inventory
 ---------
 
-If you don't want to use 'inventory' as just list of hosts separated by ",",
+If you don't want to use 'inventory' as just list of hosts separated by ``,``
 or do not have inventory file in you GIT project ("./inventory", for example),
 you need to create it in Polemarch.
 
 .. warning::
     Do not forget to add you inventory to project after it's creation.
-    To do it click on "inventory" button on project page.
+    To do it click the :guilabel:`Inventory` button on project page.
 
-By inventory’s creation, in this case, we understand creation of inventory,
-which includes at least one group, which, in it’s turn, includes at least one host.
-In other words, beside inventory user should create host and group.
+By inventory’s creation in this case, we mean creation of inventory
+that includes at least one group, which, in turn, includes at least one host.
+In other words, in addition to the inventory, the user must create a host and a group.
 
-To understand it better let’s look at next images, which will explain you how to create
-inventory. Here you can see the form for inventory creation.
+To better understand this, let’s look at next images, which will explain you how to create
+inventory.
 
-.. image:: gui_screenshots/create_inventory.png
+To create inventory you should choose 'Inventories' in left side menu and click the :guilabel:`Create` button.
+Here you can see the inventory creation form.
+
+.. image:: new_screenshots/create_inventory.png
 
 As you can see, there are only 2 fields on this page:
 
-* **name** - name of inventory.
+* **Name** - name of inventory.
 
-* **notes** - not required field for some user’s notes, for example,
+* **Notes** - not required field for some user’s notes, for example,
   for what purpose this inventory was created or something like this.
 
-Also there is only one button there:
+And there is only one button here:
 
-* **save** - |save_new_button_def| inventory.
+* :guilabel:`Save` - |save_new_button_def| inventory.
 
 After inventory creation you will see the next page:
 
-.. image:: gui_screenshots/test_inventory.png
+.. image:: new_screenshots/test_inventory.png
 
-As you can see there are 2 new fields on this page:
+As you can see there are two new fields on this page:
 
-* **id** - |id_field_def|
+* **Id** - |id_field_def|.
 
-* **owner** - |owner_field_def| inventory.
+* **Owner** - |owner_field_def| inventory.
 
 Also there are some new buttons here:
 
+* :guilabel:`Edit` - |edit_button_def|.
+* :guilabel:`Remove` - |remove_button_def| inventory.
+
 Sublinks buttons:
 
-* **all groups** - this button opens inventory's all groups list
+* :guilabel:`All groups` - this button opens inventory's all groups list
   (list of groups, which includes also groups that are nested into inventory groups).
-* **all hosts** - this button opens inventory's all hosts list.
+* :guilabel:`All hosts` - this button opens inventory's all hosts list.
   (list of hosts, which includes also hosts that are nested into inventory groups).
-* **group** - this button opens inventory's group list.
-* **host** - this button opens inventory's host list.
-* **variables** - this button opens inventory's variables list.
+* :guilabel:`Group` - this button opens inventory's group list.
+* :guilabel:`Host` - this button opens inventory's host list.
+* :guilabel:`Variables` - this button opens inventory's variables list.
 
 Action buttons:
 
-* **edit** - |edit_button_def|
-* **copy** - |copy_button_def|
-* **set owner** - |set_owner_button_def|
-* **remove** - |remove_button_def| inventory.
+* :guilabel:`Copy` - |copy_button_def|.
+* :guilabel:`Set owner` - |set_owner_button_def|.
 
 Let’s look how you can create a group for this inventory.
-To do it, let’s click on "group" button.
+To do it click the :guilabel:`Group` button.
 
 
 Group
 -----
 
-.. image:: gui_screenshots/test_inventory_group.png
+.. image:: new_screenshots/test_inventory_group.png
 
 As you can see, there are no groups in the inventory's group list now.
 
-There are 2 buttons here:
+There are two buttons here:
 
-* **new** - |create_button_def| group.
-* **add** - this button opens the all group list from database,
+* :guilabel:`Create` - |create_button_def| group.
+* :guilabel:`Add` - this button opens the all group list from database,
   from which you can choose group for this inventory.
 
-We need to create group. To do it click on "new" button.
+We need to create a group. To do it click the :guilabel:`Create` button.
 
-.. image:: gui_screenshots/create_group.png
+.. image:: new_screenshots/create_group.png
 
 As you can see, the form of new group creation consists of following fields:
 
-* **name** - name of your group.
+* **Name** - name of your group.
 
-* **contains groups** - boolean field, it means ability of group to contain child groups.
+* **Contains groups** - boolean field, it means ability of group to contain child groups.
 
-* **notes** - not required field for some user’s notes, for example,
+* **Notes** - not required field for some user’s notes, for example,
   for what purpose this group was created or something like this.
 
 After group creation you will see the next page:
 
-.. image:: gui_screenshots/test_group.png
+.. image:: new_screenshots/test_group.png
 
-As you can see there are 2 new fields on this page:
+As you can see there are two new fields on this page:
 
-* **id** - |id_field_def|
+* **Id** - |id_field_def|.
 
-* **owner** - |owner_field_def| group.
+* **Owner** - |owner_field_def| group.
 
-Also there are some new buttons here:
+Also there are some buttons here:
+
+* :guilabel:`Edit` - |edit_button_def|.
+* :guilabel:`Remove` - |remove_button_def| group.
 
 Sublinks buttons:
 
-* **host** - this button opens group's host list.
-* **variables** - this button opens group's variables list.
+* :guilabel:`Hosts` - this button opens group's host list.
+* :guilabel:`Variables` - this button opens group's variables list.
 
 Action buttons:
 
-* **edit** - |edit_button_def|
-* **copy** - |copy_button_def|
-* **set owner** - |set_owner_button_def|
-* **remove** - |remove_button_def| group.
+* :guilabel:`Copy` - |copy_button_def|.
+* :guilabel:`Set owner` - |set_owner_button_def|.
+
+Hosts
+-----
 
 Let’s look how you can create a host for this group.
-To do it, let’s click on "host" button.
+To do it click the :guilabel:`Create` button.
 
-
-Host
-----
-
-.. image:: gui_screenshots/test_inventory_group_host.png
+.. image:: new_screenshots/test_inventory_group_host.png
 
 As you can see, there are no hosts in the group's host list now.
 
-There are 2 buttons here:
+There are two buttons here:
 
-* **new** - |create_button_def| host.
-* **add** - this button opens the all host list from database,
+* :guilabel:`Create` - |create_button_def| host.
+* :guilabel:`Add` - this button opens the all host list from database,
   from which you can choose host for this group.
 
-We need to create host. To do it click on "new" button.
+We need to create host. To do it click the :guilabel:`Create` button.
 
-.. image:: gui_screenshots/create_host.png
+.. image:: new_screenshots/create_host.png
 
 As you can see, the form of new host creation consists of following fields:
 
-* **name** - name of your host.
+* **Name** - name of your host.
 
-* **notes** - not required field for some user’s notes, for example,
+* **Notes** - not required field for some user’s notes, for example,
   for what purpose this host was created or something like this.
 
-* **type** - type of host (RANGE, HOST).
+* **Type** - type of host (RANGE, HOST).
 
   * RANGE -  range of IPs or hosts.
   * HOST - single host.
 
 After host creation you will see the next page:
 
-.. image:: gui_screenshots/test_host.png
+.. image:: new_screenshots/test_host.png
 
-As you can see there are 2 new fields on this page:
+As you can see there are two new fields on this page:
 
-* **id** - |id_field_def|
+* **Id** - |id_field_def|
 
-* **owner** - |owner_field_def| host.
+* **Owner** - |owner_field_def| host.
 
-Also there are some new buttons here:
+Also there are some buttons here:
+
+* :guilabel:`Edit` - |edit_button_def|.
+* :guilabel:`Remove` - |remove_button_def| host.
 
 Sublinks buttons:
 
-* **variables** - this button opens host's variables list.
+* :guilabel:`Variables` - this button opens host's variables list.
 
 Action buttons:
 
-* **edit** - |edit_button_def|
-* **copy** - |copy_button_def|
-* **set owner** - |set_owner_button_def|
-* **remove** - |remove_button_def| host.
+* :guilabel:`Copy` - |copy_button_def|.
+* :guilabel:`Set owner` - |set_owner_button_def|.
 
 Let’s look how you can create a variables for host, group and inventory.
 
 
-Variables for inventory, group, host
-------------------------------------
+Variables for inventory, group, hosts
+-------------------------------------
 
 The process of variable creation for inventory is the same as for group or host.
 So, let's look it at the example of variable creation for host.
 
-.. image:: gui_screenshots/test_host.png
+.. image:: new_screenshots/test_host.png
 
-To do it click on the "variables" button on the host page:
+To do it click the :guilabel:`Variables` button on the host page:
 
-.. image:: gui_screenshots/test_host_variables.png
+.. image:: new_screenshots/test_host_variables.png
 
 As you can see, there are no variables in the host's variables list now.
 
-There is only 1 button here:
+There is only one button here:
 
-* **new** - |create_button_def| variable.
+* :guilabel:`Create` - |create_button_def| variable.
 
-To create variable click on "new" button:
+To create variable click the :guilabel:`Create` button:
 
-.. image:: gui_screenshots/test_host_variables_1.png
+.. image:: new_screenshots/test_host_variables_1.png
 
 As you can see, the form of new host variable creation consists of following fields:
 
-* **key** - key of variable.
+* **Key** - key of variable.
 
-* **value** - value of variable.
+* **Value** - value of variable.
 
 After variable creation you will see the next page:
 
-.. image:: gui_screenshots/test_host_variables_2.png
+.. image:: new_screenshots/test_host_variables_2.png
 
 As you can see there is only 1 new field on this page:
 
-* **id** - |id_field_def|
+* **Id** - |id_field_def|.
 
 
 Import inventory
 ----------------
 
-If you have some inventory file and you want to add objects from it to Polemarch
-you can do it in rather simple, convenient and quick way: let us introduce you
-very useful action - "Import inventory".
+If you have an inventory file and you want to add items from it to Polemarch,
+you can do it quickly using "Import Inventory".
 
 For example, let's use next inventory file:
 
@@ -686,33 +670,37 @@ For example, let's use next inventory file:
 
 To import inventory you should open inventory list page:
 
-.. image:: gui_screenshots/import_inventory.png
+.. image:: new_screenshots/import_inventory.png
 
-And click on "Import inventory" button. Then you will see the next page:
+And click the :guilabel:`Import inventory` button. Then you will see the next page:
 
-.. image:: gui_screenshots/import_inventory_2.png
+.. image:: new_screenshots/import_inventory_2.png
 
-As you can see, the form of "Import inventory" action consists of 2 fields:
+As you can see, the form of "Import inventory" action consists of two fields:
 
-* **name** - name of your inventory.
-* **inventory file** - content of your inventory file.
+* **Name** - name of your inventory.
+* **Row data** - content of your inventory file.
 
-After filling of all fields you should click on "Exec" button and then you will see
+After filling of all fields you should click the :guilabel:`Import inventory` button and then you will see
 page of your imported inventory:
 
-.. image:: gui_screenshots/import_inventory_3.png
+.. image:: new_screenshots/import_inventory_3.png
 
 This inventory includes "imported-test-group" from imported inventory file:
 
-.. image:: gui_screenshots/import_inventory_4.png
+.. image:: new_screenshots/import_inventory_4.png
 
 And "imported-test-group" includes "imported-test-host" from imported inventory file:
 
-.. image:: gui_screenshots/import_inventory_5.png
+.. image:: new_screenshots/import_inventory_5.png
+
+Also "imported-test-group" includes variables "ansible_user" and "ansible_ssh_private_key_file" from imported inventory file:
+
+.. image:: new_screenshots/import_inventory_7.png
 
 "imported-test-host" includes variable "ansible-host" from imported inventory file:
 
-.. image:: gui_screenshots/import_inventory_6.png
+.. image:: new_screenshots/import_inventory_6.png
 
 
 .polemarch.yaml
@@ -740,7 +728,7 @@ Structure of ``.polemarch.yaml`` consists of next fields:
   * **fields** - dictionary, it consists of objects, that describe fields properties:
 
     * **title**: title of field, that Polemarch will show in web-form.
-    * **default**: default value of field. Default: '' - for strings, 0 - for numbers.
+    * **default**: default value of field. Default: ``''`` - for strings, ``0`` - for numbers.
     * **format**: format of field. For today next field formats are available: string, integer, float, boolean. Default: string.
     * **help**: some help text for this field.
 
@@ -825,35 +813,34 @@ Firstly, you need to create a project with ``.polemarch.yaml``
 For example, let's create new GIT project, that has in its base directory ``.polemarch.yaml`` file
 from the example above:
 
-.. image:: gui_screenshots/create_project_with_polemarch_yaml.png
+.. image:: new_screenshots/create_project_with_polemarch_yaml.png
 
-In the field 'repo url' you should insert url of project that has in its base directory
+In the field 'Repo url' you should insert URL of project that has in its base directory
 ``.polemarch.yaml`` file.
 
 After project creation you will see the ordinary project page:
 
-.. image:: gui_screenshots/create_project_with_polemarch_yaml_2.png
+.. image:: new_screenshots/create_project_with_polemarch_yaml_2.png
 
-Then you need to click on "sync" button. After project synchronization and page update you will see the next page:
+Then you need to click the :guilabel:`Sync` button. After project synchronization you will see the next page:
 
-.. image:: gui_screenshots/create_project_with_polemarch_yaml_3.png
-.. image:: gui_screenshots/create_project_with_polemarch_yaml_3_1.png
+.. image:: new_screenshots/create_project_with_polemarch_yaml_3.png
+.. image:: new_screenshots/create_project_with_polemarch_yaml_3_1.png
 
-As you can see, all fields that we mentioned in the exmaple ``.polemarch.yaml`` were added
-to this web-form into section "Execute parameters". Values of all these fields will be
-used as ansible ``extra_vars`` parameter during task execution.
+As you can see, all fields that we mentioned in the example ``.polemarch.yaml`` were added
+to this web-form. Values of all these fields will be used as ansible ``extra_vars`` parameter during task execution.
 
 The remaining fields mean following:
 
-* **inventory** - it can be inventory from Polemarch system or just list of hosts, that are separated by ",".
-* **user** - set it if your do not have ``ansible_user`` variable in your inventory.
-* **key file** - set it if your do not have ``ansible_ssh_private_key_file`` variable in your inventory.
+* **Inventory** - it can be inventory from Polemarch system, list of hosts, that are separated by ``,``, or path to your inventory in project folder.
+* **User** - set it if your don't have ``ansible_user`` variable in your inventory.
+* **Key file** - set it if your don't have ``ansible_ssh_private_key_file`` variable in your inventory.
 
-Button "execute title" will execute playbook "main.yml", as we mentioned in ``.polemarch.yaml`` file.
+Button :guilabel:`Execute title` will execute playbook "main.yml", as we mentioned in ``.polemarch.yaml`` file.
 
 Also templates from ``.polemarch.yaml`` were added to just created Polemarch project.
 
-.. image:: gui_screenshots/create_project_with_polemarch_yaml_4.png
+.. image:: new_screenshots/create_project_with_polemarch_yaml_4.png
 
 Community project samples
 -------------------------
@@ -868,59 +855,60 @@ Let's look how it works on examples.
 
 Firstly, open page with community project samples list.
 
-.. image:: gui_screenshots/community_template.png
+.. image:: new_screenshots/community_template.png
 
 As you can see, there is a table with list of community repositories,
 that consists of following columns:
 
-* **name** - name of community repository.
-* **type** - type of community repository.
-* **actions** - actions that you can execute on community repository.
+* **Name** - name of community repository.
+* **Type** - type of community repository.
 
 Let's open "WordPress" community repository page.
 
-.. image:: gui_screenshots/community_template_1.png
+.. image:: new_screenshots/community_template_1.png
 
 As you can see, the community repository page consists of following fields:
 
-* **id** - id of community repository.
-* **name** - name of community repository.
-* **description** - Description of community repository.
-* **type** - type of community repository.
-* **repository** - url of community repository.
+* **Id** - id of community repository;
+* **Name** - name of community repository;
+* **Description** - description of community repository;
+* **Type** - type of community repository;
+* **Repository** - URL of community repository.
 
 Also there is only one action button on this page:
 
-* **use it** - this buttons open page of "use_it" action.
+* :guilabel:`Use it` - this buttons opens page where you can set project's name.
 
-Let's click on "use it" button.
+Let's click the :guilabel:`Use it` button.
 
-.. image:: gui_screenshots/community_template_2.png
+.. image:: new_screenshots/community_template_2.png
 
 As you can see, this action page has only one field:
 
-* **name** - name of project, that will be clone of current community repository in your Polemarch.
+* **Name** - name of project, that will be clone of current community repository in your Polemarch.
+  By default it will be name of community repository with UUID.
 
-After "use_it" action execution you will see the page of just created project:
+After that you need to click :guilabel:`Use it` button once more time and you will be redirected to the page of just created project:
 
-.. image:: gui_screenshots/community_template_3.png
+.. image:: new_screenshots/community_template_3.png
 
-As you can see value of field "repository" is the same as in "WordPress" community repository.
+As you can see value of field "Repository" is the same as in "WordPress" community repository.
 
-Then you need to click on "sync" button. After project synchronization and page update you will see the next page:
+Then you need to click the :guilabel:`Sync` button. After project synchronization you will see the next page:
 
-.. image:: gui_screenshots/community_template_4.png
+.. image:: new_screenshots/community_template_4.png
+.. image:: new_screenshots/community_template_5.png
 
-This page has "run playbook from" (because project has ``.polemarch.yaml`` file)
+This page has :guilabel:`Deploy wordpress` button (because project has ``.polemarch.yaml`` file)
 and all that you need to do for WordPress deployment on your hosts is filling following fields:
 
-* **inventory** - it can be inventory from Polemarch system or just list of hosts, that are separated by ",".
-* **user** - set it if your do not have ``ansible_user`` variable in your inventory.
-* **key file** - set it if your do not have ``ansible_ssh_private_key_file`` variable in your inventory.
-* **mysql user** - name of MySQL user of your wordpress site's database.
-* **mysql password** - password of MySQL user of your wordpress site's database.
+* **Inventory** - it can be inventory from Polemarch system, list of hosts, that are separated by ``,``, or path to your inventory in project folder.
+* **User** - set it if your do not have ``ansible_user`` variable in your inventory.
+* **Key file** - set it if your do not have ``ansible_ssh_private_key_file`` variable in your inventory.
+* **Mysql user** - name of MySQL user of your wordpress site's database.
+* **Mysql password** - password of MySQL user of your wordpress site's database.
 
-After all required fields have been filled, you need to click on "deploy wordpress" button
+After all required fields have been filled, you need to click the :guilabel:`Deploy wordpress` button
 to start wordpress deployment on your hosts.
 
 Hooks
@@ -928,39 +916,42 @@ Hooks
 
 Polemarch has his own system of hooks.
 Polemarch hooks are synchronous and you can appoint them on different events
-like “after task end”, “before task start” and so on.
+like “on_execution”, “after_execution” and so on.
 
-WARNING: You should be accurate with hooks appointment,
-because the more hooks you have, the more time they need for execution and,
-finally, the more time Ansible needs for task execution.
+.. warning:: You should be accurate with hooks appointment,
+             because the more hooks you have, the more time they need for execution and,
+             finally, the more time Ansible needs for task execution.
 
-.. image:: gui_screenshots/hooks_empty_list.png
+.. image:: new_screenshots/hooks_empty_list.png
 
 As you can see, there are no hooks in the system now.
 
 There is only one button here:
 
-* **new** - |create_button_def| hook.
+* :guilabel:`Create` - |create_button_def| hook.
 
-To create hook click on "new" button.
+To create hook click the :guilabel:`Create` button.
 
-.. image:: gui_screenshots/create_hook.png
+.. image:: new_screenshots/create_hook.png
 
 As you can see, the form of new hook creation consists of following fields:
 
-* **name** - name of your hook.
+* **Name** - name of your hook.
 
-* **type** - type of hook (HTTP, SCRIPT).
+* **Type** - type of hook (HTTP, SCRIPT).
   * If type is "HTTP", Polemarch will send "POST" request with JSON to all recipients.
   * If type is "SCRIPT", Polemarch will execute script.
 
-* **when** - event on each Polemarch have to execute hook.
+* **When** - event on each Polemarch have to execute hook.
 
-* **enable** - boolean field, it means to activate or to deactivate hook.
+* **Enable** - boolean field, it means to activate or to deactivate hook.
 
-* **recipients** - list of recipients, separated by " | ".
+* **Recipients** - if type of hook is HTTP, then this field represents list of recipients, separated by " | ".
   For example, "ex1.com | ex2.com | ex3.com".
+  If type of hook is SCRIPT, then recipients are actually list of files containing scripts, similarly separated by " | ".
+  For example: "notify.sh | counter.sh". Files must be in HOOKS_DIR directory.
 
+.. image:: new_screenshots/create_hook_1.png
 
 Users
 -----
@@ -971,73 +962,68 @@ Polemarch provides you with several types of user:
 * staff.
 
 If you need to create a superuser, you need to do it with terminal command.
-Look for more information here :doc:`"Create superuser" </quickstart>`.
+Look for more information here ":ref:`Create superuser`".
 
 If you need to create user with "staff" rights you can do it with Polemarch GUI:
 
-.. image:: gui_screenshots/user_list.png
+.. image:: new_screenshots/user_list.png
 
-To create new user click on "new" button.
+To create new user click the :guilabel:`Create` button.
 
-.. image:: gui_screenshots/create_user.png
+.. image:: new_screenshots/create_user.png
 
 As you can see, the form of new user creation consists of following fields:
 
-* **username** - name of new user.
+* **Username** - name of new user.
 
-* **is active** - boolean field, it means to activate or to deactivate user.
+* **Is active** - boolean field, it means to activate or to deactivate user.
 
-* **first name** - first name of user.
+* **First name** - first name of user.
 
-* **last name** - last name of user.
+* **Last name** - last name of user.
 
-* **email** - email of user.
+* **Email** - email of user.
 
-* **password** - password of user.
+* **Password** - password of user.
 
-* **repeat password** - password of user.
+* **Repeat password** - password of user.
+
+Also you can use action :guilabel:`Generate password`.
+
+* :guilabel:`Generate password` - generates random password from 12 to 20 characters long. Password will contain capital and lower letters, numbers and special symbols.
 
 After user creation you will see next page:
 
-.. image:: gui_screenshots/test_user.png
+.. image:: new_screenshots/test_user.png
 
 As you can see there is only one new fields on this page:
 
-* **id** - |id_field_def|
+* **Id** - |id_field_def|.
 
 Also there are several buttons here:
 
-Sublinks buttons:
-
-* **settings** - this button opens interface settings of current user.
+* :guilabel:`Edit` - |edit_button_def|.
+* :guilabel:`Two factor authentication` - you can use TFA if you want to protect your account.
+* :guilabel:`Remove` - |remove_button_def| periodic task.
 
 Action buttons:
 
-* **edit** - |edit_button_def|
-* **copy** - |copy_button_def|
-* **change password** - this button opens "change password" action page.
-* **remove** - |remove_button_def| periodic task.
-
-
-Let's look on user settings page:
-
-.. image:: gui_screenshots/user_settings.png
-
-This page has fields for managing dashboard chart line settings
-and for managing dashboard settings.
+* :guilabel:`Change password` - this button opens "change password" action page.
+* :guilabel:`Copy` - |copy_button_def|.
 
 Let's look on "change password" action page.
 
-.. image:: gui_screenshots/change_password.png
+.. image:: new_screenshots/change_password.png
 
 As you can see, the form of "change password" action consists of following fields:
 
-* **old password** - current password of user.
+* **Old password** - current password of user.
 
-* **new password** - new password of user.
+* **New password** - new password of user.
 
-* **confirm new password** - new password of user.
+* **Confirm new password** - new password of user.
 
-There is only one button here:
+There are two buttons here:
 
-* **execute** - |exec_button_def|
+* :guilabel:`Change password` - this button saves your new password.
+* :guilabel:`Generate password` - generates random password from 12 to 20 characters long. Password will contain capital and lower letters, numbers and special symbols.
