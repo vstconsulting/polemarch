@@ -8,7 +8,7 @@ const HISTORY_MODELS = ['History', 'OneHistory', 'ProjectHistory'];
 const HISTORY_LIST_PATHS = ['/history/', '/project/{id}/history/'];
 const HISTORY_DETAIL_PATHS = ['/history/{id}/', '/project/{id}/history/{history_id}/'];
 
-class ProjectBasedFkField extends spa.fields.fk.fk.FKField {
+export class ProjectBasedFkField extends spa.fields.fk.fk.FKField {
     _formatQuerysetPath(queryset) {
         return super
             ._formatQuerysetPath(queryset)
@@ -50,7 +50,7 @@ export const modeModuleField = (projectId) => ({
     },
 });
 
-const initiatorField = {
+export const initiatorField = {
     template: (projectId) => ({
         format: ProjectBasedFkField.format,
         name: 'initiator',
