@@ -93,7 +93,7 @@ class task(object):
 
     def __call__(self, task_cls):
 
-        self.kwargs["name"] = "{c.__module__}.{c.__name__}".format(c=task_cls)
+        self.kwargs["name"] = self.kwargs["__name__"] = "{c.__module__}.{c.__name__}".format(c=task_cls)
         self.kwargs["base"] = TaskClass
 
         @self.app.task(*self.args, **self.kwargs)
