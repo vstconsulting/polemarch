@@ -2,7 +2,7 @@
 import logging
 import traceback
 from django.conf import settings
-from ...wapp import app
+from vstutils.utils import import_class
 from ..utils import task, BaseTask
 from .exceptions import TaskError
 from ..models import PeriodicTask
@@ -10,6 +10,7 @@ from ..models.utils import AnsibleModule, AnsiblePlaybook
 
 logger = logging.getLogger("polemarch")
 clone_retry = getattr(settings, 'CLONE_RETRY', 5)
+app = import_class(f'{settings.VST_PROJECT}.wapp.app')
 
 
 @task(app, ignore_result=True, default_retry_delay=1, max_retries=clone_retry, bind=True)
