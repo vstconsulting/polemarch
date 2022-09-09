@@ -202,7 +202,7 @@ paths:
   /group/:
     get:
       operationId: group_list
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Return all groups.
       parameters:
         - name: __deep_parent
           in: query
@@ -308,7 +308,7 @@ paths:
       x-deep-nested-view: groups
     post:
       operationId: group_add
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Create a new group.
       parameters:
         - name: data
           in: body
@@ -326,7 +326,7 @@ paths:
   /group/{id}/:
     get:
       operationId: group_get
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Return a group instance.
       parameters: []
       responses:
         '200':
@@ -340,7 +340,7 @@ paths:
       x-deep-nested-view: groups
     put:
       operationId: group_update
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Update a group.
       parameters:
         - name: data
           in: body
@@ -356,7 +356,7 @@ paths:
         - group
     patch:
       operationId: group_edit
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Update one or more fields on an existing group.
       parameters:
         - name: data
           in: body
@@ -372,7 +372,7 @@ paths:
         - group
     delete:
       operationId: group_remove
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Remove an existing group.
       parameters: []
       responses:
         '204':
@@ -411,7 +411,7 @@ paths:
   /group/{id}/groups/:
     get:
       operationId: group_groups_list
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Return all groups.
       parameters:
         - name: __deep_parent
           in: query
@@ -516,7 +516,7 @@ paths:
         - main.Group
     post:
       operationId: group_groups_add
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Create a new group.
       parameters:
         - name: data
           in: body
@@ -540,7 +540,7 @@ paths:
   /group/{id}/groups/{groups_id}/:
     get:
       operationId: group_groups_get
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Return a group instance.
       parameters: []
       responses:
         '200':
@@ -553,7 +553,7 @@ paths:
         - main.Group
     put:
       operationId: group_groups_update
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Update a group.
       parameters:
         - name: data
           in: body
@@ -569,7 +569,7 @@ paths:
         - group
     patch:
       operationId: group_groups_edit
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Update one or more fields on an existing group.
       parameters:
         - name: data
           in: body
@@ -585,7 +585,7 @@ paths:
         - group
     delete:
       operationId: group_groups_remove
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Remove an existing group.
       parameters: []
       responses:
         '204':
@@ -3540,7 +3540,7 @@ paths:
   /inventory/{id}/group/{group_id}/groups/:
     get:
       operationId: inventory_group_groups_list
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Return all groups.
       parameters:
         - name: __deep_parent
           in: query
@@ -3645,7 +3645,7 @@ paths:
         - main.Group
     post:
       operationId: inventory_group_groups_add
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Create a new group.
       parameters:
         - name: data
           in: body
@@ -3674,7 +3674,7 @@ paths:
   /inventory/{id}/group/{group_id}/groups/{groups_id}/:
     get:
       operationId: inventory_group_groups_get
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Return a group instance.
       parameters: []
       responses:
         '200':
@@ -3687,7 +3687,7 @@ paths:
         - main.Group
     put:
       operationId: inventory_group_groups_update
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Update a group.
       parameters:
         - name: data
           in: body
@@ -3703,7 +3703,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_group_groups_edit
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Update one or more fields on an existing group.
       parameters:
         - name: data
           in: body
@@ -3719,7 +3719,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_group_groups_remove
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Remove an existing group.
       parameters: []
       responses:
         '204':
@@ -6864,7 +6864,7 @@ paths:
   /project/{id}/inventory/{inventory_id}/group/{group_id}/groups/:
     get:
       operationId: project_inventory_group_groups_list
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Return all groups.
       parameters:
         - name: __deep_parent
           in: query
@@ -6969,7 +6969,7 @@ paths:
         - main.Group
     post:
       operationId: project_inventory_group_groups_add
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Create a new group.
       parameters:
         - name: data
           in: body
@@ -7003,7 +7003,7 @@ paths:
   /project/{id}/inventory/{inventory_id}/group/{group_id}/groups/{groups_id}/:
     get:
       operationId: project_inventory_group_groups_get
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Return a group instance.
       parameters: []
       responses:
         '200':
@@ -7016,7 +7016,7 @@ paths:
         - main.Group
     put:
       operationId: project_inventory_group_groups_update
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Update a group.
       parameters:
         - name: data
           in: body
@@ -7032,7 +7032,7 @@ paths:
         - project
     patch:
       operationId: project_inventory_group_groups_edit
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Update one or more fields on an existing group.
       parameters:
         - name: data
           in: body
@@ -7048,7 +7048,7 @@ paths:
         - project
     delete:
       operationId: project_inventory_group_groups_remove
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Remove an existing group.
       parameters: []
       responses:
         '204':

@@ -133,6 +133,26 @@ class GroupCreateMasterSerializer(VSTSerializer):
 
 
 class Group(InventoryItems):
+    """
+    retrieve:
+        Return a group instance.
+
+    list:
+        Return all groups.
+
+    create:
+        Create a new group.
+
+    destroy:
+        Remove an existing group.
+
+    partial_update:
+        Update one or more fields on an existing group.
+
+    update:
+        Update a group.
+    """
+
     CyclicDependencyError = CyclicDependencyError
 
     hosts = ManyToManyFieldACL(Host, related_query_name="groups")
