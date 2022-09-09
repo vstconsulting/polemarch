@@ -551,6 +551,100 @@ class InventoryTestCase(BaseProjectTestCase):
         for path in invalid_paths:
             self.assertFalse(path_validator.regex.match(path), f'path {path} matched')
 
+    def test_deep_nested_groups_crud(self):
+        """
+        NOTE: This test may fail if you are using database without CTE support.
+        For this case consider set
+
+        databases_without_cte_support = default
+
+        to your [databases] section in settings.ini.
+        """
+
+        self.get_model_filter('main.Group').all().delete()
+
+        def generate_group_chain_bulk_data(first, count):
+            return [
+                {
+                    'method': 'post',
+                    'path': ['group', f'<<{idx}[data][id]>>', 'groups'],
+                    'data': {'children': True},
+                }
+                for idx in range(first, count)
+            ]
+
+        results = self.bulk_transactional([
+            {'method': 'post', 'path': 'group', 'data': {'children': True}},
+            *generate_group_chain_bulk_data(0, 9),
+        ])
+        second_to_last_group_id = results[-2]['data']['id']
+        last_children_group_id = results[-1]['data']['id']
+
+        results = self.bulk_transactional([
+            {  # [0] create another group with children=False in second to last group
+                'method': 'post',
+                'path': ['group', second_to_last_group_id, 'groups'],
+                'data': {}
+            },
+            {  # [1] create host in last non-children group
+                'method': 'post',
+                'path': ['group', '<<0[data][id]>>', 'hosts'],
+                'data': {}
+            },
+            {  # [2] create some var in last non-children group
+                'method': 'post',
+                'path': ['group', '<<0[data][id]>>', 'variables'],
+                'data': {'key': 'ansible_user', 'value': 'lol_user'},
+            },
+            {  # [3] create some var in last children group
+                'method': 'post',
+                'path': ['group', last_children_group_id, 'variables'],
+                'data': {'key': 'ansible_user', 'value': 'lol_user'},
+            },
+            {  # [4] check subaction in last non-children group
+                'method': 'post',
+                'path': ['group', '<<0[data][id]>>', 'set_owner'],
+                'data': {'user_id': self.user.id}
+            },
+            {  # [5] check subaction in last children group
+                'method': 'post',
+                'path': ['group', last_children_group_id, 'set_owner'],
+                'data': {'user_id': self.user.id}
+            },
+            {  # [6] update name of non-children group
+                'method': 'patch',
+                'path': ['group', second_to_last_group_id, 'groups', '<<0[data][id]>>'],
+                'data': {'name': 'non_children_group'}
+            },
+            {  # [7] update name of children group
+                'method': 'patch',
+                'path': ['group', second_to_last_group_id, 'groups', last_children_group_id],
+                'data': {'name': 'children_group'}
+            },
+            {  # [8] get detailed non-children group
+                'method': 'get',
+                'path': ['group', second_to_last_group_id, 'groups', '<<0[data][id]>>'],
+            },
+            {  # [9] get detailed children group
+                'method': 'get',
+                'path': ['group', second_to_last_group_id, 'groups', last_children_group_id],
+            },
+            {  # [10] delete non-children group
+                'method': 'delete',
+                'path': ['group', second_to_last_group_id, 'groups', '<<0[data][id]>>'],
+                'headers': {'HTTP_X_Purge_Nested': 'true'}
+            },
+            {  # [11] delete children group
+                'method': 'delete',
+                'path': ['group', second_to_last_group_id, 'groups', last_children_group_id],
+                'headers': {'HTTP_X_Purge_Nested': 'true'}
+            },
+        ])
+        self.assertEqual(results[8]['data']['name'], 'non_children_group')
+        self.assertEqual(results[9]['data']['name'], 'children_group')
+        self.assertFalse(self.get_model_filter('main.Group').filter(name='non_children_group').exists())
+        self.assertFalse(self.get_model_filter('main.Group').filter(name='children_group').exists())
+
 
 @own_projects_dir
 class SyncTestCase(BaseProjectTestCase):

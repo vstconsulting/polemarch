@@ -12,17 +12,17 @@ RUN --mount=type=cache,target=/var/cache/apt \
     --mount=type=cache,target=/root/.cache/pip \
     apt update && \
     apt -y install --no-install-recommends \
-        default-libmysqlclient-dev \
-        libpcre3-dev \
-        python3.8-dev \
-        libldap2-dev \
-        libsasl2-dev \
-        libffi-dev \
-        libkrb5-dev \
-        krb5-multidev \
-        libssl-dev \
-        libpq-dev \
-        gcc
+    default-libmysqlclient-dev \
+    libpcre3-dev \
+    python3.8-dev \
+    libldap2-dev \
+    libsasl2-dev \
+    libffi-dev \
+    libkrb5-dev \
+    krb5-multidev \
+    libssl-dev \
+    libpq-dev \
+    gcc
 
 COPY . .
 
@@ -53,15 +53,15 @@ RUN --mount=type=cache,target=/var/cache/apt \
     --mount=type=bind,from=build,source=/usr/local/polemarch/,target=/polemarch_env \
     apt update && \
     apt -y install --no-install-recommends \
-        git \
-        sudo \
-        sshpass \
-        libmysqlclient21 \
-        libpcre3 \
-        libldap-2.4-2 \
-        libsasl2-2 \
-        libffi7 \
-        libssl1.1 && \
+    git \
+    sudo \
+    sshpass \
+    libmysqlclient21 \
+    libpcre3 \
+    libldap-2.4-2 \
+    libsasl2-2 \
+    libffi7 \
+    libssl1.1 && \
     python3.8 -m pip install cryptography paramiko 'pip<22' && \
     ln -s /usr/bin/python3.8 /usr/bin/python && \
     mkdir -p /projects /hooks /run/openldap /etc/polemarch/hooks /var/lib/polemarch && \
@@ -69,11 +69,12 @@ RUN --mount=type=cache,target=/var/cache/apt \
     find /usr/lib/python3.8 -regex '.*\(*.pyc\|__pycache__\).*' -delete && \
     apt autoremove -y && \
     rm -rf /tmp/* \
-           /var/tmp/* \
-           /var/log/apt/*
+    /var/tmp/* \
+    /var/log/apt/*
 
 RUN useradd -m -s /bin/bash -U -u 1000 polemarch && \
-    chown -R polemarch /projects /hooks /run/openldap /etc/polemarch /var/lib/polemarch
+    chown -R polemarch /projects /hooks /run/openldap /etc/polemarch /var/lib/polemarch && \
+    ln -s /usr/bin/python3.8 /usr/local/bin/python
 
 USER polemarch
 
