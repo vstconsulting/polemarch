@@ -118,7 +118,7 @@ Install from PyPI
 
    #. Open `/etc/polemarch/settings.ini`, if it does not exist, create it. Polemarch uses config from this directory.
 
-   #. The default database is SQLite3, but MariaDB is recommended. Settings needed for correct work MariaDB database:
+   #. The default database is SQLite3, but MySQL is recommended. Settings needed for correct work MySQL database:
 
       .. code-block:: ini
 
@@ -133,6 +133,18 @@ Install from PyPI
          init_command = SET sql_mode='STRICT_TRANS_TABLES', default_storage_engine=INNODB, NAMES 'utf8', CHARACTER SET 'utf8', SESSION collation_connection = 'utf8_unicode_ci'
 
       .. note:: Set ``host`` and ``port`` settings if you connect to remote server.
+
+      .. warning::
+         If you are using MariaDB, make sure that your ``settings.ini`` config contains next line:
+
+         .. code-block:: ini
+
+            [databases]
+            databases_without_cte_support = default
+
+         The problem is that the implementation of recursive queries in the MariaDB
+         does not allow using it in a standard form.
+         MySQL (since 8.0) works as expected.
 
 
    #. The default cache system is file based cache, but RedisCache is recommended. Settings needed for correct RedisCache work:

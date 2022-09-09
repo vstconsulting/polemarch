@@ -40,7 +40,7 @@ services:
     restart: unless-stopped
 
   database:
-    image: mariadb:10.5
+    image: mysql:8.0
     restart: unless-stopped
     tty: true
     environment:
