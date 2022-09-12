@@ -42,9 +42,6 @@ Official site: https://polemarch.org/
 
 We also help you via:
 
-`Twitter
-<https://twitter.com/polemarchio>`_ - we post information about new releases and new features
-
 `Stack Overflow
 <https://stackoverflow.com/questions/tagged/polemarch>`_ - tag for questions about our application on Stack Overflow
 
