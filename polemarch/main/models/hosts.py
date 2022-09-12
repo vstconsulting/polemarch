@@ -132,6 +132,11 @@ class GroupCreateMasterSerializer(VSTSerializer):
         return super().create(validated_data)
 
 
+class GroupCopySerializer(VSTSerializer):
+    class Meta:
+        fields = ['name']
+
+
 class Group(InventoryItems):
     """
     retrieve:
@@ -191,6 +196,7 @@ class Group(InventoryItems):
         _serializer_class = _WithPermissionsSerializer
         _extra_serializer_classes = {
             'serializer_class_create': GroupCreateMasterSerializer,
+            'serializer_class_copy': GroupCopySerializer,
         }
 
     def toDict(self, tmp_dir: Text = '/tmp') -> Tuple[Dict, List]:

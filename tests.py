@@ -645,6 +645,47 @@ class InventoryTestCase(BaseProjectTestCase):
         self.assertFalse(self.get_model_filter('main.Group').filter(name='non_children_group').exists())
         self.assertFalse(self.get_model_filter('main.Group').filter(name='children_group').exists())
 
+    def test_copy_group(self):
+        self.bulk_transactional([
+            {
+                'method': 'patch',
+                'path': ['group', self.group.id],
+                'data': {'notes': 'lol notes'},
+            },
+            {
+                'method': 'post',
+                'path': ['group', self.group.id, 'variables'],
+                'data': {'key': 'ansible_connection', 'value': 'local'},
+            },
+        ])
+
+        results = self.bulk_transactional([
+            {
+                'method': 'post',
+                'path': ['group', self.group.id, 'copy'],
+                'data': {'name': f'copied_group_{self.group.id}'},
+            },
+            {
+                'method': 'get',
+                'path': ['group', '<<0[data][id]>>'],
+            },
+            {
+                'method': 'get',
+                'path': ['group', '<<0[data][id]>>', 'variables'],
+            },
+            {
+                'method': 'get',
+                'path': ['group', '<<0[data][id]>>', 'hosts'],
+            },
+        ])
+        self.assertEqual(results[1]['data']['name'], f'copied_group_{self.group.id}')
+        self.assertEqual(results[1]['data']['notes'], 'lol notes')
+        self.assertEqual(results[2]['data']['count'], 1)
+        self.assertEqual(results[2]['data']['results'][0]['key'], 'ansible_connection')
+        self.assertEqual(results[2]['data']['results'][0]['value'], 'local')
+        self.assertEqual(results[3]['data']['count'], 1)
+        self.assertEqual(results[3]['data']['results'][0]['name'], self.host.name)
+
 
 @own_projects_dir
 class SyncTestCase(BaseProjectTestCase):
