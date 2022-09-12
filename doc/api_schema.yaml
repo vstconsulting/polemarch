@@ -394,12 +394,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/GroupCopy'
       responses:
         '201':
           description: CREATED
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/GroupCopy'
       tags:
         - group
     parameters:
@@ -612,12 +612,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/GroupCopy'
       responses:
         '201':
           description: CREATED
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/GroupCopy'
       tags:
         - group
     parameters:
@@ -3518,12 +3518,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/GroupCopy'
       responses:
         '201':
           description: CREATED
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/GroupCopy'
       tags:
         - inventory
     parameters:
@@ -6837,12 +6837,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/GroupCopy'
       responses:
         '201':
           description: CREATED
           schema:
-            $ref: '#/definitions/Group'
+            $ref: '#/definitions/GroupCopy'
       tags:
         - project
     parameters:
@@ -10549,6 +10549,23 @@ definitions:
         - notes
         - children
         - owner
+    x-view-field-name: name
+  GroupCopy:
+    type: object
+    properties:
+      id:
+        title: Id
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+        minLength: 1
+    x-properties-groups:
+      '':
+        - id
+        - name
     x-view-field-name: name
   Host:
     type: object
