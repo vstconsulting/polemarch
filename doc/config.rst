@@ -73,18 +73,22 @@ example than general howto) you must do such steps:
 
            [Unit]
            Description=Polemarch Service HTTP Server
-           After=network.target remote-fs.target nss-lookup.target redis.service
+           After=network.target remote-fs.target nss-lookup.target redis.service mysql.service
 
            [Service]
            Type=forking
            ExecStart=/opt/polemarch/bin/polemarchctl webserver
-           ExecReload=/opt/polemarch/bin/polemarchctl webserver reload=/opt/polemarch/run/polemarch/web.pid
-           ExecStop=/opt/polemarch/bin/polemarchctl webserver stop=/opt/polemarch/run/polemarch/web.pid
-           PIDFile=/opt/polemarch/run/polemarch/web.pid
+           ExecReload=/opt/polemarch/bin/polemarchctl webserver reload=/opt/polemarch/pid/web.pid
+           ExecStop=/opt/polemarch/bin/polemarchctl webserver stop=/opt/polemarch/pid/web.pid
+           PIDFile=/opt/polemarch/pid/web.pid
            User=polemarch
            Group=polemarch
            KillSignal=SIGCONT
            Restart=always
+
+           # Uncomment this if used privileged ports
+           # Capabilities=CAP_NET_BIND_SERVICE+ep
+           # AmbientCapabilities=CAP_NET_BIND_SERVICE
 
            [Install]
            WantedBy=multi-user.target
