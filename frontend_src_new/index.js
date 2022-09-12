@@ -31,4 +31,4 @@ spa.signals.once('APP_CREATED', (app) => {
 
 spa.signals.connect('app.afterInit', ({ app }) => {
     app.views.get('/group/{id}/groups/{groups_id}/hosts/').nestedQueryset = app.views.get('/host/').objects;
-})
+});

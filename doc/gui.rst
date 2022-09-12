@@ -161,7 +161,6 @@ As you can see, now project's status is "NEW", so we need to click the :guilabel
 to get all needed data from your GIT project.
 
 .. image:: new_screenshots/test_project_2.png
-.. image:: new_screenshots/test_project_3.png
 
 Once your project status changes to "OK", you can start working with Polemarch.
 
