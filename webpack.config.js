@@ -5,7 +5,7 @@ require('dotenv').config();
 const isProd = process.env.APP_ENV === 'prod';
 
 const KB = 1024;
-const frontendSrc = path.resolve(__dirname, 'frontend_src_new');
+const frontendSrc = path.resolve(__dirname, 'frontend_src');
 
 module.exports = {
     mode: isProd ? 'production' : 'development',

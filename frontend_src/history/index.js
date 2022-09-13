@@ -8,6 +8,8 @@ const HISTORY_MODELS = ['History', 'OneHistory', 'ProjectHistory'];
 const HISTORY_LIST_PATHS = ['/history/', '/project/{id}/history/'];
 const HISTORY_DETAIL_PATHS = ['/history/{id}/', '/project/{id}/history/{history_id}/'];
 
+export { ExecutionTimeField };
+
 export class ProjectBasedFkField extends spa.fields.fk.fk.FKField {
     _formatQuerysetPath(queryset) {
         return super
