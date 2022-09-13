@@ -9,6 +9,7 @@ import sys
 import re
 import json
 from os.path import dirname
+from vstutils.models.cent_notify import Notificator
 
 try:
     from yaml import CLoader as Loader, CDumper as Dumper, load, dump
@@ -24,6 +25,7 @@ from vstutils.utils import (
     Executor,
     UnhandledExecutor, ON_POSIX,
 )
+from ..main.settings import NOTIFY_WITHOUT_QUEUE_MODELS
 
 
 from . import __file__ as file
@@ -341,3 +343,11 @@ class AnsibleInventoryParser(PMAnsible):
 
 class AnsibleConfigParser(PMAnsible):
     ref_name = 'config'
+
+
+class PolemarchNotificator(Notificator):
+    def create_notification_from_instance(self, instance):
+        super().create_notification_from_instance(instance)
+        # pylint: disable=protected-access
+        if instance.__class__._meta.label in NOTIFY_WITHOUT_QUEUE_MODELS and self.channel != 'history_lines':
+            self.send()

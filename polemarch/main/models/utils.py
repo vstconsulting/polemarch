@@ -18,6 +18,7 @@ from django.apps import apps
 from django.utils import timezone
 from vstutils.utils import tmp_file, KVExchanger, raise_context
 from vstutils.tools import get_file_value
+
 from .hosts import Inventory
 from .tasks import History, Project
 from ...main.utils import CmdExecutor, AnsibleArgumentsReference, PMObject
@@ -134,6 +135,9 @@ class Executor(CmdExecutor):
         ret = super().execute(new_cmd, cwd)
         if self.notificator:
             self.notificator.disconnect_all()
+            with self.notificator_lock:
+                if self.notificator.queue:
+                    self.notificator.send()
         return ret
 
 

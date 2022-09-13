@@ -10,7 +10,7 @@
   "scripts": {
     "build": "APP_ENV=prod webpack",
     "devBuild": "webpack",
-    "lint": "eslint --ext .js,.vue frontend_src_new/"
+    "lint": "eslint --ext .js,.vue frontend_src/"
   },
   "devDependencies": {
     "@babel/core": "^7.16.7",

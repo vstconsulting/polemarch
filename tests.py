@@ -2587,6 +2587,25 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
         self.assertEqual(results[3]['data']['initiator'], task_template['id'])
         self.assertEqual(results[3]['data']['mode'], 'playbook.yml')
 
+    def test_notificator(self):
+        class DummyClient:
+            def add(*args):
+                pass
+
+            def send(*args):
+                pass
+
+        with self.patch(
+            f'{settings.VST_PROJECT_LIB_NAME}.main.utils.PolemarchNotificator.get_client',
+            return_value=DummyClient()
+        ) as client_getter:
+            self.assertEqual(client_getter.call_count, 0)
+            self.bulk_transactional([self.sync_project_bulk_data()])
+            self.assertEqual(client_getter.call_count, 1)
+            client_getter.call_count = 0
+            self.bulk_transactional([self.execute_module_bulk_data()])
+            self.assertEqual(client_getter.call_count, 2)
+
 
 @own_projects_dir
 class VariableTestCase(BaseProjectTestCase):

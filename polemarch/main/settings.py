@@ -225,6 +225,11 @@ TASKS_HANDLERS = {
     },
 }
 
+NOTIFY_WITHOUT_QUEUE_MODELS = [
+    'main.History',
+    'main.Project',
+]
+
 CLONE_RETRY = rpc.getint('clone_retry_count', fallback=5)
 
 # ACL settings

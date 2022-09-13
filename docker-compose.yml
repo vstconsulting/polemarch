@@ -76,6 +76,10 @@ services:
       timeout: 3s
       retries: 3
     command: centrifugo
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
 
 volumes:
   data-volume:
