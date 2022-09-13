@@ -1,27 +1,51 @@
 # syntax=docker/dockerfile:1
 
-FROM vstconsulting/images:tox AS build
+FROM registry.gitlab.com/vstconsulting/images:ubuntu AS build
 
+RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 WORKDIR /usr/local/polemarch
+
+ENV CC='ccache gcc'
+
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=type=cache,target=/var/lib/apt \
+    --mount=type=cache,target=/root/.cache/pip \
+    apt update && \
+    apt -y install --no-install-recommends \
+    default-libmysqlclient-dev \
+    libpcre3-dev \
+    python3.8-dev \
+    libldap2-dev \
+    libsasl2-dev \
+    libffi-dev \
+    libkrb5-dev \
+    krb5-multidev \
+    libssl-dev \
+    libpq-dev \
+    gcc
 
 COPY . .
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=cache,target=/cache \
     --mount=type=cache,target=/usr/local/polemarch/.tox \
-    rm -rf dist/* && \
-    tox -c tox_build.ini -e py36-build
+    tox -e build_for_docker
 
 ###############################################################
 
-FROM vstconsulting/images:python
+FROM registry.gitlab.com/vstconsulting/images:python as production
 
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
+
+ARG PACKAGE_NAME=polemarch
 
 ENV WORKER=ENABLE \
     LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8 \
-    POLEMARCH_PROJECTS_DIR=/projects
+    POLEMARCH_UWSGI_LIMITS=1536 \
+    POLEMARCH_UWSGI_PIDFILE=/tmp/web.pid \
+    POLEMARCH_PROJECTS_DIR=/projects \
+    POLEMARCH_SQLITE_DIR=/var/lib/polemarch/
 
 RUN --mount=type=cache,target=/var/cache/apt \
     --mount=type=cache,target=/var/lib/apt \
@@ -29,48 +53,28 @@ RUN --mount=type=cache,target=/var/cache/apt \
     --mount=type=bind,from=build,source=/usr/local/polemarch/,target=/polemarch_env \
     apt update && \
     apt -y install --no-install-recommends \
-        git \
-        sudo \
-        sshpass \
-        libpcre3 \
-        libpcre3-dev \
-        python3.8-dev \
-        libldap2-dev \
-        libldap-2.4-2 \
-        libsasl2-dev \
-        libsasl2-2 \
-        libffi-dev \
-        libffi7 \
-        libkrb5-dev \
-        krb5-multidev \
-        libssl-dev \
-        libssl1.1 \
-        gcc && \
-    python3.8 -m pip install --upgrade pip -U \
-        wheel \
-        setuptools \
-        cryptography \
-        paramiko && \
+    git \
+    sudo \
+    sshpass \
+    libmysqlclient21 \
+    libpcre3 \
+    libldap-2.4-2 \
+    libsasl2-2 \
+    libffi7 \
+    libssl1.1 && \
+    python3.8 -m pip install cryptography paramiko 'pip<22' && \
     ln -s /usr/bin/python3.8 /usr/bin/python && \
-    mkdir -p /projects /hooks /run/openldap /etc/polemarch/hooks && \
-    python3.8 -m pip install /polemarch_env/dist/$(ls /polemarch_env/dist/ | grep "\.tar\.gz" | tail -1)[mysql,postgresql] && \
-    apt remove -y \
-        libpcre3-dev \
-        python3.8-dev \
-        libldap2-dev \
-        libsasl2-dev \
-        libssl-dev \
-        libkrb5-dev \
-        libffi-dev \
-        default-libmysqlclient-dev \
-        gcc && \
+    mkdir -p /projects /hooks /run/openldap /etc/polemarch/hooks /var/lib/polemarch && \
+    python3.8 -m pip install --no-index --find-links /polemarch_env/wheels $PACKAGE_NAME[mysql,postgresql,ansible] && \
+    find /usr/lib/python3.8 -regex '.*\(*.pyc\|__pycache__\).*' -delete && \
     apt autoremove -y && \
     rm -rf /tmp/* \
-           /var/tmp/* \
-           /var/log/apt/*
+    /var/tmp/* \
+    /var/log/apt/*
 
-RUN useradd -m -s /bin/bash -U polemarch && \
-    chown -R polemarch /projects /hooks /run/openldap /etc/polemarch
+RUN useradd -m -s /bin/bash -U -u 1000 polemarch && \
+    chown -R polemarch /projects /hooks /run/openldap /etc/polemarch /var/lib/polemarch && \
+    ln -s /usr/bin/python3.8 /usr/local/bin/python
 
 USER polemarch
 

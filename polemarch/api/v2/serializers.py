@@ -6,7 +6,7 @@ from collections import OrderedDict
 import json
 import uuid
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -21,6 +21,7 @@ from ...main import models
 from ...main.settings import LANGUAGES
 from ...main.utils import AnsibleArgumentsReference
 from ...main.validators import path_validator
+from ...main.constants import HiddenArg, HiddenVar, CYPHER
 
 User = get_user_model()
 
@@ -60,19 +61,7 @@ class MultiTypeField(serializers.CharField):
         )
 
 
-class InventoryDependEnumField(vst_fields.DependEnumField):
-    def to_internal_value(self, data):
-        data = super().to_internal_value(data)
-        return data
-
-    def to_representation(self, value):
-        value = super().to_representation(value)
-        if isinstance(value, models.Inventory):
-            value = value.id
-        return value
-
-
-class InventoryAutoCompletionField(vst_fields.AutoCompletionField):
+class InventoryAutoCompletionField(vst_fields.VSTCharField):
 
     def to_internal_value(self, data):
         inventory = super().to_internal_value(data)
@@ -84,16 +73,16 @@ class InventoryAutoCompletionField(vst_fields.AutoCompletionField):
                     "You don't have permission to inventory."
                 )  # noce
         except (ValueError, KeyError):
-            self.check_path(inventory)
+            if ',' not in inventory:
+                path_validator(inventory)
         return inventory
-
-    def check_path(self, inventory):
-        if not hasattr(self.root, 'project'):  # nocv
-            return
-        self.root.project.check_path(inventory)
 
 
 # Serializers
+class FactsSerializer(DataSerializer):
+    facts = serializers.JSONField(read_only=True)
+
+
 class ActionResponseSerializer(DataSerializer, EmptySerializer):
     detail = vst_fields.VSTCharField()
 
@@ -129,11 +118,16 @@ class SetOwnerSerializer(DataSerializer):
         return dict(pk=data['user_id'])
 
 
-class CreateUserSerializer(vst_auth.CreateUserSerializer):
+class CreateUserSerializer(vst_auth.CreateUserSerializer):  # noee
+    is_staff = None
 
     @with_signals
     def create(self, validated_data: Dict) -> User:
+        validated_data['is_staff'] = True
         return super().create(validated_data)
+
+    class Meta(vst_auth.CreateUserSerializer.Meta):
+        fields = tuple(filter(lambda field: field != 'is_staff', vst_auth.CreateUserSerializer.Meta.fields))
 
 
 class ChangePasswordSerializer(vst_auth.ChangePasswordSerializer):
@@ -147,7 +141,7 @@ class OneUserSerializer(UserSerializer):
     email = serializers.EmailField(required=False)
 
     class Meta(vst_auth.OneUserSerializer.Meta):
-        pass
+        fields = tuple(filter(lambda field: field != 'is_staff', vst_auth.OneUserSerializer.Meta.fields))
 
 
 class ChartLineSettingSerializer(vst_serializers.JsonObjectSerializer):
@@ -184,15 +178,6 @@ class WidgetSettingsSerializer(vst_serializers.JsonObjectSerializer):
     pmwChartWidget = WidgetSettingSerializer()
 
 
-class UserSettingsSerializer(vst_serializers.JsonObjectSerializer):
-    lang = serializers.ChoiceField(choices=LANG_CHOICES, default=LANG_CHOICES[0])
-    autoupdateInterval = serializers.IntegerField(default=15000)
-    chartLineSettings = ChartLineSettingsSerializer()
-    widgetSettings = WidgetSettingsSerializer()
-    selectedSkin = serializers.CharField(required=False)
-    skinsSettings = vst_serializers.DataSerializer(required=False)
-
-
 class TeamSerializer(_WithPermissionsSerializer):
 
     class Meta:
@@ -219,6 +204,22 @@ class OneTeamSerializer(TeamSerializer):
 
 class HistorySerializer(_SignalSerializer):
     status = serializers.ChoiceField(choices=models.History.statuses, required=False)
+    executor = vst_fields.DependEnumField(field='initiator_type', types={
+        'project': vst_fields.FkModelField(select=UserSerializer,
+                                           autocomplete_property='id',
+                                           autocomplete_represent='username'),
+        'template': vst_fields.FkModelField(select=UserSerializer,
+                                            autocomplete_property='id',
+                                            autocomplete_represent='username'),
+        'scheduler': {
+            'type': 'string',
+            'x-format': 'static_value',
+            'x-options': {
+                'staticValue': 'system',
+                'realField': 'string',
+            }
+        },
+    })
 
     class Meta:
         model = models.History
@@ -256,8 +257,7 @@ class ProjectHistorySerializer(HistorySerializer):
         )
 
 
-class OneHistorySerializer(_SignalSerializer):
-    status = serializers.ChoiceField(choices=models.History.statuses, required=False)
+class OneHistorySerializer(HistorySerializer):
     raw_stdout = serializers.SerializerMethodField(read_only=True)
     execution_time = vst_fields.UptimeField()
 
@@ -317,6 +317,7 @@ class HookSerializer(serializers.ModelSerializer):
 
 class VariableSerializer(_SignalSerializer):
     value = MultiTypeField(default="", allow_blank=True)
+    hidden_enum = HiddenVar
 
     class Meta:
         model = models.Variable
@@ -328,8 +329,8 @@ class VariableSerializer(_SignalSerializer):
 
     def to_representation(self, instance: models.Variable):
         result = super().to_representation(instance)
-        if instance.key in getattr(instance.content_object, 'HIDDEN_VARS', []):
-            result['value'] = "[~~ENCRYPTED~~]"
+        if instance.key in self.hidden_enum.get_values():
+            result['value'] = CYPHER
         elif instance.key in getattr(instance.content_object, 'BOOLEAN_VARS', []):
             result['value'] = instance.value == 'True'
         return result
@@ -350,7 +351,7 @@ class InventoryVariableSerializer(VariableSerializer):
 
 
 class PeriodicTaskVariableSerializer(VariableSerializer):
-    pass
+    hidden_enum = HiddenArg
 
 
 class ProjectVariableSerializer(VariableSerializer):
@@ -364,8 +365,8 @@ class ProjectVariableSerializer(VariableSerializer):
     }, types={
         'repo_password': 'password',
         'repo_key': 'secretfile',
-        'repo_sync_on_run_timeout': 'uptime',
-        'ci_template': 'fk'
+        'repo_sync_on_run_timeout': vst_fields.UptimeField(default=0),
+        'ci_template': vst_fields.FkField(select='ExecutionTemplate')
     })
 
 
@@ -382,18 +383,13 @@ class _WithVariablesSerializer(_WithPermissionsSerializer):
     def update(self, instance, validated_data: Dict):
         return self._do_with_vars("update", instance, validated_data=validated_data)
 
-    def get_vars(self, representation):
-        return representation.get('vars', None)
+    def represent_vars(self, representation):
+        HiddenVar.hide_values(representation.get('vars'))
 
-    def to_representation(self, instance, hidden_vars: List[str] = None):
-        rep = super().to_representation(instance)
-        hv = getattr(instance, 'HIDDEN_VARS', []) if hidden_vars is None else hidden_vars
-        vars = self.get_vars(rep)
-        if vars is not None:
-            for mask_key in hv:
-                if mask_key in vars.keys():
-                    vars[mask_key] = "[~~ENCRYPTED~~]"
-        return rep
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        self.represent_vars(representation)
+        return representation
 
 
 class HostSerializer(_WithVariablesSerializer):
@@ -402,7 +398,7 @@ class HostSerializer(_WithVariablesSerializer):
         required=False,
         default='HOST'
     )
-    from_project = serializers.BooleanField(read_only=True, label='Project Based')
+    from_project = serializers.BooleanField(read_only=True, label='Project based')
 
     class Meta:
         model = models.Host
@@ -453,6 +449,7 @@ class ModuleSerializer(vst_serializers.VSTSerializer):
         )
 
 
+# NOTE: deprecated. Remove this with tests after breaking v2 api support
 class TemplateSerializer(_WithVariablesSerializer):
     data = DataSerializer(required=True, write_only=True)
     options = DataSerializer(write_only=True)
@@ -475,35 +472,16 @@ class TemplateSerializer(_WithVariablesSerializer):
             'options_list',
         )
 
-    def get_vars(self, representation):
-        try:
-            return representation['data']['vars']
-        except KeyError:  # nocv
-            return None
+    def represent_vars(self, representation):
+        if 'data' in representation:
+            HiddenArg.hide_values(representation['data'].get('vars'))
 
-    def set_opts_vars(self, rep, hidden_vars: List[str]):
-        if not rep.get('vars', None):
-            return rep
-        var = rep['vars']
-        for mask_key in hidden_vars:
-            if mask_key in var.keys():
-                var[mask_key] = "[~~ENCRYPTED~~]"
-        return rep
-
-    def repr_options(self, instance: models.Template, data: Dict, hidden_vars: List):
-        hv = hidden_vars
-        hv = instance.HIDDEN_VARS if hv is None else hv
-        for name, rep in data.get('options', {}).items():
-            data['options'][name] = self.set_opts_vars(rep, hv)
-
-    def to_representation(self, instance, hidden_vars: List[str] = None) -> OrderedDict:
+    def to_representation(self, instance) -> OrderedDict:
         data = OrderedDict()
         if instance.kind in ["Task", "Module"]:
-            hidden_vars = models.PeriodicTask.HIDDEN_VARS
-            data = super().to_representation(
-                instance, hidden_vars=hidden_vars
-            )
-            self.repr_options(instance, data, hidden_vars)
+            data = super().to_representation(instance)
+            for option in data.get('options', {}).values():
+                HiddenArg.hide_values(option.get('vars'))
         return data
 
 
@@ -543,7 +521,7 @@ class _InventoryOperations(_WithVariablesSerializer):
 
 
 class InventorySerializer(_WithVariablesSerializer):
-    from_project = serializers.BooleanField(read_only=True, label='Project Based')
+    from_project = serializers.BooleanField(read_only=True, label='Project based')
 
     class Meta:
         model = models.Inventory
@@ -566,40 +544,73 @@ class OneInventorySerializer(InventorySerializer, _InventoryOperations):
 
 class ProjectCreateMasterSerializer(_WithPermissionsSerializer):
     types = models.list_to_choices(models.Project.repo_handlers.keys())
-    auth_types = ['NONE', 'KEY', 'PASSWORD']
-    branch_auth_types = {t: "hidden" for t in models.Project.repo_handlers.keys()}
-    branch_auth_types['GIT'] = 'string'
-    branch_types = dict(**branch_auth_types)
-    branch_types['TAR'] = 'string'
 
     status = vst_fields.VSTCharField(read_only=True)
     type = serializers.ChoiceField(choices=types, default='MANUAL', label='Repo type')
-    repository = vst_fields.VSTCharField(default='MANUAL', label='Repo url')
-    repo_auth = vst_fields.DependEnumField(default='NONE',
-                                           field='type',
-                                           choices={"GIT": auth_types},
-                                           types=branch_auth_types,
-                                           label='Repo auth type',
-                                           write_only=True)
-    auth_data = vst_fields.DependEnumField(allow_blank=True,
-                                           write_only=True,
-                                           default='',
-                                           field='repo_auth',
-                                           label='Repo auth data',
-                                           types={
-                                               'KEY': 'secretfile',
-                                               'PASSWORD': 'password',
-                                               'NONE': 'hidden'
-                                           })
-    branch = vst_fields.DependEnumField(allow_blank=True,
-                                        required=False,
-                                        allow_null=True,
-                                        label='Branch for GIT(branch/tag/SHA) or TAR(subdir)',
-                                        field='type',
-                                        types=branch_types)
-    additional_playbook_path = vst_fields.VSTCharField(required=False,
-                                                       allow_null=True,
-                                                       label='Directory with playbooks')
+    repository = vst_fields.DependEnumField(
+        field='type',
+        default='MANUAL',
+        label='Repo url',
+        types={'MANUAL': 'hidden', 'GIT': 'string', 'TAR': 'string'},
+    )
+    repo_auth = vst_fields.DependEnumField(
+        field='type',
+        default='NONE',
+        types={
+            'MANUAL': {'type': 'string', 'format': 'hidden'},
+            'TAR': {'type': 'string', 'format': 'hidden'},
+            'GIT': {
+                'type': 'string',
+                'enum': ('NONE', 'KEY', 'PASSWORD'),
+                'default': 'NONE',
+            },
+        },
+        label='Repo auth type',
+        write_only=True
+    )
+    auth_data = vst_fields.DependEnumField(
+        allow_blank=True,
+        write_only=True,
+        default='',
+        field='repo_auth',
+        label='Repo auth data',
+        types={
+            'KEY': 'secretfile',
+            'PASSWORD': 'password',
+            'NONE': 'hidden'
+        }
+    )
+    branch = vst_fields.DependEnumField(
+        allow_blank=True,
+        required=False,
+        allow_null=True,
+        label='Branch for GIT (branch/tag/SHA) or TAR (subdir)',
+        field='type',
+        types={
+            'MANUAL': {'type': 'string', 'format': 'hidden'},
+            'GIT': {'type': 'string'},
+            'TAR': {'type': 'string'},
+        }
+    )
+    additional_playbook_path = vst_fields.VSTCharField(
+        required=False,
+        allow_null=True,
+        label='Directory with playbooks'
+    )
+
+    _schema_properties_groups = {
+        'General': (
+            'name',
+            'type',
+            'additional_playbook_path',
+        ),
+        'Repository': (
+            'repository',
+            'branch',
+            'repo_auth',
+            'auth_data',
+        ),
+    }
 
     class Meta:
         model = models.Project
@@ -615,7 +626,7 @@ class ProjectCreateMasterSerializer(_WithPermissionsSerializer):
             'additional_playbook_path',
         )
         extra_kwargs = {
-            'name': {'required': True}
+            'name': {'required': True},
         }
 
     @transaction.atomic
@@ -760,10 +771,9 @@ def generate_fileds(ansible_reference: AnsibleArgumentsReference, ansible_type: 
         if ref == 'verbose':
             field = serializers.IntegerField
             kwargs.update(dict(max_value=4, default=0))
-        if ref in models.PeriodicTask.HIDDEN_VARS:
+        if ref in HiddenArg.get_values():
             field = vst_fields.SecretFileInString
         if ref == 'inventory':
-            kwargs['autocomplete'] = 'Inventory'
             field = InventoryAutoCompletionField
 
         if field is None:  # nocv
@@ -854,7 +864,7 @@ class InventoryImportSerializer(serializers.Serializer):
     # pylint: disable=abstract-method
     inventory_id = vst_fields.RedirectIntegerField(default=None, allow_null=True, read_only=True)
     name = serializers.CharField(required=True)
-    raw_data = vst_fields.VSTCharField()
+    raw_data = vst_fields.FileInStringField()
 
     def create(self, validated_data: Dict) -> Dict:
         return models.Inventory.import_inventory_from_string(**validated_data)

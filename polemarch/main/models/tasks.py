@@ -29,6 +29,7 @@ from ..exceptions import DataNotReady, NotApplicable
 from .base import ForeignKeyACL, BModel, ACLModel, BQuerySet, models, BaseModel
 from .vars import AbstractModel, AbstractVarsQuerySet
 from .projects import Project, HISTORY_ID
+from ..constants import CYPHER, HiddenArg
 
 
 logger = logging.getLogger("polemarch")
@@ -78,7 +79,10 @@ class Template(ACLModel):
         data = json.loads(self.template_data)
         if "inventory" in self.template_fields[self.kind] and self.inventory:
             try:
-                data['inventory'] = int(self.inventory)
+                if isinstance(self.inventory, Inventory):
+                    data['inventory'] = self.inventory.id
+                else:
+                    data['inventory'] = int(self.inventory)
             except ValueError:
                 data['inventory'] = self.inventory
         return data
@@ -136,7 +140,7 @@ class Template(ACLModel):
 
     def __encrypt(self, new_vars: Dict, data_name: Text = 'data') -> Dict:
         old_vars = getattr(self, data_name).get('vars', {})
-        for key in filter(lambda k: new_vars[k] == '[~~ENCRYPTED~~]', new_vars.keys()):
+        for key in filter(lambda k: new_vars[k] == CYPHER, new_vars.keys()):
             new_vars[key] = old_vars.get(key, new_vars[key])
         return new_vars
 
@@ -258,6 +262,10 @@ class TemplateOption(ListModel):
         self.template.set_options_data(options)
         self.template.save()
 
+    @property
+    def kind(self):
+        return self.template.kind
+
 
 class PeriodicTaskQuerySet(AbstractVarsQuerySet):
     use_for_related_fields = True
@@ -285,16 +293,6 @@ class PeriodicTask(AbstractModel):
 
     kinds = ["PLAYBOOK", "MODULE", "TEMPLATE"]
     types = ["CRONTAB", "INTERVAL"]
-    HIDDEN_VARS = [
-        'key-file',
-        'key_file',
-        'private-key',
-        'private_key',
-        'vault-password-file',
-        'vault_password_file',
-        'new-vault-password-file',
-        'new_vault_password_file',
-    ]
 
     class Meta:
         default_related_name = "periodic_task"
@@ -315,17 +313,12 @@ class PeriodicTask(AbstractModel):
 
     @inventory.setter
     def inventory(self, inventory: InvOrString) -> NoReturn:
-        if isinstance(inventory, Inventory):  # nocv
+        if isinstance(inventory, Inventory):
             self._inventory = inventory
             self.inventory_file = None
-        elif isinstance(inventory, (str, int)):
-            try:
-                self._inventory = self.project.inventories.get(pk=int(inventory))
-                self.inventory_file = None
-            except (ValueError, Inventory.DoesNotExist):
-                self.project.check_path(inventory)
-                self.inventory_file = inventory
-                self._inventory = None
+        elif isinstance(inventory, str):
+            self.inventory_file = inventory
+            self._inventory = None
 
     @property
     def crontab_kwargs(self) -> Dict:
@@ -391,7 +384,7 @@ class HistoryQuerySet(BQuerySet):
         return values
 
     def stats(self, last: int) -> OrderedDict:
-        qs = self.filter(start_time__gte=now()-timedelta(days=last))
+        qs = self.filter(start_time__gte=timezone.now()-timedelta(days=last))
         qs = qs.annotate(
             day=dbfunc.TruncDay('start_time'),
             month=dbfunc.TruncMonth('start_time'),
@@ -512,9 +505,7 @@ class History(BModel):
         if not isinstance(value, dict):
             raise ValidationError(dict(args="Should be a dict."))
         data = {k: v for k, v in value.items() if k not in ['group']}
-        for key in PeriodicTask.HIDDEN_VARS:
-            if key in data:
-                data[key] = "[~~ENCRYPTED~~]"
+        HiddenArg.hide_values(data)
         self.json_args = json.dumps(data)
 
     # options
@@ -556,6 +547,7 @@ class History(BModel):
         )
         subst = '"\\1": {\n\t"status": "\\2", \n\\3},'
         result = re.sub(regex, subst, data, 0, re.MULTILINE)
+        result = re.findall(r'^".*":[\s\S]*$', result, re.MULTILINE)[0]
         result = "{" + result[:-1] + "\n}"
         return json.loads(result)
 

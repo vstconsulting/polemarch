@@ -12,6 +12,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from vstutils.utils import tmp_file
 from .base import ACLModel, BQuerySet, BModel, models
+from ..constants import CYPHER
 
 logger = logging.getLogger("polemarch")
 
@@ -104,14 +105,6 @@ class AbstractModel(ACLModel):
     class Meta:
         abstract = True
 
-    HIDDEN_VARS = [
-        'ansible_ssh_pass',
-        'ansible_ssh_private_key_file',
-        'ansible_become_pass',
-        'ansible_become_password',
-        'ansible_password'
-    ]
-
     BOOLEAN_VARS = []
 
     def __unicode__(self):  # pragma: no cover
@@ -128,9 +121,8 @@ class AbstractModel(ACLModel):
 
     @transaction.atomic()
     def set_vars(self, variables) -> NoReturn:
-        encr = "[~~ENCRYPTED~~]"
-        encrypted_vars = {k: v for k, v in variables.items() if v == encr}
-        other_vars = {k: v for k, v in variables.items() if v != encr}
+        encrypted_vars = {k: v for k, v in variables.items() if v == CYPHER}
+        other_vars = {k: v for k, v in variables.items() if v != CYPHER}
         self.variables.cleared().exclude(key__in=list(encrypted_vars.keys()) + list(other_vars.keys())).delete()
         for key, value in other_vars.items():
             self.variables.create(key=key, value=value)

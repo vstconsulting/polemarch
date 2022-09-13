@@ -1,0 +1,69 @@
+@use "sass:map";
+
+body {
+    --status-ok: #27ae60;
+    --status-error: #dc3545;
+    --status-interrupted: #9b97e4;
+    --status-delay: #808419;
+    --status-offline: #808080;
+    --status-run: #0085ff;
+
+    --project-status-new: #808080;
+    --project-status-error: #dc3545;
+    --project-status-ok: #27ae60;
+    --project-status-wait-sync: #0085ff;
+    --project-status-sync: #ff8c00;
+}
+
+$history-status-colors: (
+        "OK": var(--status-ok),
+        "ERROR": var(--status-error),
+        "INTERRUPTED": var(--status-interrupted),
+        "DELAY": var(--status-delay),
+        "OFFLINE": var(--status-offline),
+        "RUN": var(--status-run),
+);
+
+$project-status-colors: (
+        "NEW": var(--project-status-new),
+        "ERROR": var(--project-status-error),
+        "OK": var(--project-status-ok),
+        "WAIT_SYNC": var(--project-status-wait-sync),
+        "SYNC": var(--project-status-sync),
+);
+
+@each $status, $color in $history-status-colors {
+    .model-History.field-component.name-status.value-#{$status} {
+        color: #{$color};
+    }
+    .model-OneHistory.field-component.name-status.value-#{$status} {
+        color: #{$color};
+    }
+}
+
+@each $status, $color in $project-status-colors {
+    .model-Project.field-component.name-status.value-#{$status} {
+        color: #{$color};
+    }
+    .model-OneProject.field-component.name-status.value-#{$status} {
+        color: #{$color};
+    }
+}
+
+.field-children-false .operation__groups {
+    display: none;
+}
+
+.field-children-true .operation__hosts {
+    display: none;
+}
+
+.entity-view.field-type-MANUAL {
+    .fields-group-Repository {
+        display: none;
+    }
+    .fields-group-General {
+        flex: initial;
+        max-width: 100%;
+    }
+}

@@ -1,0 +1,9 @@
+---
+- hosts: all
+  gather_facts: False
+  vars:
+    ansible_connection: local
+    check_mode: yes
+  tasks:
+    - name: Some local task
+      ping: 

@@ -7,14 +7,16 @@ from vstutils.utils import lazy_translate as __
 from ...main import models
 from ...main.models import ExecutionTypes
 from ...main.utils import AnsibleArgumentsReference
+from ...main.constants import HiddenArg
 from ..v2.serializers import (
     _WithVariablesSerializer,
     AnsiblePlaybookSerializer,
     AnsibleModuleSerializer,
+    InventoryAutoCompletionField,
     generate_fileds,
     ModuleSerializer,
-    InventoryDependEnumField,
     ExecuteResponseSerializer,
+    OneProjectSerializer as V2OneProjectSerializer,
 )
 
 
@@ -29,15 +31,18 @@ class TemplateVariablesMetaSerializer(serializers.SerializerMetaclass):
         return super().__new__(mcs, name, bases, attrs)
 
 
-class TemplateVariablesSerializer(BaseSerializer, metaclass=TemplateVariablesMetaSerializer):
-    pass
+class BaseAnsibleArgumentsSerializer(BaseSerializer, metaclass=TemplateVariablesMetaSerializer):
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        HiddenArg.hide_values(representation)
+        return representation
 
 
-class TaskTemplateVariablesSerializer(TemplateVariablesSerializer):
+class PlaybookAnsibleArgumentsSerializer(BaseAnsibleArgumentsSerializer):
     type = 'playbook'
 
 
-class ModuleTemplateVariablesSerializer(TemplateVariablesSerializer):
+class ModuleAnsibleArgumentsSerializer(BaseAnsibleArgumentsSerializer):
     type = 'module'
 
 
@@ -47,7 +52,7 @@ class TaskTemplateParameters(BaseSerializer):
         autocomplete_property='playbook',
         autocomplete_represent='playbook',
     )
-    vars = TaskTemplateVariablesSerializer(required=False)
+    vars = PlaybookAnsibleArgumentsSerializer(required=False)
 
 
 class ModuleTemplateParameters(BaseSerializer):
@@ -58,7 +63,7 @@ class ModuleTemplateParameters(BaseSerializer):
         autocomplete_represent='path'
     )
     args = fields.CharField(label=__('Arguments'), required=False, default='', allow_blank=True)
-    vars = ModuleTemplateVariablesSerializer(required=False)
+    vars = ModuleAnsibleArgumentsSerializer(required=False)
 
 
 class ExecutionTemplateSerializer(_WithVariablesSerializer):
@@ -79,6 +84,7 @@ class CreateExecutionTemplateSerializer(ExecutionTemplateSerializer):
         ExecutionTypes.Task.value: TaskTemplateParameters(),
         ExecutionTypes.Module.value: ModuleTemplateParameters(),
     })
+    inventory = InventoryAutoCompletionField(allow_blank=True, required=False)
 
     class Meta(ExecutionTemplateSerializer.Meta):
         fields = ExecutionTemplateSerializer.Meta.fields + ['notes', 'inventory', 'data']
@@ -158,8 +164,8 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
         allow_blank=True,
         field='type',
         types={
-            'CRONTAB': 'crontab',
-            'INTERVAL': 'integer',
+            'CRONTAB': {'type': 'string', 'format': 'crontab', 'default': '* * * * *', 'required': True},
+            'INTERVAL': vst_fields.UptimeField(default=0),
         }
     )
     mode = vst_fields.DependEnumField(
@@ -180,7 +186,7 @@ class PeriodictaskSerializer(_WithVariablesSerializer):
             'TEMPLATE': 'hidden',
         }
     )
-    inventory = InventoryDependEnumField(allow_blank=True, required=False, field='kind')
+    inventory = InventoryAutoCompletionField(allow_blank=True, required=False)
 
     class Meta:
         model = models.PeriodicTask
@@ -235,3 +241,7 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
         ))
         rdata.is_valid(True)
         return rdata.data
+
+
+class OneProjectSerializer(V2OneProjectSerializer):
+    branch = vst_fields.VSTCharField(read_only=True, source='project_branch', allow_blank=True)

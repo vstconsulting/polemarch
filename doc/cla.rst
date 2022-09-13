@@ -95,7 +95,7 @@ rules or principles, and the parties agree to the exclusive jurisdiction of
 the courts in Russian Federation. This Agreement does not create a partnership,
 agency relationship, or joint venture between the parties. We may assign this
 Agreement without notice or restriction. If any provision of this Agreement is
-unenforcable, that provision will be modified to render it enforceable to the
+unenforceable, that provision will be modified to render it enforceable to the
 extent possible to effect the parties' intention and the remaining provisions
 will not be affected. The parties may amend this Agreement only in a written
 amendment signed by both parties. This Agreement comprises the parties' entire

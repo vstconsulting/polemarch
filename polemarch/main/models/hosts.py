@@ -25,7 +25,7 @@ from ..validators import RegexValidator
 logger = logging.getLogger("polemarch")
 
 
-vars_help = 'List of variables to filter. Comma separeted "key:value" list.'
+vars_help = 'List of variables to filter. Comma separated "key:value" list.'
 
 
 def variables_filter(queryset, field, value):
@@ -64,7 +64,7 @@ class InventoryDumper(Dumper):
 
 
 # Helpfull exceptions
-class CiclicDependencyError(ex.PMException):
+class CyclicDependencyError(ex.PMException):
     _def_message = "A cyclic dependence was found. {}"
 
     def __init__(self, tp: Text = ""):
@@ -126,9 +126,39 @@ class GroupCreateMasterSerializer(VSTSerializer):
     class Meta:
         __inject_from__ = 'detail'
 
+    def create(self, validated_data):
+        if 'owner' not in validated_data and 'request' in self.context:
+            validated_data['owner'] = self.context['request'].user
+        return super().create(validated_data)
+
+
+class GroupCopySerializer(VSTSerializer):
+    class Meta:
+        fields = ['name']
+
 
 class Group(InventoryItems):
-    CiclicDependencyError = CiclicDependencyError
+    """
+    retrieve:
+        Return a group instance.
+
+    list:
+        Return all groups.
+
+    create:
+        Create a new group.
+
+    destroy:
+        Remove an existing group.
+
+    partial_update:
+        Update one or more fields on an existing group.
+
+    update:
+        Update a group.
+    """
+
+    CyclicDependencyError = CyclicDependencyError
 
     hosts = ManyToManyFieldACL(Host, related_query_name="groups")
     parents = ManyToManyFieldACLReverse('Group', blank=True, related_query_name="childrens")
@@ -139,9 +169,9 @@ class Group(InventoryItems):
 
     class Meta:
         default_related_name = "groups"
-        index_together = [
-            ["children"],
-            ["children", "id"],
+        indexes = [
+            models.Index(fields=["children"]),
+            models.Index(fields=["children", "id"]),
         ]
         _list_fields = (
             'id',
@@ -166,6 +196,7 @@ class Group(InventoryItems):
         _serializer_class = _WithPermissionsSerializer
         _extra_serializer_classes = {
             'serializer_class_create': GroupCreateMasterSerializer,
+            'serializer_class_copy': GroupCopySerializer,
         }
 
     def toDict(self, tmp_dir: Text = '/tmp') -> Tuple[Dict, List]:

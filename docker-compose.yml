@@ -2,7 +2,7 @@ version: '3'
 
 services:
   traefik:
-    image: traefik:2.6
+    image: traefik:2.8
     restart: unless-stopped
     volumes:
       - ./traefik_dynamic.yml:/traefik_dynamic.yml:ro
@@ -33,13 +33,14 @@ services:
     tty: true
     volumes:
       - ./settings.ini:/etc/polemarch/settings.ini:ro
+      - projects-volume:/projects
 
   redis:
     image: "redis:6"
     restart: unless-stopped
 
   database:
-    image: mariadb:10.5
+    image: mysql:8.0
     restart: unless-stopped
     tty: true
     environment:
@@ -75,9 +76,14 @@ services:
       timeout: 3s
       retries: 3
     command: centrifugo
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
 
 volumes:
   data-volume:
+  projects-volume:
 
 networks:
   default:

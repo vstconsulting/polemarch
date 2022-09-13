@@ -1,0 +1,17 @@
+.list-Hook {
+    @media (max-width: 1000px) {
+        .column-enable {
+            display: none;
+        }
+    }
+    @media (max-width: 1200px) {
+        .column-when {
+            display: none;
+        }
+    }
+    @media (max-width: 1400px) {
+        .column-recipients {
+            display: none;
+        }
+    }
+}

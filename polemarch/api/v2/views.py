@@ -4,7 +4,7 @@ from collections import OrderedDict
 from django.db import transaction
 from django.http.response import HttpResponse
 from django.utils.decorators import method_decorator
-from rest_framework import exceptions as excepts, status, permissions
+from rest_framework import exceptions as excepts, status
 from rest_framework.authtoken import views as token_views
 from drf_yasg.utils import swagger_auto_schema
 from vstutils.api import auth as vst_auth
@@ -14,7 +14,7 @@ from vstutils.utils import KVExchanger
 from vstutils.api.responses import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from . import filters
-from .permissions import InventoryItemsPermission
+from .permissions import InventoryItemsPermission, CreateUsersPermission
 from . import serializers as sers
 from ..v3 import serializers as sers3
 from ...main import utils
@@ -26,8 +26,8 @@ action_kw = {**default_action}
 action_kw.update({'response_serializer': sers.ActionResponseSerializer, 'response_code': status.HTTP_200_OK})
 execute_kw = default_action.copy()
 execute_kw.update({
-    'serializer_class': sers.ExecuteResponseSerializer,
-    'response_serializer': sers.EmptySerializer,
+    'serializer_class': sers.EmptySerializer,
+    'response_serializer': sers.ExecuteResponseSerializer,
     'response_code': status.HTTP_201_CREATED
 })
 
@@ -93,7 +93,7 @@ class __VarsViewSet(base.ModelViewSet):
     """
     model = sers.models.Variable
     serializer_class = sers.VariableSerializer
-    filter_class = filters.VariableFilter
+    filterset_class = filters.VariableFilter
     optimize_get_by_values = False
 
 
@@ -208,31 +208,10 @@ class UserViewSet(vst_auth.UserViewSet, base.CopyMixin):
     serializer_class_one = sers.OneUserSerializer
     serializer_class_create = sers.CreateUserSerializer
     serializer_class_change_password = sers.ChangePasswordSerializer  # pylint: disable=invalid-name
+    permission_classes = vst_auth.UserViewSet.permission_classes + (CreateUsersPermission, )
 
     copy_related = ['groups']
     copy_field_name = 'username'
-
-    def copy_instance(self, instance):
-        new_instance = super().copy_instance(instance)
-        new_instance.settings.data = instance.settings.get_settings_copy()
-        new_instance.settings.save()
-        return new_instance
-
-    @deco.action(
-        ["post", "delete", "get"], url_path="settings",
-        detail=yes, serializer_class=sers.UserSettingsSerializer,
-        permission_classes=(permissions.IsAuthenticated,)
-    )
-    def user_settings(self, request, *args, **kwargs):
-        """
-        Return user settings.
-        """
-        obj = self.get_object()
-        method = request.method
-        if method != "GET":
-            obj.settings.data = request.data if method == "POST" else {}
-            obj.settings.save()
-        return HTTP_200_OK(obj.settings.data)
 
 
 @deco.nested_view('user', 'id', allow_append=yes, manager_name='users', view=UserViewSet)
@@ -259,7 +238,7 @@ class TeamViewSet(OwnedView):
     model = sers.models.UserGroup
     serializer_class = sers.TeamSerializer
     serializer_class_one = sers.OneTeamSerializer
-    filter_class = filters.TeamFilter
+    filterset_class = filters.TeamFilter
     copy_related = ['users']
 
 
@@ -267,7 +246,7 @@ class __HistoryLineViewSet(base.ReadOnlyModelViewSet):
     schema = None
     model = sers.models.HistoryLines
     serializer_class = sers.HistoryLinesSerializer
-    filter_class = filters.HistoryLinesFilter
+    filterset_class = filters.HistoryLinesFilter
 
 
 @method_decorator(name='lines_list', decorator=swagger_auto_schema(auto_schema=None))
@@ -289,7 +268,7 @@ class HistoryViewSet(base.HistoryModelViewSet):
     model = sers.models.History
     serializer_class = sers.HistorySerializer
     serializer_class_one = sers.OneHistorySerializer
-    filter_class = filters.HistoryFilter
+    filterset_class = filters.HistoryFilter
     POST_WHITE_LIST = ['cancel']
 
     @deco.action(detail=yes, serializer_class=sers.EmptySerializer)
@@ -309,12 +288,13 @@ class HistoryViewSet(base.HistoryModelViewSet):
         exch.send(True, 60) if obj.working else None
         return HTTP_200_OK(f"Task canceled: {obj.id}")
 
-    @deco.action(["get", "head"], detail=yes, serializer_class=sers.DataSerializer)
+    @deco.action(["get", "head"], detail=yes, serializer_class=sers.FactsSerializer)
     def facts(self, request, *args, **kwargs):
         """
         Get compilated history facts (only for execution 'module' with module 'setup').
         """
-        return HTTP_200_OK(self.get_object().facts)
+        serializer = self.get_serializer(instance=self.get_object().facts)
+        return HTTP_200_OK({'facts': serializer.data})
 
     @deco.subaction(methods=["delete"], detail=yes, serializer_class=sers.EmptySerializer)
     def clear(self, request, *args, **kwargs):
@@ -358,7 +338,7 @@ class HostViewSet(OwnedView, _VariablesCopyMixin):
     model = sers.models.Host
     serializer_class = sers.HostSerializer
     serializer_class_one = sers.OneHostSerializer
-    filter_class = filters.HostFilter
+    filterset_class = filters.HostFilter
     permission_classes = concat_classes(
         OwnedView.permission_classes,
         _VariablesCopyMixin.permission_classes,
@@ -387,7 +367,7 @@ class _BaseGroupViewSet(OwnedView, sers.models.Group.generated_view):  # pylint:
     update:
         Update a group.
     """
-    filter_class = filters.GroupFilter
+    filterset_class = filters.GroupFilter
 
     class ValidationException(excepts.ValidationError):
         status_code = 409
@@ -449,7 +429,7 @@ class InventoryViewSet(_GroupMixin):
     serializer_class = sers.InventorySerializer
     serializer_class_one = sers.OneInventorySerializer
     serializer_class_import_inventory = sers.InventoryImportSerializer  # pylint: disable=invalid-name
-    filter_class = filters.InventoryFilter
+    filterset_class = filters.InventoryFilter
     permission_classes = concat_classes(
         _GroupMixin.permission_classes,
         InventoryItemsPermission
@@ -500,7 +480,7 @@ class __PlaybookViewSet(base.ReadOnlyModelViewSet):
     model = sers.models.Task
     serializer_class = sers.PlaybookSerializer
     serializer_class_one = sers.OnePlaybookSerializer
-    filter_class = filters.TaskFilter
+    filterset_class = filters.TaskFilter
 
 
 class __ModuleViewSet(base.ReadOnlyModelViewSet):
@@ -517,7 +497,7 @@ class __ModuleViewSet(base.ReadOnlyModelViewSet):
     model = sers.models.Module
     serializer_class = sers.ModuleSerializer
     serializer_class_one = sers3.OneModuleSerializer
-    filter_class = filters.ModuleFilter
+    filterset_class = filters.ModuleFilter
 
 
 @deco.nested_view('variables', 'id', view=__PeriodicTaskVarsViewSet)
@@ -546,7 +526,7 @@ class __PeriodicTaskViewSet(base.ModelViewSet):
     model = sers.models.PeriodicTask
     serializer_class = sers3.PeriodictaskSerializer
     serializer_class_one = sers3.OnePeriodictaskSerializer
-    filter_class = filters.PeriodicTaskFilter
+    filterset_class = filters.PeriodicTaskFilter
 
     @deco.subaction(**{
         **execute_kw,
@@ -583,7 +563,7 @@ class __TemplateViewSet(base.ModelViewSet):
     model = sers.models.Template
     serializer_class = sers.TemplateSerializer
     serializer_class_one = sers.OneTemplateSerializer
-    filter_class = filters.TemplateFilter
+    filterset_class = filters.TemplateFilter
     POST_WHITE_LIST = ['execute']
 
     @deco.subaction(**{
@@ -634,7 +614,7 @@ class ProjectViewSet(OwnedView, _VariablesCopyMixin):
     serializer_class = sers.ProjectSerializer
     serializer_class_one = sers.OneProjectSerializer
     serializer_class_create = sers.ProjectCreateMasterSerializer
-    filter_class = filters.ProjectFilter
+    filterset_class = filters.ProjectFilter
     POST_WHITE_LIST = ['sync', 'execute_playbook', 'execute_module']
     copy_related = ['inventories']
 
@@ -718,9 +698,7 @@ class ProjectViewSet(OwnedView, _VariablesCopyMixin):
         exec_method = getattr(self, 'execute_{}'.format(kind), None)
         if exec_method is None:  # nocv
             raise Exception('Unknown kind')
-        serializer: sers.serializers.Serializer = exec_method.kwargs['serializer_class'](
-            context=self.get_serializer_context()
-        )
+        serializer: sers.serializers.Serializer = self.get_serializer()
         serializer.project = self.get_object()
         return serializer
 
@@ -775,7 +753,7 @@ class HookViewSet(base.ModelViewSet):
     """
     model = sers.models.Hook
     serializer_class = sers.HookSerializer
-    filter_class = filters.HookFilter
+    filterset_class = filters.HookFilter
     permission_classes = (StaffPermission,)
 
 
@@ -786,27 +764,30 @@ class HookViewSet(base.ModelViewSet):
 class StatisticViewSet(base.ListNonModelViewSet):
     base_name = "stats"
 
-    def _get_count_by_user(self, model):
+    def _get_by_user(self, model):
         user = self.request.user
         filter_models = (sers.User,)
         if model not in filter_models:
-            return model.objects.all().user_filter(user).count()
-        return model.objects.all().count()
+            return model.objects.all().user_filter(user)
+        return model.objects.all()
 
     def _get_history_stats(self, request):
         qs = sers.models.History.objects.all()
         qs = qs.user_filter(self.request.user)
         return qs.stats(int(request.query_params.get("last", "14")))
 
+    def _get_by_user_projects(self, model):
+        return model.objects.filter(project__in=self._get_by_user(sers.models.Project).values('id'))
+
     def list(self, request, *args, **kwargs):
         # pylint: disable=unused-argument
         stats = OrderedDict()
-        stats['projects'] = self._get_count_by_user(sers.models.Project)
-        stats['templates'] = self._get_count_by_user(sers.models.Template)
-        stats['inventories'] = self._get_count_by_user(sers.models.Inventory)
-        stats['groups'] = self._get_count_by_user(sers.models.Group)
-        stats['hosts'] = self._get_count_by_user(sers.models.Host)
-        stats['teams'] = self._get_count_by_user(sers.models.UserGroup)
-        stats['users'] = self._get_count_by_user(sers.User)
+        stats['projects'] = self._get_by_user(sers.models.Project).count()
+        stats['templates'] = self._get_by_user_projects(sers.models.Template).count()
+        stats['inventories'] = self._get_by_user(sers.models.Inventory).count()
+        stats['groups'] = self._get_by_user(sers.models.Group).count()
+        stats['hosts'] = self._get_by_user(sers.models.Host).count()
+        stats['teams'] = self._get_by_user(sers.models.UserGroup).count()
+        stats['users'] = self._get_by_user(sers.User).count()
         stats['jobs'] = self._get_history_stats(request)
         return HTTP_200_OK(stats)

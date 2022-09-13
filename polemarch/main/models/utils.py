@@ -18,9 +18,11 @@ from django.apps import apps
 from django.utils import timezone
 from vstutils.utils import tmp_file, KVExchanger, raise_context
 from vstutils.tools import get_file_value
+
 from .hosts import Inventory
 from .tasks import History, Project
 from ...main.utils import CmdExecutor, AnsibleArgumentsReference, PMObject
+from ..constants import HiddenArg, HiddenVar, CYPHER
 
 
 logger = logging.getLogger("polemarch")
@@ -133,6 +135,9 @@ class Executor(CmdExecutor):
         ret = super().execute(new_cmd, cwd)
         if self.notificator:
             self.notificator.disconnect_all()
+            with self.notificator_lock:
+                if self.notificator.queue:
+                    self.notificator.send()
         return ret
 
 
@@ -157,8 +162,6 @@ class AnsibleCommand(PMObject):
         '''
 
     class Inventory(object):
-        hidden_vars = Inventory.HIDDEN_VARS
-
         def __init__(self, inventory: Union[Inventory, int, Text], cwd: Text = "/tmp", tmpdir: Text = '/tmp'):
             self.cwd = cwd
             self.tmpdir = tmpdir
@@ -265,9 +268,9 @@ class AnsibleCommand(PMObject):
             extra_args += ['-' + ('v' * value)] if value else []
             return extra_args, files
         result = [value, []]
-        if key in ["key-file", "private-key"]:
+        if key in HiddenArg.get_text_values():
             result = self.__parse_key(key, value)
-        elif key in ["vault-password-file", "new-vault-password-file"]:
+        elif key in HiddenArg.get_file_values():
             result = self.__generate_arg_file(value)  # nocv
         value = result[0]
         files += result[1]
@@ -291,9 +294,6 @@ class AnsibleCommand(PMObject):
     @property
     def path_to_ansible(self) -> List[Text]:
         return self.pm_ansible(self.command_type)
-
-    def get_hidden_vars(self) -> List[Text]:
-        return self.inventory_object.hidden_vars
 
     def get_inventory_arg(self, target: Text, extra_args: List[Text]) -> List[Text]:
         # pylint: disable=unused-argument
@@ -319,10 +319,9 @@ class AnsibleCommand(PMObject):
     def hide_passwords(self, raw: Text) -> Text:
         regex = r'|'.join((
             r"(?<=" + hide + r":\s).{1,}?(?=[\n\t\s])"
-            for hide in self.get_hidden_vars()
+            for hide in HiddenVar.get_values()
         ))
-        subst = "[~~ENCRYPTED~~]"
-        raw = re.sub(regex, subst, raw, 0, re.MULTILINE)
+        raw = re.sub(regex, CYPHER, raw, 0, re.MULTILINE)
         return raw
 
     def get_execution_revision(self, project: Project):  # nocv

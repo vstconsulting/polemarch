@@ -25,6 +25,7 @@ from .serializers import (
     CreateExecutionTemplateSerializer,
     TaskTemplateParameters,
     ModuleTemplateParameters,
+    OneProjectSerializer,
 )
 
 
@@ -86,7 +87,7 @@ TemplateOptionViewSet = create_view(
     override_detail_fields={
         'id': fields.CharField(read_only=True),
         'name': fields.CharField(read_only=True),
-        'kind': fields.CharField(read_only=True, source='template.kind'),
+        'kind': fields.CharField(read_only=True),
         'data': DependEnumField(field='kind', types={
             'Task': TaskTemplateParameters(),
             'Module': ModuleTemplateParameters(),
@@ -107,3 +108,4 @@ class ExecutionTemplateViewSet(__TemplateViewSet):
 @nested_view('template', 'id', manager_name='template', view=__TemplateViewSet, schema=None)
 class ProjectViewSet(ProjectViewSetV2):
     __doc__ = ProjectViewSetV2.__doc__
+    serializer_class_one = OneProjectSerializer

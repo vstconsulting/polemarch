@@ -9,6 +9,7 @@ import sys
 import re
 import json
 from os.path import dirname
+from vstutils.models.cent_notify import Notificator
 
 try:
     from yaml import CLoader as Loader, CDumper as Dumper, load, dump
@@ -17,12 +18,14 @@ except ImportError:  # nocv
 
 from django.core.validators import ValidationError
 
+from vstutils.tasks import TaskClass
 from vstutils.utils import (
     tmp_file_context,
     BaseVstObject,
     Executor,
     UnhandledExecutor, ON_POSIX,
 )
+from ..main.settings import NOTIFY_WITHOUT_QUEUE_MODELS
 
 
 from . import __file__ as file
@@ -92,7 +95,8 @@ class task(object):
 
     def __call__(self, task_cls):
 
-        self.kwargs["name"] = "{c.__module__}.{c.__name__}".format(c=task_cls)
+        self.kwargs["name"] = self.kwargs["__name__"] = "{c.__module__}.{c.__name__}".format(c=task_cls)
+        self.kwargs["base"] = TaskClass
 
         @self.app.task(*self.args, **self.kwargs)
         def wrapper(*args, **kwargs):
@@ -151,7 +155,7 @@ class SubCacheInterface(PMObject):
         return load(cache, Loader=Loader) if cache else None
 
     def clear(self):
-        self.set(None)
+        self.cache.delete(self.key)
 
 
 class AnsibleCache(SubCacheInterface):
@@ -339,3 +343,11 @@ class AnsibleInventoryParser(PMAnsible):
 
 class AnsibleConfigParser(PMAnsible):
     ref_name = 'config'
+
+
+class PolemarchNotificator(Notificator):
+    def create_notification_from_instance(self, instance):
+        super().create_notification_from_instance(instance)
+        # pylint: disable=protected-access
+        if instance.__class__._meta.label in NOTIFY_WITHOUT_QUEUE_MODELS and self.channel != 'history_lines':
+            self.send()

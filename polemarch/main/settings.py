@@ -57,7 +57,7 @@ API = {
 }
 API[VST_API_VERSION] = {
     **API['v2'],
-    'groups': {
+    'group': {
         'view': '{}.api.v3.views.GroupViewSet'.format(VST_PROJECT_LIB_NAME)
     },
     'inventory': {
@@ -67,57 +67,13 @@ API[VST_API_VERSION] = {
         'view': '{}.api.v3.views.ProjectViewSet'.format(VST_PROJECT_LIB_NAME)
     },
 }
-del API[VST_API_VERSION]['group']
 
-PROJECT_GUI_MENU = [
-    {
-        'name': 'Projects',
-        'url': '/project',
-        'span_class': 'fas fa-cubes',
-    },
-    {
-        'name': 'Community',
-        'url': '/community_template',
-        'span_class': 'fa fa-cloud',
-    },
-    {
-        'name': 'Inventories',
-        'url': '/inventory',
-        'span_class': 'fa fa-folder',
-        'sublinks': [
-            {
-                'name': 'Groups',
-                'url': '/groups',
-                'span_class': 'fas fa-server',
-            },
-            {
-                'name': 'Hosts',
-                'url': '/host',
-                'span_class': 'fas fa-hdd',
-            },
-        ]
-    },
-    {
-        'name': 'History',
-        'url': '/history',
-        'span_class': 'fa fa-calendar',
-    },
-    {
-        'name': 'System',
-        'span_class': 'fa fa-cog',
-        'sublinks': [
-            {
-                'name': 'Users',
-                'url': '/user',
-                'span_class': 'fa fa-user',
-            },
-            {
-                'name': 'Hooks',
-                'url': '/hook',
-                'span_class': 'fa fa-plug'
-            },
-        ]
-    },
+PROJECT_GUI_MENU = []
+
+OPENAPI_HOOKS = [
+    'polemarch.main.openapi.set_gui_menu_ce',
+    'polemarch.main.openapi.set_inventory_field',
+    'polemarch.main.openapi.set_periodic_task_variable_value_field',
 ]
 
 SWAGGER_SETTINGS['DEFAULT_INFO'] = '{}.api.v2.swagger.api_info'.format(VST_PROJECT_LIB_NAME)
@@ -258,7 +214,7 @@ TASKS_HANDLERS = {
     "REPO": {
         "BACKEND": "{}.main.tasks.tasks.RepoTask".format(VST_PROJECT_LIB_NAME)
     },
-    "SCHEDUER": {
+    "SCHEDULER": {
         "BACKEND": "{}.main.tasks.tasks.ScheduledTask".format(VST_PROJECT_LIB_NAME)
     },
     "MODULE": {
@@ -268,6 +224,11 @@ TASKS_HANDLERS = {
         "BACKEND": "{}.main.tasks.tasks.ExecuteAnsiblePlaybook".format(VST_PROJECT_LIB_NAME)
     },
 }
+
+NOTIFY_WITHOUT_QUEUE_MODELS = [
+    'main.History',
+    'main.Project',
+]
 
 CLONE_RETRY = rpc.getint('clone_retry_count', fallback=5)
 
