@@ -2601,10 +2601,11 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
         ) as client_getter:
             self.assertEqual(client_getter.call_count, 0)
             self.bulk_transactional([self.sync_project_bulk_data()])
-            self.assertEqual(client_getter.call_count, 1)
-            client_getter.call_count = 0
+            client_getter.assert_any_call()
+            client_getter.reset_mock()
+            client_getter.assert_not_called()
             self.bulk_transactional([self.execute_module_bulk_data()])
-            self.assertEqual(client_getter.call_count, 2)
+            client_getter.assert_any_call()
 
 
 @own_projects_dir
