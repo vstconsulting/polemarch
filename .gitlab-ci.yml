@@ -142,7 +142,7 @@ release_pypi:
   variables:
     TOX_ARGS: ""
   script:
-   - tox -e build $TOX_ARGS
+   - tox -c tox_build.ini $TOX_ARGS -e py37-build,py37-wheel
    - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} $(find dist/*.{tar.gz,whl})
   artifacts:
     name: "release-packages-${CI_BUILD_REF_NAME}.${CI_BUILD_ID}"
