@@ -23,24 +23,18 @@ from django.conf import settings
 from rest_framework.exceptions import UnsupportedMediaType
 
 from vstutils.custom_model import ListModel, CustomQuerySet
-from vstutils.utils import BaseEnum, translate as _
+from vstutils.utils import translate as _
 from . import Inventory
 from ..exceptions import DataNotReady, NotApplicable
 from .base import ForeignKeyACL, BModel, ACLModel, BQuerySet, models, BaseModel
 from .vars import AbstractModel, AbstractVarsQuerySet
 from .projects import Project, HISTORY_ID
-from ..constants import CYPHER, HiddenArg
+from ..constants import CYPHER, HiddenArgumentsEnum
 
 
 logger = logging.getLogger("polemarch")
 InvOrString = TypeVar('InvOrString', str, int, Inventory, None)
 User = get_user_model()
-
-
-class ExecutionTypes(BaseEnum):
-    # pylint: disable=invalid-name
-    Task = 'Task'
-    Module = 'Module'
 
 
 # Block of real models
@@ -505,7 +499,7 @@ class History(BModel):
         if not isinstance(value, dict):
             raise ValidationError(dict(args="Should be a dict."))
         data = {k: v for k, v in value.items() if k not in ['group']}
-        HiddenArg.hide_values(data)
+        HiddenArgumentsEnum.hide_values(data)
         self.json_args = json.dumps(data)
 
     # options

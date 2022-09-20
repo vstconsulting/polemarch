@@ -21,8 +21,8 @@ from vstutils.tools import get_file_value
 
 from .hosts import Inventory
 from .tasks import History, Project
-from ...main.utils import CmdExecutor, AnsibleArgumentsReference, PMObject
-from ..constants import HiddenArg, HiddenVar, CYPHER
+from ...main.utils import CmdExecutor, PMObject
+from ..constants import HiddenArgumentsEnum, HiddenVariablesEnum, CYPHER, ANSIBLE_REFERENCE
 
 
 logger = logging.getLogger("polemarch")
@@ -147,7 +147,6 @@ class AnsibleCommand(PMObject):
         'ansible': 'module',
     }
     command_type = None
-    ansible_ref_class = AnsibleArgumentsReference
 
     status_codes = {
         4: "OFFLINE",
@@ -216,7 +215,7 @@ class AnsibleCommand(PMObject):
         self.kwargs = kwargs
         self.__will_raise_exception = False
         self.ref_type = self.ref_types[self.command_type]
-        self.ansible_ref = self.ansible_ref_class().raw_dict[self.ref_type]
+        self.ansible_ref = ANSIBLE_REFERENCE.raw_dict[self.ref_type]
         self.verbose = kwargs.get('verbose', 0)
         self.cwd = tempfile.mkdtemp()
         self._verbose_output('Execution tmpdir created - [{}].'.format(self.cwd), 0)
@@ -268,9 +267,9 @@ class AnsibleCommand(PMObject):
             extra_args += ['-' + ('v' * value)] if value else []
             return extra_args, files
         result = [value, []]
-        if key in HiddenArg.get_text_values():
+        if key in HiddenArgumentsEnum.get_text_values():
             result = self.__parse_key(key, value)
-        elif key in HiddenArg.get_file_values():
+        elif key in HiddenArgumentsEnum.get_file_values():
             result = self.__generate_arg_file(value)  # nocv
         value = result[0]
         files += result[1]
@@ -319,7 +318,7 @@ class AnsibleCommand(PMObject):
     def hide_passwords(self, raw: Text) -> Text:
         regex = r'|'.join((
             r"(?<=" + hide + r":\s).{1,}?(?=[\n\t\s])"
-            for hide in HiddenVar.get_values()
+            for hide in HiddenVariablesEnum.get_values()
         ))
         raw = re.sub(regex, CYPHER, raw, 0, re.MULTILINE)
         return raw
