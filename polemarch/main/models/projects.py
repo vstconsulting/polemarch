@@ -111,16 +111,6 @@ class Project(AbstractModel):
         'repo_sync_on_run'
     ]
 
-    VARS_KEY = [
-        'repo_type',
-        'repo_sync_on_run',
-        'repo_sync_on_run_timeout',
-        'repo_branch',
-        'repo_password',
-        'repo_key',
-        'playbook_path'
-    ]
-
     EXTRA_OPTIONS = {
         'initiator': 0,
         'initiator_type': 'project',

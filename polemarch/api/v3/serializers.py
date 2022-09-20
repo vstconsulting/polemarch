@@ -5,45 +5,50 @@ from vstutils.api.serializers import BaseSerializer
 from vstutils.utils import lazy_translate as __
 
 from ...main import models
-from ...main.models import ExecutionTypes
-from ...main.utils import AnsibleArgumentsReference
-from ...main.constants import HiddenArg
+from ...main.constants import ExecutionTypesEnum, HiddenArgumentsEnum
 from ..v2.serializers import (
     _WithVariablesSerializer,
-    AnsiblePlaybookSerializer,
-    AnsibleModuleSerializer,
     InventoryAutoCompletionField,
-    generate_fileds,
     ModuleSerializer,
     ExecuteResponseSerializer,
     OneProjectSerializer as V2OneProjectSerializer,
+    generate_fields
 )
+from ...main.constants import ANSIBLE_REFERENCE
 
 
-class TemplateVariablesMetaSerializer(serializers.SerializerMetaclass):
-    ansible_reference = AnsibleArgumentsReference()
-
+class AnsibleArgumentsMetaSerializer(serializers.SerializerMetaclass):
     @staticmethod
     def __new__(mcs, name, bases, attrs):
-        template_type = attrs.get('type')
-        if template_type:
-            attrs.update(generate_fileds(mcs.ansible_reference, template_type, no_default=True))
+        args_type = attrs.get('type')
+        exclude_args = attrs.get('exclude_args', set())
+        if args_type:
+            attrs.update(
+                generate_fields(
+                    ansible_reference=ANSIBLE_REFERENCE,
+                    ansible_type=args_type,
+                    exclude=exclude_args,
+                    no_default=True,
+                )
+            )
         return super().__new__(mcs, name, bases, attrs)
 
 
-class BaseAnsibleArgumentsSerializer(BaseSerializer, metaclass=TemplateVariablesMetaSerializer):
+class BaseAnsibleArgumentsSerializer(BaseSerializer, metaclass=AnsibleArgumentsMetaSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        HiddenArg.hide_values(representation)
+        HiddenArgumentsEnum.hide_values(representation)
         return representation
 
 
 class PlaybookAnsibleArgumentsSerializer(BaseAnsibleArgumentsSerializer):
     type = 'playbook'
+    exclude_args = {'inventory'}
 
 
 class ModuleAnsibleArgumentsSerializer(BaseAnsibleArgumentsSerializer):
     type = 'module'
+    exclude_args = {'args', 'group', 'inventory'}
 
 
 class TaskTemplateParameters(BaseSerializer):
@@ -68,9 +73,9 @@ class ModuleTemplateParameters(BaseSerializer):
 
 class ExecutionTemplateSerializer(_WithVariablesSerializer):
     kind = fields.ChoiceField(
-        choices=ExecutionTypes.to_choices(),
+        choices=ExecutionTypesEnum.to_choices(),
         required=False,
-        default=ExecutionTypes.Task.value,
+        default=ExecutionTypesEnum.Task.value,
         label=__('Type'),
     )
 
@@ -81,8 +86,8 @@ class ExecutionTemplateSerializer(_WithVariablesSerializer):
 
 class CreateExecutionTemplateSerializer(ExecutionTemplateSerializer):
     data = vst_fields.DependEnumField(field='kind', types={
-        ExecutionTypes.Task.value: TaskTemplateParameters(),
-        ExecutionTypes.Module.value: ModuleTemplateParameters(),
+        ExecutionTypesEnum.Task.value: TaskTemplateParameters(),
+        ExecutionTypesEnum.Module.value: ModuleTemplateParameters(),
     })
     inventory = InventoryAutoCompletionField(allow_blank=True, required=False)
 
@@ -103,18 +108,10 @@ class CreateExecutionTemplateSerializer(ExecutionTemplateSerializer):
 
 class OneExecutionTemplateSerializer(CreateExecutionTemplateSerializer):
     kind = fields.ChoiceField(
-        choices=ExecutionTypes.to_choices(),
+        choices=ExecutionTypesEnum.to_choices(),
         label=__('Type'),
         read_only=True
     )
-
-
-class ExecutionTemplateVariablesSerializer(BaseSerializer):
-    kind = fields.CharField(read_only=True)
-    vars = vst_fields.DependEnumField(field='kind', types={
-        ExecutionTypes.Task.value: AnsiblePlaybookSerializer(),
-        ExecutionTypes.Module.value: AnsibleModuleSerializer(),
-    })
 
 
 class OneModuleSerializer(ModuleSerializer):

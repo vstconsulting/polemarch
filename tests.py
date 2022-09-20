@@ -106,9 +106,8 @@ class BaseProjectTestCase(BaseTestCase):
 
     def setUp(self):
         super().setUp()
-        os.makedirs(settings.PROJECTS_DIR, exist_ok=True)
-        self.project = self.get_model_class('main.Project').objects.create(name='default_project')
-        self.project.start_repo_task('sync')
+        self.project = self.get_model_filter('main.Project').create(name='default_project')
+        os.makedirs(f'{settings.PROJECTS_DIR}/{self.project.id}', exist_ok=True)
         self.project.hosts.add(self.host)
         self.project.groups.add(self.group)
         self.project.inventories.add(self.inventory)

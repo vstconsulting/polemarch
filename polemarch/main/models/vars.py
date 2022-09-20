@@ -12,7 +12,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from vstutils.utils import tmp_file
 from .base import ACLModel, BQuerySet, BModel, models
-from ..constants import CYPHER
+from ..constants import CYPHER, InventoryVariablesEnum
 
 logger = logging.getLogger("polemarch")
 
@@ -33,7 +33,7 @@ class VariablesQuerySet(BQuerySet):
 
     def sort_by_key(self) -> BQuerySet:
         args, kwargs = [], {}
-        keys = self.model.variables_keys
+        keys = InventoryVariablesEnum.get_values_list()
         index = keys.index
         for key in keys:
             args.append(When(key=key, then=Value(index(key))))
@@ -53,35 +53,6 @@ class Variable(BModel):
     content_object = GenericForeignKey('content_type', 'object_id')
     key = models.CharField(max_length=512)
     value = models.TextField(null=True)
-
-    variables_keys = [
-        "ansible_host",
-        'ansible_port',
-        'ansible_user',
-        'ansible_connection',
-
-        'ansible_ssh_pass',
-        'ansible_ssh_private_key_file',
-        'ansible_ssh_common_args',
-        'ansible_sftp_extra_args',
-        'ansible_scp_extra_args',
-        'ansible_ssh_extra_args',
-        'ansible_ssh_executable',
-        'ansible_ssh_pipelining',
-
-        'ansible_become',
-        'ansible_become_method',
-        'ansible_become_user',
-        'ansible_become_pass',
-        'ansible_become_exe',
-        'ansible_become_flags',
-
-        'ansible_shell_type',
-        'ansible_python_interpreter',
-        'ansible_ruby_interpreter',
-        'ansible_perl_interpreter',
-        'ansible_shell_executable',
-    ]
 
     def __unicode__(self):  # pragma: no cover
         return "{}={}".format(self.key, self.value)
