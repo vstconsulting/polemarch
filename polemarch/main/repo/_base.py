@@ -1,6 +1,6 @@
 # pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
-from typing import Any, Text, Dict, List, Tuple, Union, Iterable, Callable, TypeVar, NoReturn
+from typing import Any, Text, Dict, List, Tuple, Union, Iterable, Callable, TypeVar
 import os
 import shutil
 import pathlib
@@ -25,13 +25,14 @@ class _Base:
 
     regex = r"(^[\w\d\.\-_]{1,})\.yml"
     handler_class = import_class(settings.PROJECT_CI_HANDLER_CLASS)
+    attempts = 2
 
     def __init__(self, project: Project, **options):
         self.options = options
         self.proj = project
         self.path = self.proj.path
 
-    def _set_status(self, status) -> NoReturn:
+    def _set_status(self, status) -> None:
         self.proj.set_status(status)
 
     @raise_context()
@@ -51,12 +52,12 @@ class _Base:
     def _dir_exists(self, path_dir: Text) -> bool:
         return self._path_exists(path_dir) and os.path.isdir(path_dir)
 
-    def message(self, message: Any, level: Text = 'debug') -> NoReturn:
+    def message(self, message: Any, level: Text = 'debug') -> None:
         getattr(logger, level.lower(), logger.debug)(
             'Syncing project [{}] - {}'.format(self.proj.id, message)
         )
 
-    def pm_handle_sync_on_run(self, feature: Text, data: bool) -> NoReturn:
+    def pm_handle_sync_on_run(self, feature: Text, data: bool) -> None:
         '''
         Set sync_on_run if it is setted in `.polemarch.yaml`.
 
@@ -85,7 +86,7 @@ class _Base:
         self.message(f'Template[{obj.name}] {"created" if created else "updated"} in the project.')
         return obj
 
-    def pm_handle_templates(self, feature: Text, data: Dict) -> NoReturn:
+    def pm_handle_templates(self, feature: Text, data: Dict) -> None:
         '''
         Get and create (if is not existed) templates from `.polemarch.yaml`.
 
@@ -102,7 +103,7 @@ class _Base:
                 continue
             self.__create_template(template_name, template_data)
 
-    def pm_handle_view(self, feature: Text, data: Dict) -> NoReturn:
+    def pm_handle_view(self, feature: Text, data: Dict) -> None:
         '''
         Clear view data from cache
 
@@ -114,14 +115,14 @@ class _Base:
         self.proj.get_yaml_subcache('view').clear()
         self.message(self.proj.execute_view_data, 'debug')
 
-    def pm_handle_unknown(self, feature: Text, data: Any) -> NoReturn:  # nocv
+    def pm_handle_unknown(self, feature: Text, data: Any) -> None:  # nocv
         '''
         Logging unknowing data from `.polemarch.yaml`.
         '''
         self.message('{} - this feature is not realised yet.'.format(feature), 'info')
         logger.debug(str(data))
 
-    def _handle_yaml(self, data: Union[Dict, None]) -> NoReturn:
+    def _handle_yaml(self, data: Union[Dict, None]) -> None:
         """
         Loads and returns data from `.polemarch.yaml` file
         """
@@ -132,7 +133,7 @@ class _Base:
             feature_name = 'pm_handle_{}'.format(feature)
             getattr(self, feature_name, self.pm_handle_unknown)(feature, data)
 
-    def _set_tasks_list(self, playbooks_names: Iterable[pathlib.Path]) -> NoReturn:
+    def _set_tasks_list(self, playbooks_names: Iterable[pathlib.Path]) -> None:
         """
         Updates playbooks in project.
         """
@@ -177,7 +178,7 @@ class _Base:
             ModuleClass(path=path, project=project) for path in modules
         ])
 
-    def _update_tasks(self, files: Iterable[pathlib.Path]) -> NoReturn:
+    def _update_tasks(self, files: Iterable[pathlib.Path]) -> None:
         '''
         Find and update playbooks in project.
         :param files: list of filenames.
@@ -283,24 +284,22 @@ class _Base:
 
     def clone(self) -> Text:
         # pylint: disable=broad-except
-        attempt = 2
-        for __ in range(attempt):
+        for __ in range(self.attempts):
             try:
                 repo = self._make_operations(self.make_clone)[0]
                 return "Received {} files.".format(len(list(self.search_files(repo))))
             except:
                 self.delete()
-        raise Exception("Clone didn't perform by {} attempts.".format(attempt))
+        raise Exception("Clone didn't perform by {} attempts.".format(self.attempts))
 
     def get(self) -> Any:
         # pylint: disable=broad-except
-        attempt = 2
-        for __ in range(attempt):
+        for __ in range(self.attempts):
             try:
                 return self._make_operations(self.make_update)
             except:
                 self.delete()
-        raise Exception("Upd didn't perform by {} attempts.".format(attempt))
+        raise Exception("Upd didn't perform by {} attempts.".format(self.attempts))
 
     def check(self):
         pass  # nocv
@@ -308,14 +307,18 @@ class _Base:
     def revision(self) -> Text:
         return self._operate(self.get_revision)
 
+    def make_run_copy(self, destination: Text, revision: Text):
+        shutil.copytree(self.proj.path, destination)
+
 
 class _ArchiveRepo(_Base):
     def make_clone(self, options) -> Tuple[Any, Any]:
-        if os.path.exists(self.path):
-            shutil.rmtree(self.path)
-        os.mkdir(self.path)
+        destination = options.pop('destination', self.path)
+        if os.path.exists(destination):
+            shutil.rmtree(destination)
+        os.mkdir(destination)
         archive = self._download(self.proj.repository, options)
-        return self._extract(archive, self.path, options)
+        return self._extract(archive, destination, options)
 
     def make_update(self, options) -> Tuple[Any, Any]:
         archive = self._download(self.proj.repository, options)
@@ -327,3 +330,12 @@ class _ArchiveRepo(_Base):
 
     def _extract(self, archive, path, options):
         raise NotImplementedError  # nocv
+
+    def make_run_copy(self, destination: Text, revision: Text):
+        if self.proj.repo_sync_on_run:
+            return self.make_clone({
+                'destination': destination,
+                'revision': revision,
+                'no_update': True,
+            })
+        return super().make_run_copy(destination, revision)

@@ -29,11 +29,12 @@ class Tar(_ArchiveRepo):
         except IOError:
             pass
         try:
-            repo_branch = self.proj.vars.get('repo_branch', '')
+            repo_branch = options.get('revision', self.proj.vars.get('repo_branch', ''))
             with tarfile.open(archive) as arch:
                 arch.extractall(path, members=self.__get_members(arch, repo_branch))
         except:
-            self.delete()
+            if not options.get('no_update', False):
+                self.delete()
             shutil.move(path + ".bak", path) if moved else None
             raise
         else:

@@ -1,7 +1,7 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
 
-from typing import NoReturn, Any, Dict, List, Tuple, Iterable, TypeVar, Text
+from typing import Any, Dict, List, Tuple, Iterable, TypeVar, Text
 import logging
 from collections import OrderedDict
 from datetime import timedelta, datetime
@@ -143,7 +143,7 @@ class Template(ACLModel):
             return new_vars
         return self.__encrypt(new_vars)
 
-    def _validate_option_data(self, data: Dict) -> NoReturn:
+    def _validate_option_data(self, data: Dict) -> None:
         excepted = self.excepted_execution_fields
         errors = {
             name: ['Disallowed to override {}.'.format(name)]
@@ -152,7 +152,7 @@ class Template(ACLModel):
         if errors:
             raise ValidationError(errors)
 
-    def set_options_data(self, value: Any) -> NoReturn:
+    def set_options_data(self, value: Any) -> None:
         options_data = self._convert_to_data(value)
         new = {}
         for option, data in options_data.items():
@@ -162,7 +162,7 @@ class Template(ACLModel):
             new[option] = data
         self.options_data = json.dumps(new)
 
-    def set_data(self, value) -> NoReturn:
+    def set_data(self, value) -> None:
         data = self._convert_to_data(value)
         inventory_id = data.pop('inventory', None)
         if "inventory" in self.template_fields[self.kind]:
@@ -178,11 +178,11 @@ class Template(ACLModel):
         return self.get_data()
 
     @data.setter
-    def data(self, value) -> NoReturn:
+    def data(self, value) -> None:
         self.set_data(value)
 
     @data.deleter
-    def data(self) -> NoReturn:  # nocv
+    def data(self) -> None:  # nocv
         self.template_data = ""
         self.inventory = None
         self.project = None
@@ -192,11 +192,11 @@ class Template(ACLModel):
         return self.get_options_data()
 
     @options.setter
-    def options(self, value) -> NoReturn:
+    def options(self, value) -> None:
         self.set_options_data(value)
 
     @options.deleter
-    def options(self) -> NoReturn:  # nocv
+    def options(self) -> None:  # nocv
         self.options_data = ''
 
     @property
@@ -306,7 +306,7 @@ class PeriodicTask(AbstractModel):
         return self._inventory or self.inventory_file
 
     @inventory.setter
-    def inventory(self, inventory: InvOrString) -> NoReturn:
+    def inventory(self, inventory: InvOrString) -> None:
         if isinstance(inventory, Inventory):
             self._inventory = inventory
             self.inventory_file = None
@@ -495,7 +495,7 @@ class History(BModel):
         return json.loads(self.json_args)
 
     @execute_args.setter
-    def execute_args(self, value: Dict) -> NoReturn:
+    def execute_args(self, value: Dict) -> None:
         if not isinstance(value, dict):
             raise ValidationError(dict(args="Should be a dict."))
         data = {k: v for k, v in value.items() if k not in ['group']}
@@ -508,7 +508,7 @@ class History(BModel):
         return json.loads(self.json_options)
 
     @options.setter
-    def options(self, value: Dict) -> NoReturn:
+    def options(self, value: Dict) -> None:
         if not isinstance(value, dict):
             raise ValidationError(dict(args="Should be a dict."))  # nocv
         self.json_options = json.dumps(value)
@@ -557,15 +557,15 @@ class History(BModel):
 
     @raw_stdout.setter
     @transaction.atomic
-    def raw_stdout(self, lines: Iterable) -> NoReturn:
+    def raw_stdout(self, lines: Iterable) -> None:
         del self.raw_stdout
         self.check_output(lines)
 
     @raw_stdout.deleter
-    def raw_stdout(self) -> NoReturn:
+    def raw_stdout(self) -> None:
         self.raw_history_line.all().delete()
 
-    def check_output(self, output: str) -> NoReturn:
+    def check_output(self, output: str) -> None:
         raw_count = self.raw_history_line.all().count()
         lines = re.findall(r'.+\n{0,}', output)
         counter = 0
@@ -575,7 +575,7 @@ class History(BModel):
             counter += 1
             self.write_line(number=counter, value=line)
 
-    def write_line(self, value: str, number: int, endl: Text = "") -> NoReturn:
+    def write_line(self, value: str, number: int, endl: Text = "") -> None:
         self.raw_history_line.bulk_create([
             HistoryLines(line_gnumber=number, line_number=1, line=value + endl, history=self)
         ])

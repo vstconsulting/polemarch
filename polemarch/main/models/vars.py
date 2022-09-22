@@ -1,6 +1,6 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
-from typing import Any, NoReturn, Tuple, Dict, List, Text, Union
+from typing import Any, Tuple, Dict, List, Text, Union
 import logging
 import uuid
 
@@ -11,6 +11,7 @@ from django.db.models import Case, When, Value
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from vstutils.utils import tmp_file
+from vstutils.api.decorators import cache_method_result
 from .base import ACLModel, BQuerySet, BModel, models
 from ..constants import CYPHER, InventoryVariablesEnum
 
@@ -91,13 +92,17 @@ class AbstractModel(ACLModel):
         return hook_data
 
     @transaction.atomic()
-    def set_vars(self, variables) -> NoReturn:
+    def set_vars(self, variables) -> None:
         encrypted_vars = {k: v for k, v in variables.items() if v == CYPHER}
         other_vars = {k: v for k, v in variables.items() if v != CYPHER}
         self.variables.cleared().exclude(key__in=list(encrypted_vars.keys()) + list(other_vars.keys())).delete()
         for key, value in other_vars.items():
             self.variables.create(key=key, value=value)
+        cache = getattr(self, '__cache_get_vars', None)
+        if cache is not None:
+            setattr(self, '__cache_get_vars', (cache[0], cache[1], OrderedDict(**other_vars, **encrypted_vars)))
 
+    @cache_method_result
     def get_vars(self) -> Union[OrderedDict, Dict]:
         qs = self.variables.cleared().sort_by_key().values_list('key', 'value')
         return reduce(update_boolean, self.BOOLEAN_VARS, OrderedDict(qs))
