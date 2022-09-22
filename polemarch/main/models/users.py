@@ -1,6 +1,6 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
-from typing import NoReturn, Text
+from typing import Text
 import logging
 
 from django.contrib.auth.models import Group as BaseGroup
@@ -26,7 +26,7 @@ class ACLPermission(BModel):
         return self.uagroup.id
 
     @member.setter
-    def member(self, value) -> NoReturn:  # nocv
+    def member(self, value) -> None:  # nocv
         pass
 
     @property
@@ -36,7 +36,7 @@ class ACLPermission(BModel):
         return "team"
 
     @member_type.setter
-    def member_type(self, value) -> NoReturn:  # nocv
+    def member_type(self, value) -> None:  # nocv
         pass
 
 

@@ -143,10 +143,23 @@ class BaseProjectTestCase(BaseTestCase):
             'data': {}
         }
 
+    def create_variable_bulk_data(self, key, value, project_id=None):
+        return {
+            'method': 'post',
+            'path': ['project', project_id or self.project.id, 'variables'],
+            'data': {'key': key, 'value': value}
+        }
+
     def get_project_bulk_data(self, project_id=None):
         return {
             'method': 'get',
             'path': ['project', project_id or self.project.id]
+        }
+
+    def get_history_bulk_data(self, history_id):
+        return {
+            'method': 'get',
+            'path': ['history', history_id]
         }
 
     def execute_module_bulk_data(self, project_id=None, inventory=None, module='ping', **kwargs):
@@ -154,6 +167,13 @@ class BaseProjectTestCase(BaseTestCase):
             'method': 'post',
             'path': ['project', project_id or self.project.id, 'execute_module'],
             'data': {'module': module, 'inventory': inventory or self.inventory_path, **kwargs}
+        }
+
+    def execute_playbook_bulk_data(self, project_id=None, inventory=None, playbook='bootstrap.yml', **kwargs):
+        return {
+            'method': 'post',
+            'path': ['project', project_id or self.project.id, 'execute_playbook'],
+            'data': {'playbook': playbook, 'inventory': inventory or self.inventory_path, **kwargs}
         }
 
     def create_periodic_task_bulk_data(self, project_id=None, inventory=None, **kwargs):
@@ -1508,6 +1528,171 @@ class SyncTestCase(BaseProjectTestCase):
         self.assertEqual(results[6]['status'], 200)
         self.assertEqual(results[6]['data']['kind'], 'PLAYBOOK')
         self.assertEqual(results[6]['data']['status'], 'OK')
+
+    @use_temp_dir
+    def test_repo_sync_on_run_for_manual_project(self, temp_dir):
+        results = self.bulk_transactional([
+            self.create_project_bulk_data(),
+            self.sync_project_bulk_data(project_id='<<0[data][id]>>'),
+            self.create_variable_bulk_data('repo_sync_on_run', True, project_id='<<0[data][id]>>'),
+            self.get_project_bulk_data(project_id='<<0[data][id]>>'),
+        ])
+        self.assertEqual(results[-1]['data']['status'], 'OK')
+        self.assertEqual(results[-1]['data']['branch'], 'NO VCS')
+        self.assertEqual(results[-1]['data']['revision'], 'NO VCS')
+        project_id = results[-1]['data']['id']
+
+        project = self.get_model_filter('main.Project').get(id=project_id)
+        (Path(project.path) / 'test.yml').touch()
+
+        mock_dir = Path(temp_dir) / 'project'
+        with self.patch(
+            f'{settings.VST_PROJECT_LIB_NAME}.main.models.utils.AnsibleCommand._get_tmp_name',
+            return_value=mock_dir
+        ):
+            results = self.bulk_transactional([
+                self.execute_module_bulk_data(project_id),
+                self.get_history_bulk_data('<<0[data][history_id]>>'),
+                self.execute_playbook_bulk_data(project_id, playbook='test.yml'),
+                self.get_history_bulk_data('<<0[data][history_id]>>'),
+            ])
+            self.assertEqual(results[1]['data']['status'], 'OK')
+            self.assertEqual(results[1]['data']['revision'], 'NO VCS')
+
+            self.assertEqual(results[3]['data']['status'], 'OK')
+            self.assertEqual(results[3]['data']['revision'], 'NO VCS')
+
+            self.assertTrue((mock_dir / 'ansible.cfg').is_file())
+            self.assertTrue((mock_dir / 'bootstrap.yml').is_file())
+            self.assertTrue((mock_dir / 'test.yml').is_file())
+
+    @use_temp_dir
+    def test_repo_sync_on_run_for_git_project(self, temp_dir):
+        repo_dir = f'{temp_dir}/repo'
+        shutil.copytree(f'{TEST_DATA_DIR}/repo', repo_dir)
+
+        repo = git.Repo.init(repo_dir)
+
+        # create submodules
+        submodule_dir = f'{temp_dir}/submodule'
+        os.mkdir(submodule_dir)
+        shutil.copy(f'{TEST_DATA_DIR}/test_module.py', f'{submodule_dir}/test_module.py')
+        submodule = git.Repo.init(submodule_dir)
+        submodule.git.add('test_module.py')
+        submodule.index.commit('Add module')
+        repo.git.submodule('add', '../submodule/.git', 'lib')
+        repo.git.submodule('add', f'{submodule_dir}/.git', 'lib2')
+
+        repo.git.add(all=True)
+        repo.index.commit('Initial commit')
+        revision0 = repo.head.commit.hexsha
+
+        results = self.bulk_transactional([
+            self.create_project_bulk_data(
+                type='GIT',
+                repository=repo_dir,
+                additional_playbook_path='additional_pb_dir'
+            ),
+            self.sync_project_bulk_data(project_id='<<0[data][id]>>'),
+            self.create_variable_bulk_data('repo_sync_on_run', True, project_id='<<0[data][id]>>'),
+            self.get_project_bulk_data(project_id='<<0[data][id]>>'),
+        ])
+        self.assertEqual(results[-1]['data']['status'], 'OK')
+        self.assertEqual(results[-1]['data']['branch'], 'master')
+        self.assertEqual(results[-1]['data']['revision'], revision0)
+        project_id = results[-1]['data']['id']
+
+        # make changes in remote after sync to check that with
+        # repo_sync_on_run clone uses remote repo
+        repo.git.branch('lol_branch')
+        repo.git.checkout('lol_branch')
+        with open(f'{repo_dir}/main.yml', 'a') as f:
+            f.write('    - name: Another task\n    system.setup:')
+        repo.git.add('main.yml')
+        repo.index.commit('Feature: Add Another task')
+        revision1 = repo.head.commit.hexsha
+
+        repo.create_tag('lol_tag')
+        repo.git.checkout('master')
+
+        def check_execution(revision, no_assert=False):
+            results = self.bulk_transactional([
+                self.create_variable_bulk_data('repo_branch', revision, project_id),
+                self.execute_module_bulk_data(project_id),
+                self.get_history_bulk_data('<<1[data][history_id]>>'),
+                self.get_project_bulk_data(project_id)
+            ])
+            if not no_assert:
+                # history
+                self.assertEqual(results[-2]['data']['status'], 'OK')
+                self.assertEqual(results[-2]['data']['revision'], revision)
+                # project
+                self.assertEqual(results[-1]['data']['revision'], revision0)
+                self.assertEqual(results[-1]['data']['status'], 'OK')
+
+            return results
+
+        check_execution('master')
+        check_execution('lol_branch')
+        check_execution('tags/lol_tag')
+        check_execution(revision1)
+
+        results = check_execution('invalid', no_assert=True)
+        self.assertEqual(results[-2]['data']['status'], 'ERROR')
+        self.assertEqual(results[-2]['data']['revision'], 'invalid')
+        self.assertEqual(results[-1]['data']['revision'], revision0)
+        self.assertEqual(results[-1]['data']['status'], 'OK')
+
+        # check that with repo_sync_on_run=False execution uses project's revision
+        results = self.bulk_transactional([
+            self.create_variable_bulk_data('repo_branch', 'master', project_id),
+            self.sync_project_bulk_data(project_id),
+            self.create_variable_bulk_data('repo_branch', 'invalid', project_id),
+            self.create_variable_bulk_data('repo_sync_on_run', False, project_id),
+            self.execute_module_bulk_data(project_id),
+            self.get_history_bulk_data('<<4[data][history_id]>>'),
+            self.get_project_bulk_data(project_id)
+        ])
+        self.assertEqual(results[-2]['data']['status'], 'OK')
+        self.assertEqual(results[-2]['data']['revision'], 'master')
+        self.assertEqual(results[-1]['data']['revision'], revision0)
+        self.assertEqual(results[-1]['data']['status'], 'OK')
+
+    def test_repo_sync_on_run_for_tar_project(self):
+        with self.patch(
+            f'{settings.VST_PROJECT_LIB_NAME}.main.repo._base._ArchiveRepo._download',
+            return_value=f'{TEST_DATA_DIR}/repo.tar.gz'
+        ):
+            results = self.bulk_transactional([
+                self.create_project_bulk_data(type='TAR', repository='http://localhost:8000/repo.tar.gz'),
+                self.sync_project_bulk_data(project_id='<<0[data][id]>>'),
+                self.create_variable_bulk_data('repo_sync_on_run', True, project_id='<<0[data][id]>>'),
+                self.execute_playbook_bulk_data(project_id='<<0[data][id]>>', playbook='main.yml'),
+                self.get_history_bulk_data('<<3[data][history_id]>>'),
+            ])
+            self.assertEqual(results[-1]['data']['status'], 'OK')
+            self.assertEqual(results[-1]['data']['revision'], 'NO VCS')
+            project_id = results[0]['data']['id']
+
+        with self.patch(
+            f'{settings.VST_PROJECT_LIB_NAME}.main.repo._base._ArchiveRepo._download',
+            return_value=f'{TEST_DATA_DIR}/invalid_repo.tar.gz'
+        ):
+            results = self.bulk_transactional([
+                self.execute_playbook_bulk_data(project_id, playbook='main.yml'),
+                self.get_history_bulk_data('<<0[data][history_id]>>'),
+            ])
+            self.assertEqual(results[-1]['data']['status'], 'ERROR')
+            self.assertEqual(results[-1]['data']['revision'], 'NO VCS')
+
+            # check that with repo_sync_on_run=False project will be copied
+            results = self.bulk_transactional([
+                self.create_variable_bulk_data('repo_sync_on_run', False, project_id=project_id),
+                self.execute_playbook_bulk_data(project_id, playbook='main.yml'),
+                self.get_history_bulk_data('<<1[data][history_id]>>'),
+            ])
+            self.assertEqual(results[-1]['data']['status'], 'OK')
+            self.assertEqual(results[-1]['data']['revision'], 'NO VCS')
 
 
 @own_projects_dir
@@ -2972,6 +3157,21 @@ class VariableTestCase(BaseProjectTestCase):
             {'method': 'get', 'path': ['history', '<<1[data][history_id]>>']},
         ])
         self.assertIn('ansible_ssh_pass: [~~ENCRYPTED~~]', results[-1]['data']['raw_inventory'])
+
+    def test_vars_property_caching(self):
+        self.project.vars = {'repo_branch': 'master'}
+        self.assertDictEqual(self.project.vars, {'repo_branch': 'master'})
+
+        self.project.vars = {
+            'repo_branch': 'slave',
+            'repo_password': CYPHER,
+            'repo_sync_on_run': True
+        }
+        self.assertDictEqual(self.project.vars, {
+            'repo_branch': 'slave',
+            'repo_password': CYPHER,
+            'repo_sync_on_run': True
+        })
 
 
 @own_projects_dir

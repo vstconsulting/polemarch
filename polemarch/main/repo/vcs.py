@@ -1,5 +1,6 @@
 # pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
+from pathlib import Path
 from typing import Tuple, Dict, Text, Union, Any, Iterable
 import warnings
 from vstutils.utils import tmp_file_context, raise_context
@@ -13,7 +14,7 @@ ENV_VARS_TYPE =  Dict[Text, Union[Text, bool]]  # pylint: disable=invalid-name
 
 
 class _VCS(_Base):  # nocv
-    def vsc_clone(self, *args, **kwargs):
+    def vcs_clone(self, *args, **kwargs):
         raise NotImplementedError()
 
     def vcs_update(self, *args, **kwargs):
@@ -50,7 +51,7 @@ class Git(_VCS):
     def get_repo(self) -> git.Repo:
         return git.Repo(self.path)
 
-    def vsc_clone(self, *args, **kwargs) -> git.Repo:
+    def vcs_clone(self, *args, **kwargs) -> git.Repo:
         repo = git.Repo.clone_from(*args, **kwargs)
         with repo.git.custom_environment(**kwargs.get('env', {})):
             self._update_submodules(repo)
@@ -100,13 +101,21 @@ class Git(_VCS):
 
     def make_clone(self, env: ENV_VARS_TYPE) -> Tuple[git.Repo, None]:  # pylint: disable=arguments-renamed
         kw = dict(**self.options.get("CLONE_KWARGS", {}))
-        if self.target_branch:
-            kw['branch'] = self.target_branch.replace('tags/', '')
-        repo = self.vsc_clone(self.proj.repository, self.path, env=env, **kw)
-        with raise_context():
-            self.proj.variables.update_or_create(
-                key='repo_branch', defaults=dict(value=repo.active_branch.name)
-            )
+
+        destination = env.pop('destination', self.path)
+        source = env.pop('source', self.proj.repository)
+        revision = env.pop('revision', self.target_branch)
+        no_update = env.pop('no_update', False)
+
+        repo = self.vcs_clone(source, destination, env=env, **kw)
+        if revision:
+            repo.git.checkout(revision)
+
+        if not no_update:
+            with raise_context():
+                self.proj.variables.update_or_create(
+                    key='repo_branch', defaults=dict(value=repo.active_branch.name)
+                )
         return repo, None
 
     def _get_or_create_repo(self, env: ENV_VARS_TYPE) -> git.Repo:
@@ -184,7 +193,6 @@ class Git(_VCS):
         return env_vars
 
     def _operate(self, operation, **env_vars):
-        env_vars.update(self.env.get("GLOBAL", {}))
         with tmp_file_context(delete=False) as tmp:
             if self.proj.vars.get("repo_password", None) is not None:
                 env_vars = self._with_password(tmp, env_vars)
@@ -226,3 +234,15 @@ class Git(_VCS):
             return self._operate(self.get_revision)
         except git.GitError:
             return "ERROR"
+
+    def make_run_copy(self, destination: Text, revision: Text):
+        # TODO: implement timeout
+        source = Path(self.proj.path) / '.git'
+        if self.proj.repo_sync_on_run:
+            source = self.proj.repository
+        self.make_clone({
+            'source': source,
+            'destination': str(destination),
+            'no_update': True,
+            'revision': revision
+        })

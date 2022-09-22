@@ -43,10 +43,18 @@ class BaseAnsibleArgumentsSerializer(BaseSerializer, metaclass=AnsibleArgumentsM
 
 class PlaybookAnsibleArgumentsSerializer(BaseAnsibleArgumentsSerializer):
     type = 'playbook'
-    exclude_args = {'inventory'}
 
 
 class ModuleAnsibleArgumentsSerializer(BaseAnsibleArgumentsSerializer):
+    type = 'module'
+
+
+class TaskTemplateVarsSerializer(BaseAnsibleArgumentsSerializer):
+    type = 'playbook'
+    exclude_args = {'inventory'}
+
+
+class ModuleTemplateVarsSerializer(BaseAnsibleArgumentsSerializer):
     type = 'module'
     exclude_args = {'args', 'group', 'inventory'}
 
@@ -57,7 +65,7 @@ class TaskTemplateParameters(BaseSerializer):
         autocomplete_property='playbook',
         autocomplete_represent='playbook',
     )
-    vars = PlaybookAnsibleArgumentsSerializer(required=False)
+    vars = TaskTemplateVarsSerializer(required=False)
 
 
 class ModuleTemplateParameters(BaseSerializer):
@@ -68,7 +76,7 @@ class ModuleTemplateParameters(BaseSerializer):
         autocomplete_represent='path'
     )
     args = fields.CharField(label=__('Arguments'), required=False, default='', allow_blank=True)
-    vars = ModuleAnsibleArgumentsSerializer(required=False)
+    vars = ModuleTemplateVarsSerializer(required=False)
 
 
 class ExecutionTemplateSerializer(_WithVariablesSerializer):
