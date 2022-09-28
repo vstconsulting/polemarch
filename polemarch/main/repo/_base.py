@@ -1,5 +1,6 @@
 # pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
+import io
 from typing import Any, Text, Dict, List, Tuple, Union, Iterable, Callable, TypeVar
 import os
 import shutil
@@ -7,14 +8,14 @@ import pathlib
 import logging
 import traceback
 from itertools import chain
-
-from six.moves.urllib.request import urlretrieve
+import requests
 from django.db import transaction
 from django.conf import settings
 from vstutils.utils import raise_context, import_class
 from ..utils import AnsibleModules
 from ..models.projects import Project
 from ..models.tasks import Template
+from ...main.exceptions import MaxContentLengthExceeded, SyncOnRunTimeout
 
 logger = logging.getLogger("polemarch")
 FILENAME = TypeVar('FILENAME', Text, str)
@@ -324,9 +325,23 @@ class _ArchiveRepo(_Base):
         archive = self._download(self.proj.repository, options)
         return self._extract(archive, self.path, options)
 
-    def _download(self, url: Text, options) -> FILENAME:
-        # pylint: disable=unused-argument
-        return urlretrieve(url)[0]  # nocv
+    def _download(self, url: Text, options) -> io.BytesIO:
+        # NOTE: request's timeout is timeout for connection
+        # establishment and NOT for the whole download process
+        timeout = options.get('timeout')
+        try:
+            self.message(f'downloading from {url}')
+            response = requests.get(url, stream=True, timeout=timeout)
+            response.raise_for_status()
+
+            content_length = int(response.headers.get('content-length', 0))
+            max_content_length = self.options.get('max_content_length')
+            if max_content_length and content_length > max_content_length:
+                raise MaxContentLengthExceeded
+
+            return io.BytesIO(response.content)
+        except requests.exceptions.Timeout as error:
+            raise SyncOnRunTimeout from error
 
     def _extract(self, archive, path, options):
         raise NotImplementedError  # nocv
@@ -337,5 +352,6 @@ class _ArchiveRepo(_Base):
                 'destination': destination,
                 'revision': revision,
                 'no_update': True,
+                'timeout': self.proj.repo_sync_timeout,
             })
         return super().make_run_copy(destination, revision)

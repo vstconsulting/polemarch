@@ -162,8 +162,7 @@ class Project(AbstractModel):
 
     @property
     def repo_class(self):
-        repo_type = self.vars.get("repo_type", "MANUAL")
-        return self.repo_handlers(repo_type, self)
+        return self.repo_handlers(self.type, self)
 
     @property
     def env_vars(self) -> Dict[Text, Any]:
@@ -171,17 +170,11 @@ class Project(AbstractModel):
 
     @property
     def type(self) -> Text:
-        try:
-            return self.variables.get(key="repo_type").value
-        except self.variables.model.DoesNotExist:  # nocv
-            return 'MANUAL'
+        return self.vars.get('repo_type', 'MANUAL')
 
     @property
-    def repo_sync_timeout(self):  # nocv
-        try:
-            return self.variables.get(key="repo_sync_on_run_timeout").value
-        except self.variables.model.DoesNotExist:
-            return settings.PROJECT_REPOSYNC_WAIT_SECONDS
+    def repo_sync_timeout(self):
+        return int(self.vars.get('repo_sync_on_run_timeout', settings.PROJECT_REPOSYNC_WAIT_SECONDS))
 
     @property
     def repo_sync_on_run(self) -> bool:

@@ -753,20 +753,14 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'execute_view_data',)
 
 
-def generate_fields(
-    ansible_reference: AnsibleArgumentsReference,
-    ansible_type: str,
-    no_default=False,
-    exclude=set()
-) -> OrderedDict:
-
+def generate_fields(ansible_reference: AnsibleArgumentsReference, ansible_type: str, no_default=False) -> OrderedDict:
     if ansible_type is None:
         return OrderedDict()  # nocv
 
     fields_of_serializer = OrderedDict()
 
     for ref, settings in ansible_reference.raw_dict[ansible_type].items():
-        if ref in {'help', 'version'} | exclude:
+        if ref in {'help', 'version'}:
             continue
         ref_type = settings.get('type', None)
         kwargs = dict(help_text=settings.get('help', ''), required=False)

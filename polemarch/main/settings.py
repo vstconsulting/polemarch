@@ -168,6 +168,12 @@ class GitCloneSection(GitSection):
     }
 
 
+class ArchiveSection(BaseAppendSection):
+    types_map = {
+        'max_content_length': cconfig.BytesSizeType()
+    }
+
+
 git_fetch = {}
 git_clone = {}
 
@@ -182,6 +188,9 @@ if 'git' in config:
 
     if 'clone' in git:
         git_clone = GitCloneSection('git.clone', config, git['clone']).all()
+
+
+archive_section = ArchiveSection('archive', config, config['archive']).all()
 
 
 REPO_BACKENDS = {
@@ -202,6 +211,7 @@ REPO_BACKENDS = {
     },
     "TAR": {
         "BACKEND": "{}.main.repo.Tar".format(VST_PROJECT_LIB_NAME),
+        "OPTIONS": archive_section,
     },
 }
 

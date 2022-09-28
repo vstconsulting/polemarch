@@ -374,6 +374,18 @@ Sections ``[git.fetch]`` and ``[git.clone]``.
 Options for git commands. See options in ``git fetch --help`` or ``git clone --help``.
 
 
+.. _archive:
+
+Archive settings
+----------------
+
+Section ``[archive]``.
+
+Here you can specify settings used by archive (e.g. TAR) projects.
+
+* **max_content_length** - Maximum download file size. Format: ``30<unit>``, where unit is *b*, *kb*, *mb*, *gb*, *tb*.
+
+
 Production web settings
 -----------------------
 
