@@ -21,16 +21,16 @@ class AnsibleArgumentsMetaSerializer(serializers.SerializerMetaclass):
     @staticmethod
     def __new__(mcs, name, bases, attrs):
         args_type = attrs.get('type')
-        exclude_args = attrs.get('exclude_args', set())
         if args_type:
             attrs.update(
                 generate_fields(
                     ansible_reference=ANSIBLE_REFERENCE,
                     ansible_type=args_type,
-                    exclude=exclude_args,
                     no_default=True,
                 )
             )
+        for field in attrs.get('exclude_args', set()):
+            attrs[field] = None
         return super().__new__(mcs, name, bases, attrs)
 
 
@@ -49,13 +49,11 @@ class ModuleAnsibleArgumentsSerializer(BaseAnsibleArgumentsSerializer):
     type = 'module'
 
 
-class TaskTemplateVarsSerializer(BaseAnsibleArgumentsSerializer):
-    type = 'playbook'
+class TaskTemplateVarsSerializer(PlaybookAnsibleArgumentsSerializer):
     exclude_args = {'inventory'}
 
 
-class ModuleTemplateVarsSerializer(BaseAnsibleArgumentsSerializer):
-    type = 'module'
+class ModuleTemplateVarsSerializer(ModuleAnsibleArgumentsSerializer):
     exclude_args = {'args', 'group', 'inventory'}
 
 

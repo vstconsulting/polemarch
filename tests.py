@@ -2,7 +2,10 @@ import json
 import io
 import os
 import re
+import time
 import shutil
+from threading import Thread
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from django.forms import ValidationError
 from django.test import override_settings
 from unittest import skipIf
@@ -70,6 +73,29 @@ def own_projects_dir(cls):
     """
 
     return override_settings(PROJECTS_DIR=Path(settings.PROJECTS_DIR) / cls.__module__ / cls.__name__)(cls)
+
+
+class MockServer:
+    """
+    Context manager which creates, serves and returns an
+    instance of HTTPServer with given handler in separate
+    thread. You can then make request to the `http://localhost:<PORT>`,
+    where `<PORT>` in `.server_port` attribute of return value.
+    Stops server after leaving context.
+    """
+
+    def __init__(self, handler: BaseHTTPRequestHandler):
+        self.handler = handler
+
+    def __enter__(self) -> HTTPServer:
+        self.httpd = HTTPServer(('', 0), self.handler)
+        Thread(None, self.httpd.serve_forever).start()
+        return self.httpd
+
+    def __exit__(self, exc_cls, exc_object, traceback):
+        self.httpd.shutdown()
+        if exc_cls is not None:
+            exc_cls(exc_object, traceback)
 
 
 class TestException(Exception):
@@ -160,6 +186,12 @@ class BaseProjectTestCase(BaseTestCase):
         return {
             'method': 'get',
             'path': ['history', history_id]
+        }
+
+    def get_raw_history_bulk_data(self, history_id):
+        return {
+            'method': 'get',
+            'path': ['history', history_id, 'raw']
         }
 
     def execute_module_bulk_data(self, project_id=None, inventory=None, module='ping', **kwargs):
@@ -1310,10 +1342,15 @@ class SyncTestCase(BaseProjectTestCase):
         self.assertNotIn('playbook2', (playbook['name'] for playbook in results[3]['data']['results']))
 
     def test_sync_tar(self):
-        with self.patch(
-            f'{settings.VST_PROJECT_LIB_NAME}.main.repo._base._ArchiveRepo._download',
-            return_value=f'{TEST_DATA_DIR}/repo.tar.gz'
-        ):
+        class MockHandler(BaseHTTPRequestHandler):
+            def do_GET(self, *args, **kwargs):
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/gzip')
+                self.send_header('Content-Length', '700')
+                self.end_headers()
+                self.wfile.write((Path(TEST_DATA_DIR) / 'repo.tar.gz').read_bytes())
+
+        with MockServer(MockHandler) as server:
             # create folder - while sync it must be replaced
             shutil.rmtree(settings.PROJECTS_DIR)
             os.mkdir(settings.PROJECTS_DIR)
@@ -1325,8 +1362,10 @@ class SyncTestCase(BaseProjectTestCase):
             with open(f'{settings.PROJECTS_DIR}/{next_project_id}/some_trash', 'w') as f:
                 f.write('lol')
 
+            remote = f'http://localhost:{server.server_port}/'
+
             results = self.bulk([
-                self.create_project_bulk_data(type='TAR', repository='http://localhost:8000/repo.tar.gz'),
+                self.create_project_bulk_data(type='TAR', repository=remote),
                 self.sync_project_bulk_data(project_id='<<0[data][id]>>'),
                 self.get_project_bulk_data(project_id='<<0[data][id]>>'),
                 # update
@@ -1338,17 +1377,17 @@ class SyncTestCase(BaseProjectTestCase):
             self.assertDictEqual(results[0]['data'], {
                 **results[0]['data'],
                 'type': 'TAR',
-                'repository': 'http://localhost:8000/repo.tar.gz',
+                'repository': remote,
                 'status': 'NEW',
                 'branch': 'NO VCS',
             })
             self.assertEqual(results[1]['status'], 200)
-            self.assertEqual(results[1]['data']['detail'], 'Sync with http://localhost:8000/repo.tar.gz.')
+            self.assertEqual(results[1]['data']['detail'], f'Sync with {remote}.')
             self.assertEqual(results[2]['status'], 200)
             self.assertEqual(results[2]['data']['status'], 'OK')
             self.assertEqual(results[2]['data']['branch'], 'NO VCS')
             self.assertEqual(results[3]['status'], 200)
-            self.assertEqual(results[3]['data']['detail'], 'Sync with http://localhost:8000/repo.tar.gz.')
+            self.assertEqual(results[3]['data']['detail'], f'Sync with {remote}.')
             self.assertEqual(results[4]['status'], 200)
             self.assertEqual(results[4]['data']['status'], 'OK')
             self.assertEqual(results[4]['data']['branch'], 'NO VCS')
@@ -1367,20 +1406,53 @@ class SyncTestCase(BaseProjectTestCase):
 
             with self.patch('shutil.move', side_effect=IOError):
                 results = self.bulk([
-                    self.create_project_bulk_data(type='TAR', repository='http://localhost:8000/repo.tar.gz'),
+                    self.create_project_bulk_data(type='TAR', repository=remote),
                     self.sync_project_bulk_data(project_id='<<0[data][id]>>'),
                     self.get_project_bulk_data(project_id='<<0[data][id]>>'),
                 ])
                 self.assertEqual(results[1]['status'], 200)
-                self.assertEqual(results[1]['data']['detail'], 'Sync with http://localhost:8000/repo.tar.gz.')
+                self.assertEqual(results[1]['data']['detail'], f'Sync with {remote}.')
                 self.assertEqual(results[2]['status'], 200)
                 self.assertEqual(results[2]['data']['status'], 'OK')
                 self.assertEqual(results[2]['data']['branch'], 'NO VCS')
                 self.assertEqual(results[2]['data']['revision'], 'NO VCS')
 
+            # check if file too big
+            patched_settings = settings.REPO_BACKENDS
+            patched_settings['TAR']['OPTIONS']['max_content_length'] = 500
+            with override_settings(REPO_BACKENDS=patched_settings):
+                results = self.bulk_transactional([
+                    self.create_project_bulk_data(type='TAR', repository=remote),
+                    self.sync_project_bulk_data(project_id='<<0[data][id]>>'),
+                    self.get_project_bulk_data(project_id='<<0[data][id]>>'),
+                ])
+                self.assertEqual(results[1]['data']['detail'], f'Sync with {remote}.')
+                self.assertEqual(results[2]['data']['status'], 'ERROR')
+                self.assertEqual(results[2]['data']['branch'], 'NO VCS')
+                self.assertEqual(results[2]['data']['revision'], 'NO VCS')
+
+        class MockHandler(BaseHTTPRequestHandler):
+            def do_GET(self, *args, **kwargs):
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+
+        with MockServer(MockHandler) as server:
+            remote = f'http://localhost:{server.server_port}'
+            results = self.bulk([
+                self.create_project_bulk_data(type='TAR', repository=remote),
+                self.sync_project_bulk_data(project_id='<<0[data][id]>>'),
+                self.get_project_bulk_data(project_id='<<0[data][id]>>'),
+            ])
+            self.assertEqual(results[1]['status'], 200)
+            self.assertEqual(results[1]['data']['detail'], f'Sync with {remote}.')
+            self.assertEqual(results[2]['status'], 200)
+            self.assertEqual(results[2]['data']['status'], 'ERROR')
+            self.assertEqual(results[2]['data']['branch'], 'NO VCS')
+
         with self.patch(
             f'{settings.VST_PROJECT_LIB_NAME}.main.repo._base._ArchiveRepo._download',
-            return_value=f'{TEST_DATA_DIR}/invalid_repo.tar.gz'
+            side_effect=lambda *args, **kwargs: io.BytesIO(b'invalid')
         ):
             results = self.bulk([
                 self.create_project_bulk_data(type='TAR', repository='http://localhost:8000/invalid_repo.tar.gz'),
@@ -1659,9 +1731,11 @@ class SyncTestCase(BaseProjectTestCase):
         self.assertEqual(results[-1]['data']['status'], 'OK')
 
     def test_repo_sync_on_run_for_tar_project(self):
+        with open(str(TEST_DATA_DIR / 'repo.tar.gz'), 'rb') as targz:
+            bts = targz.read()
         with self.patch(
             f'{settings.VST_PROJECT_LIB_NAME}.main.repo._base._ArchiveRepo._download',
-            return_value=f'{TEST_DATA_DIR}/repo.tar.gz'
+            side_effect=lambda *args, **kwargs: io.BytesIO(bts)
         ):
             results = self.bulk_transactional([
                 self.create_project_bulk_data(type='TAR', repository='http://localhost:8000/repo.tar.gz'),
@@ -1676,7 +1750,7 @@ class SyncTestCase(BaseProjectTestCase):
 
         with self.patch(
             f'{settings.VST_PROJECT_LIB_NAME}.main.repo._base._ArchiveRepo._download',
-            return_value=f'{TEST_DATA_DIR}/invalid_repo.tar.gz'
+            side_effect=lambda *args, **kwargs: io.BytesIO(b'invalid')
         ):
             results = self.bulk_transactional([
                 self.execute_playbook_bulk_data(project_id, playbook='main.yml'),
@@ -1693,6 +1767,114 @@ class SyncTestCase(BaseProjectTestCase):
             ])
             self.assertEqual(results[-1]['data']['status'], 'OK')
             self.assertEqual(results[-1]['data']['revision'], 'NO VCS')
+
+    @use_temp_dir
+    def test_repo_sync_on_run_timeout(self, temp_dir):
+        # up the mock server which will sleep on response
+        class MockHandler(BaseHTTPRequestHandler):
+            def do_GET(self, *args, **kwargs):
+                time.sleep(1.2)
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+
+        with MockServer(MockHandler) as server:
+            remote = f'http://localhost:{server.server_port}/'
+
+            # git
+            repo_dir = f'{temp_dir}/git_repo'
+            shutil.copytree(f'{TEST_DATA_DIR}/repo', repo_dir)
+
+            repo = git.Repo.init(repo_dir)
+
+            # create submodules
+            submodule_dir = f'{temp_dir}/submodule'
+            os.mkdir(submodule_dir)
+            shutil.copy(f'{TEST_DATA_DIR}/test_module.py', f'{submodule_dir}/test_module.py')
+            submodule = git.Repo.init(submodule_dir)
+            submodule.git.add('test_module.py')
+            submodule.index.commit('Add module')
+            repo.git.submodule('add', '../submodule/.git', 'lib')
+            repo.git.submodule('add', f'{submodule_dir}/.git', 'lib2')
+
+            repo.git.add(all=True)
+            repo.index.commit('Initial commit')
+
+            results = self.bulk_transactional([
+                self.create_project_bulk_data(type='GIT', repository=repo_dir),
+                self.sync_project_bulk_data('<<0[data][id]>>'),
+                self.create_variable_bulk_data('repo_sync_on_run', True, project_id='<<0[data][id]>>'),
+            ])
+            project_id = results[0]['data']['id']
+
+            results = self.bulk_transactional([
+                {
+                    'method': 'patch',
+                    'path': ['project', project_id],
+                    'data': {'repository': remote}
+                },
+                self.create_variable_bulk_data('repo_sync_on_run_timeout', 1, project_id),
+                self.execute_module_bulk_data(project_id),
+                self.get_history_bulk_data('<<2[data][history_id]>>'),
+                self.get_raw_history_bulk_data('<<2[data][history_id]>>'),
+            ])
+
+            self.assertEqual(results[3]['data']['status'], 'ERROR')
+            self.assertEqual(results[4]['data']['detail'], 'Sync error: timeout exceeded.')
+
+            # test submodules timeout
+            (Path(repo_dir) / '.gitmodules').write_text(f"""
+                [submodule "lib"]
+                    path = lib
+                    url = {remote}.git
+            """.strip())
+            repo.git.add('.gitmodules')
+            repo.index.commit('BREAKING CHANGE! Broke submodules.')
+
+            results = self.bulk_transactional([
+                {
+                    'method': 'patch',
+                    'path': ['project', project_id],
+                    'data': {'repository': repo_dir}
+                },
+                self.execute_module_bulk_data(project_id),
+                self.get_history_bulk_data('<<1[data][history_id]>>'),
+                self.get_raw_history_bulk_data('<<1[data][history_id]>>'),
+            ])
+
+            self.assertEqual(results[2]['data']['status'], 'ERROR')
+            self.assertEqual(results[3]['data']['detail'], 'Sync error: timeout exceeded.')
+
+            # tar
+            with open(str(TEST_DATA_DIR / 'repo.tar.gz'), 'rb') as targz:
+                bts = targz.read()
+            with self.patch(
+                f'{settings.VST_PROJECT_LIB_NAME}.main.repo._base._ArchiveRepo._download',
+                side_effect=lambda *args, **kwargs: io.BytesIO(bts)
+            ):
+                results = self.bulk_transactional([
+                    self.create_project_bulk_data(type='TAR', repository='http://localhost:8000/repo.tar.gz'),
+                    self.sync_project_bulk_data('<<0[data][id]>>'),
+                    self.create_variable_bulk_data('repo_sync_on_run', True, project_id='<<0[data][id]>>'),
+                    self.get_project_bulk_data('<<0[data][id]>>'),
+                ])
+                project_id = results[0]['data']['id']
+                self.assertEqual(results[-1]['data']['status'], 'OK')
+
+            results = self.bulk_transactional([
+                {
+                    'method': 'patch',
+                    'path': ['project', project_id],
+                    'data': {'repository': remote}
+                },
+                self.create_variable_bulk_data('repo_sync_on_run_timeout', 1, project_id),
+                self.execute_module_bulk_data(project_id),
+                self.get_history_bulk_data('<<2[data][history_id]>>'),
+                self.get_raw_history_bulk_data('<<2[data][history_id]>>'),
+            ])
+
+            self.assertEqual(results[3]['data']['status'], 'ERROR')
+            self.assertEqual(results[4]['data']['detail'], 'Sync error: timeout exceeded.')
 
 
 @own_projects_dir

@@ -1,9 +1,10 @@
 # pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
+import io
 from typing import Text, Tuple
 import tarfile
 from pathlib import Path
-from ._base import _ArchiveRepo, shutil, FILENAME
+from ._base import _ArchiveRepo, shutil
 
 
 class Tar(_ArchiveRepo):
@@ -20,7 +21,7 @@ class Tar(_ArchiveRepo):
 
         return filter(bool, map(change_member, members))
 
-    def _extract(self, archive: FILENAME, path: Text, options) -> Tuple[Path, bool]:
+    def _extract(self, archive: io.BytesIO, path: Text, options) -> Tuple[Path, bool]:
         # pylint: disable=broad-except
         moved = False
         try:
@@ -30,7 +31,7 @@ class Tar(_ArchiveRepo):
             pass
         try:
             repo_branch = options.get('revision', self.proj.vars.get('repo_branch', ''))
-            with tarfile.open(archive) as arch:
+            with tarfile.open(fileobj=archive) as arch:
                 arch.extractall(path, members=self.__get_members(arch, repo_branch))
         except:
             if not options.get('no_update', False):
