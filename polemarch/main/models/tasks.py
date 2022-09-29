@@ -73,10 +73,7 @@ class Template(ACLModel):
         data = json.loads(self.template_data)
         if "inventory" in self.template_fields[self.kind] and self.inventory:
             try:
-                if isinstance(self.inventory, Inventory):
-                    data['inventory'] = self.inventory.id
-                else:
-                    data['inventory'] = int(self.inventory)
+                data['inventory'] = int(self.inventory)
             except ValueError:
                 data['inventory'] = self.inventory
         return data
@@ -164,12 +161,6 @@ class Template(ACLModel):
 
     def set_data(self, value) -> None:
         data = self._convert_to_data(value)
-        inventory_id = data.pop('inventory', None)
-        if "inventory" in self.template_fields[self.kind]:
-            try:
-                self.inventory = self.project.inventories.get(pk=int(inventory_id)).id
-            except (ValueError, TypeError, Inventory.DoesNotExist):
-                self.inventory = inventory_id
         data['vars'] = self.keep_encrypted_data(data.get('vars', None))
         self.template_data = json.dumps(data)
 

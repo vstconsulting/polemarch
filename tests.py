@@ -737,6 +737,50 @@ class InventoryTestCase(BaseProjectTestCase):
         self.assertEqual(results[3]['data']['count'], 1)
         self.assertEqual(results[3]['data']['results'][0]['name'], self.host.name)
 
+    def test_create_and_update_execution_template_with_different_inventory_types(self):
+        def check_create(inventory):
+            results = self.bulk_transactional([
+                {
+                    'method': 'post',
+                    'path': ['project', self.project.id, 'execution_templates'],
+                    'data': {
+                        'name': str(uuid1()),
+                        'kind': 'Module',
+                        'inventory': inventory,
+                        'data': {'module': 'ping'},
+                    }
+                }
+            ])
+            self.assertEqual(results[0]['data']['inventory'], str(inventory))
+            template_object = self.get_model_filter('main.Template').get(id=results[0]['data']['id'])
+            self.assertEqual(template_object.inventory, str(inventory))
+            return results[0]['data']['id']
+
+        def check_update(inventory, template_id):
+            results = self.bulk_transactional([
+                {
+                    'method': 'patch',
+                    'path': ['project', self.project.id, 'execution_templates', template_id],
+                    'data': {
+                        'inventory': inventory,
+                        'data': {'module': 'ping', 'vars': {}},
+                    }
+                }
+            ])
+            self.assertEqual(results[0]['data']['inventory'], str(inventory))
+            template_object = self.get_model_filter('main.Template').get(id=results[0]['data']['id'])
+            self.assertEqual(template_object.inventory, str(inventory))
+
+        inventory_list = (self.inventory.id, self.inventory_path, 'host1,host2,')
+        for inventory in inventory_list:
+            for inventory2 in inventory_list:
+                try:
+                    template_id = check_create(inventory)
+                    check_update(inventory2, template_id)
+                except:
+                    print(f'Failed with create {inventory}, update {inventory2}.')
+                    raise
+
 
 @own_projects_dir
 class SyncTestCase(BaseProjectTestCase):
