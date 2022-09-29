@@ -100,12 +100,13 @@ class CreateExecutionTemplateSerializer(ExecutionTemplateSerializer):
     class Meta(ExecutionTemplateSerializer.Meta):
         fields = ExecutionTemplateSerializer.Meta.fields + ['notes', 'inventory', 'data']
 
+    def validate_inventory(self, value):
+        if isinstance(value, models.Inventory):
+            return value.id
+        return value
+
     def create(self, validated_data):
         data = validated_data['data']
-        inventory = validated_data.get('inventory', None)
-
-        if inventory and not data.get('inventory'):  # nocv
-            data['inventory'] = inventory
 
         if not data.get('vars'):
             data['vars'] = {}
