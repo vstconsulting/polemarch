@@ -2469,6 +2469,22 @@ class PlaybookAndModuleTestCase(BaseProjectTestCase):
 
 @own_projects_dir
 class HistoryTestCase(BaseProjectTestCase):
+    def test_history_str_inventory(self):
+        results = self.bulk_transactional([
+            self.execute_module_bulk_data(inventory=self.inventory.id),
+            self.execute_module_bulk_data(inventory=self.inventory_path),
+            self.execute_module_bulk_data(inventory='lolhost,kekhost,'),
+            self.get_history_bulk_data('<<0[data][history_id]>>'),
+            self.get_history_bulk_data('<<1[data][history_id]>>'),
+            self.get_history_bulk_data('<<2[data][history_id]>>'),
+        ])
+        self.assertEqual(results[3]['data']['inventory'], self.inventory.id)
+        self.assertNotIn('inventory', results[3]['data']['execute_args'])
+        self.assertIsNone(results[4]['data']['inventory'])
+        self.assertEqual(results[4]['data']['execute_args']['inventory'], self.inventory_path)
+        self.assertIsNone(results[5]['data']['inventory'])
+        self.assertEqual(results[5]['data']['execute_args']['inventory'], 'lolhost,kekhost,')
+
     def test_history_execute_args_validation(self):
         with self.assertRaises(ValidationError):
             self.get_model_class('main.History')().execute_args = 'lol'

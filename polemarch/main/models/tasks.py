@@ -405,6 +405,7 @@ class HistoryQuerySet(BQuerySet):
         )
         if isinstance(inventory, str):
             history_kwargs['inventory'] = None
+            extra['inventory'] = inventory
         elif isinstance(inventory, int):
             history_kwargs['inventory'] = project.inventories.get(pk=inventory)  # nocv
         return self.create(status="DELAY", **history_kwargs), extra
