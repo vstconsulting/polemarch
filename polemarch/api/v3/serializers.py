@@ -243,7 +243,7 @@ class OnePeriodictaskSerializer(PeriodictaskSerializer):
             detail=f"Started at inventory {self.instance.inventory}.",
             history_id=self.instance.execute(sync=False)
         ))
-        rdata.is_valid(True)
+        rdata.is_valid(raise_exception=True)
         return rdata.data
 
 

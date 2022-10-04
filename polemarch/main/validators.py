@@ -14,7 +14,7 @@ class URLValidator(OldURLValidator):
 
 path_validator = RegexValidator(
     regex=r'^([\w\d_\-]+|[\.][\/\w\d_\-\+=\^,])(\.?[\w\d\-\/\\_()\+=\^,]+)+$',
-    message=_('Invalid path. Path must not contain ".." or any special characters.')
+    message=_('Invalid path. Path must not contain "..", "~" or any other special characters and must be relative.')
 )
 
 

@@ -3036,6 +3036,79 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
 
 @own_projects_dir
 class VariableTestCase(BaseProjectTestCase):
+    def test_override_ansible_cfg_in_project(self):
+        test_ansible_cfg = """
+            [defaults]
+            task_timeout = 1
+        """.strip()
+        # create directories in project
+        (Path(self.project.path) / 'dir0' / 'dir1').mkdir(parents=True, exist_ok=True)
+        # create ansible.cfg in dir0/dir1
+        (Path(self.project.path) / 'dir0' / 'dir1' / 'ansible.cfg').write_text(test_ansible_cfg)
+
+        results = self.bulk([
+            # [0] invalid path (absolute)
+            self.create_variable_bulk_data('env_ANSIBLE_CONFIG', '/dir0/ansible.cfg'),
+        ])
+        self.assertEqual(results[0]['status'], 400)
+        self.assertIn(
+            'Invalid path. Path must not contain "..", "~" or any other special characters and must be relative.',
+            results[0]['data']['detail']['other_errors'][0],
+        )
+
+        # check if env_ANSIBLE_CONFIG is set than this config is used
+        def check(inner_self, *args, **kwargs):
+            self.assertTrue(inner_self.env['ANSIBLE_CONFIG'].endswith(f'{self.project.id}/dir0/dir1/ansible.cfg'))
+
+        with self.patch(
+            f'{settings.VST_PROJECT_LIB_NAME}.main.models.utils.Executor.execute',
+            side_effect=check,
+            autospec=True
+        ):
+            results = self.bulk_transactional([
+                self.create_variable_bulk_data('env_ANSIBLE_CONFIG', 'dir0/dir1/ansible.cfg'),
+                self.execute_playbook_bulk_data(playbook='playbook.yml'),
+                self.get_history_bulk_data('<<1[data][history_id]>>'),
+            ])
+            self.assertEqual(results[-1]['data']['status'], 'OK')
+            var_id = results[0]['data']['id']
+
+        # check if env_ANSIBLE_CONFIG is not set than root project ansible.cfg is used
+        (Path(self.project.path) / 'ansible.cfg').write_text(test_ansible_cfg)
+
+        def check(inner_self, *args, **kwargs):
+            self.assertTrue(inner_self.env['ANSIBLE_CONFIG'].endswith(f'{self.project.id}/ansible.cfg'))
+
+        with self.patch(
+            f'{settings.VST_PROJECT_LIB_NAME}.main.models.utils.Executor.execute',
+            side_effect=check,
+            autospec=True
+        ):
+            results = self.bulk_transactional([
+                {'method': 'delete', 'path': ['project', self.project.id, 'variables', var_id]},
+                self.execute_playbook_bulk_data(playbook='playbook.yml'),
+                self.get_history_bulk_data('<<1[data][history_id]>>'),
+            ])
+            self.assertEqual(results[-1]['data']['status'], 'OK')
+
+        # check if env_ANSIBLE_CONFIG is not set and project's ansible.cfg does not exist than
+        # os ANSIBLE_CONFIG env var is used
+        os.remove(Path(self.project.path) / 'ansible.cfg')
+
+        def check(inner_self, *args, **kwargs):
+            self.assertEqual(inner_self.env['ANSIBLE_CONFIG'], '/some/global.cfg')
+
+        with self.patch(
+            f'{settings.VST_PROJECT_LIB_NAME}.main.models.utils.Executor.execute',
+            side_effect=check,
+            autospec=True
+        ), self.patch('os.environ', {'ANSIBLE_CONFIG': '/some/global.cfg'}):
+            results = self.bulk_transactional([
+                self.execute_playbook_bulk_data(playbook='playbook.yml'),
+                self.get_history_bulk_data('<<0[data][history_id]>>'),
+            ])
+            self.assertEqual(results[-1]['data']['status'], 'OK')
+
     def test_periodic_task_variables_validation(self):
         results = self.bulk([
             # [0] create task
@@ -3168,7 +3241,7 @@ class VariableTestCase(BaseProjectTestCase):
         ])
         self.assertEqual(results[0]['status'], 400)
         self.assertIn(
-            'Invalid path. Path must not contain ".." or any special characters.',
+            'Invalid path. Path must not contain "..", "~" or any other special characters and must be relative.',
             results[0]['data']['detail']['other_errors'][0]
         )
         self.assertEqual(results[1]['status'], 201)

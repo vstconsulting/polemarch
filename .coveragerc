@@ -27,6 +27,7 @@ omit =
     *celery_beat_scheduler.py
 
 [report]
+fail_under = 100
 show_missing = True
 exclude_lines =
     pragma: no cover
