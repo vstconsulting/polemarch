@@ -1,5 +1,6 @@
 # pylint: disable=unused-argument
 from __future__ import absolute_import
+from pathlib import Path
 from typing import Any, Text, Iterable, Dict, Union
 import sys
 import json
@@ -88,6 +89,9 @@ def check_variables_values(instance: Variable, *args, **kwargs) -> None:
     elif isinstance(content_object, Host):
         if instance.key == 'ansible_host':
             validate_hostname(instance.value)
+    elif isinstance(content_object, Project):
+        if instance.key == 'env_ANSIBLE_CONFIG':
+            path_validator(instance.value)
 
 
 @receiver(signals.pre_save, sender=Variable)

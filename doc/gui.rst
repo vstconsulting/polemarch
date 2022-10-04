@@ -204,6 +204,10 @@ Other available project variables, that you can add with clicking the :guilabel:
 * **ci_template** - runs the selected template during project synchronization;
 * Environment variables, with key starting from **env_**. For example **env_test_var** would create environment variable ``test_var`` on run tasks from this project.
 
+.. note::
+  You can add ``ANSIBLE_CONFIG`` environment variable by creating ``env_ANSIBLE_CONFIG`` variable in your project.
+  This will make your project to use specified config at every execution. Make sure that path is relative to project directory.
+
 Let's edit **repo_branch** variable. To do it you need click the **repo_branch** item in list.
 Then you will see the following page:
 

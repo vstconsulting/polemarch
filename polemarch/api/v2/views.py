@@ -64,7 +64,7 @@ class OwnedView(base.ModelViewSet, base.CopyMixin):
         serializer = sers.SetOwnerSerializer(
             self.get_object(), data=request.data, context=self.get_serializer_context()
         )
-        serializer.is_valid(True)
+        serializer.is_valid(raise_exception=True)
         serializer.save()
         return HTTP_201_CREATED(serializer.data)
 
@@ -439,7 +439,7 @@ class InventoryViewSet(_GroupMixin):
     def import_inventory(self, request, **kwargs):
         # pylint: disable=no-member
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(True)
+        serializer.is_valid(raise_exception=True)
         instance = serializer.save()
         if hasattr(self, 'nested_manager'):
             self.nested_manager.add(instance)
@@ -459,7 +459,7 @@ class __ProjectInventoryViewSet(InventoryViewSet):
             self.nested_parent_object,
             data=dict(name=request.data.get('name', ''))
         )
-        serializer.is_valid(True)
+        serializer.is_valid(raise_exception=True)
         instance = serializer.save()
         self.nested_manager.add(instance)
 
@@ -633,7 +633,7 @@ class ProjectViewSet(OwnedView, _VariablesCopyMixin):
         serializer = sers.ActionResponseSerializer(
             data=dict(detail=f"Sync with {instance.repository}.")
         )
-        serializer.is_valid(True)
+        serializer.is_valid(raise_exception=True)
         return HTTP_200_OK(serializer.data)
 
     @deco.subaction(**{

@@ -349,11 +349,19 @@ class AnsibleCommand(PMObject):
         project.repo_class.make_run_copy(work_dir, revision)
         self._verbose_output(f'Copied project on execution to {work_dir}.', 2)
 
-        project_cfg = os.path.join(work_dir, 'ansible.cfg')
-        if os.path.exists(project_cfg) and os.path.isfile(project_cfg):
-            self.executor.env['ANSIBLE_CONFIG'] = os.environ.get(
-                'ANSIBLE_CONFIG', project_cfg
-            )
+        project_cfg = self.executor.env.get('ANSIBLE_CONFIG')
+        if project_cfg is not None:
+            self.executor.env['ANSIBLE_CONFIG'] = str(Path(self.project.path) / project_cfg)
+            return
+
+        project_cfg = Path(self.project.path) / 'ansible.cfg'
+        if project_cfg.is_file():
+            self.executor.env['ANSIBLE_CONFIG'] = str(project_cfg)
+            return
+
+        project_cfg = os.getenv('ANSIBLE_CONFIG')
+        if project_cfg is not None:
+            self.executor.env['ANSIBLE_CONFIG'] = project_cfg
 
     def error_handler(self, exception: BaseException) -> None:
         # pylint: disable=no-else-return
