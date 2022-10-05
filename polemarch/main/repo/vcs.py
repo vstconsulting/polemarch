@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from typing import Tuple, Dict, Text, Union, Any, Iterable
 import warnings
 from vstutils.utils import tmp_file_context, raise_context
+from ...main.exceptions import SyncOnRunTimeout
 try:
     import git
 except:  # nocv
@@ -13,7 +14,7 @@ ENV_VARS_TYPE =  Dict[Text, Union[Text, bool]]  # pylint: disable=invalid-name
 
 
 class _VCS(_Base):  # nocv
-    def vsc_clone(self, *args, **kwargs):
+    def vcs_clone(self, *args, **kwargs):
         raise NotImplementedError()
 
     def vcs_update(self, *args, **kwargs):
@@ -50,10 +51,22 @@ class Git(_VCS):
     def get_repo(self) -> git.Repo:
         return git.Repo(self.path)
 
-    def vsc_clone(self, *args, **kwargs) -> git.Repo:
-        repo = git.Repo.clone_from(*args, **kwargs)
-        with repo.git.custom_environment(**kwargs.get('env', {})):
-            self._update_submodules(repo)
+    def vcs_clone(self, source: str, destination, **kwargs) -> git.Repo:
+        os.makedirs(destination)
+        try:
+            git.cmd.Git().clone(
+                git.Git.polish_url(source),
+                destination,
+                **kwargs
+            )
+            repo = git.Repo(destination)
+            with repo.git.custom_environment(**kwargs.get('env', {})):
+                self._update_submodules(repo, kill_after_timeout=kwargs.get('kill_after_timeout'))
+        except git.GitCommandError as error:
+            if error.status == -9:
+                raise SyncOnRunTimeout from error
+            raise
+
         return repo
 
     def _fetch_from_remote(self, repo: git.Repo, env: ENV_VARS_TYPE):
@@ -66,20 +79,20 @@ class Git(_VCS):
             self._update_submodules(repo)
             return result
 
-    def _update_submodules(self, repo: git.Repo):
+    def _update_submodules(self, repo: git.Repo, **kwargs):
         logger.debug('Update GIT submodules in project [{}]'.format(self.proj.id))
         for sm in repo.submodules:
             # Calling git directly for own submodules
             # since using relative path is not working in gitpython
             # see https://github.com/gitpython-developers/GitPython/issues/730
-            with raise_context():
+            try:
                 logger.debug('Update module "{}" in project [{}].'.format(sm.name, self.proj.id))
-                if sm.url[0:3] == '../':
-                    sm_path = sm.name
-                    repo.git.submodule('init', sm_path)
-                    repo.git.submodule('update', sm_path)
-                else:
-                    sm.update(init=True)
+                repo.git.submodule('init', sm.name)
+                repo.git.submodule('update', sm.name, **kwargs)
+            except git.GitCommandError as error:
+                if error.status == -9:
+                    raise
+                continue
 
     def vcs_update(self, repo: git.Repo, env: ENV_VARS_TYPE):
         fetch_result = self._fetch_from_remote(repo, env)
@@ -100,13 +113,22 @@ class Git(_VCS):
 
     def make_clone(self, env: ENV_VARS_TYPE) -> Tuple[git.Repo, None]:  # pylint: disable=arguments-renamed
         kw = dict(**self.options.get("CLONE_KWARGS", {}))
-        if self.target_branch:
-            kw['branch'] = self.target_branch.replace('tags/', '')
-        repo = self.vsc_clone(self.proj.repository, self.path, env=env, **kw)
-        with raise_context():
-            self.proj.variables.update_or_create(
-                key='repo_branch', defaults=dict(value=repo.active_branch.name)
-            )
+        if 'timeout' in env:
+            kw['kill_after_timeout'] = env.pop('timeout')
+        destination = env.pop('destination', self.path)
+        source = env.pop('source', self.proj.repository)
+        revision = env.pop('revision', self.target_branch)
+        no_update = env.pop('no_update', False)
+
+        repo = self.vcs_clone(source, destination, env=env, **kw)
+        if revision:
+            repo.git.checkout(revision)
+
+        if not no_update:
+            with raise_context():
+                self.proj.variables.update_or_create(
+                    key='repo_branch', defaults=dict(value=repo.active_branch.name)
+                )
         return repo, None
 
     def _get_or_create_repo(self, env: ENV_VARS_TYPE) -> git.Repo:
@@ -184,7 +206,6 @@ class Git(_VCS):
         return env_vars
 
     def _operate(self, operation, **env_vars):
-        env_vars.update(self.env.get("GLOBAL", {}))
         with tmp_file_context(delete=False) as tmp:
             if self.proj.vars.get("repo_password", None) is not None:
                 env_vars = self._with_password(tmp, env_vars)
@@ -226,3 +247,15 @@ class Git(_VCS):
             return self._operate(self.get_revision)
         except git.GitError:
             return "ERROR"
+
+    def make_run_copy(self, destination: Text, revision: Text):
+        source = self.proj.path
+        if self.proj.repo_sync_on_run:
+            source = self.proj.repository
+        self.make_clone({
+            'source': source,
+            'destination': str(destination),
+            'no_update': True,
+            'revision': revision,
+            'timeout': self.proj.repo_sync_timeout
+        })

@@ -1,5 +1,6 @@
 # pylint: disable=unused-argument
 from __future__ import absolute_import
+from pathlib import Path
 from typing import Any, Text, Iterable, Dict, Union
 import sys
 import json
@@ -20,11 +21,12 @@ from .vars import Variable
 from .hosts import Host, Group, Inventory
 from .projects import Project, Task, Module, ProjectTemplate, list_to_choices
 from .users import get_user_model, UserGroup, ACLPermission
-from .tasks import PeriodicTask, History, HistoryLines, Template, TemplateOption, ExecutionTypes
+from .tasks import PeriodicTask, History, HistoryLines, Template, TemplateOption
 from .hooks import Hook
 from ..validators import RegexValidator, validate_hostname, path_validator
 from ..exceptions import UnknownTypeException, Conflict
-from ..utils import AnsibleArgumentsReference, CmdExecutor
+from ..utils import CmdExecutor
+from ...main.constants import ProjectVariablesEnum, ExecutionTypesEnum, ANSIBLE_REFERENCE
 
 
 logger = logging.getLogger('polemarch')
@@ -83,10 +85,13 @@ def check_variables_values(instance: Variable, *args, **kwargs) -> None:
     content_object = instance.content_object
     if isinstance(content_object, PeriodicTask):
         cmd = "module" if content_object.kind == "MODULE" else "playbook"
-        AnsibleArgumentsReference().validate_args(cmd, {instance.key: instance.value})
+        ANSIBLE_REFERENCE.validate_args(cmd, {instance.key: instance.value})
     elif isinstance(content_object, Host):
         if instance.key == 'ansible_host':
             validate_hostname(instance.value)
+    elif isinstance(content_object, Project):
+        if instance.key == 'env_ANSIBLE_CONFIG':
+            path_validator(instance.value)
 
 
 @receiver(signals.pre_save, sender=Variable)
@@ -102,9 +107,9 @@ def check_project_variables_values(instance: Variable, *args, **kwargs) -> None:
 
     is_ci_var = instance.key.startswith('ci_')
     key_startswith = instance.key.startswith('env_') or is_ci_var
-    if not key_startswith and instance.key not in Project.VARS_KEY:
+    if not key_startswith and instance.key not in ProjectVariablesEnum.get_values():
         msg = 'Unknown variable key \'{}\'. Key must be in {} or starts from \'env_\' or \'ci_\'.'
-        raise ValidationError(msg.format(instance.key, Project.VARS_KEY))
+        raise ValidationError(msg.format(instance.key, ProjectVariablesEnum.get_values()))
 
     is_ci_template = instance.key == 'ci_template'
     qs_variables = project_object.variables.all()
@@ -199,9 +204,9 @@ def validate_template_args(instance: Template, **kwargs) -> None:
     ansible_args = dict(instance.data['vars'])
     if instance.kind == "Module":
         command = "module"
-    AnsibleArgumentsReference().validate_args(command, ansible_args)
+    ANSIBLE_REFERENCE.validate_args(command, ansible_args)
     for _, data in dict(instance.options).items():
-        AnsibleArgumentsReference().validate_args(
+        ANSIBLE_REFERENCE.validate_args(
             command, data.get('vars', {})
         )
 

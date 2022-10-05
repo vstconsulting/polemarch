@@ -21,7 +21,13 @@ from ...main import models
 from ...main.settings import LANGUAGES
 from ...main.utils import AnsibleArgumentsReference
 from ...main.validators import path_validator
-from ...main.constants import HiddenArg, HiddenVar, CYPHER
+from ...main.constants import (
+    InventoryVariablesEnum,
+    HiddenArgumentsEnum,
+    HiddenVariablesEnum,
+    ProjectVariablesEnum,
+    CYPHER,
+)
 
 User = get_user_model()
 
@@ -317,7 +323,7 @@ class HookSerializer(serializers.ModelSerializer):
 
 class VariableSerializer(_SignalSerializer):
     value = MultiTypeField(default="", allow_blank=True)
-    hidden_enum = HiddenVar
+    hidden_enum = HiddenVariablesEnum
 
     class Meta:
         model = models.Variable
@@ -337,7 +343,7 @@ class VariableSerializer(_SignalSerializer):
 
 
 class InventoryVariableSerializer(VariableSerializer):
-    key = vst_fields.AutoCompletionField(autocomplete=models.Variable.variables_keys)
+    key = vst_fields.AutoCompletionField(autocomplete=InventoryVariablesEnum.get_values_list())
     value = vst_fields.DependEnumField(
         allow_blank=True, field='key',
         types={
@@ -351,13 +357,13 @@ class InventoryVariableSerializer(VariableSerializer):
 
 
 class PeriodicTaskVariableSerializer(VariableSerializer):
-    hidden_enum = HiddenArg
+    hidden_enum = HiddenArgumentsEnum
 
 
 class ProjectVariableSerializer(VariableSerializer):
     key = vst_fields.AutoCompletionField(
         required=True,
-        autocomplete=models.Project.VARS_KEY+['ci_template']
+        autocomplete=ProjectVariablesEnum.get_values_list()
     )
     value = vst_fields.DependEnumField(allow_blank=True, field='key', choices={
         'repo_type': list(models.Project.repo_handlers.keys()),
@@ -384,7 +390,7 @@ class _WithVariablesSerializer(_WithPermissionsSerializer):
         return self._do_with_vars("update", instance, validated_data=validated_data)
 
     def represent_vars(self, representation):
-        HiddenVar.hide_values(representation.get('vars'))
+        HiddenVariablesEnum.hide_values(representation.get('vars'))
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -474,14 +480,14 @@ class TemplateSerializer(_WithVariablesSerializer):
 
     def represent_vars(self, representation):
         if 'data' in representation:
-            HiddenArg.hide_values(representation['data'].get('vars'))
+            HiddenArgumentsEnum.hide_values(representation['data'].get('vars'))
 
     def to_representation(self, instance) -> OrderedDict:
         data = OrderedDict()
         if instance.kind in ["Task", "Module"]:
             data = super().to_representation(instance)
             for option in data.get('options', {}).values():
-                HiddenArg.hide_values(option.get('vars'))
+                HiddenArgumentsEnum.hide_values(option.get('vars'))
         return data
 
 
@@ -747,14 +753,14 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'execute_view_data',)
 
 
-def generate_fileds(ansible_reference: AnsibleArgumentsReference, ansible_type: str, no_default=False) -> OrderedDict:
+def generate_fields(ansible_reference: AnsibleArgumentsReference, ansible_type: str, no_default=False) -> OrderedDict:
     if ansible_type is None:
         return OrderedDict()  # nocv
 
     fields_of_serializer = OrderedDict()
 
     for ref, settings in ansible_reference.raw_dict[ansible_type].items():
-        if ref in ['help', 'version', ]:
+        if ref in {'help', 'version'}:
             continue
         ref_type = settings.get('type', None)
         kwargs = dict(help_text=settings.get('help', ''), required=False)
@@ -771,7 +777,7 @@ def generate_fileds(ansible_reference: AnsibleArgumentsReference, ansible_type: 
         if ref == 'verbose':
             field = serializers.IntegerField
             kwargs.update(dict(max_value=4, default=0))
-        if ref in HiddenArg.get_values():
+        if ref in HiddenArgumentsEnum.get_values():
             field = vst_fields.SecretFileInString
         if ref == 'inventory':
             field = InventoryAutoCompletionField
@@ -801,7 +807,7 @@ class AnsibleSerializerMetaclass(serializers.SerializerMetaclass):
                 ansible_type = 'playbook'
             elif isinstance(attrs.get('module', None), serializers.CharField):
                 ansible_type = 'module'
-            attrs.update(generate_fileds(attrs['ansible_reference'], ansible_type))
+            attrs.update(generate_fields(attrs['ansible_reference'], ansible_type))
         return super(AnsibleSerializerMetaclass, cls).__new__(cls, name, bases, attrs)
 
 

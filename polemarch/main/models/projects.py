@@ -1,11 +1,10 @@
 # pylint: disable=protected-access,no-member,unused-argument
 from __future__ import unicode_literals
 
-from typing import Any, Dict, List, Tuple, Iterable, NoReturn, TypeVar, Text
+from typing import Any, Dict, List, Tuple, Iterable, TypeVar, Text
 import os
 import logging
 import traceback
-import time
 import uuid
 import requests
 from docutils.core import publish_parts as rst_gen
@@ -50,7 +49,7 @@ class ReadMe:
         self.ext = None
         self.content = self.set_readme()
 
-    def _make_ext(self, file_name) -> NoReturn:
+    def _make_ext(self, file_name) -> None:
         self.ext = os.path.splitext(file_name)[1]
         self.file_name = self.path + '/' + file_name
 
@@ -111,16 +110,6 @@ class Project(AbstractModel):
         'repo_sync_on_run'
     ]
 
-    VARS_KEY = [
-        'repo_type',
-        'repo_sync_on_run',
-        'repo_sync_on_run_timeout',
-        'repo_branch',
-        'repo_password',
-        'repo_key',
-        'playbook_path'
-    ]
-
     EXTRA_OPTIONS = {
         'initiator': 0,
         'initiator_type': 'project',
@@ -173,8 +162,7 @@ class Project(AbstractModel):
 
     @property
     def repo_class(self):
-        repo_type = self.vars.get("repo_type", "MANUAL")
-        return self.repo_handlers(repo_type, self)
+        return self.repo_handlers(self.type, self)
 
     @property
     def env_vars(self) -> Dict[Text, Any]:
@@ -182,17 +170,15 @@ class Project(AbstractModel):
 
     @property
     def type(self) -> Text:
-        try:
-            return self.variables.get(key="repo_type").value
-        except self.variables.model.DoesNotExist:  # nocv
-            return 'MANUAL'
+        return self.vars.get('repo_type', 'MANUAL')
 
     @property
     def repo_sync_timeout(self):
-        try:
-            return self.variables.get(key="repo_sync_on_run_timeout").value
-        except self.variables.model.DoesNotExist:
-            return settings.PROJECT_REPOSYNC_WAIT_SECONDS
+        return int(self.vars.get('repo_sync_on_run_timeout', settings.PROJECT_REPOSYNC_WAIT_SECONDS))
+
+    @property
+    def repo_sync_on_run(self) -> bool:
+        return self.vars.get('repo_sync_on_run', False)
 
     @property
     def config(self) -> Dict[Text, Any]:
@@ -275,7 +261,7 @@ class Project(AbstractModel):
         self.get_yaml_subcache('view').set(view_data)
         return view_data
 
-    def check_path(self, inventory) -> NoReturn:
+    def check_path(self, inventory) -> None:
         if not isinstance(inventory, str):  # nocv
             return
         path_validator(inventory)
@@ -293,23 +279,8 @@ class Project(AbstractModel):
         kwargs.update(extra)
         return kwargs
 
-    def hook(self, when, msg) -> NoReturn:
+    def hook(self, when, msg) -> None:
         Hook.objects.all().execute(when, msg)
-
-    def sync_on_execution_handler(self) -> NoReturn:
-        if not self.vars.get('repo_sync_on_run', False):
-            return
-        timeout = self.repo_sync_timeout
-        try:
-            for i in range(timeout):  # pylint: disable=unused-variable
-                self.refresh_from_db(fields=['status'])
-                if self.status not in self.BUSY_STATUSES:
-                    self.sync()
-                    return
-                time.sleep(1)  # nocv
-            raise Exception('Project busy (timeout={}).'.format(timeout))  # nocv
-        except Exception as exc:  # nocv
-            raise self.SyncError("ERROR on Sync operation: " + str(exc))
 
     def execute(self, kind: str, *args, **extra) -> HISTORY_ID:
         sync = extra.pop("sync", False)
@@ -326,7 +297,7 @@ class Project(AbstractModel):
             task_class.delay(**kwargs)
         return history.id if history is not None else history
 
-    def set_status(self, status) -> NoReturn:
+    def set_status(self, status) -> None:
         self.status = status
         self.save()
 

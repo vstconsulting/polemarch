@@ -31,3 +31,13 @@ class NotApplicable(exceptions.NotApplicable):
 
 class Conflict(PMException):
     status = exceptions.status.HTTP_409_CONFLICT
+
+
+class SyncOnRunTimeout(PMException):
+    def __init__(self):
+        super().__init__('Sync error: timeout exceeded.')
+
+
+class MaxContentLengthExceeded(NotApplicable):
+    def __init__(self):
+        super().__init__('Maximum content length exceeded.')

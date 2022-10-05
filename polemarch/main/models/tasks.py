@@ -1,7 +1,7 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
 
-from typing import NoReturn, Any, Dict, List, Tuple, Iterable, TypeVar, Text
+from typing import Any, Dict, List, Tuple, Iterable, TypeVar, Text
 import logging
 from collections import OrderedDict
 from datetime import timedelta, datetime
@@ -23,24 +23,18 @@ from django.conf import settings
 from rest_framework.exceptions import UnsupportedMediaType
 
 from vstutils.custom_model import ListModel, CustomQuerySet
-from vstutils.utils import BaseEnum, translate as _
+from vstutils.utils import translate as _
 from . import Inventory
 from ..exceptions import DataNotReady, NotApplicable
 from .base import ForeignKeyACL, BModel, ACLModel, BQuerySet, models, BaseModel
 from .vars import AbstractModel, AbstractVarsQuerySet
 from .projects import Project, HISTORY_ID
-from ..constants import CYPHER, HiddenArg
+from ..constants import CYPHER, HiddenArgumentsEnum
 
 
 logger = logging.getLogger("polemarch")
 InvOrString = TypeVar('InvOrString', str, int, Inventory, None)
 User = get_user_model()
-
-
-class ExecutionTypes(BaseEnum):
-    # pylint: disable=invalid-name
-    Task = 'Task'
-    Module = 'Module'
 
 
 # Block of real models
@@ -79,10 +73,7 @@ class Template(ACLModel):
         data = json.loads(self.template_data)
         if "inventory" in self.template_fields[self.kind] and self.inventory:
             try:
-                if isinstance(self.inventory, Inventory):
-                    data['inventory'] = self.inventory.id
-                else:
-                    data['inventory'] = int(self.inventory)
+                data['inventory'] = int(self.inventory)
             except ValueError:
                 data['inventory'] = self.inventory
         return data
@@ -149,7 +140,7 @@ class Template(ACLModel):
             return new_vars
         return self.__encrypt(new_vars)
 
-    def _validate_option_data(self, data: Dict) -> NoReturn:
+    def _validate_option_data(self, data: Dict) -> None:
         excepted = self.excepted_execution_fields
         errors = {
             name: ['Disallowed to override {}.'.format(name)]
@@ -158,7 +149,7 @@ class Template(ACLModel):
         if errors:
             raise ValidationError(errors)
 
-    def set_options_data(self, value: Any) -> NoReturn:
+    def set_options_data(self, value: Any) -> None:
         options_data = self._convert_to_data(value)
         new = {}
         for option, data in options_data.items():
@@ -168,14 +159,8 @@ class Template(ACLModel):
             new[option] = data
         self.options_data = json.dumps(new)
 
-    def set_data(self, value) -> NoReturn:
+    def set_data(self, value) -> None:
         data = self._convert_to_data(value)
-        inventory_id = data.pop('inventory', None)
-        if "inventory" in self.template_fields[self.kind]:
-            try:
-                self.inventory = self.project.inventories.get(pk=int(inventory_id)).id
-            except (ValueError, TypeError, Inventory.DoesNotExist):
-                self.inventory = inventory_id
         data['vars'] = self.keep_encrypted_data(data.get('vars', None))
         self.template_data = json.dumps(data)
 
@@ -184,11 +169,11 @@ class Template(ACLModel):
         return self.get_data()
 
     @data.setter
-    def data(self, value) -> NoReturn:
+    def data(self, value) -> None:
         self.set_data(value)
 
     @data.deleter
-    def data(self) -> NoReturn:  # nocv
+    def data(self) -> None:  # nocv
         self.template_data = ""
         self.inventory = None
         self.project = None
@@ -198,11 +183,11 @@ class Template(ACLModel):
         return self.get_options_data()
 
     @options.setter
-    def options(self, value) -> NoReturn:
+    def options(self, value) -> None:
         self.set_options_data(value)
 
     @options.deleter
-    def options(self) -> NoReturn:  # nocv
+    def options(self) -> None:  # nocv
         self.options_data = ''
 
     @property
@@ -312,7 +297,7 @@ class PeriodicTask(AbstractModel):
         return self._inventory or self.inventory_file
 
     @inventory.setter
-    def inventory(self, inventory: InvOrString) -> NoReturn:
+    def inventory(self, inventory: InvOrString) -> None:
         if isinstance(inventory, Inventory):
             self._inventory = inventory
             self.inventory_file = None
@@ -420,6 +405,7 @@ class HistoryQuerySet(BQuerySet):
         )
         if isinstance(inventory, str):
             history_kwargs['inventory'] = None
+            extra['inventory'] = inventory
         elif isinstance(inventory, int):
             history_kwargs['inventory'] = project.inventories.get(pk=inventory)  # nocv
         return self.create(status="DELAY", **history_kwargs), extra
@@ -501,11 +487,11 @@ class History(BModel):
         return json.loads(self.json_args)
 
     @execute_args.setter
-    def execute_args(self, value: Dict) -> NoReturn:
+    def execute_args(self, value: Dict) -> None:
         if not isinstance(value, dict):
             raise ValidationError(dict(args="Should be a dict."))
         data = {k: v for k, v in value.items() if k not in ['group']}
-        HiddenArg.hide_values(data)
+        HiddenArgumentsEnum.hide_values(data)
         self.json_args = json.dumps(data)
 
     # options
@@ -514,7 +500,7 @@ class History(BModel):
         return json.loads(self.json_options)
 
     @options.setter
-    def options(self, value: Dict) -> NoReturn:
+    def options(self, value: Dict) -> None:
         if not isinstance(value, dict):
             raise ValidationError(dict(args="Should be a dict."))  # nocv
         self.json_options = json.dumps(value)
@@ -563,15 +549,15 @@ class History(BModel):
 
     @raw_stdout.setter
     @transaction.atomic
-    def raw_stdout(self, lines: Iterable) -> NoReturn:
+    def raw_stdout(self, lines: Iterable) -> None:
         del self.raw_stdout
         self.check_output(lines)
 
     @raw_stdout.deleter
-    def raw_stdout(self) -> NoReturn:
+    def raw_stdout(self) -> None:
         self.raw_history_line.all().delete()
 
-    def check_output(self, output: str) -> NoReturn:
+    def check_output(self, output: str) -> None:
         raw_count = self.raw_history_line.all().count()
         lines = re.findall(r'.+\n{0,}', output)
         counter = 0
@@ -581,7 +567,7 @@ class History(BModel):
             counter += 1
             self.write_line(number=counter, value=line)
 
-    def write_line(self, value: str, number: int, endl: Text = "") -> NoReturn:
+    def write_line(self, value: str, number: int, endl: Text = "") -> None:
         self.raw_history_line.bulk_create([
             HistoryLines(line_gnumber=number, line_number=1, line=value + endl, history=self)
         ])

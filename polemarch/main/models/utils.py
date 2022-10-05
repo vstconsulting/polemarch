@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import threading
-from typing import NoReturn, Text, Any, Iterable, Tuple, List, Dict, Union
+from typing import Text, Any, Iterable, Tuple, List, Dict, Union
 import os
 import re
 import time
@@ -21,8 +21,8 @@ from vstutils.tools import get_file_value
 
 from .hosts import Inventory
 from .tasks import History, Project
-from ...main.utils import CmdExecutor, AnsibleArgumentsReference, PMObject
-from ..constants import HiddenArg, HiddenVar, CYPHER
+from ...main.utils import CmdExecutor, PMObject
+from ..constants import HiddenArgumentsEnum, HiddenVariablesEnum, CYPHER, ANSIBLE_REFERENCE
 
 
 logger = logging.getLogger("polemarch")
@@ -40,7 +40,7 @@ class DummyHistory:
     def __init__(self, *args, **kwargs):
         self.mode = kwargs.get('mode', None)
 
-    def __setattr__(self, key: Text, value: Any) -> NoReturn:
+    def __setattr__(self, key: Text, value: Any) -> None:
         if key == 'raw_args':
             logger.info(value)
 
@@ -52,7 +52,7 @@ class DummyHistory:
         return ""  # nocv
 
     @raw_stdout.setter
-    def raw_stdout(self, value: Text) -> NoReturn:
+    def raw_stdout(self, value: Text) -> None:
         logger.info(value)  # nocv
 
     def get_hook_data(self, when: Text) -> None:
@@ -92,7 +92,7 @@ class Executor(CmdExecutor):
         return ''
 
     @output.setter
-    def output(self, value) -> NoReturn:
+    def output(self, value) -> None:
         pass  # nocv
 
     def working_handler(self, proc: Popen):
@@ -147,7 +147,6 @@ class AnsibleCommand(PMObject):
         'ansible': 'module',
     }
     command_type = None
-    ansible_ref_class = AnsibleArgumentsReference
 
     status_codes = {
         4: "OFFLINE",
@@ -203,7 +202,7 @@ class AnsibleCommand(PMObject):
                 return self.file
             return self.file.name
 
-        def close(self) -> NoReturn:
+        def close(self) -> None:
             # pylint: disable=no-member
             map(lambda key_file: key_file.close(), self.keys) if self.keys else None
             if not isinstance(self.file, str):
@@ -216,13 +215,13 @@ class AnsibleCommand(PMObject):
         self.kwargs = kwargs
         self.__will_raise_exception = False
         self.ref_type = self.ref_types[self.command_type]
-        self.ansible_ref = self.ansible_ref_class().raw_dict[self.ref_type]
+        self.ansible_ref = ANSIBLE_REFERENCE.raw_dict[self.ref_type]
         self.verbose = kwargs.get('verbose', 0)
         self.cwd = tempfile.mkdtemp()
         self._verbose_output('Execution tmpdir created - [{}].'.format(self.cwd), 0)
         self.env = {}
 
-    def _verbose_output(self, value: Text, level: int = 3) -> NoReturn:
+    def _verbose_output(self, value: Text, level: int = 3) -> None:
         if self.verbose >= level:
             if hasattr(self, 'executor'):
                 self.executor.write_output(value)
@@ -231,7 +230,7 @@ class AnsibleCommand(PMObject):
     def _get_tmp_name(self) -> Text:
         return os.path.join(self.cwd, 'project_sources')
 
-    def _send_hook(self, when: Text, **kwargs) -> NoReturn:
+    def _send_hook(self, when: Text, **kwargs) -> None:
         msg = OrderedDict()
         msg['execution_type'] = self.history.kind
         msg['when'] = when
@@ -268,9 +267,9 @@ class AnsibleCommand(PMObject):
             extra_args += ['-' + ('v' * value)] if value else []
             return extra_args, files
         result = [value, []]
-        if key in HiddenArg.get_text_values():
+        if key in HiddenArgumentsEnum.get_text_values():
             result = self.__parse_key(key, value)
-        elif key in HiddenArg.get_file_values():
+        elif key in HiddenArgumentsEnum.get_file_values():
             result = self.__generate_arg_file(value)  # nocv
         value = result[0]
         files += result[1]
@@ -319,19 +318,20 @@ class AnsibleCommand(PMObject):
     def hide_passwords(self, raw: Text) -> Text:
         regex = r'|'.join((
             r"(?<=" + hide + r":\s).{1,}?(?=[\n\t\s])"
-            for hide in HiddenVar.get_values()
+            for hide in HiddenVariablesEnum.get_values()
         ))
         raw = re.sub(regex, CYPHER, raw, 0, re.MULTILINE)
         return raw
 
-    def get_execution_revision(self, project: Project):  # nocv
-        return project.revision
+    def get_execution_revision(self, project: Project):
+        if not project.repo_sync_on_run:
+            return project.branch
+        return project.vars.get('repo_branch', '')
 
-    def prepare(self, target: Text, inventory: Any, history: History, project: Project) -> NoReturn:
+    def prepare(self, target: Text, inventory: Any, history: History, project: Project) -> None:
         self.target, self.project = target, project
         self.history = history if history else DummyHistory()
         self.history.status = "RUN"
-        self.project.sync_on_execution_handler()
         if inventory:
             self.inventory_object = self.Inventory(inventory, cwd=self.project.path, tmpdir=self.cwd)
             self.history.raw_inventory = self.hide_passwords(
@@ -339,54 +339,31 @@ class AnsibleCommand(PMObject):
             )
         else:  # nocv
             self.inventory_object = None
-        self.history.revision = self.get_execution_revision(project)
+
+        revision = self.get_execution_revision(project)
+        self.history.revision = revision or 'NO VCS'
         self.history.save()
         self.executor = self.ExecutorClass(self.history)
 
-        prepare_func = getattr(
-            self,
-            'dir_prepare_{}'.format(project.type.lower()),
-            self.dir_prepare_copy
-        )
         work_dir = self._get_tmp_name()
-        self._verbose_output('Copy project to tmp directory.', 2)
-        prepare_func(self.project.path, work_dir, self.history.revision)
-        self._verbose_output('Project copied to {}.'.format(work_dir), 2)
-        project_cfg = os.path.join(work_dir, 'ansible.cfg')
-        if os.path.exists(project_cfg) and os.path.isfile(project_cfg):
-            self.executor.env['ANSIBLE_CONFIG'] = os.environ.get(
-                'ANSIBLE_CONFIG', project_cfg
-            )
+        project.repo_class.make_run_copy(work_dir, revision)
+        self._verbose_output(f'Copied project on execution to {work_dir}.', 2)
 
-    def dir_prepare_git(self, src: Text, work_dir: Text, revision: Text):
-        # pylint: disable=no-member
-        import git  # pylint: disable=import-outside-toplevel
-        repo = git.Repo.clone_from(
-            url=src + "/.git",
-            to_path=work_dir,
-            **self.project.repo_handlers.opts(self.project.type).get('PREP_KWARGS', {})
-        )
-        repo.git.checkout(revision or self.project.branch)
-        for sm in repo.submodules:
-            # Calling git directly for own submodules
-            # since using relative path is not working in gitpython
-            # see https://github.com/gitpython-developers/GitPython/issues/730
-            with raise_context():
-                if sm.url[0:3] == '../':
-                    repo_parent_url, _ = os.path.split(repo.remotes.origin.url)
-                    actual_url = os.path.join(repo_parent_url, sm.name)
-                    with sm.config_writer() as writer:
-                        writer.set('url', actual_url)
-                sm.update(init=True)
+        project_cfg = self.executor.env.get('ANSIBLE_CONFIG')
+        if project_cfg is not None:
+            self.executor.env['ANSIBLE_CONFIG'] = str(Path(self.project.path) / project_cfg)
+            return
 
-    def dir_prepare_copy(self, src: Text, work_dir: Text, revision: Text):
-        # pylint: disable=unused-argument
-        if os.path.exists(src):
-            shutil.copytree(src=src, dst=work_dir)
-        else:  # nocv
-            raise Exception('Project dir {} is not exist.'.format(src))
+        project_cfg = Path(self.project.path) / 'ansible.cfg'
+        if project_cfg.is_file():
+            self.executor.env['ANSIBLE_CONFIG'] = str(project_cfg)
+            return
 
-    def error_handler(self, exception: BaseException) -> NoReturn:
+        project_cfg = os.getenv('ANSIBLE_CONFIG')
+        if project_cfg is not None:
+            self.executor.env['ANSIBLE_CONFIG'] = project_cfg
+
+    def error_handler(self, exception: BaseException) -> None:
         # pylint: disable=no-else-return
         default_code = self.status_codes["other"]
         error_text = str(exception)
@@ -408,7 +385,7 @@ class AnsibleCommand(PMObject):
             last_line += 1
             self.history.write_line(line, last_line)
 
-    def execute(self, target: Text, inventory: Any, history: History, project: Project, **extra_args) -> NoReturn:
+    def execute(self, target: Text, inventory: Any, history: History, project: Project, **extra_args) -> None:
         try:
             self.prepare(target, inventory, history, project)
             self.history.status = "OK"

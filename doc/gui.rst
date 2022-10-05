@@ -183,13 +183,30 @@ As you can see, now current project has only 2 variables:
 
 Other available project variables, that you can add with clicking the :guilabel:`Create` button:
 
-* **repo_sync_on_run** - boolean, if true, Polemarch will sync project before every task execution (don't use in concurrent executions, experimental);
-* **repo_sync_on_run_timeout** - you can select a timeout when "repo_sync_on_run" will stop the sync attempt;
+* **repo_sync_on_run** - boolean, if true, on every execution will be used project files obtained directly
+  from the remote repository with revision specified in **repo_branch**, instead of current project stored in Polemarch.
+* **repo_sync_on_run_timeout** - time value after which attempt to clone project on execution will be stopped. Works
+  only in conjunction with **repo_sync_on_run**.
+
+  .. note::
+    In case of GIT projects **repo_sync_on_run_timeout** limits time to whole cloning process. For example, if it set
+    to 3 seconds and after 3 seconds project was cloned only on 70%, execution will be aborted.
+
+    This behavior is somewhat different with TAR projects. Timeout specifies how long Polemarch must wait until
+    successfully establish connection with the server. After that download process will start and continue until it
+    completes, regardless of **repo_sync_on_run_timeout**.
+
+    When working with MANUAL projects both **repo_sync_on_run** and **repo_sync_on_run_timeout** options do not applies.
+
 * **repo_password** - GIT repository password;
 * **repo_key** - GIT repository key;
 * **playbook_path** - path to playbook;
 * **ci_template** - runs the selected template during project synchronization;
 * Environment variables, with key starting from **env_**. For example **env_test_var** would create environment variable ``test_var`` on run tasks from this project.
+
+.. note::
+  You can add ``ANSIBLE_CONFIG`` environment variable by creating ``env_ANSIBLE_CONFIG`` variable in your project.
+  This will make your project to use specified config at every execution. Make sure that path is relative to project directory.
 
 Let's edit **repo_branch** variable. To do it you need click the **repo_branch** item in list.
 Then you will see the following page:
