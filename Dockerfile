@@ -55,6 +55,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     apt -y install --no-install-recommends \
     git \
     sudo \
+    openssh-client \
     sshpass \
     libmysqlclient21 \
     libpcre3 \
