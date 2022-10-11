@@ -252,10 +252,11 @@ class Git(_VCS):
         source = self.proj.path
         if self.proj.repo_sync_on_run:
             source = self.proj.repository
-        self.make_clone({
-            'source': source,
-            'destination': str(destination),
-            'no_update': True,
-            'revision': revision,
-            'timeout': self.proj.repo_sync_timeout
-        })
+        self._operate(
+            self.make_clone,
+            source=source,
+            destination=str(destination),
+            no_update=True,
+            revision=revision,
+            timeout=self.proj.repo_sync_timeout
+        )
