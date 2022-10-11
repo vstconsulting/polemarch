@@ -995,31 +995,12 @@ class SyncTestCase(BaseProjectTestCase):
         self.assertEqual(results[8]['data']['branch'], 'lol_branch')
         self.assertEqual(results[8]['data']['revision'], repo.head.object.hexsha)
 
-        # execute playbook with sync_on_run set
-        results = self.bulk([
-            {
-                'method': 'post',
-                'path': ['project', project_id, 'variables'],
-                'data': {'key': 'repo_sync_on_run', 'value': True},
-            },
-            {
-                'method': 'post',
-                'path': ['project', project_id, 'execute_playbook'],
-                'data': {'playbook': 'main.yml'}
-            },
-        ])
-        self.assertEqual(results[0]['status'], 201)
-        self.assertEqual(results[1]['status'], 201)
-
         # test invalid git repository
-        results = self.bulk([
+        results = self.bulk_transactional([
             self.create_project_bulk_data(type='GIT', repository=f'{temp_dir}/not_existing_dir'),
             self.sync_project_bulk_data(project_id='<<0[data][id]>>'),
             self.get_project_bulk_data(project_id='<<0[data][id]>>'),
         ])
-        self.assertEqual(results[0]['status'], 201)
-        self.assertEqual(results[1]['status'], 200)
-        self.assertEqual(results[2]['status'], 200)
         self.assertDictEqual(results[2]['data'], {
             **results[2]['data'],
             'status': 'ERROR',
@@ -1033,56 +1014,58 @@ class SyncTestCase(BaseProjectTestCase):
             if password_file is not None:
                 saved_pass = Path(password_file).read_text()
                 self.assertIn("echo 'lol_password'", saved_pass)
-            if ssh_command is not None:
+            elif ssh_command is not None:
                 self.assertIn('ssh -vT -i', ssh_command)
                 self.assertIn('PubkeyAuthentication=yes', ssh_command)
                 key_file = ssh_command.split(' ')[3]
-                with open(key_file, 'r') as f:
-                    saved_key = f.read()
-                    f.close()
+                saved_key = Path(key_file).read_text()
                 self.assertIn('lol_key', saved_key)
+            else:
+                raise AssertionError('no password or key provided.')
             return operation(kwargs)
 
         with self.patch(
             f'{settings.VST_PROJECT_LIB_NAME}.main.repo._base._Base._operate',
             side_effect=password_and_key_checker
-        ):
+        ) as checker:
+            checker.assert_not_called()
             # test sync if password is set
-            results = self.bulk([
-                # [0] create password variable
-                {
-                    'method': 'post',
-                    'path': ['project', project_id, 'variables'],
-                    'data': {'key': 'repo_password', 'value': 'lol_password'},
-                },
-                # [1]
+            results = self.bulk_transactional([
+                self.create_variable_bulk_data('repo_password', 'lol_password', project_id=project_id),
                 self.sync_project_bulk_data(project_id=project_id),
-                # [2]
+                # [2] check project after sync
                 self.get_project_bulk_data(project_id=project_id),
+                self.create_variable_bulk_data('repo_sync_on_run', True, project_id=project_id),
+                self.execute_module_bulk_data(project_id, inventory='localhost,', connection='local'),
+                # [5] check history after run with repo_sync_on_run
+                self.get_history_bulk_data('<<4[data][history_id]>>'),
+                # [6]
+                self.get_raw_history_bulk_data('<<4[data][history_id]>>'),
             ])
-            self.assertEqual(results[0]['status'], 201)
-            self.assertEqual(results[1]['status'], 200)
-            self.assertEqual(results[2]['status'], 200)
             self.assertEqual(results[2]['data']['status'], 'OK')
-            self.get_model_class('main.Variable').objects.filter(key='repo_password').delete()
+            self.assertEqual(results[5]['data']['status'], 'OK')
+            self.assertIn('SUCCESS =>', results[6]['data']['detail'])
+            self.get_model_filter('main.Variable').filter(key='repo_password').delete()
+            self.assertEqual(checker.call_count, 3)
+            checker.reset_mock()
 
             # test sync if key is set
+            checker.assert_not_called()
             results = self.bulk([
-                # [0] create key variable
-                {
-                    'method': 'post',
-                    'path': ['project', project_id, 'variables'],
-                    'data': {'key': 'repo_key', 'value': 'lol_key'},
-                },
-                # [1]
+                self.create_variable_bulk_data('repo_key', 'lol_key', project_id=project_id),
                 self.sync_project_bulk_data(project_id=project_id),
-                # [2]
+                # [2] check project after sync
                 self.get_project_bulk_data(project_id=project_id),
+                self.execute_module_bulk_data(project_id, inventory='localhost,', connection='local'),
+                # [4] check history after run with repo_sync_on_run
+                self.get_history_bulk_data('<<3[data][history_id]>>'),
+                # [5]
+                self.get_raw_history_bulk_data('<<3[data][history_id]>>'),
             ])
-            self.assertEqual(results[0]['status'], 201)
-            self.assertEqual(results[1]['status'], 200)
-            self.assertEqual(results[2]['status'], 200)
             self.assertEqual(results[2]['data']['status'], 'OK')
+            self.assertEqual(results[4]['data']['status'], 'OK')
+            self.assertIn('SUCCESS =>', results[5]['data']['detail'])
+            self.assertEqual(checker.call_count, 3)
 
     @override_settings(CACHES={
         **settings.CACHES,
