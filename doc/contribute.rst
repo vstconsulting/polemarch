@@ -86,6 +86,18 @@ Here is how to proceed:
    pylint and flake and run main python tests.
    Make sure that your code meets those checks.
 
+   .. warning::
+      Some tests linked to git may fail because local ``file://`` clones are considered unsafe by default.
+      For more information please see
+      `this topic <https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253>`_.
+      If you are encountered this problem, one of the solutions might be:
+
+      .. sourcecode:: bash::
+
+         git config --global protocol.file.allow always
+
+      Keep in mind that this command allows file clone **globally at git level for all your projects**.
+
 #. Reflect your changes in documentation (if needed). Build documentation,
    read what you have changed and make sure that all is right. To build documentation use:
 

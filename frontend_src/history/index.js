@@ -1,4 +1,5 @@
 /* eslint-disable vue/one-component-per-file */
+import { computed } from 'vue';
 import OutputLines from './OutputLines.vue';
 import { RawInventoryField } from './raw-inventory';
 import './style.scss';
@@ -155,17 +156,14 @@ spa.signals.once('allModels.created', ({ models }) => {
  */
 const HistoryDetailView = {
     computed: {
-        title() {
-            return this.$t('History');
-        },
         beforeFieldsGroupsComponent() {
-            return OutputLines;
+            if (this.instance) {
+                return OutputLines;
+            }
+            return null;
         },
         modelsFieldsWrapperClasses() {
             return 'col-md-6 history-info';
-        },
-        isInProgress() {
-            return ['RUN', 'DELAY'].includes(this.instance && this.instance.status);
         },
         fieldsGroups() {
             return [
@@ -193,66 +191,6 @@ const HistoryDetailView = {
             ];
         },
     },
-    watch: {
-        isInProgress: function (newVal, oldVal) {
-            if (!newVal && oldVal) this.stopAutoUpdate();
-        },
-    },
-    methods: {
-        shouldStartAutoupdate() {
-            return (
-                spa.components.page.PageViewComponent.methods.shouldStartAutoupdate.call(this) &&
-                this.isInProgress
-            );
-        },
-    },
-};
-
-/**
- * @vue/component
- */
-const HideDetailOperationsMixin = {
-    computed: {
-        sublinks() {
-            return Array.from(this.view.sublinks.values()).filter((sublink) => {
-                if (sublink.name === 'facts') {
-                    return (
-                        this.data.status === 'OK' && this.data.kind === 'MODULE' && this.data.mode === 'setup'
-                    );
-                }
-                return true;
-            });
-        },
-        actions() {
-            return Array.from(this.view.actions.values()).filter((action) => {
-                switch (action.name) {
-                    case 'cancel':
-                        return this.data.status === 'RUN' || this.data.status === 'DELAY';
-                    case 'clear':
-                        return false;
-                }
-                return true;
-            });
-        },
-    },
-};
-
-/**
- * @vue/component
- */
-const HideListOperationsMixin = {
-    computed: {
-        instanceSublinks() {
-            return spa.components.list.ListViewComponent.computed.instanceSublinks
-                .call(this)
-                .filter((sublink) => sublink.name !== 'facts');
-        },
-        instanceActions() {
-            return spa.components.list.ListViewComponent.computed.instanceActions
-                .call(this)
-                .filter((action) => action.name !== 'cancel' && action.name !== 'clear');
-        },
-    },
 };
 
 for (const path of HISTORY_DETAIL_PATHS) {
@@ -266,14 +204,59 @@ for (const path of HISTORY_LIST_PATHS) {
 export function setupDetailView(path) {
     spa.signals.once('allViews.created', ({ views }) => {
         const detailView = views.get(path);
-        detailView.mixins.push(HistoryDetailView, HideDetailOperationsMixin);
+        detailView.useViewFieldAsTitle = false;
+        detailView.mixins.push(HistoryDetailView);
+
+        detailView.extendStore((store) => {
+            const sublinks = computed(() => {
+                if (
+                    store.instance.value === null ||
+                    (store.instance.value.kind === 'MODULE' &&
+                        store.instance.value.mode.name === 'setup' &&
+                        store.instance.value.status === 'OK')
+                ) {
+                    return store.sublinks.value;
+                }
+                return store.sublinks.value.filter((sublink) => sublink.name !== 'facts');
+            });
+
+            const actions = computed(() => {
+                let storeActions = store.actions.value;
+                if (store.instance.value && ['OK', 'DELAY'].includes(store.instance.value.status)) {
+                    storeActions = storeActions.filter((action) => action.name !== 'cancel');
+                }
+                return storeActions.filter((action) => action.name !== 'clear');
+            });
+
+            return {
+                ...store,
+                sublinks,
+                actions,
+            };
+        });
     });
 }
 
 export function setupListView(path) {
     spa.signals.once('allViews.created', ({ views }) => {
         const listView = views.get(path);
-        listView.mixins.push(HideListOperationsMixin);
+        listView.extendStore((store) => {
+            const instanceSublinks = computed(() => {
+                return store.instanceSublinks.value.filter((sublink) => sublink.name !== 'facts');
+            });
+
+            const instanceActions = computed(() => {
+                return store.instanceActions.value.filter(
+                    (action) => !['cancel', 'clear'].includes(action.name),
+                );
+            });
+
+            return {
+                ...store,
+                instanceActions,
+                instanceSublinks,
+            };
+        });
         listView.multiActions.delete('cancel');
         listView.multiActions.delete('clear');
     });

@@ -13,7 +13,7 @@ module.exports = {
     },
     rules: {
         'no-debugger': 'warn',
-        'prettier/prettier': 'warn',
+        'prettier/prettier': 'error',
         'vue/component-tags-order': 'off',
         'vue/html-indent': ['error', 4],
         'vue/html-self-closing': ['error', { html: { void: 'any' } }],

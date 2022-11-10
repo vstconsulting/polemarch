@@ -1,40 +1,30 @@
-/** @vue/component */
-const OptionCreatePageMixin = {
-    data() {
-        return {
-            templateKind: null,
-        };
-    },
-    computed: {
-        data() {
-            return {
-                ...this.$store.getters[this.storeName + '/sandbox'],
-                kind: this.templateKind,
-            };
-        },
-    },
-    methods: {
-        async fetchData() {
-            this.initLoading();
-            try {
-                const template = await this.$app.views
-                    .get('/project/{id}/execution_templates/')
-                    .objects.get(this.params.execution_templates_id, this.params);
-                this.templateKind = template.kind;
-            } catch (e) {
-                this.$app.error_handler.defineErrorAndShow(e);
-            }
-            await spa.components.page.PageNewViewComponent.methods.fetchData.call(this);
-            this.setLoadingSuccessful();
-        },
-    },
-};
-
 spa.signals.once('allViews.created', ({ views }) => {
     const optionCreatePage = views.get(
         '/project/{id}/execution_templates/{execution_templates_id}/option/new/',
     );
-    optionCreatePage.mixins.push(OptionCreatePageMixin);
+    optionCreatePage.extendStore((store) => {
+        const app = spa.getApp();
+
+        async function fetchData() {
+            const route = app.router.currentRoute;
+            store.initLoading();
+            await store.fetchData();
+            try {
+                const template = await app.views
+                    .get('/project/{id}/execution_templates/')
+                    .objects.get(route.params.execution_templates_id, route.params);
+                store.sandbox.value.kind = template.kind;
+            } catch (e) {
+                app.error_handler.defineErrorAndShow(e);
+            }
+            store.setLoadingSuccessful();
+        }
+
+        return {
+            ...store,
+            fetchData,
+        };
+    });
 });
 
 spa.signals.once('app.afterInit', ({ app }) => {

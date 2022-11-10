@@ -68,7 +68,12 @@ class _ProjectInventoryViewSet(InventoryViewSet, __ProjectInventoryViewSet):
 
 
 class CreateTemplateOptionSerializer(TemplateOption.generated_view.serializer_class_one):  # pylint: disable=no-member
+    id = fields.CharField(read_only=True)
     name = CharField(max_length=256)
+    data = DependEnumField(field='kind', types={
+        'Task': TaskTemplateParameters(),
+        'Module': ModuleTemplateParameters(),
+    })
 
     class Meta:
         __inject_from__ = 'detail'
