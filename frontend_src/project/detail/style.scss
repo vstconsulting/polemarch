@@ -1,11 +1,16 @@
-.fields-group-Main {
-  order: 2
+.fields-group-General {
+  order: 1
 }
 
 .fields-group-Info {
   order: 3;
 }
 
-.fields-group-Quick_playbook_execution_form {
-  order: 1;
+.fields-group-Quick_playbook_execution_form,
+.fields-group-Repository {
+  order: 2;
+}
+
+#label-for-readme_content-field {
+  display: none;
 }

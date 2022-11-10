@@ -157,6 +157,9 @@
                 if (newPeriod?.queryAmount !== period?.queryAmount) {
                     this.$emit('request-data', newPeriod.queryAmount);
                 }
+                if (newPeriod?.label !== period?.label) {
+                    this.updateChart();
+                }
             },
         },
         created() {

@@ -25,6 +25,7 @@ module.exports = {
     ],
     externals: {
         moment: 'moment',
+        vue: 'Vue27',
     },
     module: {
         rules: [

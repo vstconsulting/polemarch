@@ -8,7 +8,7 @@ const ProjectDetailViewMixin = {
         fieldsGroups() {
             const groups = [
                 {
-                    title: 'Main',
+                    title: 'General',
                     wrapperClasses: 'col-md-5',
                     fields: ['id', 'name', 'repository', 'status', 'revision', 'branch', 'owner'],
                 },

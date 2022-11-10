@@ -22,11 +22,11 @@
             </button>
             <div class="dropdown-menu">
                 <button
-                    v-for="(title, type) in types"
-                    :key="type"
+                    v-for="(title, menuType) in types"
+                    :key="menuType"
                     class="dropdown-item"
                     type="button"
-                    :data-type="type"
+                    :data-type="menuType"
                     @click="setType"
                 >
                     {{ $t(title) }}

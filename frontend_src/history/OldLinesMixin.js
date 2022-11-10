@@ -122,6 +122,7 @@ export default {
     beforeDestroy() {
         if (this.subscription) {
             this.subscription.unsubscribe();
+            this.subscription.removeAllListeners();
         }
     },
 
@@ -132,7 +133,8 @@ export default {
     methods: {
         startUpdate() {
             if (this.$app.centrifugoClient) {
-                this.subscription = this.$app.centrifugoClient.subscribe('history_lines', (msg) => {
+                this.subscription = this.$app.centrifugoClient.subscribe(
+                    `${this.$app.autoUpdateController.subscriptionsPrefix}.history_lines`, (msg) => {
                     if (msg.data.pk === this.pk && !this.loading) {
                         this.updateData();
                     }
@@ -142,9 +144,6 @@ export default {
             }
         },
 
-        autoAutoUpdateActionName() {
-            return 'updateData';
-        },
         /**
          * Method - on scroll event handler.
          */

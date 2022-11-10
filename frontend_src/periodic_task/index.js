@@ -1,34 +1,8 @@
+import { computed } from 'vue';
 import './style.scss';
 import { hideListColumns } from '../history';
 
 hideListColumns('Periodictask', ['mode', 'inventory', 'template', 'template_opt']);
-
-const fetchKindMixin = {
-    data() {
-        return {
-            kind: null,
-        };
-    },
-    methods: {
-        fetchKind() {
-            return this.$app.views
-                .get('/project/{id}/periodic_task/')
-                .objects.formatPath(this.$route.params)
-                .get(this.$route.params.periodic_task_id)
-                .then((task) => task.kind)
-                .catch((error) => {
-                    this.setLoadingError(error || {});
-                });
-        },
-        onCreatedHandler() {
-            this.fetchData()
-                .then(() => this.fetchKind())
-                .then((kind) => {
-                    this.commitMutation('setFieldValue', { field: 'kind', value: kind });
-                });
-        },
-    },
-};
 
 spa.signals.once('allViews.created', ({ views }) => {
     const variablesCreatePage = views.get('/project/{id}/periodic_task/{periodic_task_id}/variables/new/');
@@ -71,23 +45,48 @@ spa.signals.once('allViews.created', ({ views }) => {
         );
     }
 
-    variablesCreatePage.mixins.push(fetchKindMixin);
-});
+    variablesCreatePage.extendStore((store) => {
+        const app = spa.getApp();
 
-const HideSublinksMixin = {
-    computed: {
-        sublinks() {
-            return Array.from(this.view.sublinks.values()).filter((sublink) => {
-                if (sublink.name === 'variables') {
-                    return this.data.kind === 'MODULE' || this.data.kind === 'PLAYBOOK';
-                }
-                return true;
-            });
-        },
-    },
-};
+        async function fetchKind() {
+            try {
+                const task = await app.views
+                    .get('/project/{id}/periodic_task/')
+                    .objects.formatPath(app.router.currentRoute.params)
+                    .get(app.router.currentRoute.params.periodic_task_id);
+                return task.kind;
+            } catch (error) {
+                store.setLoadingError(error || {});
+            }
+        }
+
+        async function fetchData() {
+            const [kind] = await Promise.all([fetchKind(), store.fetchData()]);
+            store.setFieldValue({ field: 'kind', value: kind });
+        }
+
+        return {
+            ...store,
+            fetchData,
+        };
+    });
+});
 
 spa.signals.once('allViews.created', ({ views }) => {
     const periodicTaskPage = views.get('/project/{id}/periodic_task/{periodic_task_id}/');
-    periodicTaskPage.mixins.push(HideSublinksMixin);
+    periodicTaskPage.extendStore((store) => {
+        const sublinks = computed(() => {
+            return store.sublinks.value.filter((sublink) => {
+                if (sublink.name === 'variables') {
+                    const data = store.instance.value;
+                    return data?.kind === 'MODULE' || data?.kind === 'PLAYBOOK';
+                }
+                return true;
+            });
+        });
+        return {
+            ...store,
+            sublinks,
+        };
+    });
 });

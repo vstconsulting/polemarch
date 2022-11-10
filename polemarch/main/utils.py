@@ -349,5 +349,5 @@ class PolemarchNotificator(Notificator):
     def create_notification_from_instance(self, instance):
         super().create_notification_from_instance(instance)
         # pylint: disable=protected-access
-        if instance.__class__._meta.label in NOTIFY_WITHOUT_QUEUE_MODELS and self.channel != 'history_lines':
+        if instance.__class__._meta.label in NOTIFY_WITHOUT_QUEUE_MODELS and self.label != 'history_lines':
             self.send()
