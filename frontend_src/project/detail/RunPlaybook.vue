@@ -81,15 +81,17 @@
                     const response = await this.$app.api.makeRequest({
                         useBulk: true,
                         method: spa.utils.HttpMethods.POST,
-                        path: spa.utils.formatPath(actionView.path, { id: this.page.getInstancePk() }),
+                        path: spa.utils.formatPath(actionView.path, {
+                            id: this.$app.store.page.getInstancePk(),
+                        }),
                         data: {
                             ...mainDataInstance._getInnerData(),
                             playbook: name,
                             extra_vars: JSON.stringify(this.argsData),
                         },
                     });
-                    this.page.openPage(
-                        this.page._getRedirectUrlFromResponse(response.data, actionView.modelsList[1]),
+                    spa.utils.openPage(
+                        spa.utils.getRedirectUrlFromResponse(response.data, actionView.modelsList[1]),
                     );
                 } catch (e) {
                     this.$app.error_handler.defineErrorAndShow(e);

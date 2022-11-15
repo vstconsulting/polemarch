@@ -59,6 +59,12 @@ code_style:
   variables:
     TOX_ENVS: "flake,pylint"
 
+js_style:
+  <<: *branch_tests
+  stage: code_standarts
+  variables:
+    TOX_ENVS: "js_style"
+
 py38-coverage:
   <<: *branch_tests
   variables:

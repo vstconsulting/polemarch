@@ -167,6 +167,18 @@ Once your project status changes to "OK", you can start working with Polemarch.
 .. warning:: If you update something in your GIT repository, don't forget to run sync in
              Polemarch for pulling your changes.
 
+.. warning::
+      If you have trouble when cloning from *local* git repository, this may be caused by
+      ``protocol.file.allow`` setting is is set to ``user`` in your git config.
+      For more information please see
+      `this topic <https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253>`_.
+      One of the solutions might be:
+
+      .. sourcecode:: bash::
+
+         git config --global protocol.file.allow always
+
+      Keep in mind that this command allows file clone **globally at git level for all your projects**.
 
 Project variables
 -----------------

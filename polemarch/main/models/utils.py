@@ -82,7 +82,7 @@ class Executor(CmdExecutor):
             self.notificator = None
         else:
             notificator_class = apps.get_app_config('vstutils_api').module.notificator_class
-            self.notificator = notificator_class([], channel='history_lines')
+            self.notificator = notificator_class([], label='history_lines')
             self.notificator_lock = threading.Lock()
             self.notification_last_time = 0
 

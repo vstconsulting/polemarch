@@ -1,6 +1,6 @@
 <template>
     <div class="col-md-6 output-lines">
-        <Card card-body-classes="p-0" :title="title" :is-collapsable="false">
+        <Card card-body-classes="p-0" :title="title">
             <template #tools>
                 <button v-show="loading" type="button" class="btn btn-tool">
                     <i class="fa fa-spinner fa-pulse fa-fw" />
