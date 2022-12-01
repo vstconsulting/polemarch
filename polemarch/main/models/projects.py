@@ -30,6 +30,7 @@ from .base import ManyToManyFieldACL, BQuerySet, BModel
 from .hooks import Hook
 from ..utils import AnsibleModules, AnsibleConfigParser, SubCacheInterface
 
+
 logger = logging.getLogger("polemarch")
 HISTORY_ID = TypeVar('HISTORY_ID', int, None)  # pylint: disable=C0103
 
@@ -87,6 +88,7 @@ class Project(AbstractModel):
     objects = ProjectQuerySet.as_manager()
     repo_handlers = objects._queryset_class.repo_handlers
     task_handlers = objects._queryset_class.task_handlers
+
     repository = models.CharField(max_length=2 * 1024)
     status = models.CharField(max_length=32, default="NEW")
     inventories = ManyToManyFieldACL(hosts_models.Inventory, blank=True)
@@ -109,14 +111,6 @@ class Project(AbstractModel):
     BOOLEAN_VARS = [
         'repo_sync_on_run'
     ]
-
-    EXTRA_OPTIONS = {
-        'initiator': 0,
-        'initiator_type': 'project',
-        'executor': None,
-        'save_result': True,
-        'template_option': None
-    }
 
     PM_YAML_FORMATS = {
         'unknown': str,
@@ -266,36 +260,20 @@ class Project(AbstractModel):
             return
         path_validator(inventory)
 
-    def _prepare_kw(self, kind: str, mod_name: str, inventory=None, **extra) -> Dict:
-        if not mod_name:  # nocv
-            raise PMException("Empty playbook/module name.")
-        history, extra = self.history.all().start(
-            self, kind, mod_name, inventory, **extra
-        )
-        kwargs = dict(
-            target=mod_name, inventory=inventory,
-            history=history, project=self
-        )
-        kwargs.update(extra)
-        return kwargs
-
     def hook(self, when, msg) -> None:
         Hook.objects.all().execute(when, msg)
 
-    def execute(self, kind: str, *args, **extra) -> HISTORY_ID:
-        sync = extra.pop("sync", False)
-        if self.status != "OK" and not sync:
-            raise self.SyncError("ERROR project not synchronized")
-        kind = kind.upper()
-        task_class = self.task_handlers.backend(kind)
+    def execute(self, plugin: str, execute_args, **kwargs) -> HISTORY_ID:
+        from ..executions import PLUGIN_HANDLERS  # pylint: disable=import-outside-toplevel
 
-        kwargs = self._prepare_kw(kind, *args, **extra)
-        history = kwargs['history']
-        if sync:
-            task_class(**kwargs)
-        else:
-            task_class.delay(**kwargs)
-        return history.id if history is not None else history
+        return PLUGIN_HANDLERS.execute(
+            plugin,
+            self,
+            execute_args=execute_args,
+            initiator=self.id,
+            initiator_type='project',
+            **kwargs
+        )
 
     def set_status(self, status) -> None:
         self.status = status

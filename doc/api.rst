@@ -24,6 +24,6 @@ In Polemarch we have some entities that can be nested to another entities. Below
 **User** can be nested into **Team**
 
 
-For add entities into another, you only need send ``[{"id": [instance_id]}, ...]`` to subpath. Also you can insert instead of data results of bulk request, inner mechanism add all entities in result to parent entity.
+To add entities into another, you only need send ``[{"id": [instance_id]}, ...]`` to subpath. Also you can insert instead of data results of bulk request, inner mechanism add all entities in result to parent entity.
 
 .. vst_openapi:: ./api_schema.yaml

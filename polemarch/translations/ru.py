@@ -3,6 +3,7 @@ TRANSLATION = {
     'User settings were successfully saved.': 'Пользовательские настройки были успешно сохранены.',
     'Invalid path. Path must not contain "..", "~" or any other special characters and must be relative.':
         'Неправильный путь. Путь не должен содержать "..", "~" и другие специальные символы, а также должен быть относительным.',
+    '{} plugin was executed.': 'Запущен плагин {}.',
 
     # field titles and names
     'project id': 'id проекта',

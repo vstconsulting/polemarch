@@ -174,7 +174,7 @@ Once your project status changes to "OK", you can start working with Polemarch.
       `this topic <https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253>`_.
       One of the solutions might be:
 
-      .. sourcecode:: bash::
+      .. sourcecode:: bash
 
          git config --global protocol.file.allow always
 
@@ -279,7 +279,6 @@ When status of your module execution changes to "OK" you will see the next page:
 
 .. image:: new_screenshots/execute_module_3.png
 .. image:: new_screenshots/execute_module_4.png
-
 
 Execution templates
 -------------------

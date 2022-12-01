@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Optional, Type
 from django.db.models import Model
 
 
@@ -6,9 +6,9 @@ class Default:
     # pylint: disable=unused-argument
     qs_methods = []
 
-    def __init__(self, model=None, instance=None):
+    def __init__(self, model: Optional[Type[Model]] = None, instance=None):
         self.instance = instance
-        self.model = model  # type: Type[Model]
+        self.model = model
 
     def set_owner(self, user):
         '''

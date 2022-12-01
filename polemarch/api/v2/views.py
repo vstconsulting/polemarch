@@ -10,7 +10,7 @@ from drf_yasg.utils import swagger_auto_schema
 from vstutils.api import auth as vst_auth
 from vstutils.api.permissions import StaffPermission
 from vstutils.api import base, serializers as vstsers, decorators as deco, responses
-from vstutils.utils import KVExchanger
+from vstutils.utils import KVExchanger, deprecated, translate as _
 from vstutils.api.responses import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from . import filters
@@ -575,8 +575,18 @@ class __TemplateViewSet(base.ModelViewSet):
         """
         Execute template with option.
         """
-        # returns HTTPResponse
-        return self.get_object().execute(request.user, request.data.get('option', None))
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        template = self.get_object()
+        history_id = template.execute(request.user, **serializer.validated_data)
+
+        response_serializer = sers.ExecuteResponseSerializer(instance={
+            'history_id': history_id,
+            'executor': request.user.id,
+            'detail': _('{} plugin was executed.').format(template.get_plugin())
+        })
+        return HTTP_201_CREATED(response_serializer.data)
 
 
 class __ProjectHistoryViewSet(HistoryViewSet):
@@ -658,34 +668,26 @@ class ProjectViewSet(OwnedView, _VariablesCopyMixin):
         """
         return self._execution("module", dict(request.data), request.user)
 
+    @deprecated
     def _execution(self, kind, data, user, **kwargs):
-
-        template = data.pop("template", None)
         inventory = data.get("inventory", None)
         msg = "Started in the inventory {}.".format(
             inventory if inventory else 'specified in the project configuration.'
         )
         instance = self.get_object()
-        if template is not None:
-            init_type = "template"
-            obj_id = template
-            msg = f'Start template [id={template}].'
-        else:
-            init_type = "project"
-            obj_id = instance.id
-            serializer = self._get_ansible_serializer(kind.lower())
-            data = {
-                k: v for k, v in serializer.to_internal_value(data).items()
-                if k in data.keys() or v
-            }
+        serializer = self._get_ansible_serializer(kind.lower())
+        data = {
+            k: v for k, v in serializer.to_internal_value(data).items()
+            if k in data.keys() or v
+        }
         target = data.pop(kind)
         try:
             target = str(target)
         except UnicodeEncodeError:  # nocv
             target = target.encode('utf-8')
+        data[kind] = target
         history_id = instance.execute(
-            kind, str(target),
-            initiator=obj_id, initiator_type=init_type, executor=user, **data
+            kind.upper(), executor=user, execute_args=data
         )
         rdata = sers.ExecuteResponseSerializer(data=dict(
             detail=msg,
