@@ -1,12 +1,12 @@
 export function setupExecuteViews() {
-    const executingViews = ['/project/{id}/execute_module/', '/project/{id}/execute_playbook/'];
     const HideNotRequiredMixin = {
         data: () => ({ hideNotRequired: true }),
     };
     spa.signals.once('allViews.created', ({ views }) => {
-        for (const path of executingViews) {
-            const view = views.get(path);
-            view.mixins.push(HideNotRequiredMixin);
+        for (const [path, view] of views) {
+            if (path.startsWith('/project/{id}/execute_')) {
+                view.mixins.push(HideNotRequiredMixin);
+            }
         }
     });
 }

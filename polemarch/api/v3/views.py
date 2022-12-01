@@ -1,10 +1,13 @@
-from rest_framework import fields
-from vstutils.api.decorators import nested_view
+from rest_framework import fields, status
+from vstutils.api.base import GenericViewSetMeta
+from vstutils.api.decorators import nested_view, subaction
 from vstutils.api.fields import CharField, DependEnumField
 from vstutils.api.filters import CharFilter
-from vstutils.utils import create_view
+from vstutils.api.responses import HTTP_201_CREATED
+from vstutils.utils import create_view, translate as _
 
-from ...main.models import TemplateOption, Group
+from ...main.models import TemplateOption, Group, Project
+from ...main.executions import PLUGIN_HANDLERS
 from ..v2.filters import variables_filter, vars_help
 from ..v2.views import (
     HostViewSet,
@@ -26,6 +29,7 @@ from .serializers import (
     TaskTemplateParameters,
     ModuleTemplateParameters,
     OneProjectSerializer,
+    ExecuteResponseSerializer,
 )
 
 
@@ -67,13 +71,21 @@ class _ProjectInventoryViewSet(InventoryViewSet, __ProjectInventoryViewSet):
     __doc__ = InventoryViewSet.__doc__
 
 
+option_data = {
+    'Task': TaskTemplateParameters(),
+    'Module': ModuleTemplateParameters(),
+}
+option_data.update({
+    plugin: backend.get_serializer_class()()
+    for plugin, backend in PLUGIN_HANDLERS.items()
+    if plugin not in ('PLAYBOOK, MODULE')
+})
+
+
 class CreateTemplateOptionSerializer(TemplateOption.generated_view.serializer_class_one):  # pylint: disable=no-member
     id = fields.CharField(read_only=True)
     name = CharField(max_length=256)
-    data = DependEnumField(field='kind', types={
-        'Task': TaskTemplateParameters(),
-        'Module': ModuleTemplateParameters(),
-    })
+    data = DependEnumField(field='kind', types=option_data)
 
     class Meta:
         __inject_from__ = 'detail'
@@ -93,10 +105,7 @@ TemplateOptionViewSet = create_view(
         'id': fields.CharField(read_only=True),
         'name': fields.CharField(read_only=True),
         'kind': fields.CharField(read_only=True),
-        'data': DependEnumField(field='kind', types={
-            'Task': TaskTemplateParameters(),
-            'Module': ModuleTemplateParameters(),
-        }),
+        'data': DependEnumField(field='kind', types=option_data),
     }
 )
 
@@ -108,9 +117,42 @@ class ExecutionTemplateViewSet(__TemplateViewSet):
     serializer_class_create = CreateExecutionTemplateSerializer
 
 
+class ProjectViewSetMeta(GenericViewSetMeta):
+    def __new__(mcs, name, bases, attrs):
+        for plugin, backend in PLUGIN_HANDLERS.items():
+            action_name = f'execute_{plugin.lower()}'
+
+            def action(self, request, plugin=plugin, *args, **kwargs):
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                project: Project = self.get_object()
+
+                data = serializer.validated_data
+                history_id = project.execute(plugin, executor=request.user, execute_args=data)
+
+                response_serializer = ExecuteResponseSerializer(instance={
+                    'history_id': history_id,
+                    'executor': request.user.id,
+                    'detail': _('{} plugin was executed.').format(plugin),
+                })
+                return HTTP_201_CREATED(response_serializer.data)
+
+            action.__name__ = action_name
+            attrs[action_name] = subaction(
+                detail=True,
+                methods=['post'],
+                serializer_class=backend.get_serializer_class(),
+                response_serializer=ExecuteResponseSerializer,
+                response_code=status.HTTP_201_CREATED,
+                description=f'Execute {plugin.lower()} plugin.',
+            )(action)
+
+        return super().__new__(mcs, name, bases, attrs)
+
+
 @nested_view('inventory', 'id', manager_name='inventories', allow_append=True, view=_ProjectInventoryViewSet)
 @nested_view('execution_templates', 'id', manager_name='template', view=ExecutionTemplateViewSet)
 @nested_view('template', 'id', manager_name='template', view=__TemplateViewSet, schema=None)
-class ProjectViewSet(ProjectViewSetV2):
+class ProjectViewSet(ProjectViewSetV2, metaclass=ProjectViewSetMeta):
     __doc__ = ProjectViewSetV2.__doc__
     serializer_class_one = OneProjectSerializer

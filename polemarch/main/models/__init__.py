@@ -26,7 +26,7 @@ from .hooks import Hook
 from ..validators import RegexValidator, validate_hostname, path_validator
 from ..exceptions import UnknownTypeException, Conflict
 from ..utils import CmdExecutor
-from ...main.constants import ProjectVariablesEnum, ExecutionTypesEnum, ANSIBLE_REFERENCE
+from ...main.constants import ProjectVariablesEnum, ANSIBLE_REFERENCE
 
 
 logger = logging.getLogger('polemarch')
@@ -85,6 +85,8 @@ def check_variables_values(instance: Variable, *args, **kwargs) -> None:
     content_object = instance.content_object
     if isinstance(content_object, PeriodicTask):
         cmd = "module" if content_object.kind == "MODULE" else "playbook"
+        if instance.key == 'revision':
+            return  # noce
         ANSIBLE_REFERENCE.validate_args(cmd, {instance.key: instance.value})
     elif isinstance(content_object, Host):
         if instance.key == 'ansible_host':
@@ -184,12 +186,12 @@ def validate_template_keys(instance: Template, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     errors = {}
-    for _, data in chain(((None, instance.data),), instance.options.items()):
-        for key in data.keys():
-            if key not in instance.template_fields[instance.kind]:
-                errors[key] = ["Unknown key. Keys should be {}".format(
-                    instance.template_fields[instance.kind]
-                )]
+    if instance.kind in instance.template_fields:
+        fields_to_validate = instance.template_fields[instance.kind]
+        for _, data in chain(((None, instance.data),), instance.options.items()):
+            for key in data.keys():
+                if key not in fields_to_validate:
+                    errors[key] = ["Unknown key. Keys should be {}".format(fields_to_validate)]
     if errors:
         raise drfValidationError(errors)
 
@@ -200,10 +202,14 @@ def validate_template_args(instance: Template, **kwargs) -> None:
         return
     if instance.kind in ["Host", "Group"]:
         return  # nocv
-    command = "playbook"
     ansible_args = dict(instance.data['vars'])
-    if instance.kind == "Module":
+    ansible_args.pop('revision', None)
+    if instance.kind == 'Task':
+        command = "playbook"
+    elif instance.kind == "Module":
         command = "module"
+    else:
+        return
     ANSIBLE_REFERENCE.validate_args(command, ansible_args)
     for _, data in dict(instance.options).items():
         ANSIBLE_REFERENCE.validate_args(

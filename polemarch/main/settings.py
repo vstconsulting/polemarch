@@ -193,6 +193,34 @@ if 'git' in config:
 archive_section = ArchiveSection('archive', config, config['archive']).all()
 
 
+class PluginSection(BaseAppendSection):
+    types_map = {
+        'backend': cconfig.StrType(),
+    }
+
+
+class PluginOptionsSection(PluginSection):
+    pass
+
+
+PLUGINS = {}
+
+for plugin_name, plugin_config, in config['plugins'].items():
+    if 'backend' in plugin_config:
+        plugin_section = PluginSection(f'plugins.{plugin_name}', config, config['plugins'][plugin_name]).all()
+        options_section = PluginOptionsSection(
+            f'plugins.{plugin_name}.options',
+            config,
+            plugin_section.get('options', {})
+        ).all()
+
+        PLUGINS[plugin_name.upper()] = {
+            "BACKEND": plugin_section['backend'],
+            "OPTIONS": options_section
+        }
+
+PLUGIN_HANDLERS_CLASS = f'{VST_PROJECT_LIB_NAME}.main.utils.ExecutionHandlers'
+
 REPO_BACKENDS = {
     "MANUAL": {
         "BACKEND": "{}.main.repo.Manual".format(VST_PROJECT_LIB_NAME),
@@ -227,11 +255,8 @@ TASKS_HANDLERS = {
     "SCHEDULER": {
         "BACKEND": "{}.main.tasks.tasks.ScheduledTask".format(VST_PROJECT_LIB_NAME)
     },
-    "MODULE": {
-        "BACKEND": "{}.main.tasks.tasks.ExecuteAnsibleModule".format(VST_PROJECT_LIB_NAME)
-    },
-    "PLAYBOOK": {
-        "BACKEND": "{}.main.tasks.tasks.ExecuteAnsiblePlaybook".format(VST_PROJECT_LIB_NAME)
+    "EXECUTION": {
+        "BACKEND": "{}.main.tasks.tasks.PluginTask".format(VST_PROJECT_LIB_NAME)
     },
 }
 
@@ -300,3 +325,10 @@ if "test" in sys.argv:
     HOOKS_DIR = '/tmp/polemarch_hooks' + str(KWARGS['PY_VER'])
     os.makedirs(PROJECTS_DIR) if not os.path.exists(PROJECTS_DIR) else None
     os.makedirs(HOOKS_DIR) if not os.path.exists(HOOKS_DIR) else None
+
+    tests_module_name = 'tests'
+    if VST_PROJECT_LIB_NAME != 'polemarch':
+        tests_module_name = 'tests_ce'  # noce
+    PLUGINS['TEST_ANSIBLE_DOC'] = {'BACKEND': f'{tests_module_name}.TestAnsibleDoc', 'OPTIONS': {}}
+    PLUGINS['TEST_ECHO'] = {'BACKEND': f'{tests_module_name}.TestEcho', 'OPTIONS': {}}
+    PLUGINS['TEST_MODULE'] = {'BACKEND': f'{tests_module_name}.TestModule', 'OPTIONS': {}}

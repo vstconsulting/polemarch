@@ -10,7 +10,7 @@ from typing import Dict
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from rest_framework import serializers, exceptions, fields
+from rest_framework import serializers, exceptions
 
 from vstutils.api import auth as vst_auth
 from vstutils.api import serializers as vst_serializers, fields as vst_fields
@@ -753,14 +753,11 @@ class OneProjectSerializer(ProjectSerializer, _InventoryOperations):
                   'execute_view_data',)
 
 
-def generate_fields(ansible_reference: AnsibleArgumentsReference, ansible_type: str, no_default=False) -> OrderedDict:
-    if ansible_type is None:
-        return OrderedDict()  # nocv
-
+def generate_fields(reference: dict, ansible_type: str, exclude=None) -> OrderedDict:
     fields_of_serializer = OrderedDict()
-
-    for ref, settings in ansible_reference.raw_dict[ansible_type].items():
-        if ref in {'help', 'version'}:
+    exclude = exclude or set()
+    for ref, settings in reference.items():
+        if ref in {'help', 'version'} | exclude:
             continue
         ref_type = settings.get('type', None)
         kwargs = dict(help_text=settings.get('help', ''), required=False)
@@ -790,8 +787,6 @@ def generate_fields(ansible_reference: AnsibleArgumentsReference, ansible_type: 
                 kwargs['default'] = 'all'
 
         field_name = ref.replace('-', '_')
-        if no_default:
-            kwargs['default'] = fields.empty
         fields_of_serializer[field_name] = field(**kwargs)
 
     return fields_of_serializer
@@ -807,7 +802,10 @@ class AnsibleSerializerMetaclass(serializers.SerializerMetaclass):
                 ansible_type = 'playbook'
             elif isinstance(attrs.get('module', None), serializers.CharField):
                 ansible_type = 'module'
-            attrs.update(generate_fields(attrs['ansible_reference'], ansible_type))
+            attrs.update(generate_fields(
+                attrs['ansible_reference'].raw_dict[ansible_type],
+                ansible_type
+            ))
         return super(AnsibleSerializerMetaclass, cls).__new__(cls, name, bases, attrs)
 
 

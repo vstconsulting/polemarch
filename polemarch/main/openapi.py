@@ -67,7 +67,12 @@ def set_inventory_field(request, schema):
     def set_inventory(model):
         for name, field in model['properties'].items():
             if name == 'inventory':
-                field['format'] = 'inventory'
+                if field.get('format') == 'dynamic' and field['x-options']['types']:
+                    for type_field in field['x-options']['types'].values():
+                        if isinstance(type_field, dict):
+                            type_field['format'] = 'inventory'
+                else:
+                    field['format'] = 'inventory'
 
             elif field.get('format') == 'dynamic':
                 for type_field in field['x-options']['types'].values():
@@ -86,13 +91,13 @@ def set_periodic_task_variable_value_field(request, schema):  # pylint: disable=
     module_vars = {
         k: v
         for k, v
-        in definitions['AnsibleModule']['properties'].items()
+        in definitions['ExecuteModule']['properties'].items()
         if k not in {'module', 'inventory'}
     }
     playbook_vars = {
         k: v
         for k, v
-        in definitions['AnsiblePlaybook']['properties'].items()
+        in definitions['ExecutePlaybook']['properties'].items()
         if k not in {'playbook', 'inventory'}
     }
     definitions['PeriodicTaskVariable']['properties']['key'] = {

@@ -9,6 +9,7 @@
         hide-title
         :type="$parent.type"
         :data="{ [field.name]: value && value.value }"
+        @set-value="({ field, value, ...args }) => $emit('set-value', { type: 'fk', value }, args)"
     />
 </template>
 

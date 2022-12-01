@@ -8,6 +8,7 @@ from threading import Thread
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from django.forms import ValidationError
 from django.test import override_settings
+from rest_framework import fields as drffields
 from unittest import skipIf
 import git
 import yaml
@@ -21,22 +22,27 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from vstutils.tests import BaseTestCase as VSTBaseTestCase
 from vstutils.utils import raise_context
+from vstutils.api import fields as vstfields
 from django.conf import settings
 try:
-    from polemarch.main import tasks
+    from polemarch.main.tasks import ScheduledTask
     from polemarch.main.openapi import PROJECT_MENU
     from polemarch.main.constants import CYPHER
+    from polemarch.plugins.ansible import BaseAnsiblePlugin, BasePlugin, Module
 except ImportError:
-    from pmlib.main import tasks
+    from pmlib.main.tasks import ScheduledTask
     from pmlib.main.constants import CYPHER
+    from pmlib.plugins.ansible import BaseAnsiblePlugin, BasePlugin, Module
 
 
 TEST_DATA_DIR = Path(__file__).parent.absolute()
 ORIGINAL_PROJECTS_DIR = settings.PROJECTS_DIR
 if settings.VST_PROJECT_LIB_NAME == 'polemarch':
     TEST_DATA_DIR /= 'test_data'
+    TESTS_MODULE = 'tests'
 else:
     TEST_DATA_DIR /= 'test_data_ce'
+    TESTS_MODULE = 'tests_ce'
 
 User = get_user_model()
 
@@ -84,6 +90,8 @@ class MockServer:
     Stops server after leaving context.
     """
 
+    __slots__ = ('handler', 'httpd')
+
     def __init__(self, handler: BaseHTTPRequestHandler):
         self.handler = handler
 
@@ -101,6 +109,53 @@ class MockServer:
 class TestException(Exception):
     def __init__(self, msg='Test exception.', *args, **kwargs):
         super().__init__(msg, *args, **kwargs)
+
+
+class TestAnsibleDoc(BaseAnsiblePlugin):
+    reference = {
+        'module-path': {'type': 'string'},
+        'verbose': {'type': 'int', 'help': 'verbose level'},
+        'json': {'type': None},
+    }
+    serializer_fields = {'target': vstfields.VSTCharField()}
+    arg_shown_on_history_as_mode = 'target'
+    supports_inventory = False
+
+    @property
+    def base_command(self):
+        return super().base_command + ['ansible-doc']
+
+    def get_inventory(self, *args, **kwargs):
+        self.verbose_output('Test log from test plugin', level=2)
+        return super().get_inventory(*args, **kwargs)
+
+    def _process_arg(self, key, value):
+        if key == 'target':
+            return value
+        return super()._process_arg(key, value)
+
+
+class TestEcho(BasePlugin):
+    serializer_fields = {
+        'string': vstfields.VSTCharField(),
+        'n': drffields.BooleanField(default=drffields.empty, required=False, label='No trailing newlines'),
+        'e': drffields.BooleanField(default=drffields.empty, required=False, label='Interpret backslash escapes'),
+    }
+    arg_shown_on_history_as_mode = 'string'
+
+    @property
+    def base_command(self):
+        return ['echo']
+
+    def _process_arg(self, key, value):
+        if key == 'string':
+            return value
+        if key in ('n', 'e') and value:
+            return f'-{key}'
+
+
+class TestModule(Module):
+    pass
 
 
 class BaseTestCase(VSTBaseTestCase):
@@ -201,11 +256,18 @@ class BaseProjectTestCase(BaseTestCase):
             'data': {'module': module, 'inventory': inventory or self.inventory_path, **kwargs}
         }
 
-    def execute_playbook_bulk_data(self, project_id=None, inventory=None, playbook='bootstrap.yml', **kwargs):
+    def execute_playbook_bulk_data(self, project_id=None, inventory=None, playbook='playbook.yml', **kwargs):
         return {
             'method': 'post',
             'path': ['project', project_id or self.project.id, 'execute_playbook'],
             'data': {'playbook': playbook, 'inventory': inventory or self.inventory_path, **kwargs}
+        }
+
+    def execute_plugin_bulk_data(self, plugin, project_id=None, **kwargs):
+        return {
+            'method': 'post',
+            'path': ['project', project_id or self.project.id, f'execute_{plugin}'],
+            'data': {'target': 'gitlab_runner', **kwargs}
         }
 
     def create_periodic_task_bulk_data(self, project_id=None, inventory=None, **kwargs):
@@ -1586,31 +1648,39 @@ class SyncTestCase(BaseProjectTestCase):
         repo.index.commit('Initial commit')
         project_templates = (TEST_DATA_DIR / 'projects.yaml').read_text() % {'repo_url': repo_dir}
 
-        with self.patch('requests.models.Response.text', return_value=project_templates):
-            results = self.bulk([
-                # [0] get possible templates
-                {'method': 'get', 'path': 'community_template'},
-                # [1] use TestProject template (see test_data/projects.yaml)
-                {
-                    'method': 'post',
-                    'path': ['community_template', '<<0[data][results][0][id]>>', 'use_it'],
-                    'data': {'name': 'lol-name'}
-                },
-                # [2] check created project
-                self.get_project_bulk_data(project_id='<<1[data][project_id]>>'),
-                # [3] sync project
-                self.sync_project_bulk_data(project_id='<<1[data][project_id]>>'),
-                # [4] check created project
-                self.get_project_bulk_data(project_id='<<1[data][project_id]>>'),
-                # [5] execute template playbook
-                {
-                    'method': 'post',
-                    'path': ['project', '<<1[data][project_id]>>', 'execute_playbook'],
-                    'data': {'playbook': 'main.yml'},
-                },
-                # [6] check execution
-                {'method': 'get', 'path': ['history', '<<5[data][history_id]>>']}
-            ])
+        class MockHandler(BaseHTTPRequestHandler):
+            def do_GET(self, *args, **kwargs):
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/yaml')
+                self.end_headers()
+                self.wfile.write(project_templates.encode())
+
+        with MockServer(MockHandler) as server:
+            with override_settings(COMMUNITY_REPOS_URL=f'http://localhost:{server.server_port}'):
+                results = self.bulk([
+                    # [0] get possible templates
+                    {'method': 'get', 'path': 'community_template'},
+                    # [1] use TestProject template (see test_data/projects.yaml)
+                    {
+                        'method': 'post',
+                        'path': ['community_template', '<<0[data][results][0][id]>>', 'use_it'],
+                        'data': {'name': 'lol-name'}
+                    },
+                    # [2] check created project
+                    self.get_project_bulk_data(project_id='<<1[data][project_id]>>'),
+                    # [3] sync project
+                    self.sync_project_bulk_data(project_id='<<1[data][project_id]>>'),
+                    # [4] check created project
+                    self.get_project_bulk_data(project_id='<<1[data][project_id]>>'),
+                    # [5] execute template playbook
+                    {
+                        'method': 'post',
+                        'path': ['project', '<<1[data][project_id]>>', 'execute_playbook'],
+                        'data': {'playbook': 'main.yml'},
+                    },
+                    # [6] check execution
+                    {'method': 'get', 'path': ['history', '<<5[data][history_id]>>']}
+                ])
         self.assertEqual(results[0]['status'], 200)
         self.assertEqual(results[0]['data']['count'], 1)
         self.assertEqual(results[0]['data']['results'][0]['name'], 'TestProject')
@@ -1645,10 +1715,7 @@ class SyncTestCase(BaseProjectTestCase):
         (Path(project.path) / 'test.yml').touch()
 
         mock_dir = Path(temp_dir) / 'project'
-        with self.patch(
-            f'{settings.VST_PROJECT_LIB_NAME}.main.models.utils.AnsibleCommand._get_tmp_name',
-            return_value=mock_dir
-        ):
+        with self.patch(f'{settings.VST_PROJECT_LIB_NAME}.main.models.utils.PluginExecutor.execution_dir', mock_dir):
             results = self.bulk_transactional([
                 self.execute_module_bulk_data(project_id),
                 self.get_history_bulk_data('<<0[data][history_id]>>'),
@@ -1908,7 +1975,7 @@ class SyncTestCase(BaseProjectTestCase):
 class PeriodicTaskTestCase(BaseProjectTestCase):
     def test_periodic_task(self):
         # check correct data
-        results = self.bulk([
+        results = self.bulk_transactional([
             # [0]
             self.create_periodic_task_bulk_data(type='INTERVAL', schedule='10'),
             # [1]
@@ -1929,8 +1996,6 @@ class PeriodicTaskTestCase(BaseProjectTestCase):
                 template='<<5[data][id]>>',
             ),
         ])
-        for result in results:
-            self.assertEqual(result['status'], 201)
         playbook_task_id = results[0]['data']['id']
         module_task_id = results[4]['data']['id']
         template_id = results[5]['data']['id']
@@ -1961,7 +2026,7 @@ class PeriodicTaskTestCase(BaseProjectTestCase):
         self.assertIn("Invalid weekday literal", results[0]['data']['detail']['schedule'][0])
 
         # execute template
-        results = self.bulk([
+        results = self.bulk_transactional([
             {  # [0] execute playbook task
                 'method': 'post',
                 'path': ['project', self.project.id, 'periodic_task', playbook_task_id, 'execute'],
@@ -2000,8 +2065,6 @@ class PeriodicTaskTestCase(BaseProjectTestCase):
                 'path': ['project', self.project.id, 'history', '<<6[data][history_id]>>'],
             },
         ])
-        for result in results:
-            self.assertIn(result['status'], {200, 201})
         self.assertIn(f'Started at inventory {self.inventory.id}', results[0]['data']['detail'])
         self.assertEqual(results[1]['data']['status'], 'OK')
         self.assertEqual(results[1]['data']['initiator_type'], 'scheduler')
@@ -2048,7 +2111,7 @@ class PeriodicTaskTestCase(BaseProjectTestCase):
         self.assertEqual(results[1]['data']['status'], 'OK')
 
         # emulate execute by scheduler
-        tasks.ScheduledTask.delay(module_task_id)
+        ScheduledTask.delay(module_task_id)
         results = self.bulk([
             {
                 'method': 'get',
@@ -2062,7 +2125,7 @@ class PeriodicTaskTestCase(BaseProjectTestCase):
         self.assertEqual(results[0]['data']['results'][0]['initiator_type'], 'scheduler')
 
         # try to execute not existing task
-        result = tasks.ScheduledTask.delay(999999)
+        result = ScheduledTask.delay(999999)
         self.assertEqual(result.status, 'SUCCESS')
 
         # check exception while execution
@@ -2070,7 +2133,7 @@ class PeriodicTaskTestCase(BaseProjectTestCase):
             f'{settings.VST_PROJECT_LIB_NAME}.main.models.tasks.PeriodicTask.execute',
             side_effect=TestException
         ) as executor:
-            tasks.ScheduledTask.delay(playbook_task_id)
+            ScheduledTask.delay(playbook_task_id)
             self.assertEqual(executor.call_count, 1)
 
         # check patch schedule
@@ -2103,9 +2166,67 @@ class PeriodicTaskTestCase(BaseProjectTestCase):
         ])
         self.assertEqual(results[0]['status'], 204)
 
+    def test_echo_plugin(self):
+        results = self.bulk_transactional([
+            # [0] create template with echo plugin
+            {
+                'method': 'post',
+                'path': ['project', self.project.id, 'execution_templates'],
+                'data': {
+                    'name': 'echo',
+                    'kind': 'TEST_ECHO',
+                    'data': {'string': 'some text'},
+                }
+            },
+            # [1]
+            self.create_periodic_task_bulk_data(
+                type='INTERVAL',
+                schedule='10',
+                kind='TEMPLATE',
+                template='<<0[data][id]>>',
+            ),
+            # [2] execute periodic task
+            {
+                'method': 'post',
+                'path': ['project', self.project.id, 'periodic_task', '<<1[data][id]>>', 'execute'],
+            },
+            # [3]
+            self.get_history_bulk_data('<<2[data][history_id]>>'),
+            # [4]
+            self.get_raw_history_bulk_data('<<2[data][history_id]>>'),
+        ])
+        self.assertEqual(results[3]['data']['status'], 'OK')
+        self.assertEqual(results[3]['data']['kind'], 'TEST_ECHO')
+        self.assertEqual(results[3]['data']['initiator_type'], 'scheduler')
+        self.assertEqual(results[3]['data']['raw_args'], 'echo some text')
+        self.assertEqual(results[4]['data']['detail'], 'some text\n')
+
 
 @own_projects_dir
 class PlaybookAndModuleTestCase(BaseProjectTestCase):
+    def test_v2_executions(self):
+        self.client.force_login(self.user)
+        result = self.client.post(
+            f'/api/v2/project/{self.project.id}/execute_module/',
+            {'module': 'ping', 'inventory': self.inventory.id},
+            content_type='application/json'
+        )
+        history1 = result.data['history_id']
+        self.assertEqual(result.status_code, 201)
+        result = self.client.post(
+            f'/api/v2/project/{self.project.id}/execute_playbook/',
+            {'playbook': 'playbook.yml', 'inventory': self.inventory.id},
+            content_type='application/json'
+        )
+        history2 = result.data['history_id']
+        self.assertEqual(result.status_code, 201)
+        results = self.bulk_transactional([
+            self.get_history_bulk_data(history1),
+            self.get_history_bulk_data(history2),
+        ])
+        self.assertEqual(results[0]['data']['status'], 'OK')
+        self.assertEqual(results[1]['data']['status'], 'OK')
+
     def test_execute_playbook(self):
         # try to execute not synced project
         project = self.get_model_class('main.Project').objects.create(name='lol_project')
@@ -2147,12 +2268,12 @@ class PlaybookAndModuleTestCase(BaseProjectTestCase):
 
         results = check_execution()
         self.assertEqual(
-            self.get_model_class('main.History').objects.get(pk=results[0]['data']['history_id']).initiator_object.id,
+            self.get_model_filter('main.History').get(pk=results[0]['data']['history_id']).initiator_object.id,
             self.project.id,
         )
 
         # check again with repo_sync_on_run set
-        sync_on_run = self.get_model_class('main.Variable').objects.create(
+        sync_on_run = self.get_model_filter('main.Variable').create(
             key='repo_sync_on_run',
             value=False,
             object_id=self.project.id,
@@ -2210,6 +2331,84 @@ class PlaybookAndModuleTestCase(BaseProjectTestCase):
         check_with_inventory(self.inventory.id)
         check_with_inventory(self.inventory_path)
         check_with_inventory('localhost,', extra_vars='ansible_connection=local')
+
+    def test_execute_echo_plugin(self):
+        results = self.bulk_transactional([
+            # [0]
+            self.execute_plugin_bulk_data('test_echo', string='test string'),
+            # [1]
+            self.get_history_bulk_data('<<0[data][history_id]>>'),
+            # [2]
+            self.get_raw_history_bulk_data('<<0[data][history_id]>>'),
+            # [3]
+            self.execute_plugin_bulk_data('test_echo', string='test string 2'),
+            # [4]
+            self.get_history_bulk_data('<<3[data][history_id]>>'),
+            # [5]
+            self.get_raw_history_bulk_data('<<3[data][history_id]>>'),
+        ])
+        self.assertEqual(results[1]['data']['status'], 'OK')
+        self.assertDictEqual(results[1]['data']['execute_args'], {'string': 'test string'})
+        self.assertEqual(results[1]['data']['mode'], 'test string')
+        self.assertEqual(results[1]['data']['kind'], 'TEST_ECHO')
+        self.assertEqual(results[1]['data']['raw_args'], 'echo test string')
+        self.assertEqual(results[2]['data']['detail'], 'test string\n')
+
+        self.assertEqual(results[4]['data']['status'], 'OK')
+        self.assertDictEqual(results[4]['data']['execute_args'], {'string': 'test string 2'})
+        self.assertEqual(results[4]['data']['raw_args'], 'echo test string 2')
+        self.assertEqual(results[5]['data']['detail'], 'test string 2\n')
+
+        # check that plugin cannot access other than allowed Project's attributes
+        def access_unsafe(inner_self, *args, **kwargs):
+            inner_self.project_data.objects.delete()
+
+        with self.patch(f'{TESTS_MODULE}.TestEcho.get_args', side_effect=access_unsafe, autospec=True):
+            results = self.bulk_transactional([
+                # [0]
+                self.execute_plugin_bulk_data('test_echo', string='test string'),
+                # [1]
+                self.get_history_bulk_data('<<0[data][history_id]>>'),
+                # [2]
+                self.get_raw_history_bulk_data('<<0[data][history_id]>>'),
+            ])
+            self.assertEqual(results[1]['data']['status'], 'ERROR')
+            self.assertEqual(
+                results[2]['data']['detail'],
+                "allowed attributes are "
+                "('config', 'revision', 'branch', 'project_branch', 'vars', 'env_vars', 'type', "
+                "'repo_sync_on_run', 'repo_sync_timeout')"
+            )
+
+    def test_execute_ansible_doc_plugin(self):
+        results = self.bulk_transactional([
+            # [0]
+            self.execute_plugin_bulk_data(
+                plugin='test_ansible_doc',
+                target='gitlab_runner',
+                verbose=2,
+                json=True,
+                module_path='some/path'
+            ),
+            # [1]
+            self.get_history_bulk_data('<<0[data][history_id]>>'),
+            # [2]
+            self.get_raw_history_bulk_data('<<0[data][history_id]>>'),
+        ])
+        next_history_id = self.get_model_filter('main.History').order_by('-id').first().id
+        self.assertDictEqual(results[0]['data'], {
+            'executor': self.user.id,
+            'history_id': next_history_id,
+            'detail': 'TEST_ANSIBLE_DOC plugin was executed.',
+
+        })
+        self.assertEqual(results[1]['data']['status'], 'OK')
+        self.assertIn('"module": "gitlab_runner"', results[2]['data']['detail'])
+        self.assertIn(
+            '"short_description": "Create, modify and delete GitLab Runners."',
+            results[2]['data']['detail']
+        )
+        self.assertIn('Test log from test plugin', results[2]['data']['detail'])
 
     def test_gather_facts(self):
         results = self.bulk([
@@ -2879,7 +3078,7 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
 
     # NOTE: template api is deprecated. Remove after break support.
     def test_template(self):
-        results = self.bulk([
+        results = self.bulk_transactional([
             {  # [0] create module template
                 'method': 'post',
                 'path': ['project', self.project.id, 'template'],
@@ -2906,7 +3105,7 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
                 'data': {
                     'kind': 'Task',
                     'name': 'Kek template',
-                    'data': {'playbook': 'playbook.yml', 'vars': {'forks': 8, 'connection': 'local', 'verbose': 8}},
+                    'data': {'playbook': 'playbook.yml', 'vars': {'forks': 8, 'connection': 'local', 'verbose': 2}},
                     'options': {
                         'one': {'vars': {'limit': 'localhost'}},
                         'two': {'vars': {'forks': 1, 'private_key': 'id_rsa'}},
@@ -2942,8 +3141,6 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
                 }
             }
         ])
-        for result in results:
-            self.assertIn(result['status'], {200, 201})
         self.assertEqual(results[0]['data']['data']['vars']['vault_password_file'], CYPHER)
         self.assertEqual(results[6]['data']['options']['two']['vars']['private_key'], CYPHER)
         self.assertEqual(results[7]['data']['data']['vars']['private_key'], CYPHER)
@@ -2963,7 +3160,7 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
                 'data': {
                     'kind': 'Task',
                     'name': 'Kek template',
-                    'data': {'playbook': 'playbook.yml', 'vars': {'forks': 8, 'connection': 'local', 'verbose': 8}},
+                    'data': {'playbook': 'playbook.yml', 'vars': {'forks': 8, 'connection': 'local', 'verbose': 2}},
                     'options': {'vars': {'inventory': 'lol'}}
                 }
             },
@@ -2973,7 +3170,7 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
         self.assertEqual(results[1]['status'], 400)
         self.assertEqual(results[1]['data']['detail']['inventory'], ['Disallowed to override inventory.'])
 
-        results = self.bulk([
+        results = self.bulk_transactional([
             # [0] execute module template
             {'method': 'post', 'path': ['project', self.project.id, 'template', module_template['id'], 'execute']},
             # [1] execute task template
@@ -2983,14 +3180,10 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
             # [3] check task execution history
             {'method': 'get', 'path': ['history', '<<1[data][history_id]>>']},
         ])
-        self.assertEqual(results[0]['status'], 201)
-        self.assertEqual(results[1]['status'], 201)
-        self.assertEqual(results[2]['status'], 200)
         self.assertEqual(results[2]['data']['status'], 'OK')
         self.assertEqual(results[2]['data']['initiator_type'], 'template')
         self.assertEqual(results[2]['data']['initiator'], module_template['id'])
         self.assertEqual(results[2]['data']['mode'], 'ping')
-        self.assertEqual(results[3]['status'], 200)
         self.assertEqual(results[3]['data']['status'], 'OK')
         self.assertEqual(results[3]['data']['initiator_type'], 'template')
         self.assertEqual(results[3]['data']['initiator'], task_template['id'])
@@ -3016,6 +3209,151 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
             self.bulk_transactional([self.execute_module_bulk_data()])
             client_getter.assert_any_call()
 
+    def test_execute_test_module(self):
+        results = self.bulk_transactional([
+            # [0]
+            {
+                'method': 'post',
+                'path': ['project', self.project.id, 'execution_templates'],
+                'data': {
+                    'name': 'test module',
+                    'kind': 'TEST_MODULE',
+                    'inventory': self.inventory.id,
+                    'data': {'module': 'ping'},
+                }
+            },
+            # [1]
+            {
+                'method': 'post',
+                'path': ['project', self.project.id, 'execution_templates', '<<0[data][id]>>', 'execute']
+            },
+            # [2]
+            self.get_history_bulk_data('<<1[data][history_id]>>'),
+            # [3]
+            self.get_raw_history_bulk_data('<<1[data][history_id]>>'),
+        ])
+        self.assertEqual(results[2]['data']['status'], 'OK')
+        self.assertIn('"ping": "pong"', results[3]['data']['detail'])
+
+    def test_execute_ansible_doc_plugin(self):
+        results = self.bulk_transactional([
+            # [0]
+            {
+                'method': 'post',
+                'path': ['project', self.project.id, 'execution_templates'],
+                'data': {
+                    'name': 'help a10_server',
+                    'notes': 'help a10_server',
+                    'kind': 'TEST_ANSIBLE_DOC',
+                    'data': {
+                        'target': 'a10_server',
+                        'verbose': 1,
+                        'json': False,
+                    },
+                }
+            },
+            # [1]
+            {
+                'method': 'post',
+                'path': ['project', self.project.id, 'execution_templates', '<<0[data][id]>>', 'execute']
+            },
+            # [2]
+            self.get_history_bulk_data('<<1[data][history_id]>>'),
+            # [3]
+            self.get_raw_history_bulk_data('<<1[data][history_id]>>'),
+        ])
+        template_id = results[0]['data']['id']
+        next_history_id = self.get_model_filter('main.History').order_by('-id').first().id
+        self.assertDictEqual(results[1]['data'], {
+            'executor': self.user.id,
+            'history_id': next_history_id,
+            'detail': 'TEST_ANSIBLE_DOC plugin was executed.',
+
+        })
+        self.assertEqual(results[2]['data']['status'], 'OK')
+        history = self.get_model_filter('main.History').get(id=next_history_id)
+        self.assertEqual(history.json_options, '{}')
+        self.assertIn(
+            'Manage SLB (Server Load Balancer) server objects on A10',
+            results[3]['data']['detail']
+        )
+        self.assertIn(
+            'AUTHOR: Eric Chou (@ericchou1), Mischa Peters (@mischapeters)',
+            results[3]['data']['detail']
+        )
+        self.assertNotIn('Test log from test plugin', results[3]['data']['detail'])
+
+        # check with option
+        results = self.bulk_transactional([
+            # [0]
+            {
+                'method': 'post',
+                'path': ['project', self.project.id, 'execution_templates', template_id, 'option'],
+                'data': {
+                    'name': 'verbose_with_json',
+                    'data': {
+                        'target': 'a10_server',
+                        'verbose': 4,
+                        'json': True,
+                    },
+                }
+            },
+            # [1]
+            {
+                'method': 'post',
+                'path': ['project', self.project.id, 'execution_templates', template_id, 'execute'],
+                'data': {'option': '<<0[data][id]>>'},
+            },
+            # [2]
+            self.get_history_bulk_data('<<1[data][history_id]>>'),
+            # [3]
+            self.get_raw_history_bulk_data('<<1[data][history_id]>>'),
+        ])
+        self.assertEqual(results[2]['data']['status'], 'OK')
+        history = self.get_model_filter('main.History').get(id=results[1]['data']['history_id'])
+        self.assertEqual(history.json_options, '{"template_option": "verbose_with_json"}')
+        # from verbose
+        self.assertIn(
+            'Executing command',
+            results[3]['data']['detail']
+        )
+        self.assertIn(
+            "'pm_ansible', 'ansible-doc', 'a10_server', '-vvvv', '--json'",
+            results[3]['data']['detail']
+        )
+        self.assertIn("Test log from test plugin", results[3]['data']['detail'])
+        # json output
+        self.assertIn('"author": [', results[3]['data']['detail'])
+        self.assertIn('"Eric Chou (@ericchou1)",', results[3]['data']['detail'])
+        self.assertIn(
+            '"Manage SLB (Server Load Balancer) server objects on A10 Networks devices via aXAPIv2."',
+            results[3]['data']['detail']
+        )
+
+    def test_edit_plugin_template(self):
+        results = self.bulk_transactional([
+            # [0]
+            {
+                'method': 'post',
+                'path': ['project', self.project.id, 'execution_templates'],
+                'data': {
+                    'name': 'echo',
+                    'kind': 'TEST_ECHO',
+                    'data': {'string': '1'},
+                }
+            },
+            # [1]
+            {
+                'method': 'patch',
+                'path': ['project', self.project.id, 'execution_templates', '<<0[data][id]>>'],
+                'data': {
+                    'data': {'string': '2'},
+                },
+            },
+        ])
+        self.assertEqual(results[0]['data']['data']['string'], '1')
+        self.assertEqual(results[1]['data']['data']['string'], '2')
+
 
 @own_projects_dir
 class VariableTestCase(BaseProjectTestCase):
@@ -3040,57 +3378,41 @@ class VariableTestCase(BaseProjectTestCase):
         )
 
         # check if env_ANSIBLE_CONFIG is set than this config is used
-        def check(inner_self, *args, **kwargs):
-            self.assertTrue(inner_self.env['ANSIBLE_CONFIG'].endswith(f'{self.project.id}/dir0/dir1/ansible.cfg'))
-
-        with self.patch(
-            f'{settings.VST_PROJECT_LIB_NAME}.main.models.utils.Executor.execute',
-            side_effect=check,
-            autospec=True
-        ):
+        with self.patch('subprocess.Popen.__init__', return_value=None) as popen:
+            popen.assert_not_called()
             results = self.bulk_transactional([
                 self.create_variable_bulk_data('env_ANSIBLE_CONFIG', 'dir0/dir1/ansible.cfg'),
                 self.execute_playbook_bulk_data(playbook='playbook.yml'),
-                self.get_history_bulk_data('<<1[data][history_id]>>'),
             ])
-            self.assertEqual(results[-1]['data']['status'], 'OK')
-            var_id = results[0]['data']['id']
+            popen.assert_called_once()
+            self.assertTrue(popen.call_args[1]['env']['ANSIBLE_CONFIG'].endswith('/dir0/dir1/ansible.cfg'))
+
+        var_id = self.get_model_filter('main.Variable').get(key='env_ANSIBLE_CONFIG').id
 
         # check if env_ANSIBLE_CONFIG is not set than root project ansible.cfg is used
         (Path(self.project.path) / 'ansible.cfg').write_text(test_ansible_cfg)
 
-        def check(inner_self, *args, **kwargs):
-            self.assertTrue(inner_self.env['ANSIBLE_CONFIG'].endswith(f'{self.project.id}/ansible.cfg'))
-
-        with self.patch(
-            f'{settings.VST_PROJECT_LIB_NAME}.main.models.utils.Executor.execute',
-            side_effect=check,
-            autospec=True
-        ):
+        with self.patch('subprocess.Popen.__init__', return_value=None) as popen:
+            popen.assert_not_called()
             results = self.bulk_transactional([
                 {'method': 'delete', 'path': ['project', self.project.id, 'variables', var_id]},
                 self.execute_playbook_bulk_data(playbook='playbook.yml'),
-                self.get_history_bulk_data('<<1[data][history_id]>>'),
             ])
-            self.assertEqual(results[-1]['data']['status'], 'OK')
+            popen.assert_called_once()
+            self.assertTrue(popen.call_args[1]['env']['ANSIBLE_CONFIG'].endswith('/ansible.cfg'))
 
         # check if env_ANSIBLE_CONFIG is not set and project's ansible.cfg does not exist than
         # os ANSIBLE_CONFIG env var is used
         os.remove(Path(self.project.path) / 'ansible.cfg')
 
-        def check(inner_self, *args, **kwargs):
-            self.assertEqual(inner_self.env['ANSIBLE_CONFIG'], '/some/global.cfg')
-
-        with self.patch(
-            f'{settings.VST_PROJECT_LIB_NAME}.main.models.utils.Executor.execute',
-            side_effect=check,
-            autospec=True
-        ), self.patch('os.environ', {'ANSIBLE_CONFIG': '/some/global.cfg'}):
+        with self.patch('subprocess.Popen.__init__', return_value=None) as popen, \
+                self.patch('os.environ', {'ANSIBLE_CONFIG': '/some/global.cfg'}):
+            popen.assert_not_called()
             results = self.bulk_transactional([
                 self.execute_playbook_bulk_data(playbook='playbook.yml'),
-                self.get_history_bulk_data('<<0[data][history_id]>>'),
             ])
-            self.assertEqual(results[-1]['data']['status'], 'OK')
+            popen.assert_called_once()
+            self.assertEqual(popen.call_args[1]['env']['ANSIBLE_CONFIG'], '/some/global.cfg')
 
     def test_periodic_task_variables_validation(self):
         results = self.bulk([
@@ -3471,6 +3793,17 @@ class VariableTestCase(BaseProjectTestCase):
             'repo_sync_on_run': True
         })
 
+    def test_env_vars_on_execution(self):
+        with self.patch('subprocess.Popen.__init__', return_value=None) as popen:
+            popen.assert_not_called()
+            self.bulk([
+                self.create_variable_bulk_data('env_EXAMPLE', '1'),
+                self.execute_module_bulk_data()
+            ])
+            popen.assert_called_once()
+            self.assertEqual(popen.call_args[1]['env']['EXAMPLE'], '1')
+            self.assertIn('VST_PROJECT', popen.call_args[1]['env'])
+
 
 @own_projects_dir
 class HookTestCase(BaseProjectTestCase):
@@ -3839,30 +4172,52 @@ class OpenAPITestCase(BaseOpenAPITestCase):
     """
 
     def test_schema(self):
-        schema = self.schema()
-        openapi_schema_yml = yaml.load(Path(self.openapi_schema_yaml).read_text(), Loader=yaml.SafeLoader)
+        endpoint_schema = self.schema()
+        yml_schema = yaml.load(Path(self.openapi_schema_yaml).read_text(), Loader=yaml.SafeLoader)
 
-        openapi_schema_yml['host'] = self.server_name
-        openapi_schema_yml['schemes'][0] = 'https'
-        openapi_schema_yml['info']['contact'] = schema['info']['contact']
-        openapi_schema_yml['info']['x-versions'] = schema['info']['x-versions']
-        openapi_schema_yml['info']['x-links'] = schema['info']['x-links']
-        openapi_schema_yml['info']['x-user-id'] = schema['info']['x-user-id']
+        yml_schema['host'] = self.server_name
+        yml_schema['schemes'][0] = 'https'
+        yml_schema['info']['contact'] = endpoint_schema['info']['contact']
+        yml_schema['info']['x-versions'] = endpoint_schema['info']['x-versions']
+        yml_schema['info']['x-links'] = endpoint_schema['info']['x-links']
+        yml_schema['info']['x-user-id'] = endpoint_schema['info']['x-user-id']
 
-        for key in list(filter(lambda x: 'Ansible' in x, openapi_schema_yml['definitions'].keys())):
-            del openapi_schema_yml['definitions'][key]
-            del schema['definitions'][key]
+        for key in list(filter(lambda x: 'Execute' in x, yml_schema['definitions'].keys())):
+            del yml_schema['definitions'][key]
+            del endpoint_schema['definitions'][key]
 
-        del openapi_schema_yml['definitions']['_MainSettings']
-        del schema['definitions']['_MainSettings']
+        template_kinds_depend_on_plugins = ('ExecutionTemplate', 'CreateExecutionTemplate', 'OneExecutionTemplate')
+        for key in template_kinds_depend_on_plugins:
+            endpoint_schema['definitions'][key]['properties']['kind']['enum'] = \
+                yml_schema['definitions'][key]['properties']['kind']['enum']
+
+        template_types_depend_on_plugins = (
+            'CreateExecutionTemplate',
+            'OneExecutionTemplate',
+            'CreateTemplateOption',
+            'OneTemplateOption',
+        )
+        for key in template_types_depend_on_plugins:
+            endpoint_schema['definitions'][key]['properties']['data']['x-options']['types'] = \
+                yml_schema['definitions'][key]['properties']['data']['x-options']['types']
+            if 'inventory' in endpoint_schema['definitions'][key]['properties']:
+                endpoint_schema['definitions'][key]['properties']['inventory']['x-options']['types'] = \
+                    yml_schema['definitions'][key]['properties']['inventory']['x-options']['types']
 
         with raise_context():
-            openapi_schema_yml['definitions']['ProjectDir']['properties']['content']["x-options"]['types'] = \
-                schema['definitions']['ProjectDir']['properties']['content']["x-options"]['types']
+            endpoint_schema['definitions']['PeriodicTaskVariable']['properties']['key']['x-options']['types'] = \
+                yml_schema['definitions']['PeriodicTaskVariable']['properties']['key']['x-options']['types']
+
+        del yml_schema['definitions']['_MainSettings']
+        del endpoint_schema['definitions']['_MainSettings']
+
+        with raise_context():
+            yml_schema['definitions']['ProjectDir']['properties']['content']["x-options"]['types'] = \
+                endpoint_schema['definitions']['ProjectDir']['properties']['content']["x-options"]['types']
 
         for module in ('paths', 'definitions'):
-            for key, value in openapi_schema_yml[module].items():
-                self.assertDictEqual(value, schema[module].get(key), key)
+            for key, value in yml_schema[module].items():
+                self.assertDictEqual(value, endpoint_schema[module].get(key), f'Failed on {key}')
 
     @skipIf(settings.VST_PROJECT_LIB_NAME != 'polemarch', 'Menu may vary')
     def test_menu(self):

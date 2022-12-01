@@ -19,7 +19,8 @@ except ImportError:  # nocv
 from .base import models
 from .base import ManyToManyFieldACL, ManyToManyFieldACLReverse
 from .vars import AbstractModel, AbstractVarsQuerySet
-from ...main import exceptions as ex, utils
+from ...main import exceptions as ex
+from ...main.utils import AnsibleInventoryParser
 from ..validators import RegexValidator
 
 logger = logging.getLogger("polemarch")
@@ -228,7 +229,7 @@ class Inventory(InventoryItems):
         default_flow_style=False,
         allow_unicode=True
     )
-    parser_class = utils.AnsibleInventoryParser
+    parser_class = AnsibleInventoryParser
 
     class Meta:
         default_related_name = "inventories"

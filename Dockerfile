@@ -61,7 +61,8 @@ RUN --mount=type=cache,target=/var/cache/apt \
     libldap-2.4-2 \
     libsasl2-2 \
     libffi7 \
-    libssl1.1 && \
+    libssl1.1 \
+    openssh-client \
     python3.8 -m pip install cryptography paramiko 'pip<22' && \
     ln -s /usr/bin/python3.8 /usr/bin/python && \
     mkdir -p /projects /hooks /run/openldap /etc/polemarch/hooks /var/lib/polemarch && \

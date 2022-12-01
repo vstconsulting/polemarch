@@ -415,4 +415,31 @@ This section contains additional information for configure additional elements.
 
 #. We strictly do not recommend running the web server from root. Use HTTP proxy to run on privileged ports.
 
-.. note:: If you need more options you can find it in :doc:`vstutils:config` in the official vstutils documentation .
+.. note:: If you need more options you can find it in :doc:`vstutils:config` in the official vstutils documentation.
+
+
+.. _plugins_config:
+
+Execution plugins
+-----------------
+
+To connect a plugin to Polemarch, there should be a section
+
+.. sourcecode:: ini
+
+    [plugin.<plugin_name>]
+    backend = import.path.to.plugin.Class
+
+Where
+
+* **<plugin_name>** - name that will available in API to work with
+* **backend** - is a python import path to plugin class
+
+Also you may add options which will be available in plugin:
+
+.. sourcecode:: ini
+
+    [plugin.<plugin_name>.options]
+    some_option = some_option
+
+To read more about plugins, please see :doc:`plugins`.
