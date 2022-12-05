@@ -53,16 +53,16 @@ RUN --mount=type=cache,target=/var/cache/apt \
     --mount=type=bind,from=build,source=/usr/local/polemarch/,target=/polemarch_env \
     apt update && \
     apt -y install --no-install-recommends \
-    git \
-    sudo \
-    sshpass \
-    libmysqlclient21 \
-    libpcre3 \
-    libldap-2.4-2 \
-    libsasl2-2 \
-    libffi7 \
-    libssl1.1 \
-    openssh-client \
+        git \
+        sudo \
+        sshpass \
+        libmysqlclient21 \
+        libpcre3 \
+        libldap-2.4-2 \
+        libsasl2-2 \
+        libffi7 \
+        libssl1.1 \
+        openssh-client && \
     python3.8 -m pip install cryptography paramiko 'pip<22' && \
     ln -s /usr/bin/python3.8 /usr/bin/python && \
     mkdir -p /projects /hooks /run/openldap /etc/polemarch/hooks /var/lib/polemarch && \
