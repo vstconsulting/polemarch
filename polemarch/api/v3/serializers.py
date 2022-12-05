@@ -5,56 +5,14 @@ from vstutils.api.serializers import BaseSerializer
 from vstutils.utils import lazy_translate as __
 
 from ...main import models
-from ...main.constants import ExecutionTypesEnum, HiddenArgumentsEnum
 from ..v2.serializers import (
     _WithVariablesSerializer,
     InventoryAutoCompletionField,
     ModuleSerializer,
     ExecuteResponseSerializer,
     OneProjectSerializer as V2OneProjectSerializer,
-    generate_fields
 )
-from ...main.constants import ANSIBLE_REFERENCE
-
-
-class AnsibleArgumentsMetaSerializer(serializers.SerializerMetaclass):
-    @staticmethod
-    def __new__(mcs, name, bases, attrs):
-        args_type = attrs.get('type')
-        if args_type:
-            attrs.update(
-                generate_fields(
-                    ansible_reference=ANSIBLE_REFERENCE,
-                    ansible_type=args_type,
-                    no_default=True,
-                )
-            )
-        for field in attrs.get('exclude_args', set()):
-            attrs[field] = None
-        return super().__new__(mcs, name, bases, attrs)
-
-
-class BaseAnsibleArgumentsSerializer(BaseSerializer, metaclass=AnsibleArgumentsMetaSerializer):
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        HiddenArgumentsEnum.hide_values(representation)
-        return representation
-
-
-class PlaybookAnsibleArgumentsSerializer(BaseAnsibleArgumentsSerializer):
-    type = 'playbook'
-
-
-class ModuleAnsibleArgumentsSerializer(BaseAnsibleArgumentsSerializer):
-    type = 'module'
-
-
-class TaskTemplateVarsSerializer(PlaybookAnsibleArgumentsSerializer):
-    exclude_args = {'inventory'}
-
-
-class ModuleTemplateVarsSerializer(ModuleAnsibleArgumentsSerializer):
-    exclude_args = {'args', 'group', 'inventory'}
+from ...main.executions import PLUGIN_HANDLERS
 
 
 class TaskTemplateParameters(BaseSerializer):
@@ -63,7 +21,9 @@ class TaskTemplateParameters(BaseSerializer):
         autocomplete_property='playbook',
         autocomplete_represent='playbook',
     )
-    vars = TaskTemplateVarsSerializer(required=False)
+    vars = PLUGIN_HANDLERS.backend('PLAYBOOK').get_serializer_class(
+        exclude_fields=('inventory', 'playbook')
+    )(required=False)
 
 
 class ModuleTemplateParameters(BaseSerializer):
@@ -74,14 +34,35 @@ class ModuleTemplateParameters(BaseSerializer):
         autocomplete_represent='path'
     )
     args = fields.CharField(label=__('Arguments'), required=False, default='', allow_blank=True)
-    vars = ModuleTemplateVarsSerializer(required=False)
+    vars = PLUGIN_HANDLERS.backend('MODULE').get_serializer_class(
+        exclude_fields=('args', 'group', 'inventory', 'module')
+    )(required=False)
+
+
+template_kinds = (
+    ('Task', 'Task'),
+    ('Module', 'Module'),
+) + tuple(
+    (plugin, plugin) for plugin in PLUGIN_HANDLERS.keys()
+    if plugin not in {'PLAYBOOK', 'MODULE'}
+)
+
+template_data_types = {
+    'Task': TaskTemplateParameters(),
+    'Module': ModuleTemplateParameters(),
+}
+template_data_types.update({
+    plugin: backend.get_serializer_class(exclude_fields=('inventory',))(required=False)
+    for plugin, backend in PLUGIN_HANDLERS.items()
+    if plugin not in ('PLAYBOOK, MODULE')
+})
 
 
 class ExecutionTemplateSerializer(_WithVariablesSerializer):
     kind = fields.ChoiceField(
-        choices=ExecutionTypesEnum.to_choices(),
+        choices=template_kinds,
         required=False,
-        default=ExecutionTypesEnum.Task.value,
+        default=template_kinds[0][0],
         label=__('Type'),
     )
 
@@ -90,12 +71,20 @@ class ExecutionTemplateSerializer(_WithVariablesSerializer):
         fields = ['id', 'name', 'kind']
 
 
+template_inventory_types = {
+    'Task': InventoryAutoCompletionField(allow_blank=True, required=False),
+    'Module': InventoryAutoCompletionField(allow_blank=True, required=False),
+}
+template_inventory_types.update({
+    plugin: InventoryAutoCompletionField(allow_blank=True, required=False) if backend.supports_inventory else 'hidden'
+    for plugin, backend in PLUGIN_HANDLERS.items()
+    if plugin not in ('PLAYBOOK', 'MODULE')
+})
+
+
 class CreateExecutionTemplateSerializer(ExecutionTemplateSerializer):
-    data = vst_fields.DependEnumField(field='kind', types={
-        ExecutionTypesEnum.Task.value: TaskTemplateParameters(),
-        ExecutionTypesEnum.Module.value: ModuleTemplateParameters(),
-    })
-    inventory = InventoryAutoCompletionField(allow_blank=True, required=False)
+    data = vst_fields.DependEnumField(field='kind', types=template_data_types)
+    inventory = vst_fields.DependEnumField(field='kind', types=template_inventory_types, required=False)
 
     class Meta(ExecutionTemplateSerializer.Meta):
         fields = ExecutionTemplateSerializer.Meta.fields + ['notes', 'inventory', 'data']
@@ -115,9 +104,9 @@ class CreateExecutionTemplateSerializer(ExecutionTemplateSerializer):
 
 class OneExecutionTemplateSerializer(CreateExecutionTemplateSerializer):
     kind = fields.ChoiceField(
-        choices=ExecutionTypesEnum.to_choices(),
+        choices=template_kinds,
         label=__('Type'),
-        read_only=True
+        read_only=True,
     )
 
 

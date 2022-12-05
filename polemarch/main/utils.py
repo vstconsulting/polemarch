@@ -9,7 +9,10 @@ import sys
 import re
 import json
 from os.path import dirname
+from django.conf import settings
+from django.utils import timezone
 from vstutils.models.cent_notify import Notificator
+from vstutils.utils import ObjectHandlers
 
 try:
     from yaml import CLoader as Loader, CDumper as Dumper, load, dump
@@ -25,7 +28,6 @@ from vstutils.utils import (
     Executor,
     UnhandledExecutor, ON_POSIX,
 )
-from ..main.settings import NOTIFY_WITHOUT_QUEUE_MODELS
 
 
 from . import __file__ as file
@@ -349,5 +351,81 @@ class PolemarchNotificator(Notificator):
     def create_notification_from_instance(self, instance):
         super().create_notification_from_instance(instance)
         # pylint: disable=protected-access
-        if instance.__class__._meta.label in NOTIFY_WITHOUT_QUEUE_MODELS and self.label != 'history_lines':
+        if instance.__class__._meta.label in settings.NOTIFY_WITHOUT_QUEUE_MODELS and self.label != 'history_lines':
             self.send()
+
+
+class ExecutionHandlers(ObjectHandlers):
+    def execute(self, plugin: str, project, execute_args, **kwargs):
+        sync = kwargs.pop('sync', False)
+        if project.status != 'OK' and not sync:
+            raise project.SyncError('ERROR project not synchronized')
+
+        task_class = project.task_handlers.backend('EXECUTION')
+        plugin_class = self.backend(plugin)
+
+        mode = f'[{plugin} plugin]'
+        if plugin_class.arg_shown_on_history_as_mode is not None:
+            mode = execute_args.get(plugin_class.arg_shown_on_history_as_mode, mode)
+
+        history = self.create_history(
+            project,
+            plugin,
+            mode,
+            execute_args=execute_args,
+            initiator=kwargs.pop('initiator', 0),
+            initiator_type=kwargs.pop('initiator_type', 'project'),
+            executor=kwargs.pop('executor', None),
+            save_result=kwargs.pop('save_result', True),
+            template_option=kwargs.pop('template_option', None),
+        )
+        task_kwargs = {
+            'plugin': plugin,
+            'project': project,
+            'history': history,
+            'execute_args': execute_args,
+        }
+
+        if sync:
+            task_class(**task_kwargs)
+        else:
+            task_class.delay(**task_kwargs)
+
+        return history.id if history else None
+
+    def create_history(self, project, kind, mode, execute_args, **kwargs):
+        if not kwargs['save_result']:
+            return None
+
+        history_execute_args = {**execute_args}
+        inventory = history_execute_args.pop('inventory', None)
+        if isinstance(inventory, str):
+            history_execute_args['inventory'] = inventory
+            inventory = None
+        elif isinstance(inventory, int):
+            inventory = project.inventories.get(id=inventory)
+
+        options = {}
+        if kwargs['template_option'] is not None:
+            options['template_option'] = kwargs['template_option']
+
+        return project.history.create(
+            status='DELAY',
+            mode=mode,
+            start_time=timezone.now(),
+            inventory=inventory,
+            project=project,
+            kind=kind,
+            raw_stdout='',
+            execute_args=history_execute_args,
+            initiator=kwargs['initiator'],
+            initiator_type=kwargs['initiator_type'],
+            executor=kwargs['executor'],
+            hidden=project.hidden,
+            options=options,
+        )
+
+    def get_object(self, plugin: str, project, history, **exec_args):  # noee
+        from .models.utils import PluginExecutor  # pylint: disable=import-outside-toplevel
+
+        return PluginExecutor(self.backend(plugin), self.opts(plugin), project, history, exec_args)

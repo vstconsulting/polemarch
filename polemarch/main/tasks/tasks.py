@@ -6,7 +6,7 @@ from vstutils.utils import import_class
 from ..utils import task, BaseTask
 from .exceptions import TaskError
 from ..models import PeriodicTask
-from ..models.utils import AnsibleModule, AnsiblePlaybook
+from ..executions import PLUGIN_HANDLERS
 
 logger = logging.getLogger("polemarch")
 clone_retry = getattr(settings, 'CLONE_RETRY', 5)
@@ -56,20 +56,23 @@ class ScheduledTask(BaseTask):
             raise
 
 
-class _ExecuteAnsible(BaseTask):
-    ansible_class = None
+@task(app, ignore_result=True, bind=True)
+class PluginTask(BaseTask):
+    def __init__(self, *args, plugin: str, project, history, execute_args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.plugin = plugin
+        self.project = project
+        self.history = history
+        self.execute_args = execute_args
 
     def run(self):
-        # pylint: disable=not-callable
-        ansible_object = self.ansible_class(*self.args, **self.kwargs)
-        ansible_object.run()
-
-
-@task(app, ignore_result=True, bind=True)
-class ExecuteAnsiblePlaybook(_ExecuteAnsible):
-    ansible_class = AnsiblePlaybook
-
-
-@task(app, ignore_result=True, bind=True)
-class ExecuteAnsibleModule(_ExecuteAnsible):
-    ansible_class = AnsibleModule
+        try:
+            PLUGIN_HANDLERS.get_object(
+                self.plugin,
+                self.project,
+                self.history,
+                **self.execute_args,
+            ).execute()
+        except:
+            logger.error(traceback.format_exc())
+            raise

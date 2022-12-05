@@ -1,6 +1,6 @@
 include polemarch/web.ini setup.cfg
 include README.rst LICENSE LICENSE_NAME
-include polemarch/main/settings.ini
+include polemarch/settings.ini
 include requirements.txt
 include requirements-git.txt
 include requirements-test.txt

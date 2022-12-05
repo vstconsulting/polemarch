@@ -21,10 +21,15 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
 import vstutils
+from django import setup
+from vstutils.environment import prepare_environment
 try:
     import polemarch
 except ImportError:
     import pmlib as polemarch
+
+prepare_environment()
+setup()
 
 # -- General configuration ------------------------------------------------
 
@@ -36,6 +41,8 @@ except ImportError:
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx_autodoc_typehints',
     'sphinxcontrib.httpdomain',
     'vstutils.api.doc_generator',
     'sphinx.ext.autosectionlabel',
@@ -189,3 +196,8 @@ extlinks = {
     'wiki': ('https://en.wikipedia.org/wiki/%s', None),
     'django_docs': ('https://docs.djangoproject.com/en/3.2/ref/%s', None),
 }
+
+set_type_checking_flag = True
+typehints_fully_qualified = True
+always_document_param_types = True
+autodoc_inherit_docstrings = False

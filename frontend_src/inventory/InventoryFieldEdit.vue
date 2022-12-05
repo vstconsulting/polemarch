@@ -41,7 +41,7 @@
             :data="{ [$parent.fkField.name]: realValue }"
             type="edit"
             style="flex: 2"
-            @set-value="({ value }) => setValue({ type: 'fk', value })"
+            @set-value="({ field, value, ...args }) => $emit('set-value', { type: 'fk', value }, args)"
         />
         <template v-else-if="type === 'path'">
             <div class="input-group-prepend">

@@ -1,7 +1,7 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
 
-from typing import Any, Dict, List, Tuple, Iterable, TypeVar, Text
+from typing import Any, Dict, List, Iterable, Optional, TypeVar, Text
 import logging
 from collections import OrderedDict
 from datetime import timedelta, datetime
@@ -18,9 +18,6 @@ from django.utils.text import slugify
 from django.contrib.auth import get_user_model
 from django.db.models import functions as dbfunc, Count
 from django.utils.timezone import now
-from django.test import Client
-from django.conf import settings
-from rest_framework.exceptions import UnsupportedMediaType
 
 from vstutils.custom_model import ListModel, CustomQuerySet
 from vstutils.utils import translate as _
@@ -71,7 +68,7 @@ class Template(ACLModel):
 
     def get_data(self) -> Dict:
         data = json.loads(self.template_data)
-        if "inventory" in self.template_fields[self.kind] and self.inventory:
+        if self.inventory is not None:
             try:
                 data['inventory'] = int(self.inventory)
             except ValueError:
@@ -88,7 +85,7 @@ class Template(ACLModel):
             self.project.check_path(self.data['inventory'])
             return self.data['inventory']
 
-    def get_data_with_options(self, option: str, **extra) -> Dict[str, Any]:
+    def get_data_with_options(self, option: Optional[str], **extra) -> Dict[str, Any]:
         data = self.get_data()
         option_data = self.get_option_data(option)
         option_vars = option_data.pop("vars", {})
@@ -99,25 +96,24 @@ class Template(ACLModel):
         data.update(extra)
         return data
 
-    def execute(self, user: User, option: str = None, **extra):
-        # pylint: disable=protected-access
-        tp = self._exec_types.get(self.kind, None)
-        if tp is None:
-            raise UnsupportedMediaType(media_type=self.kind)  # nocv
-        client = Client(SERVER_NAME='TEMPLATE')
-        client.force_login(user)
-        url = "/{}/{}/project/{}/execute_{}/".format(
-            getattr(settings, 'API_URL'), getattr(settings, 'VST_API_VERSION'),
-            self.project.id, tp
+    def get_plugin(self):
+        plugin = self.kind.upper()
+        if self.kind in self._exec_types:
+            plugin = self._exec_types[self.kind].upper()
+        return plugin
+
+    def execute(self, user: User, option: Optional[str] = None, **kwargs):
+        from ...main.executions import PLUGIN_HANDLERS  # pylint: disable=import-outside-toplevel
+
+        return PLUGIN_HANDLERS.execute(
+            self.get_plugin(),
+            project=self.project,
+            execute_args=self.get_data_with_options(option, **kwargs),
+            executor=user,
+            initiator=self.id,
+            initiator_type='template',
+            template_option=option,
         )
-        data = dict(
-            template=self.id, template_option=option,
-            **self.get_data_with_options(option, **extra)
-        )
-        response = client.post(
-            url, data=json.dumps(data), content_type="application/json"
-        )
-        return response
 
     def ci_run(self):
         self.execute(self.project.owner)
@@ -161,7 +157,7 @@ class Template(ACLModel):
 
     def set_data(self, value) -> None:
         data = self._convert_to_data(value)
-        data['vars'] = self.keep_encrypted_data(data.get('vars', None))
+        data['vars'] = self.keep_encrypted_data(data.get('vars', {}))
         self.template_data = json.dumps(data)
 
     @property
@@ -326,24 +322,30 @@ class PeriodicTask(AbstractModel):
         return float(self.schedule)
 
     def execute(self, sync: bool = True) -> HISTORY_ID:
+        from ...main.executions import PLUGIN_HANDLERS  # pylint: disable=import-outside-toplevel
+
+        execute_args = {}
         kwargs = dict(
             sync=sync, save_result=self.save_result,
             initiator=self.id, initiator_type="scheduler"
         )
+        if self.kind == 'PLAYBOOK':
+            execute_args['playbook'] = self.mode
+        elif self.kind == 'MODULE':
+            execute_args['module'] = self.mode
+
         if self.kind != 'TEMPLATE':
-            args = [self.kind, self.mode, self.inventory]
-            kwargs.update(self.vars)
+            plugin = self.kind
+            execute_args['inventory'] = self.inventory
+            execute_args.update(self.vars)
         else:
             data = self.template.get_data_with_options(self.template_opt)
             data.pop('inventory', None)
-            kind = self.template._exec_types[self.template.kind]
-            args = [
-                kind.upper(),
-                data.pop(kind),
-                self.template.inventory_object
-            ]
-            kwargs.update(data)
-        return self.project.execute(*args, **kwargs)
+            data['inventory'] = self.template.inventory_object
+            plugin = self.template.get_plugin()
+            execute_args.update(data)
+
+        return PLUGIN_HANDLERS.execute(plugin, self.project, execute_args, **kwargs)
 
 
 class HistoryQuerySet(BQuerySet):
@@ -380,35 +382,6 @@ class HistoryQuerySet(BQuerySet):
         result['month'] = self._get_history_stats_by(qs, 'month')
         result['year'] = self._get_history_stats_by(qs, 'year')
         return result
-
-    def __get_extra_options(self, extra, options) -> Dict[str, Any]:
-        return {opt: extra.pop(opt, options[opt]) for opt in options}
-
-    def __get_additional_options(self, extra_options) -> Dict[str, Any]:
-        options = {}
-        if extra_options['template_option'] is not None:
-            options['template_option'] = extra_options['template_option']
-        return options
-
-    def start(self, project, kind, mod_name, inventory, **extra) -> Tuple[Any, Dict]:
-        extra_options = self.__get_extra_options(extra, project.EXTRA_OPTIONS)
-        if not extra_options['save_result']:
-            return None, extra
-        history_kwargs = dict(
-            mode=mod_name, start_time=timezone.now(),
-            inventory=inventory, project=project,
-            kind=kind, raw_stdout="", execute_args=extra,
-            initiator=extra_options['initiator'],
-            initiator_type=extra_options['initiator_type'],
-            executor=extra_options['executor'], hidden=project.hidden,
-            options=self.__get_additional_options(extra_options)
-        )
-        if isinstance(inventory, str):
-            history_kwargs['inventory'] = None
-            extra['inventory'] = inventory
-        elif isinstance(inventory, int):
-            history_kwargs['inventory'] = project.inventories.get(pk=inventory)  # nocv
-        return self.create(status="DELAY", **history_kwargs), extra
 
 
 class History(BModel):

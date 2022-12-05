@@ -37,7 +37,7 @@
         mixins: [spa.fields.base.BaseFieldMixin],
         data() {
             return {
-                AnsibleModule: this.$app.modelsResolver.get('AnsibleModule'),
+                AnsibleModule: this.$app.modelsResolver.get('ExecuteModule'),
                 mainData: {},
                 argsData: {},
             };

@@ -92,7 +92,7 @@ Here is how to proceed:
       `this topic <https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253>`_.
       If you are encountered this problem, one of the solutions might be:
 
-      .. sourcecode:: bash::
+      .. sourcecode:: bash
 
          git config --global protocol.file.allow always
 

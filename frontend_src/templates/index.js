@@ -31,5 +31,12 @@ spa.signals.once('app.afterInit', ({ app }) => {
     ['OneExecutionTemplate', 'CreateExecutionTemplate', 'CreateTemplateOption', 'OneTemplateOption']
         .map((modelName) => app.modelsResolver.get(modelName))
         .flatMap((model) => Object.values(model.fields.get('data').types))
-        .forEach((field) => (field.nestedModel.fields.get('vars').hideNotRequired = true));
+        .forEach((field) => {
+            const vars = field.nestedModel.fields.get('vars');
+            if (vars === undefined) {
+                field.hideNotRequired = true;
+            } else {
+                vars.hideNotRequired = true;
+            }
+        });
 });

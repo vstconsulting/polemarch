@@ -1,2 +1,2 @@
 # Docs
-vstutils[doc]~=5.1.6
+-rrequirements.txt

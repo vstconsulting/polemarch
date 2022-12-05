@@ -21,6 +21,7 @@ const InventoryFieldMixin = {
                     value_field: 'id',
                     view_field: 'name',
                     makeLink: true,
+                    usePrefetch: true,
                 },
             });
             field.prepareFieldForView(this.view?.path);

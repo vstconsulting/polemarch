@@ -69,7 +69,7 @@ info:
   x-versions:
     application: 2.1.2
     library: 2.1.2
-    vstutils: 5.1.1
+    vstutils: 5.1.10
     django: 3.2.16
     djangorestframework: 3.14.0
     drf_yasg: 1.21.4
@@ -5376,13 +5376,13 @@ paths:
   /project/{id}/execute_module/:
     post:
       operationId: project_execute_module
-      description: Execute `ansible -m [module]` with arguments.
+      description: Execute module plugin.
       parameters:
         - name: data
           in: body
           required: true
           schema:
-            $ref: '#/definitions/AnsibleModule'
+            $ref: '#/definitions/ExecuteModule'
       responses:
         '201':
           description: CREATED
@@ -5401,13 +5401,13 @@ paths:
   /project/{id}/execute_playbook/:
     post:
       operationId: project_execute_playbook
-      description: Execute `ansible-playbook` with arguments.
+      description: Execute playbook plugin.
       parameters:
         - name: data
           in: body
           required: true
           schema:
-            $ref: '#/definitions/AnsiblePlaybook'
+            $ref: '#/definitions/ExecutePlaybook'
       responses:
         '201':
           description: CREATED
@@ -11440,7 +11440,7 @@ definitions:
         - readme_content
         - execute_view_data
     x-view-field-name: name
-  AnsibleModule:
+  ExecuteModule:
     required:
       - module
     type: object
@@ -11467,7 +11467,6 @@ definitions:
         title: Become
         description: run operations with become (does not imply password prompting)
         type: boolean
-        default: false
       become_method:
         title: Become method
         description: privilege escalation method to use (default=sudo), use `ansible-doc
@@ -11478,7 +11477,6 @@ definitions:
         description: don't make any changes; instead, try to predict some of the changes
           that may occur
         type: boolean
-        default: false
       connection:
         title: Connection
         description: connection type to use (default=smart)
@@ -11488,7 +11486,6 @@ definitions:
         description: when changing (small) files and templates, show the differences
           in those files; works great with --check
         type: boolean
-        default: false
       extra_vars:
         title: Extra vars
         description: set additional variables as key=value or YAML/JSON, if filename
@@ -11512,12 +11509,10 @@ definitions:
         title: List hosts
         description: outputs a list of matching hosts; does not execute anything else
         type: boolean
-        default: false
       one_line:
         title: One line
         description: condense output
         type: boolean
-        default: false
       playbook_dir:
         title: Playbook dir
         description: Since this tool does not use playbooks, use this as a substitute
@@ -11556,7 +11551,6 @@ definitions:
         title: Syntax check
         description: perform a syntax check on the playbook, but do not execute it
         type: boolean
-        default: false
       timeout:
         title: Timeout
         description: override the connection timeout in seconds (default=10)
@@ -11581,7 +11575,6 @@ definitions:
         title: Verbose
         description: verbose mode (-vvv for more, -vvvv to enable connection debugging)
         type: integer
-        default: 0
         maximum: 4
       group:
         title: Group
@@ -11646,7 +11639,7 @@ definitions:
         - history_id
         - executor
     x-view-field-name: history_id
-  AnsiblePlaybook:
+  ExecutePlaybook:
     required:
       - playbook
     type: object
@@ -11669,7 +11662,6 @@ definitions:
         title: Become
         description: run operations with become (does not imply password prompting)
         type: boolean
-        default: false
       become_method:
         title: Become method
         description: privilege escalation method to use (default=sudo), use `ansible-doc
@@ -11680,7 +11672,6 @@ definitions:
         description: don't make any changes; instead, try to predict some of the changes
           that may occur
         type: boolean
-        default: false
       connection:
         title: Connection
         description: connection type to use (default=smart)
@@ -11690,7 +11681,6 @@ definitions:
         description: when changing (small) files and templates, show the differences
           in those files; works great with --check
         type: boolean
-        default: false
       extra_vars:
         title: Extra vars
         description: set additional variables as key=value or YAML/JSON, if filename
@@ -11700,12 +11690,10 @@ definitions:
         title: Flush cache
         description: clear the fact cache for every host in inventory
         type: boolean
-        default: false
       force_handlers:
         title: Force handlers
         description: run handlers even if a task fails
         type: boolean
-        default: false
       forks:
         title: Forks
         description: specify number of parallel processes to use (default=5)
@@ -11724,17 +11712,14 @@ definitions:
         title: List hosts
         description: outputs a list of matching hosts; does not execute anything else
         type: boolean
-        default: false
       list_tags:
         title: List tags
         description: list all available tags
         type: boolean
-        default: false
       list_tasks:
         title: List tasks
         description: list all tasks that would be executed
         type: boolean
-        default: false
       private_key:
         title: Private key
         description: use this file to authenticate the connection
@@ -11771,12 +11756,10 @@ definitions:
         title: Step
         description: 'one-step-at-a-time: confirm each task before running'
         type: boolean
-        default: false
       syntax_check:
         title: Syntax check
         description: perform a syntax check on the playbook, but do not execute it
         type: boolean
-        default: false
       tags:
         title: Tags
         description: only run plays and tasks tagged with these values
@@ -11801,7 +11784,6 @@ definitions:
         title: Verbose
         description: verbose mode (-vvv for more, -vvvv to enable connection debugging)
         type: integer
-        default: 0
         maximum: 4
     x-properties-groups:
       '':
@@ -11892,7 +11874,17 @@ definitions:
       inventory:
         title: Inventory
         type: string
-        format: inventory
+        format: dynamic
+        x-options:
+          choices: {}
+          field: kind
+          types:
+            Module:
+              type: string
+              format: inventory
+            Task:
+              type: string
+              format: inventory
       data:
         title: Data
         type: string
@@ -12237,7 +12229,17 @@ definitions:
       inventory:
         title: Inventory
         type: string
-        format: inventory
+        format: dynamic
+        x-options:
+          choices: {}
+          field: kind
+          types:
+            Module:
+              type: string
+              format: inventory
+            Task:
+              type: string
+              format: inventory
       data:
         title: Data
         type: string
@@ -13829,7 +13831,6 @@ definitions:
                     description: run operations with become (does not imply password
                       prompting)
                     type: boolean
-                    default: false
                   become_method:
                     title: Become method
                     description: privilege escalation method to use (default=sudo),
@@ -13840,7 +13841,6 @@ definitions:
                     description: don't make any changes; instead, try to predict some
                       of the changes that may occur
                     type: boolean
-                    default: false
                   connection:
                     title: Connection
                     description: connection type to use (default=smart)
@@ -13850,7 +13850,6 @@ definitions:
                     description: when changing (small) files and templates, show the
                       differences in those files; works great with --check
                     type: boolean
-                    default: false
                   extra_vars:
                     title: Extra vars
                     description: set additional variables as key=value or YAML/JSON,
@@ -13873,12 +13872,10 @@ definitions:
                     description: outputs a list of matching hosts; does not execute
                       anything else
                     type: boolean
-                    default: false
                   one_line:
                     title: One line
                     description: condense output
                     type: boolean
-                    default: false
                   playbook_dir:
                     title: Playbook dir
                     description: Since this tool does not use playbooks, use this
@@ -13922,7 +13919,6 @@ definitions:
                     description: perform a syntax check on the playbook, but do not
                       execute it
                     type: boolean
-                    default: false
                   timeout:
                     title: Timeout
                     description: override the connection timeout in seconds (default=10)
@@ -13948,7 +13944,6 @@ definitions:
                     description: verbose mode (-vvv for more, -vvvv to enable connection
                       debugging)
                     type: integer
-                    default: 0
                     maximum: 4
             PLAYBOOK:
               format: dynamic
@@ -13965,7 +13960,6 @@ definitions:
                     description: run operations with become (does not imply password
                       prompting)
                     type: boolean
-                    default: false
                   become_method:
                     title: Become method
                     description: privilege escalation method to use (default=sudo),
@@ -13976,7 +13970,6 @@ definitions:
                     description: don't make any changes; instead, try to predict some
                       of the changes that may occur
                     type: boolean
-                    default: false
                   connection:
                     title: Connection
                     description: connection type to use (default=smart)
@@ -13986,7 +13979,6 @@ definitions:
                     description: when changing (small) files and templates, show the
                       differences in those files; works great with --check
                     type: boolean
-                    default: false
                   extra_vars:
                     title: Extra vars
                     description: set additional variables as key=value or YAML/JSON,
@@ -13996,12 +13988,10 @@ definitions:
                     title: Flush cache
                     description: clear the fact cache for every host in inventory
                     type: boolean
-                    default: false
                   force_handlers:
                     title: Force handlers
                     description: run handlers even if a task fails
                     type: boolean
-                    default: false
                   forks:
                     title: Forks
                     description: specify number of parallel processes to use (default=5)
@@ -14015,17 +14005,14 @@ definitions:
                     description: outputs a list of matching hosts; does not execute
                       anything else
                     type: boolean
-                    default: false
                   list_tags:
                     title: List tags
                     description: list all available tags
                     type: boolean
-                    default: false
                   list_tasks:
                     title: List tasks
                     description: list all tasks that would be executed
                     type: boolean
-                    default: false
                   private_key:
                     title: Private key
                     description: use this file to authenticate the connection
@@ -14067,13 +14054,11 @@ definitions:
                     title: Step
                     description: 'one-step-at-a-time: confirm each task before running'
                     type: boolean
-                    default: false
                   syntax_check:
                     title: Syntax check
                     description: perform a syntax check on the playbook, but do not
                       execute it
                     type: boolean
-                    default: false
                   tags:
                     title: Tags
                     description: only run plays and tasks tagged with these values
@@ -14099,7 +14084,6 @@ definitions:
                     description: verbose mode (-vvv for more, -vvvv to enable connection
                       debugging)
                     type: integer
-                    default: 0
                     maximum: 4
       kind:
         name: kind

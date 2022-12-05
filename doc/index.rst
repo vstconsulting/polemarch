@@ -57,6 +57,7 @@ We also help you via:
    quickstart
    config
    gui
+   plugins
    api
    contribute
    cla
