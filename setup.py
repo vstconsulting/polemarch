@@ -387,6 +387,8 @@ ext_list = []
 if 'develop' in sys.argv:
     ext_list = []
 
+install_requirements = load_requirements('requirements.txt', os.getcwd())
+
 kwargs = dict(
     name='polemarch',
     packages=find_packages(),
@@ -395,11 +397,11 @@ kwargs = dict(
         'polemarch/templates/gui/service-worker.js',
     ],
     install_requires=[
-    ] + load_requirements('requirements.txt', os.getcwd()) + load_requirements('requirements-doc.txt', os.getcwd()),
+    ] + install_requirements,
     extras_require={
         'test': load_requirements('requirements-test.txt', os.getcwd()) + [
             i.replace('prod', 'test,prod')
-            for i in load_requirements('requirements.txt', os.getcwd())
+            for i in install_requirements
             if isinstance(i, str) and 'vstutils' in i
         ],
         'mysql': ['mysqlclient'],

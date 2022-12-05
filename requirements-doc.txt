@@ -1,4 +1,2 @@
 # Docs
-vstutils[rpc,ldap,doc,prod]~=5.1.11
-markdown2~=2.4.0
-gitpython~=3.1.14
+-rrequirements.txt
