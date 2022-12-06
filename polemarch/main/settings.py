@@ -176,9 +176,10 @@ class ArchiveSection(BaseAppendSection):
 
 git_fetch = {}
 git_clone = {}
+git_config_list = ()
 
 if TESTS_RUN:
-    config['git'] = dict(fetch=dict(), clone=dict())
+    config['git'] = dict(fetch={}, clone={}, config={'protocol.file.allow': 'always'})
 
 if 'git' in config:
     git = config['git']
@@ -188,6 +189,9 @@ if 'git' in config:
 
     if 'clone' in git:
         git_clone = GitCloneSection('git.clone', config, git['clone']).all()
+
+    if 'config' in git:
+        git_config_list = tuple(f'{k}={v}' for k, v in git['config'].items())
 
 
 archive_section = ArchiveSection('archive', config, config['archive']).all()
@@ -230,6 +234,7 @@ REPO_BACKENDS = {
         "OPTIONS": {
             "CLONE_KWARGS": git_clone,
             "FETCH_KWARGS": git_fetch,
+            "CONFIG_LIST": git_config_list,
             "GIT_ENV": {
                 "GLOBAL": {
                     "GIT_SSL_NO_VERIFY": "true"

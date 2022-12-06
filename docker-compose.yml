@@ -19,7 +19,7 @@ services:
       - "8080:80"
 
   polemarch:
-    image: polemarch
+    image: ${WERF_MAIN_DOCKER_IMAGE_NAME:-polemarch}
     build: .
     restart: unless-stopped
     depends_on:

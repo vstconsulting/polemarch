@@ -906,6 +906,7 @@ class SyncTestCase(BaseProjectTestCase):
         submodule = git.Repo.init(submodule_dir)
         submodule.git.add('test_module.py')
         submodule.index.commit('Add module')
+        repo.git.set_persistent_git_options(c='protocol.file.allow=always')
         repo.git.submodule('add', '../submodule/.git', 'lib')
         repo.git.submodule('add', f'{submodule_dir}/.git', 'lib2')
         repo.git.add(all=True)
@@ -1746,6 +1747,8 @@ class SyncTestCase(BaseProjectTestCase):
         submodule = git.Repo.init(submodule_dir)
         submodule.git.add('test_module.py')
         submodule.index.commit('Add module')
+        submodule.git.set_persistent_git_options(c='protocol.file.allow=always')
+        repo.git.set_persistent_git_options(c='protocol.file.allow=always')
         repo.git.submodule('add', '../submodule/.git', 'lib')
         repo.git.submodule('add', f'{submodule_dir}/.git', 'lib2')
 
@@ -1888,6 +1891,8 @@ class SyncTestCase(BaseProjectTestCase):
             submodule = git.Repo.init(submodule_dir)
             submodule.git.add('test_module.py')
             submodule.index.commit('Add module')
+            submodule.git.set_persistent_git_options(c='protocol.file.allow=always')
+            repo.git.set_persistent_git_options(c='protocol.file.allow=always')
             repo.git.submodule('add', '../submodule/.git', 'lib')
             repo.git.submodule('add', f'{submodule_dir}/.git', 'lib2')
 
