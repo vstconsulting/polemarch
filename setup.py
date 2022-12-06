@@ -388,6 +388,10 @@ if 'develop' in sys.argv:
     ext_list = []
 
 install_requirements = load_requirements('requirements.txt', os.getcwd())
+install_requirements = [
+    i.replace('prod', 'prod,ldap') if isinstance(i, str) and i.strip().startswith('vstutils') else i
+    for i in install_requirements
+]
 
 kwargs = dict(
     name='polemarch',

@@ -157,15 +157,19 @@ release_pypi:
 
 publish_docker:
   stage: publish
-  image: vstconsulting/images:ubuntu
-  services:
-    - name: 'docker:19.03-dind'
-      alias: 'docker_service_host'
+  image: registry.werf.io/werf/werf
+  before_script:
+    - type werf && source $(werf ci-env gitlab --as-file)
+    - werf version
   script:
-    - pip install tox
-    - tox -e release-docker
+    - werf cr login -u $POLEMARCH_DOCKER_USER -p $POLEMARCH_DOCKER_PASSWORD index.docker.io
+    - werf export --repo=$WERF_REPO/storage --tag=$WERF_REPO:$CI_COMMIT_TAG --tag=index.docker.io/$POLEMARCH_DOCKER_IMAGE_NAME:$CI_COMMIT_TAG
+    - werf export --repo=$WERF_REPO/storage --tag=$WERF_REPO:latest --tag=index.docker.io/$POLEMARCH_DOCKER_IMAGE_NAME:latest
+  after_script:
+    - werf cr login -u nobody -p ${WERF_IMAGES_CLEANUP_PASSWORD} ${CI_REGISTRY}
+    - werf cleanup --repo=$WERF_REPO/storage
   rules:
-    - if: '$CI_COMMIT_TAG && $POLEMARCH_DOCKER_USER && $POLEMARCH_DOCKER_PASSWORD && $POLEMARCH_DOCKER_IMAGE_NAME'
+    - if: '$CI_COMMIT_TAG && $POLEMARCH_DOCKER_USER && $POLEMARCH_DOCKER_PASSWORD && $POLEMARCH_DOCKER_IMAGE_NAME && $WERF_IMAGES_CLEANUP_PASSWORD'
       when: on_success
     - when: never
 

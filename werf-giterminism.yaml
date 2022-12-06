@@ -1,0 +1,4 @@
+giterminismConfigVersion: 1
+helm:
+    allowUncommittedFiles:
+        - ../**/*

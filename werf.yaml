@@ -1,0 +1,17 @@
+configVersion: 1
+project: polemarch
+cleanup:
+  disableKubernetesBasedPolicy: true
+  disableGitHistoryBasedPolicy: true
+  disableBuiltWithinLastNHoursPolicy: true
+  keepImagesBuiltWithinLastNHours: 1
+  keepPolicies:
+    - references:
+        branch: /.*/
+        limit:
+          last: 1
+
+---
+image: main
+dockerfile: Dockerfile
+context: .
