@@ -68,6 +68,9 @@ class MultiTypeField(serializers.CharField):
 
 
 class InventoryAutoCompletionField(vst_fields.VSTCharField):
+    def __init__(self, **kwargs):
+        self.real_type = kwargs.pop('real_type', str)
+        super().__init__(**kwargs)
 
     def to_internal_value(self, data):
         inventory = super().to_internal_value(data)
@@ -82,6 +85,14 @@ class InventoryAutoCompletionField(vst_fields.VSTCharField):
             if ',' not in inventory:
                 path_validator(inventory)
         return inventory
+
+    def to_representation(self, value):
+        if self.real_type == int:
+            if isinstance(value, models.Inventory):
+                return value.id
+            elif isinstance(value, int):  # nocv
+                return value
+        return super().to_representation(value)
 
 
 # Serializers
@@ -209,6 +220,7 @@ class OneTeamSerializer(TeamSerializer):
 
 
 class HistorySerializer(_SignalSerializer):
+    inventory = InventoryAutoCompletionField(allow_null=True, read_only=True, real_type=int)
     status = serializers.ChoiceField(choices=models.History.statuses, required=False)
     executor = vst_fields.DependEnumField(field='initiator_type', types={
         'project': vst_fields.FkModelField(select=UserSerializer,

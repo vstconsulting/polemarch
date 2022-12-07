@@ -51,6 +51,16 @@ stages:
       when: on_success
     - when: never
 
+
+.js_tests_template: &branch_js_tests
+  <<: *branch_tests
+  image: vstconsulting/images:node
+  before_script:
+    - yarn install
+  script:
+    - yarn test
+
+
 # Branch tests
 ###########################################
 code_style:
@@ -60,12 +70,12 @@ code_style:
     TOX_ENVS: "flake,pylint"
 
 js_style:
-  <<: *branch_tests
+  <<: *branch_js_tests
   stage: code_standarts
-  variables:
-    TOX_ENVS: "js_style"
+  script:
+    - yarn lint
 
-py38-coverage:
+py311-coverage:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
