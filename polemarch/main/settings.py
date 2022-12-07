@@ -77,6 +77,7 @@ OPENAPI_HOOKS = [
 ]
 
 SWAGGER_SETTINGS['DEFAULT_INFO'] = '{}.api.v2.swagger.api_info'.format(VST_PROJECT_LIB_NAME)
+SWAGGER_SETTINGS['DEFAULT_AUTO_SCHEMA_CLASS'] = '{}.api.schema.PolemarchAutoSchema'.format(VST_PROJECT_LIB_NAME)
 
 OPENAPI_EXTRA_LINKS = dict()
 OPENAPI_EXTRA_LINKS['Request'] = [

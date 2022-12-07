@@ -71,8 +71,6 @@ def set_inventory_field(request, schema):
                     for type_field in field['x-options']['types'].values():
                         if isinstance(type_field, dict):
                             type_field['format'] = 'inventory'
-                else:
-                    field['format'] = 'inventory'
 
             elif field.get('format') == 'dynamic':
                 for type_field in field['x-options']['types'].values():
