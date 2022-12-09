@@ -1,6 +1,6 @@
 # set to local images because too long execution
 default:
-  image: vstconsulting/images:build
+  image: registry.gitlab.com/vstconsulting/images:build
 
 variables:
   GET_SOURCES_ATTEMPTS: 3
@@ -34,7 +34,7 @@ stages:
 ###########################################
 .branch_tests_template: &branch_tests
   stage: test
-  image: vstconsulting/images:tox
+  image: registry.gitlab.com/vstconsulting/images:tox
   coverage: '/\d+\%\s*$/'
   variables:
     TOX_ENVS: ""
@@ -54,7 +54,7 @@ stages:
 
 .js_tests_template: &branch_js_tests
   <<: *branch_tests
-  image: vstconsulting/images:node
+  image: registry.gitlab.com/vstconsulting/images:node-tests
   before_script:
     - yarn install
   script:
@@ -89,7 +89,7 @@ py36-install:
 ###########################################
 #deploy_environment:
 #  stage: release
-#  image: vstconsulting/images:tox
+#  image: registry.gitlab.com/vstconsulting/images:tox
 #  services:
 #    - name: "docker:19.03-dind"
 #      alias: "docker_service_host"
@@ -107,7 +107,7 @@ py36-install:
 #
 #delete_environment:
 #  stage: release
-#  image: vstconsulting/images:tox
+#  image: registry.gitlab.com/vstconsulting/images:tox
 #  script:
 #    - tox -e destroy_env
 #  environment:
@@ -121,7 +121,7 @@ py36-install:
 
 release:
   stage: release
-  image: vstconsulting/images:tox
+  image: registry.gitlab.com/vstconsulting/images:tox
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $GIT_ACCESS_USER && $GIT_ACCESS_PASSWORD'
       when: on_success
@@ -149,7 +149,7 @@ pages:
 
 release_pypi:
   stage: release
-  image: vstconsulting/images:build
+  image: registry.gitlab.com/vstconsulting/images:build
   rules:
     - if: '$CI_COMMIT_TAG && $PYPI_UPLOAD_PASSWORD && $PYPI_UPLOAD_NAME'
       when: on_success
@@ -185,7 +185,7 @@ publish_docker:
 
 publish_release:
   stage: publish
-  image: vstconsulting/images:tox
+  image: registry.gitlab.com/vstconsulting/images:tox
   allow_failure: true
   needs: ["release_pypi"]
   rules:
