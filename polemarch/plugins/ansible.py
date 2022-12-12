@@ -14,7 +14,7 @@ from .base import BasePlugin
 
 
 class BaseAnsiblePlugin(BasePlugin):
-    __slots__ = ()
+    __slots__ = ('files',)
 
     reference = {}
     base_command = settings.EXECUTOR
@@ -67,7 +67,7 @@ class BaseAnsiblePlugin(BasePlugin):
             inventory = Inventory.objects.get(id=int(inventory))
 
         if isinstance(inventory, Inventory):
-            text = inventory.get_inventory()[0]
+            text, self.files = inventory.get_inventory(tmp_dir=self.execution_dir)
             inventory_file = self.execution_dir / self.inventory_filename
             inventory_file.write_text(text)
             return str(inventory_file), self._get_raw_inventory(text)
@@ -103,6 +103,7 @@ class BaseAnsiblePlugin(BasePlugin):
     def _put_into_tmpfile(self, value) -> str:
         tmpfile = self.execution_dir / f'inner_arg_{uuid1()}'
         tmpfile.write_text(value)
+        tmpfile.chmod(0o600)
         return str(tmpfile)
 
     @classmethod

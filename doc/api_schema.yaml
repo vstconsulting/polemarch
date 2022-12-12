@@ -24,9 +24,9 @@ info:
       url: https://gitlab.com/vstconsulting/polemarch.git
     Request:
       - name: Question
-        url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%202.1.2
+        url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%202.2.0
       - name: Bug report
-        url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%202.1.2
+        url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%202.2.0
       - name: Feature request
         url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Feature%20request&issue%5Btitle%5D=
   x-menu:
@@ -67,9 +67,9 @@ info:
     login_url: /account/login/
   x-subscriptions-prefix: polemarch.update
   x-versions:
-    application: 2.1.2
-    library: 2.1.2
-    vstutils: 5.1.10
+    application: 2.2.0
+    library: 2.2.0
+    vstutils: 5.1.11
     django: 3.2.16
     djangorestframework: 3.14.0
     drf_yasg: 1.21.4
@@ -11455,14 +11455,11 @@ definitions:
           usePrefetch: true
           value_field: name
           view_field: path
-      args:
-        title: Args
-        description: host pattern
-        type: string
-      background:
-        title: Background
-        description: run asynchronously, failing after X seconds (default=N/A)
+      verbose:
+        title: Verbose
+        description: verbose mode (-vvv for more, -vvvv to enable connection debugging)
         type: integer
+        maximum: 4
       become:
         title: Become
         description: run operations with become (does not imply password prompting)
@@ -11472,15 +11469,81 @@ definitions:
         description: privilege escalation method to use (default=sudo), use `ansible-doc
           -t become -l` to list valid choices.
         type: string
+      inventory:
+        title: Inventory
+        description: specify inventory host path or comma separated host list. --inventory-file
+          is deprecated
+        type: string
+        format: inventory
+      list_hosts:
+        title: List hosts
+        description: outputs a list of matching hosts; does not execute anything else
+        type: boolean
+      limit:
+        title: Limit
+        description: further limit selected hosts to an additional pattern
+        type: string
+      poll:
+        title: Poll
+        description: set the poll interval if using -B (default=15)
+        type: integer
+      background:
+        title: Background
+        description: run asynchronously, failing after X seconds (default=N/A)
+        type: integer
+      one_line:
+        title: One line
+        description: condense output
+        type: boolean
+      tree:
+        title: Tree
+        description: log output to this directory
+        type: string
+      private_key:
+        title: Private key
+        description: use this file to authenticate the connection
+        type: string
+        format: secretfile
+        x-options:
+          media_types:
+            - '*/*'
+      user:
+        title: User
+        description: connect as this user (default=None)
+        type: string
+      connection:
+        title: Connection
+        description: connection type to use (default=smart)
+        type: string
+      timeout:
+        title: Timeout
+        description: override the connection timeout in seconds (default=10)
+        type: integer
+      ssh_common_args:
+        title: Ssh common args
+        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
+        type: string
+      sftp_extra_args:
+        title: Sftp extra args
+        description: specify extra arguments to pass to sftp only (e.g. -f, -l)
+        type: string
+      scp_extra_args:
+        title: Scp extra args
+        description: specify extra arguments to pass to scp only (e.g. -l)
+        type: string
+      ssh_extra_args:
+        title: Ssh extra args
+        description: specify extra arguments to pass to ssh only (e.g. -R)
+        type: string
       check:
         title: Check
         description: don't make any changes; instead, try to predict some of the changes
           that may occur
         type: boolean
-      connection:
-        title: Connection
-        description: connection type to use (default=smart)
-        type: string
+      syntax_check:
+        title: Syntax check
+        description: perform a syntax check on the playbook, but do not execute it
+        type: boolean
       diff:
         title: Diff
         description: when changing (small) files and templates, show the differences
@@ -11491,78 +11554,6 @@ definitions:
         description: set additional variables as key=value or YAML/JSON, if filename
           prepend with @
         type: string
-      forks:
-        title: Forks
-        description: specify number of parallel processes to use (default=5)
-        type: integer
-      inventory:
-        title: Inventory
-        description: specify inventory host path or comma separated host list. --inventory-file
-          is deprecated
-        type: string
-        format: inventory
-      limit:
-        title: Limit
-        description: further limit selected hosts to an additional pattern
-        type: string
-      list_hosts:
-        title: List hosts
-        description: outputs a list of matching hosts; does not execute anything else
-        type: boolean
-      one_line:
-        title: One line
-        description: condense output
-        type: boolean
-      playbook_dir:
-        title: Playbook dir
-        description: Since this tool does not use playbooks, use this as a substitute
-          playbook directory.This sets the relative path for many features including
-          roles/ group_vars/ etc.
-        type: string
-      poll:
-        title: Poll
-        description: set the poll interval if using -B (default=15)
-        type: integer
-      private_key:
-        title: Private key
-        description: use this file to authenticate the connection
-        type: string
-        format: secretfile
-        x-options:
-          media_types:
-            - '*/*'
-      scp_extra_args:
-        title: Scp extra args
-        description: specify extra arguments to pass to scp only (e.g. -l)
-        type: string
-      sftp_extra_args:
-        title: Sftp extra args
-        description: specify extra arguments to pass to sftp only (e.g. -f, -l)
-        type: string
-      ssh_common_args:
-        title: Ssh common args
-        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
-        type: string
-      ssh_extra_args:
-        title: Ssh extra args
-        description: specify extra arguments to pass to ssh only (e.g. -R)
-        type: string
-      syntax_check:
-        title: Syntax check
-        description: perform a syntax check on the playbook, but do not execute it
-        type: boolean
-      timeout:
-        title: Timeout
-        description: override the connection timeout in seconds (default=10)
-        type: integer
-      tree:
-        title: Tree
-        description: log output to this directory
-        type: string
-      user:
-        title: User
-        description: connect as this user (default=None)
-        type: string
       vault_password_file:
         title: Vault password file
         description: vault password file
@@ -11571,11 +11562,20 @@ definitions:
         x-options:
           media_types:
             - '*/*'
-      verbose:
-        title: Verbose
-        description: verbose mode (-vvv for more, -vvvv to enable connection debugging)
+      forks:
+        title: Forks
+        description: specify number of parallel processes to use (default=5)
         type: integer
-        maximum: 4
+      playbook_dir:
+        title: Playbook dir
+        description: Since this tool does not use playbooks, use this as a substitute
+          playbook directory.This sets the relative path for many features including
+          roles/ group_vars/ etc.
+        type: string
+      args:
+        title: Args
+        description: host pattern
+        type: string
       group:
         title: Group
         type: string
@@ -11583,34 +11583,34 @@ definitions:
     x-properties-groups:
       '':
         - module
-        - args
-        - background
+        - verbose
         - become
         - become_method
-        - check
+        - inventory
+        - list_hosts
+        - limit
+        - poll
+        - background
+        - one_line
+        - tree
+        - private_key
+        - user
         - connection
+        - timeout
+        - ssh_common_args
+        - sftp_extra_args
+        - scp_extra_args
+        - ssh_extra_args
+        - check
+        - syntax_check
         - diff
         - extra_vars
-        - forks
-        - inventory
-        - limit
-        - list_hosts
-        - one_line
-        - playbook_dir
-        - poll
-        - private_key
-        - scp_extra_args
-        - sftp_extra_args
-        - ssh_common_args
-        - ssh_extra_args
-        - syntax_check
-        - timeout
-        - tree
-        - user
         - vault_password_file
-        - verbose
+        - forks
+        - playbook_dir
+        - args
         - group
-    x-view-field-name: args
+    x-view-field-name: verbose
   ExecuteResponse:
     required:
       - detail
@@ -11654,10 +11654,55 @@ definitions:
           usePrefetch: true
           value_field: playbook
           view_field: name
-      args:
-        title: Args
-        description: Playbook(s)
+      verbose:
+        title: Verbose
+        description: verbose mode (-vvv for more, -vvvv to enable connection debugging)
+        type: integer
+        maximum: 4
+      private_key:
+        title: Private key
+        description: use this file to authenticate the connection
         type: string
+        format: secretfile
+        x-options:
+          media_types:
+            - '*/*'
+      user:
+        title: User
+        description: connect as this user (default=None)
+        type: string
+      connection:
+        title: Connection
+        description: connection type to use (default=smart)
+        type: string
+      timeout:
+        title: Timeout
+        description: override the connection timeout in seconds (default=10)
+        type: integer
+      ssh_common_args:
+        title: Ssh common args
+        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
+        type: string
+      sftp_extra_args:
+        title: Sftp extra args
+        description: specify extra arguments to pass to sftp only (e.g. -f, -l)
+        type: string
+      scp_extra_args:
+        title: Scp extra args
+        description: specify extra arguments to pass to scp only (e.g. -l)
+        type: string
+      ssh_extra_args:
+        title: Ssh extra args
+        description: specify extra arguments to pass to ssh only (e.g. -R)
+        type: string
+      force_handlers:
+        title: Force handlers
+        description: run handlers even if a task fails
+        type: boolean
+      flush_cache:
+        title: Flush cache
+        description: clear the fact cache for every host in inventory
+        type: boolean
       become:
         title: Become
         description: run operations with become (does not imply password prompting)
@@ -11667,110 +11712,46 @@ definitions:
         description: privilege escalation method to use (default=sudo), use `ansible-doc
           -t become -l` to list valid choices.
         type: string
+      tags:
+        title: Tags
+        description: only run plays and tasks tagged with these values
+        type: string
+      skip_tags:
+        title: Skip tags
+        description: only run plays and tasks whose tags do not match these values
+        type: string
       check:
         title: Check
         description: don't make any changes; instead, try to predict some of the changes
           that may occur
         type: boolean
-      connection:
-        title: Connection
-        description: connection type to use (default=smart)
-        type: string
+      syntax_check:
+        title: Syntax check
+        description: perform a syntax check on the playbook, but do not execute it
+        type: boolean
       diff:
         title: Diff
         description: when changing (small) files and templates, show the differences
           in those files; works great with --check
         type: boolean
-      extra_vars:
-        title: Extra vars
-        description: set additional variables as key=value or YAML/JSON, if filename
-          prepend with @
-        type: string
-      flush_cache:
-        title: Flush cache
-        description: clear the fact cache for every host in inventory
-        type: boolean
-      force_handlers:
-        title: Force handlers
-        description: run handlers even if a task fails
-        type: boolean
-      forks:
-        title: Forks
-        description: specify number of parallel processes to use (default=5)
-        type: integer
       inventory:
         title: Inventory
         description: specify inventory host path or comma separated host list. --inventory-file
           is deprecated
         type: string
         format: inventory
-      limit:
-        title: Limit
-        description: further limit selected hosts to an additional pattern
-        type: string
       list_hosts:
         title: List hosts
         description: outputs a list of matching hosts; does not execute anything else
         type: boolean
-      list_tags:
-        title: List tags
-        description: list all available tags
-        type: boolean
-      list_tasks:
-        title: List tasks
-        description: list all tasks that would be executed
-        type: boolean
-      private_key:
-        title: Private key
-        description: use this file to authenticate the connection
+      limit:
+        title: Limit
+        description: further limit selected hosts to an additional pattern
         type: string
-        format: secretfile
-        x-options:
-          media_types:
-            - '*/*'
-      scp_extra_args:
-        title: Scp extra args
-        description: specify extra arguments to pass to scp only (e.g. -l)
-        type: string
-      sftp_extra_args:
-        title: Sftp extra args
-        description: specify extra arguments to pass to sftp only (e.g. -f, -l)
-        type: string
-      skip_tags:
-        title: Skip tags
-        description: only run plays and tasks whose tags do not match these values
-        type: string
-      ssh_common_args:
-        title: Ssh common args
-        description: specify common arguments to pass to sftp/scp/ssh (e.g. ProxyCommand)
-        type: string
-      ssh_extra_args:
-        title: Ssh extra args
-        description: specify extra arguments to pass to ssh only (e.g. -R)
-        type: string
-      start_at_task:
-        title: Start at task
-        description: start the playbook at the task matching this name
-        type: string
-      step:
-        title: Step
-        description: 'one-step-at-a-time: confirm each task before running'
-        type: boolean
-      syntax_check:
-        title: Syntax check
-        description: perform a syntax check on the playbook, but do not execute it
-        type: boolean
-      tags:
-        title: Tags
-        description: only run plays and tasks tagged with these values
-        type: string
-      timeout:
-        title: Timeout
-        description: override the connection timeout in seconds (default=10)
-        type: integer
-      user:
-        title: User
-        description: connect as this user (default=None)
+      extra_vars:
+        title: Extra vars
+        description: set additional variables as key=value or YAML/JSON, if filename
+          prepend with @
         type: string
       vault_password_file:
         title: Vault password file
@@ -11780,44 +11761,63 @@ definitions:
         x-options:
           media_types:
             - '*/*'
-      verbose:
-        title: Verbose
-        description: verbose mode (-vvv for more, -vvvv to enable connection debugging)
+      forks:
+        title: Forks
+        description: specify number of parallel processes to use (default=5)
         type: integer
-        maximum: 4
+      list_tasks:
+        title: List tasks
+        description: list all tasks that would be executed
+        type: boolean
+      list_tags:
+        title: List tags
+        description: list all available tags
+        type: boolean
+      step:
+        title: Step
+        description: 'one-step-at-a-time: confirm each task before running'
+        type: boolean
+      start_at_task:
+        title: Start at task
+        description: start the playbook at the task matching this name
+        type: string
+      args:
+        title: Args
+        description: Playbook(s)
+        type: string
     x-properties-groups:
       '':
         - playbook
-        - args
+        - verbose
+        - private_key
+        - user
+        - connection
+        - timeout
+        - ssh_common_args
+        - sftp_extra_args
+        - scp_extra_args
+        - ssh_extra_args
+        - force_handlers
+        - flush_cache
         - become
         - become_method
-        - check
-        - connection
-        - diff
-        - extra_vars
-        - flush_cache
-        - force_handlers
-        - forks
-        - inventory
-        - limit
-        - list_hosts
-        - list_tags
-        - list_tasks
-        - private_key
-        - scp_extra_args
-        - sftp_extra_args
-        - skip_tags
-        - ssh_common_args
-        - ssh_extra_args
-        - start_at_task
-        - step
-        - syntax_check
         - tags
-        - timeout
-        - user
+        - skip_tags
+        - check
+        - syntax_check
+        - diff
+        - inventory
+        - list_hosts
+        - limit
+        - extra_vars
         - vault_password_file
-        - verbose
-    x-view-field-name: args
+        - forks
+        - list_tasks
+        - list_tags
+        - step
+        - start_at_task
+        - args
+    x-view-field-name: verbose
   ExecutionTemplate:
     required:
       - name
@@ -11920,10 +11920,12 @@ definitions:
                 vars:
                   type: object
                   properties:
-                    background:
-                      title: Background
-                      description: run asynchronously, failing after X seconds (default=N/A)
+                    verbose:
+                      title: Verbose
+                      description: verbose mode (-vvv for more, -vvvv to enable connection
+                        debugging)
                       type: integer
+                      maximum: 4
                     become:
                       title: Become
                       description: run operations with become (does not imply password
@@ -11934,15 +11936,81 @@ definitions:
                       description: privilege escalation method to use (default=sudo),
                         use `ansible-doc -t become -l` to list valid choices.
                       type: string
+                    list_hosts:
+                      title: List hosts
+                      description: outputs a list of matching hosts; does not execute
+                        anything else
+                      type: boolean
+                    limit:
+                      title: Limit
+                      description: further limit selected hosts to an additional pattern
+                      type: string
+                    poll:
+                      title: Poll
+                      description: set the poll interval if using -B (default=15)
+                      type: integer
+                    background:
+                      title: Background
+                      description: run asynchronously, failing after X seconds (default=N/A)
+                      type: integer
+                    one_line:
+                      title: One line
+                      description: condense output
+                      type: boolean
+                    tree:
+                      title: Tree
+                      description: log output to this directory
+                      type: string
+                    private_key:
+                      title: Private key
+                      description: use this file to authenticate the connection
+                      type: string
+                      format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
+                    user:
+                      title: User
+                      description: connect as this user (default=None)
+                      type: string
+                    connection:
+                      title: Connection
+                      description: connection type to use (default=smart)
+                      type: string
+                    timeout:
+                      title: Timeout
+                      description: override the connection timeout in seconds (default=10)
+                      type: integer
+                    ssh_common_args:
+                      title: Ssh common args
+                      description: specify common arguments to pass to sftp/scp/ssh
+                        (e.g. ProxyCommand)
+                      type: string
+                    sftp_extra_args:
+                      title: Sftp extra args
+                      description: specify extra arguments to pass to sftp only (e.g.
+                        -f, -l)
+                      type: string
+                    scp_extra_args:
+                      title: Scp extra args
+                      description: specify extra arguments to pass to scp only (e.g.
+                        -l)
+                      type: string
+                    ssh_extra_args:
+                      title: Ssh extra args
+                      description: specify extra arguments to pass to ssh only (e.g.
+                        -R)
+                      type: string
                     check:
                       title: Check
                       description: don't make any changes; instead, try to predict
                         some of the changes that may occur
                       type: boolean
-                    connection:
-                      title: Connection
-                      description: connection type to use (default=smart)
-                      type: string
+                    syntax_check:
+                      title: Syntax check
+                      description: perform a syntax check on the playbook, but do
+                        not execute it
+                      type: boolean
                     diff:
                       title: Diff
                       description: when changing (small) files and templates, show
@@ -11953,78 +12021,6 @@ definitions:
                       description: set additional variables as key=value or YAML/JSON,
                         if filename prepend with @
                       type: string
-                    forks:
-                      title: Forks
-                      description: specify number of parallel processes to use (default=5)
-                      type: integer
-                    limit:
-                      title: Limit
-                      description: further limit selected hosts to an additional pattern
-                      type: string
-                    list_hosts:
-                      title: List hosts
-                      description: outputs a list of matching hosts; does not execute
-                        anything else
-                      type: boolean
-                    one_line:
-                      title: One line
-                      description: condense output
-                      type: boolean
-                    playbook_dir:
-                      title: Playbook dir
-                      description: Since this tool does not use playbooks, use this
-                        as a substitute playbook directory.This sets the relative
-                        path for many features including roles/ group_vars/ etc.
-                      type: string
-                    poll:
-                      title: Poll
-                      description: set the poll interval if using -B (default=15)
-                      type: integer
-                    private_key:
-                      title: Private key
-                      description: use this file to authenticate the connection
-                      type: string
-                      format: secretfile
-                      x-options:
-                        media_types:
-                          - '*/*'
-                    scp_extra_args:
-                      title: Scp extra args
-                      description: specify extra arguments to pass to scp only (e.g.
-                        -l)
-                      type: string
-                    sftp_extra_args:
-                      title: Sftp extra args
-                      description: specify extra arguments to pass to sftp only (e.g.
-                        -f, -l)
-                      type: string
-                    ssh_common_args:
-                      title: Ssh common args
-                      description: specify common arguments to pass to sftp/scp/ssh
-                        (e.g. ProxyCommand)
-                      type: string
-                    ssh_extra_args:
-                      title: Ssh extra args
-                      description: specify extra arguments to pass to ssh only (e.g.
-                        -R)
-                      type: string
-                    syntax_check:
-                      title: Syntax check
-                      description: perform a syntax check on the playbook, but do
-                        not execute it
-                      type: boolean
-                    timeout:
-                      title: Timeout
-                      description: override the connection timeout in seconds (default=10)
-                      type: integer
-                    tree:
-                      title: Tree
-                      description: log output to this directory
-                      type: string
-                    user:
-                      title: User
-                      description: connect as this user (default=None)
-                      type: string
                     vault_password_file:
                       title: Vault password file
                       description: vault password file
@@ -12033,12 +12029,16 @@ definitions:
                       x-options:
                         media_types:
                           - '*/*'
-                    verbose:
-                      title: Verbose
-                      description: verbose mode (-vvv for more, -vvvv to enable connection
-                        debugging)
+                    forks:
+                      title: Forks
+                      description: specify number of parallel processes to use (default=5)
                       type: integer
-                      maximum: 4
+                    playbook_dir:
+                      title: Playbook dir
+                      description: Since this tool does not use playbooks, use this
+                        as a substitute playbook directory.This sets the relative
+                        path for many features including roles/ group_vars/ etc.
+                      type: string
             Task:
               required:
                 - playbook
@@ -12057,10 +12057,60 @@ definitions:
                 vars:
                   type: object
                   properties:
-                    args:
-                      title: Args
-                      description: Playbook(s)
+                    verbose:
+                      title: Verbose
+                      description: verbose mode (-vvv for more, -vvvv to enable connection
+                        debugging)
+                      type: integer
+                      maximum: 4
+                    private_key:
+                      title: Private key
+                      description: use this file to authenticate the connection
                       type: string
+                      format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
+                    user:
+                      title: User
+                      description: connect as this user (default=None)
+                      type: string
+                    connection:
+                      title: Connection
+                      description: connection type to use (default=smart)
+                      type: string
+                    timeout:
+                      title: Timeout
+                      description: override the connection timeout in seconds (default=10)
+                      type: integer
+                    ssh_common_args:
+                      title: Ssh common args
+                      description: specify common arguments to pass to sftp/scp/ssh
+                        (e.g. ProxyCommand)
+                      type: string
+                    sftp_extra_args:
+                      title: Sftp extra args
+                      description: specify extra arguments to pass to sftp only (e.g.
+                        -f, -l)
+                      type: string
+                    scp_extra_args:
+                      title: Scp extra args
+                      description: specify extra arguments to pass to scp only (e.g.
+                        -l)
+                      type: string
+                    ssh_extra_args:
+                      title: Ssh extra args
+                      description: specify extra arguments to pass to ssh only (e.g.
+                        -R)
+                      type: string
+                    force_handlers:
+                      title: Force handlers
+                      description: run handlers even if a task fails
+                      type: boolean
+                    flush_cache:
+                      title: Flush cache
+                      description: clear the fact cache for every host in inventory
+                      type: boolean
                     become:
                       title: Become
                       description: run operations with become (does not imply password
@@ -12071,111 +12121,43 @@ definitions:
                       description: privilege escalation method to use (default=sudo),
                         use `ansible-doc -t become -l` to list valid choices.
                       type: string
-                    check:
-                      title: Check
-                      description: don't make any changes; instead, try to predict
-                        some of the changes that may occur
-                      type: boolean
-                    connection:
-                      title: Connection
-                      description: connection type to use (default=smart)
-                      type: string
-                    diff:
-                      title: Diff
-                      description: when changing (small) files and templates, show
-                        the differences in those files; works great with --check
-                      type: boolean
-                    extra_vars:
-                      title: Extra vars
-                      description: set additional variables as key=value or YAML/JSON,
-                        if filename prepend with @
-                      type: string
-                    flush_cache:
-                      title: Flush cache
-                      description: clear the fact cache for every host in inventory
-                      type: boolean
-                    force_handlers:
-                      title: Force handlers
-                      description: run handlers even if a task fails
-                      type: boolean
-                    forks:
-                      title: Forks
-                      description: specify number of parallel processes to use (default=5)
-                      type: integer
-                    limit:
-                      title: Limit
-                      description: further limit selected hosts to an additional pattern
-                      type: string
-                    list_hosts:
-                      title: List hosts
-                      description: outputs a list of matching hosts; does not execute
-                        anything else
-                      type: boolean
-                    list_tags:
-                      title: List tags
-                      description: list all available tags
-                      type: boolean
-                    list_tasks:
-                      title: List tasks
-                      description: list all tasks that would be executed
-                      type: boolean
-                    private_key:
-                      title: Private key
-                      description: use this file to authenticate the connection
-                      type: string
-                      format: secretfile
-                      x-options:
-                        media_types:
-                          - '*/*'
-                    scp_extra_args:
-                      title: Scp extra args
-                      description: specify extra arguments to pass to scp only (e.g.
-                        -l)
-                      type: string
-                    sftp_extra_args:
-                      title: Sftp extra args
-                      description: specify extra arguments to pass to sftp only (e.g.
-                        -f, -l)
+                    tags:
+                      title: Tags
+                      description: only run plays and tasks tagged with these values
                       type: string
                     skip_tags:
                       title: Skip tags
                       description: only run plays and tasks whose tags do not match
                         these values
                       type: string
-                    ssh_common_args:
-                      title: Ssh common args
-                      description: specify common arguments to pass to sftp/scp/ssh
-                        (e.g. ProxyCommand)
-                      type: string
-                    ssh_extra_args:
-                      title: Ssh extra args
-                      description: specify extra arguments to pass to ssh only (e.g.
-                        -R)
-                      type: string
-                    start_at_task:
-                      title: Start at task
-                      description: start the playbook at the task matching this name
-                      type: string
-                    step:
-                      title: Step
-                      description: 'one-step-at-a-time: confirm each task before running'
+                    check:
+                      title: Check
+                      description: don't make any changes; instead, try to predict
+                        some of the changes that may occur
                       type: boolean
                     syntax_check:
                       title: Syntax check
                       description: perform a syntax check on the playbook, but do
                         not execute it
                       type: boolean
-                    tags:
-                      title: Tags
-                      description: only run plays and tasks tagged with these values
+                    diff:
+                      title: Diff
+                      description: when changing (small) files and templates, show
+                        the differences in those files; works great with --check
+                      type: boolean
+                    list_hosts:
+                      title: List hosts
+                      description: outputs a list of matching hosts; does not execute
+                        anything else
+                      type: boolean
+                    limit:
+                      title: Limit
+                      description: further limit selected hosts to an additional pattern
                       type: string
-                    timeout:
-                      title: Timeout
-                      description: override the connection timeout in seconds (default=10)
-                      type: integer
-                    user:
-                      title: User
-                      description: connect as this user (default=None)
+                    extra_vars:
+                      title: Extra vars
+                      description: set additional variables as key=value or YAML/JSON,
+                        if filename prepend with @
                       type: string
                     vault_password_file:
                       title: Vault password file
@@ -12185,12 +12167,30 @@ definitions:
                       x-options:
                         media_types:
                           - '*/*'
-                    verbose:
-                      title: Verbose
-                      description: verbose mode (-vvv for more, -vvvv to enable connection
-                        debugging)
+                    forks:
+                      title: Forks
+                      description: specify number of parallel processes to use (default=5)
                       type: integer
-                      maximum: 4
+                    list_tasks:
+                      title: List tasks
+                      description: list all tasks that would be executed
+                      type: boolean
+                    list_tags:
+                      title: List tags
+                      description: list all available tags
+                      type: boolean
+                    step:
+                      title: Step
+                      description: 'one-step-at-a-time: confirm each task before running'
+                      type: boolean
+                    start_at_task:
+                      title: Start at task
+                      description: start the playbook at the task matching this name
+                      type: string
+                    args:
+                      title: Args
+                      description: Playbook(s)
+                      type: string
     x-properties-groups:
       '':
         - id
@@ -12275,10 +12275,12 @@ definitions:
                 vars:
                   type: object
                   properties:
-                    background:
-                      title: Background
-                      description: run asynchronously, failing after X seconds (default=N/A)
+                    verbose:
+                      title: Verbose
+                      description: verbose mode (-vvv for more, -vvvv to enable connection
+                        debugging)
                       type: integer
+                      maximum: 4
                     become:
                       title: Become
                       description: run operations with become (does not imply password
@@ -12289,15 +12291,81 @@ definitions:
                       description: privilege escalation method to use (default=sudo),
                         use `ansible-doc -t become -l` to list valid choices.
                       type: string
+                    list_hosts:
+                      title: List hosts
+                      description: outputs a list of matching hosts; does not execute
+                        anything else
+                      type: boolean
+                    limit:
+                      title: Limit
+                      description: further limit selected hosts to an additional pattern
+                      type: string
+                    poll:
+                      title: Poll
+                      description: set the poll interval if using -B (default=15)
+                      type: integer
+                    background:
+                      title: Background
+                      description: run asynchronously, failing after X seconds (default=N/A)
+                      type: integer
+                    one_line:
+                      title: One line
+                      description: condense output
+                      type: boolean
+                    tree:
+                      title: Tree
+                      description: log output to this directory
+                      type: string
+                    private_key:
+                      title: Private key
+                      description: use this file to authenticate the connection
+                      type: string
+                      format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
+                    user:
+                      title: User
+                      description: connect as this user (default=None)
+                      type: string
+                    connection:
+                      title: Connection
+                      description: connection type to use (default=smart)
+                      type: string
+                    timeout:
+                      title: Timeout
+                      description: override the connection timeout in seconds (default=10)
+                      type: integer
+                    ssh_common_args:
+                      title: Ssh common args
+                      description: specify common arguments to pass to sftp/scp/ssh
+                        (e.g. ProxyCommand)
+                      type: string
+                    sftp_extra_args:
+                      title: Sftp extra args
+                      description: specify extra arguments to pass to sftp only (e.g.
+                        -f, -l)
+                      type: string
+                    scp_extra_args:
+                      title: Scp extra args
+                      description: specify extra arguments to pass to scp only (e.g.
+                        -l)
+                      type: string
+                    ssh_extra_args:
+                      title: Ssh extra args
+                      description: specify extra arguments to pass to ssh only (e.g.
+                        -R)
+                      type: string
                     check:
                       title: Check
                       description: don't make any changes; instead, try to predict
                         some of the changes that may occur
                       type: boolean
-                    connection:
-                      title: Connection
-                      description: connection type to use (default=smart)
-                      type: string
+                    syntax_check:
+                      title: Syntax check
+                      description: perform a syntax check on the playbook, but do
+                        not execute it
+                      type: boolean
                     diff:
                       title: Diff
                       description: when changing (small) files and templates, show
@@ -12308,78 +12376,6 @@ definitions:
                       description: set additional variables as key=value or YAML/JSON,
                         if filename prepend with @
                       type: string
-                    forks:
-                      title: Forks
-                      description: specify number of parallel processes to use (default=5)
-                      type: integer
-                    limit:
-                      title: Limit
-                      description: further limit selected hosts to an additional pattern
-                      type: string
-                    list_hosts:
-                      title: List hosts
-                      description: outputs a list of matching hosts; does not execute
-                        anything else
-                      type: boolean
-                    one_line:
-                      title: One line
-                      description: condense output
-                      type: boolean
-                    playbook_dir:
-                      title: Playbook dir
-                      description: Since this tool does not use playbooks, use this
-                        as a substitute playbook directory.This sets the relative
-                        path for many features including roles/ group_vars/ etc.
-                      type: string
-                    poll:
-                      title: Poll
-                      description: set the poll interval if using -B (default=15)
-                      type: integer
-                    private_key:
-                      title: Private key
-                      description: use this file to authenticate the connection
-                      type: string
-                      format: secretfile
-                      x-options:
-                        media_types:
-                          - '*/*'
-                    scp_extra_args:
-                      title: Scp extra args
-                      description: specify extra arguments to pass to scp only (e.g.
-                        -l)
-                      type: string
-                    sftp_extra_args:
-                      title: Sftp extra args
-                      description: specify extra arguments to pass to sftp only (e.g.
-                        -f, -l)
-                      type: string
-                    ssh_common_args:
-                      title: Ssh common args
-                      description: specify common arguments to pass to sftp/scp/ssh
-                        (e.g. ProxyCommand)
-                      type: string
-                    ssh_extra_args:
-                      title: Ssh extra args
-                      description: specify extra arguments to pass to ssh only (e.g.
-                        -R)
-                      type: string
-                    syntax_check:
-                      title: Syntax check
-                      description: perform a syntax check on the playbook, but do
-                        not execute it
-                      type: boolean
-                    timeout:
-                      title: Timeout
-                      description: override the connection timeout in seconds (default=10)
-                      type: integer
-                    tree:
-                      title: Tree
-                      description: log output to this directory
-                      type: string
-                    user:
-                      title: User
-                      description: connect as this user (default=None)
-                      type: string
                     vault_password_file:
                       title: Vault password file
                       description: vault password file
@@ -12388,12 +12384,16 @@ definitions:
                       x-options:
                         media_types:
                           - '*/*'
-                    verbose:
-                      title: Verbose
-                      description: verbose mode (-vvv for more, -vvvv to enable connection
-                        debugging)
+                    forks:
+                      title: Forks
+                      description: specify number of parallel processes to use (default=5)
                       type: integer
-                      maximum: 4
+                    playbook_dir:
+                      title: Playbook dir
+                      description: Since this tool does not use playbooks, use this
+                        as a substitute playbook directory.This sets the relative
+                        path for many features including roles/ group_vars/ etc.
+                      type: string
             Task:
               required:
                 - playbook
@@ -12412,10 +12412,60 @@ definitions:
                 vars:
                   type: object
                   properties:
-                    args:
-                      title: Args
-                      description: Playbook(s)
+                    verbose:
+                      title: Verbose
+                      description: verbose mode (-vvv for more, -vvvv to enable connection
+                        debugging)
+                      type: integer
+                      maximum: 4
+                    private_key:
+                      title: Private key
+                      description: use this file to authenticate the connection
                       type: string
+                      format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
+                    user:
+                      title: User
+                      description: connect as this user (default=None)
+                      type: string
+                    connection:
+                      title: Connection
+                      description: connection type to use (default=smart)
+                      type: string
+                    timeout:
+                      title: Timeout
+                      description: override the connection timeout in seconds (default=10)
+                      type: integer
+                    ssh_common_args:
+                      title: Ssh common args
+                      description: specify common arguments to pass to sftp/scp/ssh
+                        (e.g. ProxyCommand)
+                      type: string
+                    sftp_extra_args:
+                      title: Sftp extra args
+                      description: specify extra arguments to pass to sftp only (e.g.
+                        -f, -l)
+                      type: string
+                    scp_extra_args:
+                      title: Scp extra args
+                      description: specify extra arguments to pass to scp only (e.g.
+                        -l)
+                      type: string
+                    ssh_extra_args:
+                      title: Ssh extra args
+                      description: specify extra arguments to pass to ssh only (e.g.
+                        -R)
+                      type: string
+                    force_handlers:
+                      title: Force handlers
+                      description: run handlers even if a task fails
+                      type: boolean
+                    flush_cache:
+                      title: Flush cache
+                      description: clear the fact cache for every host in inventory
+                      type: boolean
                     become:
                       title: Become
                       description: run operations with become (does not imply password
@@ -12426,111 +12476,43 @@ definitions:
                       description: privilege escalation method to use (default=sudo),
                         use `ansible-doc -t become -l` to list valid choices.
                       type: string
-                    check:
-                      title: Check
-                      description: don't make any changes; instead, try to predict
-                        some of the changes that may occur
-                      type: boolean
-                    connection:
-                      title: Connection
-                      description: connection type to use (default=smart)
-                      type: string
-                    diff:
-                      title: Diff
-                      description: when changing (small) files and templates, show
-                        the differences in those files; works great with --check
-                      type: boolean
-                    extra_vars:
-                      title: Extra vars
-                      description: set additional variables as key=value or YAML/JSON,
-                        if filename prepend with @
-                      type: string
-                    flush_cache:
-                      title: Flush cache
-                      description: clear the fact cache for every host in inventory
-                      type: boolean
-                    force_handlers:
-                      title: Force handlers
-                      description: run handlers even if a task fails
-                      type: boolean
-                    forks:
-                      title: Forks
-                      description: specify number of parallel processes to use (default=5)
-                      type: integer
-                    limit:
-                      title: Limit
-                      description: further limit selected hosts to an additional pattern
-                      type: string
-                    list_hosts:
-                      title: List hosts
-                      description: outputs a list of matching hosts; does not execute
-                        anything else
-                      type: boolean
-                    list_tags:
-                      title: List tags
-                      description: list all available tags
-                      type: boolean
-                    list_tasks:
-                      title: List tasks
-                      description: list all tasks that would be executed
-                      type: boolean
-                    private_key:
-                      title: Private key
-                      description: use this file to authenticate the connection
-                      type: string
-                      format: secretfile
-                      x-options:
-                        media_types:
-                          - '*/*'
-                    scp_extra_args:
-                      title: Scp extra args
-                      description: specify extra arguments to pass to scp only (e.g.
-                        -l)
-                      type: string
-                    sftp_extra_args:
-                      title: Sftp extra args
-                      description: specify extra arguments to pass to sftp only (e.g.
-                        -f, -l)
+                    tags:
+                      title: Tags
+                      description: only run plays and tasks tagged with these values
                       type: string
                     skip_tags:
                       title: Skip tags
                       description: only run plays and tasks whose tags do not match
                         these values
                       type: string
-                    ssh_common_args:
-                      title: Ssh common args
-                      description: specify common arguments to pass to sftp/scp/ssh
-                        (e.g. ProxyCommand)
-                      type: string
-                    ssh_extra_args:
-                      title: Ssh extra args
-                      description: specify extra arguments to pass to ssh only (e.g.
-                        -R)
-                      type: string
-                    start_at_task:
-                      title: Start at task
-                      description: start the playbook at the task matching this name
-                      type: string
-                    step:
-                      title: Step
-                      description: 'one-step-at-a-time: confirm each task before running'
+                    check:
+                      title: Check
+                      description: don't make any changes; instead, try to predict
+                        some of the changes that may occur
                       type: boolean
                     syntax_check:
                       title: Syntax check
                       description: perform a syntax check on the playbook, but do
                         not execute it
                       type: boolean
-                    tags:
-                      title: Tags
-                      description: only run plays and tasks tagged with these values
+                    diff:
+                      title: Diff
+                      description: when changing (small) files and templates, show
+                        the differences in those files; works great with --check
+                      type: boolean
+                    list_hosts:
+                      title: List hosts
+                      description: outputs a list of matching hosts; does not execute
+                        anything else
+                      type: boolean
+                    limit:
+                      title: Limit
+                      description: further limit selected hosts to an additional pattern
                       type: string
-                    timeout:
-                      title: Timeout
-                      description: override the connection timeout in seconds (default=10)
-                      type: integer
-                    user:
-                      title: User
-                      description: connect as this user (default=None)
+                    extra_vars:
+                      title: Extra vars
+                      description: set additional variables as key=value or YAML/JSON,
+                        if filename prepend with @
                       type: string
                     vault_password_file:
                       title: Vault password file
@@ -12540,12 +12522,30 @@ definitions:
                       x-options:
                         media_types:
                           - '*/*'
-                    verbose:
-                      title: Verbose
-                      description: verbose mode (-vvv for more, -vvvv to enable connection
-                        debugging)
+                    forks:
+                      title: Forks
+                      description: specify number of parallel processes to use (default=5)
                       type: integer
-                      maximum: 4
+                    list_tasks:
+                      title: List tasks
+                      description: list all tasks that would be executed
+                      type: boolean
+                    list_tags:
+                      title: List tags
+                      description: list all available tags
+                      type: boolean
+                    step:
+                      title: Step
+                      description: 'one-step-at-a-time: confirm each task before running'
+                      type: boolean
+                    start_at_task:
+                      title: Start at task
+                      description: start the playbook at the task matching this name
+                      type: string
+                    args:
+                      title: Args
+                      description: Playbook(s)
+                      type: string
     x-properties-groups:
       '':
         - id
@@ -12654,10 +12654,12 @@ definitions:
                 vars:
                   type: object
                   properties:
-                    background:
-                      title: Background
-                      description: run asynchronously, failing after X seconds (default=N/A)
+                    verbose:
+                      title: Verbose
+                      description: verbose mode (-vvv for more, -vvvv to enable connection
+                        debugging)
                       type: integer
+                      maximum: 4
                     become:
                       title: Become
                       description: run operations with become (does not imply password
@@ -12668,15 +12670,81 @@ definitions:
                       description: privilege escalation method to use (default=sudo),
                         use `ansible-doc -t become -l` to list valid choices.
                       type: string
+                    list_hosts:
+                      title: List hosts
+                      description: outputs a list of matching hosts; does not execute
+                        anything else
+                      type: boolean
+                    limit:
+                      title: Limit
+                      description: further limit selected hosts to an additional pattern
+                      type: string
+                    poll:
+                      title: Poll
+                      description: set the poll interval if using -B (default=15)
+                      type: integer
+                    background:
+                      title: Background
+                      description: run asynchronously, failing after X seconds (default=N/A)
+                      type: integer
+                    one_line:
+                      title: One line
+                      description: condense output
+                      type: boolean
+                    tree:
+                      title: Tree
+                      description: log output to this directory
+                      type: string
+                    private_key:
+                      title: Private key
+                      description: use this file to authenticate the connection
+                      type: string
+                      format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
+                    user:
+                      title: User
+                      description: connect as this user (default=None)
+                      type: string
+                    connection:
+                      title: Connection
+                      description: connection type to use (default=smart)
+                      type: string
+                    timeout:
+                      title: Timeout
+                      description: override the connection timeout in seconds (default=10)
+                      type: integer
+                    ssh_common_args:
+                      title: Ssh common args
+                      description: specify common arguments to pass to sftp/scp/ssh
+                        (e.g. ProxyCommand)
+                      type: string
+                    sftp_extra_args:
+                      title: Sftp extra args
+                      description: specify extra arguments to pass to sftp only (e.g.
+                        -f, -l)
+                      type: string
+                    scp_extra_args:
+                      title: Scp extra args
+                      description: specify extra arguments to pass to scp only (e.g.
+                        -l)
+                      type: string
+                    ssh_extra_args:
+                      title: Ssh extra args
+                      description: specify extra arguments to pass to ssh only (e.g.
+                        -R)
+                      type: string
                     check:
                       title: Check
                       description: don't make any changes; instead, try to predict
                         some of the changes that may occur
                       type: boolean
-                    connection:
-                      title: Connection
-                      description: connection type to use (default=smart)
-                      type: string
+                    syntax_check:
+                      title: Syntax check
+                      description: perform a syntax check on the playbook, but do
+                        not execute it
+                      type: boolean
                     diff:
                       title: Diff
                       description: when changing (small) files and templates, show
@@ -12687,78 +12755,6 @@ definitions:
                       description: set additional variables as key=value or YAML/JSON,
                         if filename prepend with @
                       type: string
-                    forks:
-                      title: Forks
-                      description: specify number of parallel processes to use (default=5)
-                      type: integer
-                    limit:
-                      title: Limit
-                      description: further limit selected hosts to an additional pattern
-                      type: string
-                    list_hosts:
-                      title: List hosts
-                      description: outputs a list of matching hosts; does not execute
-                        anything else
-                      type: boolean
-                    one_line:
-                      title: One line
-                      description: condense output
-                      type: boolean
-                    playbook_dir:
-                      title: Playbook dir
-                      description: Since this tool does not use playbooks, use this
-                        as a substitute playbook directory.This sets the relative
-                        path for many features including roles/ group_vars/ etc.
-                      type: string
-                    poll:
-                      title: Poll
-                      description: set the poll interval if using -B (default=15)
-                      type: integer
-                    private_key:
-                      title: Private key
-                      description: use this file to authenticate the connection
-                      type: string
-                      format: secretfile
-                      x-options:
-                        media_types:
-                          - '*/*'
-                    scp_extra_args:
-                      title: Scp extra args
-                      description: specify extra arguments to pass to scp only (e.g.
-                        -l)
-                      type: string
-                    sftp_extra_args:
-                      title: Sftp extra args
-                      description: specify extra arguments to pass to sftp only (e.g.
-                        -f, -l)
-                      type: string
-                    ssh_common_args:
-                      title: Ssh common args
-                      description: specify common arguments to pass to sftp/scp/ssh
-                        (e.g. ProxyCommand)
-                      type: string
-                    ssh_extra_args:
-                      title: Ssh extra args
-                      description: specify extra arguments to pass to ssh only (e.g.
-                        -R)
-                      type: string
-                    syntax_check:
-                      title: Syntax check
-                      description: perform a syntax check on the playbook, but do
-                        not execute it
-                      type: boolean
-                    timeout:
-                      title: Timeout
-                      description: override the connection timeout in seconds (default=10)
-                      type: integer
-                    tree:
-                      title: Tree
-                      description: log output to this directory
-                      type: string
-                    user:
-                      title: User
-                      description: connect as this user (default=None)
-                      type: string
                     vault_password_file:
                       title: Vault password file
                       description: vault password file
@@ -12767,12 +12763,16 @@ definitions:
                       x-options:
                         media_types:
                           - '*/*'
-                    verbose:
-                      title: Verbose
-                      description: verbose mode (-vvv for more, -vvvv to enable connection
-                        debugging)
+                    forks:
+                      title: Forks
+                      description: specify number of parallel processes to use (default=5)
                       type: integer
-                      maximum: 4
+                    playbook_dir:
+                      title: Playbook dir
+                      description: Since this tool does not use playbooks, use this
+                        as a substitute playbook directory.This sets the relative
+                        path for many features including roles/ group_vars/ etc.
+                      type: string
             Task:
               required:
                 - playbook
@@ -12791,10 +12791,60 @@ definitions:
                 vars:
                   type: object
                   properties:
-                    args:
-                      title: Args
-                      description: Playbook(s)
+                    verbose:
+                      title: Verbose
+                      description: verbose mode (-vvv for more, -vvvv to enable connection
+                        debugging)
+                      type: integer
+                      maximum: 4
+                    private_key:
+                      title: Private key
+                      description: use this file to authenticate the connection
                       type: string
+                      format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
+                    user:
+                      title: User
+                      description: connect as this user (default=None)
+                      type: string
+                    connection:
+                      title: Connection
+                      description: connection type to use (default=smart)
+                      type: string
+                    timeout:
+                      title: Timeout
+                      description: override the connection timeout in seconds (default=10)
+                      type: integer
+                    ssh_common_args:
+                      title: Ssh common args
+                      description: specify common arguments to pass to sftp/scp/ssh
+                        (e.g. ProxyCommand)
+                      type: string
+                    sftp_extra_args:
+                      title: Sftp extra args
+                      description: specify extra arguments to pass to sftp only (e.g.
+                        -f, -l)
+                      type: string
+                    scp_extra_args:
+                      title: Scp extra args
+                      description: specify extra arguments to pass to scp only (e.g.
+                        -l)
+                      type: string
+                    ssh_extra_args:
+                      title: Ssh extra args
+                      description: specify extra arguments to pass to ssh only (e.g.
+                        -R)
+                      type: string
+                    force_handlers:
+                      title: Force handlers
+                      description: run handlers even if a task fails
+                      type: boolean
+                    flush_cache:
+                      title: Flush cache
+                      description: clear the fact cache for every host in inventory
+                      type: boolean
                     become:
                       title: Become
                       description: run operations with become (does not imply password
@@ -12805,111 +12855,43 @@ definitions:
                       description: privilege escalation method to use (default=sudo),
                         use `ansible-doc -t become -l` to list valid choices.
                       type: string
-                    check:
-                      title: Check
-                      description: don't make any changes; instead, try to predict
-                        some of the changes that may occur
-                      type: boolean
-                    connection:
-                      title: Connection
-                      description: connection type to use (default=smart)
-                      type: string
-                    diff:
-                      title: Diff
-                      description: when changing (small) files and templates, show
-                        the differences in those files; works great with --check
-                      type: boolean
-                    extra_vars:
-                      title: Extra vars
-                      description: set additional variables as key=value or YAML/JSON,
-                        if filename prepend with @
-                      type: string
-                    flush_cache:
-                      title: Flush cache
-                      description: clear the fact cache for every host in inventory
-                      type: boolean
-                    force_handlers:
-                      title: Force handlers
-                      description: run handlers even if a task fails
-                      type: boolean
-                    forks:
-                      title: Forks
-                      description: specify number of parallel processes to use (default=5)
-                      type: integer
-                    limit:
-                      title: Limit
-                      description: further limit selected hosts to an additional pattern
-                      type: string
-                    list_hosts:
-                      title: List hosts
-                      description: outputs a list of matching hosts; does not execute
-                        anything else
-                      type: boolean
-                    list_tags:
-                      title: List tags
-                      description: list all available tags
-                      type: boolean
-                    list_tasks:
-                      title: List tasks
-                      description: list all tasks that would be executed
-                      type: boolean
-                    private_key:
-                      title: Private key
-                      description: use this file to authenticate the connection
-                      type: string
-                      format: secretfile
-                      x-options:
-                        media_types:
-                          - '*/*'
-                    scp_extra_args:
-                      title: Scp extra args
-                      description: specify extra arguments to pass to scp only (e.g.
-                        -l)
-                      type: string
-                    sftp_extra_args:
-                      title: Sftp extra args
-                      description: specify extra arguments to pass to sftp only (e.g.
-                        -f, -l)
+                    tags:
+                      title: Tags
+                      description: only run plays and tasks tagged with these values
                       type: string
                     skip_tags:
                       title: Skip tags
                       description: only run plays and tasks whose tags do not match
                         these values
                       type: string
-                    ssh_common_args:
-                      title: Ssh common args
-                      description: specify common arguments to pass to sftp/scp/ssh
-                        (e.g. ProxyCommand)
-                      type: string
-                    ssh_extra_args:
-                      title: Ssh extra args
-                      description: specify extra arguments to pass to ssh only (e.g.
-                        -R)
-                      type: string
-                    start_at_task:
-                      title: Start at task
-                      description: start the playbook at the task matching this name
-                      type: string
-                    step:
-                      title: Step
-                      description: 'one-step-at-a-time: confirm each task before running'
+                    check:
+                      title: Check
+                      description: don't make any changes; instead, try to predict
+                        some of the changes that may occur
                       type: boolean
                     syntax_check:
                       title: Syntax check
                       description: perform a syntax check on the playbook, but do
                         not execute it
                       type: boolean
-                    tags:
-                      title: Tags
-                      description: only run plays and tasks tagged with these values
+                    diff:
+                      title: Diff
+                      description: when changing (small) files and templates, show
+                        the differences in those files; works great with --check
+                      type: boolean
+                    list_hosts:
+                      title: List hosts
+                      description: outputs a list of matching hosts; does not execute
+                        anything else
+                      type: boolean
+                    limit:
+                      title: Limit
+                      description: further limit selected hosts to an additional pattern
                       type: string
-                    timeout:
-                      title: Timeout
-                      description: override the connection timeout in seconds (default=10)
-                      type: integer
-                    user:
-                      title: User
-                      description: connect as this user (default=None)
+                    extra_vars:
+                      title: Extra vars
+                      description: set additional variables as key=value or YAML/JSON,
+                        if filename prepend with @
                       type: string
                     vault_password_file:
                       title: Vault password file
@@ -12919,12 +12901,30 @@ definitions:
                       x-options:
                         media_types:
                           - '*/*'
-                    verbose:
-                      title: Verbose
-                      description: verbose mode (-vvv for more, -vvvv to enable connection
-                        debugging)
+                    forks:
+                      title: Forks
+                      description: specify number of parallel processes to use (default=5)
                       type: integer
-                      maximum: 4
+                    list_tasks:
+                      title: List tasks
+                      description: list all tasks that would be executed
+                      type: boolean
+                    list_tags:
+                      title: List tags
+                      description: list all available tags
+                      type: boolean
+                    step:
+                      title: Step
+                      description: 'one-step-at-a-time: confirm each task before running'
+                      type: boolean
+                    start_at_task:
+                      title: Start at task
+                      description: start the playbook at the task matching this name
+                      type: string
+                    args:
+                      title: Args
+                      description: Playbook(s)
+                      type: string
     x-properties-groups:
       '':
         - id
@@ -12987,10 +12987,12 @@ definitions:
                 vars:
                   type: object
                   properties:
-                    background:
-                      title: Background
-                      description: run asynchronously, failing after X seconds (default=N/A)
+                    verbose:
+                      title: Verbose
+                      description: verbose mode (-vvv for more, -vvvv to enable connection
+                        debugging)
                       type: integer
+                      maximum: 4
                     become:
                       title: Become
                       description: run operations with become (does not imply password
@@ -13001,15 +13003,81 @@ definitions:
                       description: privilege escalation method to use (default=sudo),
                         use `ansible-doc -t become -l` to list valid choices.
                       type: string
+                    list_hosts:
+                      title: List hosts
+                      description: outputs a list of matching hosts; does not execute
+                        anything else
+                      type: boolean
+                    limit:
+                      title: Limit
+                      description: further limit selected hosts to an additional pattern
+                      type: string
+                    poll:
+                      title: Poll
+                      description: set the poll interval if using -B (default=15)
+                      type: integer
+                    background:
+                      title: Background
+                      description: run asynchronously, failing after X seconds (default=N/A)
+                      type: integer
+                    one_line:
+                      title: One line
+                      description: condense output
+                      type: boolean
+                    tree:
+                      title: Tree
+                      description: log output to this directory
+                      type: string
+                    private_key:
+                      title: Private key
+                      description: use this file to authenticate the connection
+                      type: string
+                      format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
+                    user:
+                      title: User
+                      description: connect as this user (default=None)
+                      type: string
+                    connection:
+                      title: Connection
+                      description: connection type to use (default=smart)
+                      type: string
+                    timeout:
+                      title: Timeout
+                      description: override the connection timeout in seconds (default=10)
+                      type: integer
+                    ssh_common_args:
+                      title: Ssh common args
+                      description: specify common arguments to pass to sftp/scp/ssh
+                        (e.g. ProxyCommand)
+                      type: string
+                    sftp_extra_args:
+                      title: Sftp extra args
+                      description: specify extra arguments to pass to sftp only (e.g.
+                        -f, -l)
+                      type: string
+                    scp_extra_args:
+                      title: Scp extra args
+                      description: specify extra arguments to pass to scp only (e.g.
+                        -l)
+                      type: string
+                    ssh_extra_args:
+                      title: Ssh extra args
+                      description: specify extra arguments to pass to ssh only (e.g.
+                        -R)
+                      type: string
                     check:
                       title: Check
                       description: don't make any changes; instead, try to predict
                         some of the changes that may occur
                       type: boolean
-                    connection:
-                      title: Connection
-                      description: connection type to use (default=smart)
-                      type: string
+                    syntax_check:
+                      title: Syntax check
+                      description: perform a syntax check on the playbook, but do
+                        not execute it
+                      type: boolean
                     diff:
                       title: Diff
                       description: when changing (small) files and templates, show
@@ -13020,78 +13088,6 @@ definitions:
                       description: set additional variables as key=value or YAML/JSON,
                         if filename prepend with @
                       type: string
-                    forks:
-                      title: Forks
-                      description: specify number of parallel processes to use (default=5)
-                      type: integer
-                    limit:
-                      title: Limit
-                      description: further limit selected hosts to an additional pattern
-                      type: string
-                    list_hosts:
-                      title: List hosts
-                      description: outputs a list of matching hosts; does not execute
-                        anything else
-                      type: boolean
-                    one_line:
-                      title: One line
-                      description: condense output
-                      type: boolean
-                    playbook_dir:
-                      title: Playbook dir
-                      description: Since this tool does not use playbooks, use this
-                        as a substitute playbook directory.This sets the relative
-                        path for many features including roles/ group_vars/ etc.
-                      type: string
-                    poll:
-                      title: Poll
-                      description: set the poll interval if using -B (default=15)
-                      type: integer
-                    private_key:
-                      title: Private key
-                      description: use this file to authenticate the connection
-                      type: string
-                      format: secretfile
-                      x-options:
-                        media_types:
-                          - '*/*'
-                    scp_extra_args:
-                      title: Scp extra args
-                      description: specify extra arguments to pass to scp only (e.g.
-                        -l)
-                      type: string
-                    sftp_extra_args:
-                      title: Sftp extra args
-                      description: specify extra arguments to pass to sftp only (e.g.
-                        -f, -l)
-                      type: string
-                    ssh_common_args:
-                      title: Ssh common args
-                      description: specify common arguments to pass to sftp/scp/ssh
-                        (e.g. ProxyCommand)
-                      type: string
-                    ssh_extra_args:
-                      title: Ssh extra args
-                      description: specify extra arguments to pass to ssh only (e.g.
-                        -R)
-                      type: string
-                    syntax_check:
-                      title: Syntax check
-                      description: perform a syntax check on the playbook, but do
-                        not execute it
-                      type: boolean
-                    timeout:
-                      title: Timeout
-                      description: override the connection timeout in seconds (default=10)
-                      type: integer
-                    tree:
-                      title: Tree
-                      description: log output to this directory
-                      type: string
-                    user:
-                      title: User
-                      description: connect as this user (default=None)
-                      type: string
                     vault_password_file:
                       title: Vault password file
                       description: vault password file
@@ -13100,12 +13096,16 @@ definitions:
                       x-options:
                         media_types:
                           - '*/*'
-                    verbose:
-                      title: Verbose
-                      description: verbose mode (-vvv for more, -vvvv to enable connection
-                        debugging)
+                    forks:
+                      title: Forks
+                      description: specify number of parallel processes to use (default=5)
                       type: integer
-                      maximum: 4
+                    playbook_dir:
+                      title: Playbook dir
+                      description: Since this tool does not use playbooks, use this
+                        as a substitute playbook directory.This sets the relative
+                        path for many features including roles/ group_vars/ etc.
+                      type: string
             Task:
               required:
                 - playbook
@@ -13124,10 +13124,60 @@ definitions:
                 vars:
                   type: object
                   properties:
-                    args:
-                      title: Args
-                      description: Playbook(s)
+                    verbose:
+                      title: Verbose
+                      description: verbose mode (-vvv for more, -vvvv to enable connection
+                        debugging)
+                      type: integer
+                      maximum: 4
+                    private_key:
+                      title: Private key
+                      description: use this file to authenticate the connection
                       type: string
+                      format: secretfile
+                      x-options:
+                        media_types:
+                          - '*/*'
+                    user:
+                      title: User
+                      description: connect as this user (default=None)
+                      type: string
+                    connection:
+                      title: Connection
+                      description: connection type to use (default=smart)
+                      type: string
+                    timeout:
+                      title: Timeout
+                      description: override the connection timeout in seconds (default=10)
+                      type: integer
+                    ssh_common_args:
+                      title: Ssh common args
+                      description: specify common arguments to pass to sftp/scp/ssh
+                        (e.g. ProxyCommand)
+                      type: string
+                    sftp_extra_args:
+                      title: Sftp extra args
+                      description: specify extra arguments to pass to sftp only (e.g.
+                        -f, -l)
+                      type: string
+                    scp_extra_args:
+                      title: Scp extra args
+                      description: specify extra arguments to pass to scp only (e.g.
+                        -l)
+                      type: string
+                    ssh_extra_args:
+                      title: Ssh extra args
+                      description: specify extra arguments to pass to ssh only (e.g.
+                        -R)
+                      type: string
+                    force_handlers:
+                      title: Force handlers
+                      description: run handlers even if a task fails
+                      type: boolean
+                    flush_cache:
+                      title: Flush cache
+                      description: clear the fact cache for every host in inventory
+                      type: boolean
                     become:
                       title: Become
                       description: run operations with become (does not imply password
@@ -13138,111 +13188,43 @@ definitions:
                       description: privilege escalation method to use (default=sudo),
                         use `ansible-doc -t become -l` to list valid choices.
                       type: string
-                    check:
-                      title: Check
-                      description: don't make any changes; instead, try to predict
-                        some of the changes that may occur
-                      type: boolean
-                    connection:
-                      title: Connection
-                      description: connection type to use (default=smart)
-                      type: string
-                    diff:
-                      title: Diff
-                      description: when changing (small) files and templates, show
-                        the differences in those files; works great with --check
-                      type: boolean
-                    extra_vars:
-                      title: Extra vars
-                      description: set additional variables as key=value or YAML/JSON,
-                        if filename prepend with @
-                      type: string
-                    flush_cache:
-                      title: Flush cache
-                      description: clear the fact cache for every host in inventory
-                      type: boolean
-                    force_handlers:
-                      title: Force handlers
-                      description: run handlers even if a task fails
-                      type: boolean
-                    forks:
-                      title: Forks
-                      description: specify number of parallel processes to use (default=5)
-                      type: integer
-                    limit:
-                      title: Limit
-                      description: further limit selected hosts to an additional pattern
-                      type: string
-                    list_hosts:
-                      title: List hosts
-                      description: outputs a list of matching hosts; does not execute
-                        anything else
-                      type: boolean
-                    list_tags:
-                      title: List tags
-                      description: list all available tags
-                      type: boolean
-                    list_tasks:
-                      title: List tasks
-                      description: list all tasks that would be executed
-                      type: boolean
-                    private_key:
-                      title: Private key
-                      description: use this file to authenticate the connection
-                      type: string
-                      format: secretfile
-                      x-options:
-                        media_types:
-                          - '*/*'
-                    scp_extra_args:
-                      title: Scp extra args
-                      description: specify extra arguments to pass to scp only (e.g.
-                        -l)
-                      type: string
-                    sftp_extra_args:
-                      title: Sftp extra args
-                      description: specify extra arguments to pass to sftp only (e.g.
-                        -f, -l)
+                    tags:
+                      title: Tags
+                      description: only run plays and tasks tagged with these values
                       type: string
                     skip_tags:
                       title: Skip tags
                       description: only run plays and tasks whose tags do not match
                         these values
                       type: string
-                    ssh_common_args:
-                      title: Ssh common args
-                      description: specify common arguments to pass to sftp/scp/ssh
-                        (e.g. ProxyCommand)
-                      type: string
-                    ssh_extra_args:
-                      title: Ssh extra args
-                      description: specify extra arguments to pass to ssh only (e.g.
-                        -R)
-                      type: string
-                    start_at_task:
-                      title: Start at task
-                      description: start the playbook at the task matching this name
-                      type: string
-                    step:
-                      title: Step
-                      description: 'one-step-at-a-time: confirm each task before running'
+                    check:
+                      title: Check
+                      description: don't make any changes; instead, try to predict
+                        some of the changes that may occur
                       type: boolean
                     syntax_check:
                       title: Syntax check
                       description: perform a syntax check on the playbook, but do
                         not execute it
                       type: boolean
-                    tags:
-                      title: Tags
-                      description: only run plays and tasks tagged with these values
+                    diff:
+                      title: Diff
+                      description: when changing (small) files and templates, show
+                        the differences in those files; works great with --check
+                      type: boolean
+                    list_hosts:
+                      title: List hosts
+                      description: outputs a list of matching hosts; does not execute
+                        anything else
+                      type: boolean
+                    limit:
+                      title: Limit
+                      description: further limit selected hosts to an additional pattern
                       type: string
-                    timeout:
-                      title: Timeout
-                      description: override the connection timeout in seconds (default=10)
-                      type: integer
-                    user:
-                      title: User
-                      description: connect as this user (default=None)
+                    extra_vars:
+                      title: Extra vars
+                      description: set additional variables as key=value or YAML/JSON,
+                        if filename prepend with @
                       type: string
                     vault_password_file:
                       title: Vault password file
@@ -13252,12 +13234,30 @@ definitions:
                       x-options:
                         media_types:
                           - '*/*'
-                    verbose:
-                      title: Verbose
-                      description: verbose mode (-vvv for more, -vvvv to enable connection
-                        debugging)
+                    forks:
+                      title: Forks
+                      description: specify number of parallel processes to use (default=5)
                       type: integer
-                      maximum: 4
+                    list_tasks:
+                      title: List tasks
+                      description: list all tasks that would be executed
+                      type: boolean
+                    list_tags:
+                      title: List tags
+                      description: list all available tags
+                      type: boolean
+                    step:
+                      title: Step
+                      description: 'one-step-at-a-time: confirm each task before running'
+                      type: boolean
+                    start_at_task:
+                      title: Start at task
+                      description: start the playbook at the task matching this name
+                      type: string
+                    args:
+                      title: Args
+                      description: Playbook(s)
+                      type: string
     x-properties-groups:
       '':
         - id
@@ -13746,63 +13746,63 @@ definitions:
           types:
             MODULE:
               enum:
-                - args
-                - background
+                - verbose
                 - become
                 - become_method
-                - check
+                - list_hosts
+                - limit
+                - poll
+                - background
+                - one_line
+                - tree
+                - private_key
+                - user
                 - connection
+                - timeout
+                - ssh_common_args
+                - sftp_extra_args
+                - scp_extra_args
+                - ssh_extra_args
+                - check
+                - syntax_check
                 - diff
                 - extra_vars
-                - forks
-                - limit
-                - list_hosts
-                - one_line
-                - playbook_dir
-                - poll
-                - private_key
-                - scp_extra_args
-                - sftp_extra_args
-                - ssh_common_args
-                - ssh_extra_args
-                - syntax_check
-                - timeout
-                - tree
-                - user
                 - vault_password_file
-                - verbose
+                - forks
+                - playbook_dir
+                - args
                 - group
               type: string
             PLAYBOOK:
               enum:
-                - args
+                - verbose
+                - private_key
+                - user
+                - connection
+                - timeout
+                - ssh_common_args
+                - sftp_extra_args
+                - scp_extra_args
+                - ssh_extra_args
+                - force_handlers
+                - flush_cache
                 - become
                 - become_method
-                - check
-                - connection
-                - diff
-                - extra_vars
-                - flush_cache
-                - force_handlers
-                - forks
-                - limit
-                - list_hosts
-                - list_tags
-                - list_tasks
-                - private_key
-                - scp_extra_args
-                - sftp_extra_args
-                - skip_tags
-                - ssh_common_args
-                - ssh_extra_args
-                - start_at_task
-                - step
-                - syntax_check
                 - tags
-                - timeout
-                - user
+                - skip_tags
+                - check
+                - syntax_check
+                - diff
+                - list_hosts
+                - limit
+                - extra_vars
                 - vault_password_file
-                - verbose
+                - forks
+                - list_tasks
+                - list_tags
+                - step
+                - start_at_task
+                - args
               type: string
       value:
         format: dynamic
