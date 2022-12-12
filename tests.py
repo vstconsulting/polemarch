@@ -28,9 +28,11 @@ try:
     from polemarch.main.tasks import ScheduledTask
     from polemarch.main.openapi import PROJECT_MENU
     from polemarch.main.constants import CYPHER
+    from polemarch.main.models.utils import ProjectProxy
     from polemarch.plugins.ansible import BaseAnsiblePlugin, BasePlugin, Module
 except ImportError:
     from pmlib.main.tasks import ScheduledTask
+    from pmlib.main.models.utils import ProjectProxy
     from pmlib.main.constants import CYPHER
     from pmlib.plugins.ansible import BaseAnsiblePlugin, BasePlugin, Module
 
@@ -47,9 +49,11 @@ else:
 User = get_user_model()
 
 example_key = """
------BEGIN RSA PRIVATE KEY-----
-our_private_key_string
------END RSA PRIVATE KEY-----
+-----BEGIN EC PRIVATE KEY-----
+MHcCAQEEIH1LLUytCpUG6FMH06Wnuk+p4ZewjyDPJKcQwsaGZ5y3oAoGCCqGSM49
+AwEHoUQDQgAET5LtltdvCIaMd4ZzXBP3JkZp/F2EMxPUiNVSe/HMdNIEnzy7WdH9
+HD1a8+068eoT+KV/ESsjDxwo2NUPZAo0pQ==
+-----END EC PRIVATE KEY-----
 """.strip()
 
 
@@ -109,6 +113,11 @@ class MockServer:
 class TestException(Exception):
     def __init__(self, msg='Test exception.', *args, **kwargs):
         super().__init__(msg, *args, **kwargs)
+
+
+class DummyProject:
+    def __getattr__(self, name):
+        return name
 
 
 class TestAnsibleDoc(BaseAnsiblePlugin):
@@ -2209,6 +2218,33 @@ class PeriodicTaskTestCase(BaseProjectTestCase):
 
 @own_projects_dir
 class PlaybookAndModuleTestCase(BaseProjectTestCase):
+    def test_execute_with_key_in_inventory(self):
+        self.get_model_filter('main.Variable').delete()
+        inventory_type = ContentType.objects.get(model='inventory', app_label='main')
+        self.get_model_filter('main.Variable').create(
+            key='ansible_ssh_private_key_file',
+            value=example_key,
+            content_type=inventory_type,
+            object_id=self.inventory.id
+        )
+        self.get_model_filter('main.Variable').create(
+            key='ansible_user',
+            value='user1',
+            content_type=inventory_type,
+            object_id=self.inventory.id
+        )
+        results = self.bulk_transactional([
+            self.execute_module_bulk_data(inventory=self.inventory.id),
+            self.get_history_bulk_data('<<0[data][history_id]>>'),
+            self.get_raw_history_bulk_data('<<0[data][history_id]>>'),
+        ])
+        self.assertEqual(results[1]['data']['status'], 'OFFLINE')
+        self.assertIn('"unreachable": true', results[2]['data']['detail'])
+        self.assertIn('"msg": "Failed to connect to the host via ssh:', results[2]['data']['detail'])
+        self.assertNotIn('No such file or directory', results[2]['data']['detail'])
+        self.assertNotIn('invalid format', results[2]['data']['detail'])
+        self.assertNotIn('bad permissions', results[2]['data']['detail'])
+
     def test_v2_executions(self):
         self.client.force_login(self.user)
         result = self.client.post(
@@ -4240,3 +4276,36 @@ class OpenAPITestCase(BaseOpenAPITestCase):
         system_tab_user = self.system_tab
         system_tab_user['sublinks'] = [self.users_sublink]
         self.assertEqual(reg_schema['info']['x-menu'], PROJECT_MENU + [system_tab_user])
+
+
+class BaseExecutionPluginUnitTestCase(VSTBaseTestCase):
+    plugin_class = None
+
+    def setUp(self):
+        self.dummy_output = ''
+        self.dummy_execution_dir = Path(mkdtemp())
+
+    def tearDown(self):
+        shutil.rmtree(self.dummy_execution_dir, ignore_errors=True)
+
+    def dummy_output_handler(self, message, level):
+        self.dummy_output += f'message:{message},level:{level}'
+
+    def get_plugin_instance(self, options=None, execution_dir=None):
+        instance = self.plugin_class(
+            options or {},
+            ProjectProxy(DummyProject()),
+            self.dummy_output_handler
+        )
+        instance.execution_dir = execution_dir or self.dummy_execution_dir
+        return instance
+
+
+class AnsibleExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase):
+    plugin_class = BaseAnsiblePlugin
+
+    def test_put_into_tmpfile(self):
+        instance = self.get_plugin_instance()
+        test_value = 'test_value'
+        filepath = instance._put_into_tmpfile(test_value)
+        self.assertEqual(Path(filepath).read_text(), test_value)
