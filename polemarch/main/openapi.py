@@ -150,3 +150,15 @@ def set_periodic_task_variable_value_field(request, schema):  # pylint: disable=
         'readOnly': True,
         'x-hidden': True,
     }
+
+
+def set_template_option_field_to_fk(request, schema):
+    schema['definitions']['TemplateExec']['properties']['option']['format'] = 'fk'
+    schema['definitions']['TemplateExec']['properties']['option']['x-options'] = {
+        'model': {'$ref': '#/definitions/TemplateOption'},
+        'value_field': 'name',
+        'view_field': 'name',
+        'makeLink': True,
+        'dependence': None,
+        'filters': None,
+    }

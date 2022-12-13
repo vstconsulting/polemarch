@@ -14,7 +14,7 @@ from rest_framework import serializers, exceptions
 
 from vstutils.api import auth as vst_auth
 from vstutils.api import serializers as vst_serializers, fields as vst_fields
-from vstutils.api.serializers import DataSerializer, EmptySerializer
+from vstutils.api.serializers import DataSerializer, EmptySerializer, BaseSerializer
 
 from .base_serializers import with_signals, UserSerializer, _WithPermissionsSerializer, _SignalSerializer
 from ...main import models
@@ -522,13 +522,8 @@ class OneTemplateSerializer(TemplateSerializer):
         )
 
 
-class TemplateExecSerializer(DataSerializer):
-    option = vst_fields.FkField(
-        select='TemplateOption',
-        autocomplete_property='name',
-        autocomplete_represent='name',
-        allow_null=True,
-    )
+class TemplateExecSerializer(BaseSerializer):
+    option = serializers.CharField(allow_null=True, required=False)
 
 
 ###################################
