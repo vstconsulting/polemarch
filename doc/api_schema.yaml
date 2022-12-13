@@ -69,7 +69,7 @@ info:
   x-versions:
     application: 2.3.0
     library: 2.3.0
-    vstutils: 5.1.11
+    vstutils: 5.2.1
     django: 3.2.16
     djangorestframework: 3.14.0
     drf_yasg: 1.21.4
@@ -104,6 +104,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - name
               - -name
@@ -256,6 +257,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -467,6 +469,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -692,6 +695,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -955,6 +959,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -1191,6 +1196,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -1399,6 +1405,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -1642,6 +1649,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -1863,6 +1871,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -2076,6 +2085,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -2290,6 +2300,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -2482,6 +2493,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -2704,6 +2716,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -2897,6 +2910,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -3099,6 +3113,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -3239,6 +3254,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -3400,6 +3416,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -3627,6 +3644,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -3834,6 +3852,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -4097,6 +4116,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -4333,6 +4353,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -4541,6 +4562,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -4784,6 +4806,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -5005,6 +5028,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -5218,6 +5242,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -5478,6 +5503,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -5702,6 +5728,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - name
               - -name
@@ -5923,6 +5950,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -6166,6 +6194,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -6408,6 +6437,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -6560,6 +6590,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -6739,6 +6770,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -6982,6 +7014,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -7199,6 +7232,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -7482,6 +7516,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -7733,6 +7768,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -7951,6 +7987,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -8218,6 +8255,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -8457,6 +8495,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -8640,6 +8679,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -8786,6 +8826,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -9019,6 +9060,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -9234,6 +9276,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -9412,6 +9455,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -9600,6 +9644,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -9840,6 +9885,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id
@@ -10189,6 +10235,7 @@ paths:
           type: array
           items:
             type: string
+            format: ordering_choices
             enum:
               - id
               - -id

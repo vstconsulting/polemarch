@@ -301,6 +301,8 @@ MANUAL_PROJECT_VARS = config['project_manual_vars'].all() or \
 
 PROJECT_REPOSYNC_WAIT_SECONDS = main.getseconds('repo_sync_on_run_timeout', fallback='1:00')
 PROJECT_CI_HANDLER_CLASS = "{}.main.ci.DefaultHandler".format(VST_PROJECT_LIB_NAME)
+METRICS_BACKEND_CLASS = "{}.metrics.PolemarchBackend".format(VST_PROJECT_LIB_NAME)
+HISTORY_METRICS_WINDOW = web.getseconds('history_metrics_window', fallback=600)
 
 
 __PWA_ICONS_SIZES = [
