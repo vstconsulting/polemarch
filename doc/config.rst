@@ -335,6 +335,7 @@ session_timeout, static_files_url or pagination limit.
 * **session_timeout** - Session life-cycle time. ``Default: 2w`` (two weeks).
 * **rest_page_limit** - Default limit of objects in API list. ``Default: 1000``.
 * **public_openapi** - Allow to have access to OpenAPI schema from public. ``Default: false``.
+* **history_metrics_window** - Timeframe in seconds of collecting execution history statuses. ``Default: 1min``.
 
 .. note:: You can find more Web options in :ref:`vstutils:web`.
 

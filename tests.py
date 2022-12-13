@@ -2,6 +2,7 @@ import json
 import io
 import os
 import re
+import sys
 import time
 import shutil
 from threading import Thread
@@ -4276,6 +4277,38 @@ class OpenAPITestCase(BaseOpenAPITestCase):
         system_tab_user = self.system_tab
         system_tab_user['sublinks'] = [self.users_sublink]
         self.assertEqual(reg_schema['info']['x-menu'], PROJECT_MENU + [system_tab_user])
+
+
+class MetricsTestCase(VSTBaseTestCase):
+    def setUp(self):
+        super().setUp()
+        History = self.get_model_class('main.History')
+        Project = self.get_model_class('main.Project')
+
+        self.history_status_count_map = {
+            "OK": 10,
+            'OFFLINE': 110,
+            'ERROR': 310,
+        }
+
+        for status, count in self.history_status_count_map.items():
+            for i in range(count):
+                History.objects.create(status=status)
+
+        Project.objects.create(name=f'test_metrics_{i}')
+        for i in range(3):
+            Project.objects.create(name=f'test_metrics_{i}', status='OK')
+        for i in range(4):
+            Project.objects.create(name=f'test_metrics_{i}', status='ERROR')
+
+    def test_metrics(self):
+        result = self.get_result('get', '/api/metrics/')
+        expected = (Path(Path(__file__).parent) / 'test_data' / 'metrics.txt').read_text('utf-8')
+        expected = expected.replace(
+            '$VERSION',
+            f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}'
+        )
+        self.assertEqual(result, expected)
 
 
 class BaseExecutionPluginUnitTestCase(VSTBaseTestCase):
