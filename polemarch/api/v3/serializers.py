@@ -13,6 +13,7 @@ from ..v2.serializers import (
     OneProjectSerializer as V2OneProjectSerializer,
 )
 from ...main.executions import PLUGIN_HANDLERS
+from ...main.constants import TEMPLATE_KINDS_MAP
 
 
 class TaskTemplateParameters(BaseSerializer):
@@ -39,12 +40,12 @@ class ModuleTemplateParameters(BaseSerializer):
     )(required=False)
 
 
-template_kinds = (
-    ('Task', 'Task'),
-    ('Module', 'Module'),
-) + tuple(
-    (plugin, plugin) for plugin in PLUGIN_HANDLERS.keys()
-    if plugin not in {'PLAYBOOK', 'MODULE'}
+template_kinds = tuple(
+    (
+        TEMPLATE_KINDS_MAP.get(plugin, plugin),
+        TEMPLATE_KINDS_MAP.get(plugin, plugin),
+    )
+    for plugin in PLUGIN_HANDLERS.keys()
 )
 
 template_data_types = {
@@ -54,7 +55,7 @@ template_data_types = {
 template_data_types.update({
     plugin: backend.get_serializer_class(exclude_fields=('inventory',))(required=False)
     for plugin, backend in PLUGIN_HANDLERS.items()
-    if plugin not in ('PLAYBOOK, MODULE')
+    if plugin not in TEMPLATE_KINDS_MAP
 })
 
 
@@ -78,7 +79,7 @@ template_inventory_types = {
 template_inventory_types.update({
     plugin: InventoryAutoCompletionField(allow_blank=True, required=False) if backend.supports_inventory else 'hidden'
     for plugin, backend in PLUGIN_HANDLERS.items()
-    if plugin not in ('PLAYBOOK', 'MODULE')
+    if plugin not in TEMPLATE_KINDS_MAP
 })
 
 

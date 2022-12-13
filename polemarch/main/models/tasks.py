@@ -93,7 +93,9 @@ class Template(ACLModel):
         vars.update(option_vars)
         data.update(option_data)
         data.update(vars)
+        override = extra.pop('override', {})
         data.update(extra)
+        data.update(override)
         return data
 
     def get_plugin(self):

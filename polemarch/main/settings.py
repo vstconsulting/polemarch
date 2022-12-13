@@ -74,6 +74,7 @@ OPENAPI_HOOKS = [
     'polemarch.main.openapi.set_gui_menu_ce',
     'polemarch.main.openapi.set_inventory_field',
     'polemarch.main.openapi.set_periodic_task_variable_value_field',
+    'polemarch.main.openapi.set_template_option_field_to_fk',
 ]
 
 SWAGGER_SETTINGS['DEFAULT_INFO'] = '{}.api.v2.swagger.api_info'.format(VST_PROJECT_LIB_NAME)

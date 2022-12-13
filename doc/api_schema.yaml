@@ -69,7 +69,7 @@ info:
   x-versions:
     application: 2.3.0
     library: 2.3.0
-    vstutils: 5.2.1
+    vstutils: 5.2.2
     django: 3.2.16
     djangorestframework: 3.14.0
     drf_yasg: 1.21.4
@@ -195,8 +195,8 @@ paths:
             $ref: '#/definitions/ProjectTemplateCreate'
       tags:
         - community_template
-      x-multiaction: false
       x-require-confirmation: false
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -2203,8 +2203,8 @@ paths:
             $ref: '#/definitions/ActionResponse'
       tags:
         - history
-      x-multiaction: false
       x-require-confirmation: false
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -2221,8 +2221,8 @@ paths:
           description: NO CONTENT
       tags:
         - history
-      x-multiaction: false
       x-require-confirmation: false
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -5415,8 +5415,8 @@ paths:
             $ref: '#/definitions/ExecuteResponse'
       tags:
         - project
-      x-multiaction: false
       x-require-confirmation: false
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -5440,8 +5440,8 @@ paths:
             $ref: '#/definitions/ExecuteResponse'
       tags:
         - project
-      x-multiaction: false
       x-require-confirmation: false
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -5670,8 +5670,8 @@ paths:
             $ref: '#/definitions/ExecuteResponse'
       tags:
         - project
-      x-multiaction: false
       x-require-confirmation: false
+      x-multiaction: false
     parameters:
       - name: execution_templates_id
         in: path
@@ -6082,8 +6082,8 @@ paths:
             $ref: '#/definitions/ActionResponse'
       tags:
         - project
-      x-multiaction: false
       x-require-confirmation: false
+      x-multiaction: false
     parameters:
       - name: history_id
         in: path
@@ -6105,8 +6105,8 @@ paths:
           description: NO CONTENT
       tags:
         - project
-      x-multiaction: false
       x-require-confirmation: false
+      x-multiaction: false
     parameters:
       - name: history_id
         in: path
@@ -9002,8 +9002,8 @@ paths:
             $ref: '#/definitions/ExecuteResponse'
       tags:
         - project
-      x-multiaction: false
       x-require-confirmation: false
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -9403,8 +9403,8 @@ paths:
             $ref: '#/definitions/ActionResponse'
       tags:
         - project
-      x-multiaction: false
       x-require-confirmation: false
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -12605,13 +12605,13 @@ definitions:
         - data
     x-view-field-name: name
   TemplateExec:
-    required:
-      - option
     type: object
     properties:
       option:
         title: Option
-        type: integer
+        type: string
+        minLength: 1
+        x-nullable: true
         format: fk
         x-options:
           dependence: null
@@ -12619,10 +12619,8 @@ definitions:
           makeLink: true
           model:
             $ref: '#/definitions/TemplateOption'
-          usePrefetch: true
           value_field: name
           view_field: name
-        x-nullable: true
     x-properties-groups:
       '':
         - option

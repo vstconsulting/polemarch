@@ -30,12 +30,12 @@ try:
     from polemarch.main.openapi import PROJECT_MENU
     from polemarch.main.constants import CYPHER
     from polemarch.main.models.utils import ProjectProxy
-    from polemarch.plugins.ansible import BaseAnsiblePlugin, BasePlugin, Module
+    from polemarch.plugins.ansible import BaseAnsiblePlugin, BasePlugin, Module, Playbook
 except ImportError:
     from pmlib.main.tasks import ScheduledTask
     from pmlib.main.models.utils import ProjectProxy
     from pmlib.main.constants import CYPHER
-    from pmlib.plugins.ansible import BaseAnsiblePlugin, BasePlugin, Module
+    from pmlib.plugins.ansible import BaseAnsiblePlugin, BasePlugin, Module, Playbook
 
 
 TEST_DATA_DIR = Path(__file__).parent.absolute()
@@ -4249,6 +4249,8 @@ class OpenAPITestCase(BaseOpenAPITestCase):
         with raise_context():
             endpoint_schema['definitions']['PeriodicTaskVariable']['properties']['key']['x-options']['types'] = \
                 yml_schema['definitions']['PeriodicTaskVariable']['properties']['key']['x-options']['types']
+            endpoint_schema['definitions']['TemplateExec']['properties']['override']['x-options']['types'] = \
+                yml_schema['definitions']['TemplateExec']['properties']['override']['x-options']['types']
 
         del yml_schema['definitions']['_MainSettings']
         del endpoint_schema['definitions']['_MainSettings']
@@ -4342,3 +4344,138 @@ class AnsibleExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase):
         test_value = 'test_value'
         filepath = instance._put_into_tmpfile(test_value)
         self.assertEqual(Path(filepath).read_text(), test_value)
+        self.assertEqual(Path(filepath).stat().st_mode, 0o100600)
+
+
+class AnsiblePlaybookExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase):
+    plugin_class = Playbook
+
+    boolean_args = (
+        'force_handlers',
+        'flush_cache',
+        'become',
+        'check',
+        'syntax_check',
+        'diff',
+        'list_hosts',
+        'list_tasks',
+        'list_tags',
+    )
+    string_args = (
+        'user',
+        'connection',
+        'ssh_common_args',
+        'sftp_extra_args',
+        'scp_extra_args',
+        'ssh_extra_args',
+        'become_method',
+        'become_user',
+        'tags',
+        'skip_tags',
+        'inventory',
+        'limit',
+        'extra_vars',
+        'vault_id',
+        'start_at_task',
+        'args',
+    )
+    int_args = (
+        'timeout',
+        'forks',
+    )
+    file_args = (
+        'private_key',
+        'vault_password_file',
+        'module_path',
+    )
+
+    def test_process_arg(self):
+        instance = self.get_plugin_instance()
+
+        self.assertIsNone(instance._process_arg('unknown', 'unknown'))
+        self.assertEqual(instance._process_arg('verbose', 2), '-vv')
+        self.assertIsNone(instance._process_arg('verbose', 0))
+
+        for arg in self.boolean_args:
+            self.assertIsNone(instance._process_arg(arg, False))
+            self.assertEqual(instance._process_arg(arg, True), f'--{arg.replace("_", "-")}')
+
+        for arg in self.string_args:
+            self.assertIsNone(instance._process_arg(arg, ''))
+            self.assertEqual(instance._process_arg(arg, 'test-value'), f'--{arg.replace("_", "-")}=test-value')
+
+        for arg in self.int_args:
+            self.assertIsNone(instance._process_arg(arg, 0))
+            self.assertEqual(instance._process_arg(arg, 2), f'--{arg.replace("_", "-")}=2')
+
+        for arg in self.file_args:
+            self.assertIsNone(instance._process_arg(arg, ''))
+            processed_arg = instance._process_arg(arg, 'test-value')
+            filepath = processed_arg[processed_arg.index('=') + 1:]
+            self.assertEqual(Path(filepath).read_text(), 'test-value')
+
+
+class AnsibleModuleExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase):
+    plugin_class = Module
+
+    boolean_args = (
+        'become',
+        'list_hosts',
+        'one_line',
+        'check',
+        'syntax_check',
+        'diff',
+    )
+    string_args = (
+        'become_method',
+        'become_user',
+        'inventory',
+        'limit',
+        'tree',
+        'user',
+        'connection',
+        'ssh_common_args',
+        'sftp_extra_args',
+        'scp_extra_args',
+        'ssh_extra_args',
+        'extra_vars',
+        'vault_id',
+        'playbook_dir',
+        'args',
+        'group',
+    )
+    int_args = (
+        'poll',
+        'background',
+        'timeout',
+        'forks',
+    )
+    file_args = (
+        'private_key',
+        'vault_password_file'
+    )
+
+    def test_process_arg(self):
+        instance = self.get_plugin_instance()
+
+        self.assertIsNone(instance._process_arg('unknown', 'unknown'))
+        self.assertEqual(instance._process_arg('verbose', 3), '-vvv')
+        self.assertIsNone(instance._process_arg('verbose', 0))
+
+        for arg in self.boolean_args:
+            self.assertIsNone(instance._process_arg(arg, False))
+            self.assertEqual(instance._process_arg(arg, True), f'--{arg.replace("_", "-")}')
+
+        for arg in self.string_args:
+            self.assertIsNone(instance._process_arg(arg, ''))
+            self.assertEqual(instance._process_arg(arg, 'test-value'), f'--{arg.replace("_", "-")}=test-value')
+
+        for arg in self.int_args:
+            self.assertIsNone(instance._process_arg(arg, 0))
+            self.assertEqual(instance._process_arg(arg, 2), f'--{arg.replace("_", "-")}=2')
+
+        for arg in self.file_args:
+            self.assertIsNone(instance._process_arg(arg, ''))
+            processed_arg = instance._process_arg(arg, 'test-value')
+            filepath = processed_arg[processed_arg.index('=') + 1:]
+            self.assertEqual(Path(filepath).read_text(), 'test-value')

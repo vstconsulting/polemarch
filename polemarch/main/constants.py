@@ -6,6 +6,7 @@ from .utils import AnsibleArgumentsReference
 
 CYPHER = '[~~ENCRYPTED~~]'
 ANSIBLE_REFERENCE = AnsibleArgumentsReference()
+TEMPLATE_KINDS_MAP = {'PLAYBOOK': 'Task', 'MODULE': 'Module'}
 
 
 class BaseVariablesEnum(BaseEnum):
