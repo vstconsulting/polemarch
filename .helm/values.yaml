@@ -1,0 +1,111 @@
+postgresql:
+  commonAnnotations:
+    werf.io/weight: "-10"
+  fullnameOverride: database-server
+  auth:
+    postgresPassword: p@$$w0rD
+    username: polemarch
+    password: polemarch
+    database: polemarch
+redis:
+  commonAnnotations:
+    werf.io/weight: "-10"
+  fullnameOverride: redis-server
+  architecture: standalone
+  auth:
+    enabled: false
+centrifugo:
+  config:
+    admin: false
+    allowed_origins:
+    - '*'
+    engine: redis
+    health: true
+    history_size: 10
+    history_ttl: 300s
+    namespaces: []
+  fullnameOverride: centrifugo
+  image:
+    tag: v3.2
+  ingress:
+    enabled: false
+  secrets:
+    redisAddress: redis-server-master:6379
+    adminPassword: 01a18ca9-9328-4ee7-a8de-7e5b231d1df4
+    adminSecret: 7e91c9c1-6303-42b1-9f28-1cdfbf58dcf9
+    apiKey: a08caef0-f1ad-40de-9e59-dd2cec07e2eb
+    tokenHmacSecretKey: d4074fd2-607c-41b0-ab83-f2bc55fae0ec
+  service:
+    port: 9000
+    useSeparateInternalService: true
+    annotations:
+      werf.io/weight: "-9"
+  podAnnotations:
+    werf.io/weight: "-9"
+polemarch:
+  multi_endpoint:
+    domain: polemarch.example.com
+  deployments:
+    centrifugo:
+      port: 9000
+      endpointPath: /connection/
+      external: true
+    polemarch:
+      port: 8080
+      endpointPath: /
+      env:
+        DATABASE_URL: 'postgres://polemarch:polemarch@database-server:5432/polemarch'
+        RPC_ENGINE: 'redis://redis-server-master:6379/0'
+        CACHE_URL: 'redis://redis-server-master:6379/1'
+        LOCK_CACHE_URL: 'redis://redis-server-master:6379/2'
+        SESSION_CACHE_URL: 'redis://redis-server-master:6379/3'
+        ETAG_CACHE_URL: 'redis://redis-server-master:6379/4'
+        RPC_CONCURRENCY: 32
+      volumes:
+        storage: '/storage'
+      volumeSpec:
+        resources:
+          requests:
+            storage: 5Gi
+      livenessProbe:
+        exec:
+          command:
+            - /bin/sh
+            - -c
+            - "ps -A | grep uwsgi"
+        initialDelaySeconds: 10
+        periodSeconds: 20
+        timeoutSeconds: 15
+      readinessProbe:
+        httpGet:
+          httpHeaders:
+            - name: Connection
+              value: keep-alive
+          path: /api/health/
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 20
+      configPath: '/etc/polemarch'
+      configs:
+        settings.ini: |
+          [docker]
+          override_uwsgi = false
+          migrate_lock_id = polemarch
+
+          [main]
+          auth-cache-user = True
+          log_level = warning
+          debug = false
+          projects_dir = /storage/projects
+          hooks_dir = /storage/hooks
+
+          [uwsgi]
+          daemon = false
+          pidfile = /tmp/web.pid
+          addrport = 0.0.0.0:8080
+
+          [centrifugo]
+          address = http://centrifugo:9000/api
+          public_address = /
+          token_hmac_secret_key = d4074fd2-607c-41b0-ab83-f2bc55fae0ec
+          api_key = a08caef0-f1ad-40de-9e59-dd2cec07e2eb
