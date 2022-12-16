@@ -137,3 +137,6 @@ venv.bak/
 node_modules
 polemarch/static/polemarch
 yarn-error.log
+
+# werf and helm
+.helm/charts
