@@ -1,5 +1,4 @@
 # pylint: disable=unused-argument,protected-access,too-many-ancestors
-from collections import OrderedDict
 
 from django.db import transaction
 from django.http.response import HttpResponse
@@ -14,10 +13,16 @@ from vstutils.utils import KVExchanger, deprecated, translate as _
 from vstutils.api.responses import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from . import filters
-from .permissions import InventoryItemsPermission, CreateUsersPermission
+from .permissions import (
+    InventoryItemsPermission,
+    CreateUsersPermission,
+    SetOwnerPermission,
+    CreateTeamPermission,
+)
 from . import serializers as sers
 from ..v3 import serializers as sers3
 from ...main import utils
+from ...main.models.base import ACLModel
 
 yes = True
 no = False
@@ -55,18 +60,22 @@ class _VariablesCopyMixin(base.CopyMixin):
 class OwnedView(base.ModelViewSet, base.CopyMixin):
     POST_WHITE_LIST = []
 
-    @deco.action(methods=["post"], detail=True, serializer_class=sers.SetOwnerSerializer)
+    @deco.action(
+        methods=["post"],
+        detail=True,
+        serializer_class=sers.SetOwnerSerializer,
+        permission_classes=(SetOwnerPermission,)
+    )
     def set_owner(self, request, **kwargs):
         # pylint: disable=unused-argument
         """
         Change instance owner.
         """
-        serializer = sers.SetOwnerSerializer(
-            self.get_object(), data=request.data, context=self.get_serializer_context()
-        )
+        serializer = self.get_serializer(data=request.data)
+        instance: ACLModel = self.get_object()
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return HTTP_201_CREATED(serializer.data)
+        instance.set_owner(serializer.validated_data['user_id'])
+        return HTTP_201_CREATED(serializer.validated_data)
 
 
 class __VarsViewSet(base.ModelViewSet):
@@ -240,6 +249,7 @@ class TeamViewSet(OwnedView):
     serializer_class_one = sers.OneTeamSerializer
     filterset_class = filters.TeamFilter
     copy_related = ['users']
+    permission_classes = list(OwnedView.permission_classes) + [CreateTeamPermission]
 
 
 class __HistoryLineViewSet(base.ReadOnlyModelViewSet):
@@ -760,36 +770,44 @@ class HookViewSet(base.ModelViewSet):
 
 
 @method_decorator(name='list', decorator=swagger_auto_schema(
-    operation_description='Dashboard statistic.',
-    responses={status.HTTP_200_OK: sers.DashboardStatisticSerializer(), }
+    operation_description='Dashboard statistics.',
+    responses={status.HTTP_200_OK: sers.DashboardStatisticsSerializer()}
 ))
-class StatisticViewSet(base.ListNonModelViewSet):
+class StatisticsViewSet(base.ListNonModelViewSet):
     base_name = "stats"
 
-    def _get_by_user(self, model):
-        user = self.request.user
-        filter_models = (sers.User,)
-        if model not in filter_models:
-            return model.objects.all().user_filter(user)
-        return model.objects.all()
+    def _get_projects_count(self):  # noee
+        return sers.models.Project.objects.count()
 
-    def _get_history_stats(self, request):
-        qs = sers.models.History.objects.all()
-        qs = qs.user_filter(self.request.user)
-        return qs.stats(int(request.query_params.get("last", "14")))
+    def _get_templates_count(self):  # noee
+        return sers.models.Template.objects.count()
 
-    def _get_by_user_projects(self, model):
-        return model.objects.filter(project__in=self._get_by_user(sers.models.Project).values('id'))
+    def _get_inventories_count(self):  # noee
+        return sers.models.Inventory.objects.count()
 
-    def list(self, request, *args, **kwargs):
-        # pylint: disable=unused-argument
-        stats = OrderedDict()
-        stats['projects'] = self._get_by_user(sers.models.Project).count()
-        stats['templates'] = self._get_by_user_projects(sers.models.Template).count()
-        stats['inventories'] = self._get_by_user(sers.models.Inventory).count()
-        stats['groups'] = self._get_by_user(sers.models.Group).count()
-        stats['hosts'] = self._get_by_user(sers.models.Host).count()
-        stats['teams'] = self._get_by_user(sers.models.UserGroup).count()
-        stats['users'] = self._get_by_user(sers.User).count()
-        stats['jobs'] = self._get_history_stats(request)
-        return HTTP_200_OK(stats)
+    def _get_groups_count(self):  # noee
+        return sers.models.Group.objects.count()
+
+    def _get_hosts_count(self):  # noee
+        return sers.models.Host.objects.count()
+
+    def _get_teams_count(self):  # noee
+        return sers.models.UserGroup.objects.count()
+
+    def _get_users_count(self):  # noee
+        return sers.User.objects.count()
+
+    def _get_history_stats(self):  # noee
+        return sers.models.History.objects.stats(int(self.request.query_params.get("last", "14")))
+
+    def list(self, *args, **kwargs):
+        return HTTP_200_OK({
+            'projects': self._get_projects_count(),
+            'templates': self._get_templates_count(),
+            'inventories': self._get_inventories_count(),
+            'groups': self._get_groups_count(),
+            'hosts': self._get_hosts_count(),
+            'teams': self._get_teams_count(),
+            'users': self._get_users_count(),
+            'jobs': self._get_history_stats(),
+        })

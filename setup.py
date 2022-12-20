@@ -372,7 +372,11 @@ def make_setup(**opts):
     webpack_path = os.path.join(os.getcwd(), 'webpack.config.js')
     if os.path.exists(webpack_path) and is_build and os.environ.get('DONT_YARN', "") != 'true':
         try:
-            subprocess.check_call(['yarn', 'install', '--pure-lockfile'], stdout=sys.stdout, stderr=sys.stderr)
+            subprocess.check_call(
+                ['yarn', 'install', '--pure-lockfile', '--mutex network'],
+                stdout=sys.stdout,
+                stderr=sys.stderr
+            )
             subprocess.check_call(['yarn', 'devBuild' if is_develop else 'build'], stdout=sys.stdout, stderr=sys.stderr)
         except Exception as err:
             raise errors.CompileError(str(err))

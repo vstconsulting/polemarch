@@ -10,7 +10,7 @@ from typing import Dict
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from rest_framework import serializers, exceptions
+from rest_framework import serializers
 
 from vstutils.api import auth as vst_auth
 from vstutils.api import serializers as vst_serializers, fields as vst_fields
@@ -76,11 +76,6 @@ class InventoryAutoCompletionField(vst_fields.VSTCharField):
         inventory = super().to_internal_value(data)
         try:
             inventory = models.Inventory.objects.get(id=int(inventory))
-            user = self.context['request'].user
-            if not inventory.acl_handler.viewable_by(user):
-                raise exceptions.PermissionDenied(
-                    "You don't have permission to inventory."
-                )  # noce
         except (ValueError, KeyError):
             if ',' not in inventory:
                 path_validator(inventory)
@@ -109,30 +104,13 @@ class ExecuteResponseSerializer(ActionResponseSerializer):
     executor = serializers.IntegerField(default=None, allow_null=True)
 
 
-class SetOwnerSerializer(DataSerializer):
-    perms_msg = 'Permission denied. Only owner can change owner.'
-    user_id = vst_fields.FkField(required=True, select='User',
-                                 label='New owner',
-                                 autocomplete_represent='username')
-
-    def update(self, instance, validated_data):
-        if not self.instance.acl_handler.owned_by(self.current_user()):  # noce
-            raise exceptions.PermissionDenied(self.perms_msg)
-        user = self.get_user(validated_data)
-        self.instance.acl_handler.set_owner(user)
-        return user
-
-    def get_user(self, validated_data: dict):
-        return User.objects.get(**validated_data)
-
-    def current_user(self) -> User:
-        return self.context['request'].user
-
-    def to_representation(self, value: User):  # pylint: disable=arguments-renamed
-        return dict(user_id=value.pk)
-
-    def to_internal_value(self, data: dict):
-        return dict(pk=data['user_id'])
+class SetOwnerSerializer(BaseSerializer):
+    user_id = vst_fields.FkField(
+        required=True,
+        select='User',
+        label='New owner',
+        autocomplete_represent='username'
+    )
 
 
 class CreateUserSerializer(vst_auth.CreateUserSerializer):  # noee
@@ -860,7 +838,7 @@ class DashboardJobsSerializer(DataSerializer):
     year = YearDashboardJobSerializer(many=True)
 
 
-class DashboardStatisticSerializer(DataSerializer):
+class DashboardStatisticsSerializer(DataSerializer):
     projects = serializers.IntegerField()
     templates = serializers.IntegerField()
     inventories = serializers.IntegerField()

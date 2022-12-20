@@ -56,7 +56,7 @@ stages:
   <<: *branch_tests
   image: registry.gitlab.com/vstconsulting/images:node-tests
   before_script:
-    - yarn install
+    - yarn install --pure-lockfile --mutex network
   script:
     - yarn test
 

@@ -26,6 +26,7 @@ from .hooks import Hook
 from ..validators import RegexValidator, validate_hostname, path_validator
 from ..exceptions import UnknownTypeException, Conflict
 from ..utils import CmdExecutor
+from .utils import ensure_inventory_is_from_project
 from ...main.constants import ProjectVariablesEnum, ANSIBLE_REFERENCE
 
 
@@ -149,12 +150,10 @@ def check_circular_deps(instance: Group, action: Text, pk_set: Iterable, *args, 
 
 
 @receiver(signals.pre_save, sender=PeriodicTask)
-def validate_types(instance: PeriodicTask, **kwargs) -> None:
+def validate_inventory(instance: PeriodicTask, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
-    if (instance.kind not in instance.kinds) or (instance.type not in instance.types):
-        # Deprecated, because moved to serializers
-        raise UnknownTypeException(instance.kind, "Unknown kind {}.")  # nocv
+    ensure_inventory_is_from_project(instance.inventory, instance.project)
 
 
 @receiver(signals.pre_save, sender=PeriodicTask)
@@ -200,6 +199,7 @@ def validate_template_keys(instance: Template, **kwargs) -> None:
 def validate_template_args(instance: Template, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
+    ensure_inventory_is_from_project(instance.inventory, instance.project)
     if instance.kind in ["Host", "Group"]:
         return  # nocv
     ansible_args = dict(instance.data['vars'])
