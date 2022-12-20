@@ -51,6 +51,8 @@ TRANSLATION = {
     'Directory with playbooks': 'Каталог с плейбуками',
     'Information': 'Информация',
     'Arguments': 'Аргументы',
+    'Vars': 'Переменные',
+    'Data': 'Данные',
     'Task type': 'Тип задачи',
     'Interval type': 'Типа интервала',
     'Contains groups': 'Содержит группы',

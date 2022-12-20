@@ -15,6 +15,7 @@ from django.core.cache import caches
 from vstutils.utils import ModelHandlers, raise_context_decorator_with_default, classproperty
 # pylint: disable=no-name-in-module
 from vstutils import custom_model
+from vstutils.models import BQuerySet, BModel
 from yaml import load
 
 try:
@@ -26,7 +27,7 @@ from . import hosts as hosts_models
 from ..validators import path_validator
 from .vars import AbstractModel, AbstractVarsQuerySet, models
 from ..exceptions import PMException
-from .base import ManyToManyFieldACL, BQuerySet, BModel
+from .base import ManyToManyFieldACL
 from .hooks import Hook
 from ..utils import AnsibleModules, AnsibleConfigParser, SubCacheInterface
 
@@ -265,7 +266,6 @@ class Project(AbstractModel):
 
     def execute(self, plugin: str, execute_args, **kwargs) -> HISTORY_ID:
         from ..executions import PLUGIN_HANDLERS  # pylint: disable=import-outside-toplevel
-
         return PLUGIN_HANDLERS.execute(
             plugin,
             self,

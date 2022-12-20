@@ -34,10 +34,6 @@ AUTH_PASSWORD_VALIDATORS += [
 # API settings
 VST_API_VERSION = 'v3'
 
-REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = [
-    "{}.api.v2.permissions.ModelPermission".format(VST_PROJECT_LIB_NAME),
-]
-
 API_URL = VST_API_URL
 DEFAULT_API_URL = "/{}/{}".format(API_URL, VST_API_VERSION)
 API = {
@@ -52,7 +48,7 @@ API = {
         team={'view': '{}.api.v2.views.TeamViewSet'.format(VST_PROJECT_LIB_NAME)},
         token={'view': '{}.api.v2.views.TokenView'.format(VST_PROJECT_LIB_NAME), 'type': 'view'},
         hook={'view': '{}.api.v2.views.HookViewSet'.format(VST_PROJECT_LIB_NAME)},
-        stats={'view': '{}.api.v2.views.StatisticViewSet'.format(VST_PROJECT_LIB_NAME), 'op_types': ['get']}
+        stats={'view': '{}.api.v2.views.StatisticsViewSet'.format(VST_PROJECT_LIB_NAME), 'op_types': ['get']}
     )
 }
 API[VST_API_VERSION] = {
@@ -274,12 +270,6 @@ NOTIFY_WITHOUT_QUEUE_MODELS = [
 
 CLONE_RETRY = rpc.getint('clone_retry_count', fallback=5)
 
-# ACL settings
-ACL = {
-    "MODEL_HANDLERS": {
-        "Default": "{}.main.acl.handlers.Default".format(VST_PROJECT_LIB_NAME)
-    }
-}
 
 # Outgoing hooks settings
 HOOKS = {

@@ -9,6 +9,11 @@ ANSIBLE_REFERENCE = AnsibleArgumentsReference()
 TEMPLATE_KINDS_MAP = {'PLAYBOOK': 'Task', 'MODULE': 'Module'}
 
 
+class MemberType(BaseEnum):
+    USER = BaseEnum.LOWER
+    TEAM = BaseEnum.LOWER
+
+
 class BaseVariablesEnum(BaseEnum):
     @classmethod
     @lru_cache()

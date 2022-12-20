@@ -14,4 +14,7 @@ TRANSLATION = {
     'hosts counter': 'hosts | host | hosts',
     'users counter': 'users | user | users',
     'all_tasks': 'all tasks',
+
+    'Vars': 'Variables',
+    'Acl': 'ACL'
 }

@@ -3,8 +3,9 @@ from typing import Text, Any, List
 import logging
 import collections
 import uuid
+from django.db import models
 from vstutils.utils import raise_context, ModelHandlers
-from .base import BModel, BQuerySet, models
+from vstutils.models import BModel, BQuerySet
 
 
 logger = logging.getLogger('polemarch')

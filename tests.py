@@ -316,6 +316,7 @@ class BaseProjectTestCase(BaseTestCase):
 class ProjectTestCase(BaseProjectTestCase):
     def test_set_owner(self):
         user = self._create_user(is_super_user=False, is_staff=True)
+        user2 = self._create_user(is_super_user=False, is_staff=True)
         results = self.bulk([
             {
                 'method': 'post',
@@ -327,16 +328,59 @@ class ProjectTestCase(BaseProjectTestCase):
                 'path': ['project', self.project.id, 'set_owner'],
                 'data': {'user_id': 146}
             },
-            {'method': 'get', 'path': ['project', self.project.id]}
+            {'method': 'get', 'path': ['project', self.project.id]},
         ])
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[1]['status'], 400)
         self.assertEqual(results[2]['status'], 200)
         self.assertEqual(results[2]['data']['owner']['id'], user.id)
 
+        with self.user_as(self, user2):
+            results = self.bulk([
+                {'method': 'post', 'path': ['project', self.project.id, 'set_owner'], 'data': {'user_id': user.id}},
+            ])
+        self.assertEqual(results[0]['status'], 403)
+        self.assertEqual(results[0]['data']['detail'], 'Only owner can change owner.')
+
 
 @own_projects_dir
 class InventoryTestCase(BaseProjectTestCase):
+    def test_fk_inventory_usage(self):
+        results = self.bulk_transactional([
+            {'method': 'post', 'path': 'inventory', 'name': 'unreachable'},
+            self.create_execution_template_bulk_data(),
+            self.create_periodic_task_bulk_data(),
+        ])
+        inventory_id = results[0]['data']['id']
+        template_id = results[1]['data']['id']
+        periodic_task_id = results[2]['data']['id']
+
+        results = self.bulk([
+            # [0]
+            self.execute_module_bulk_data(inventory=inventory_id),
+            # [1]
+            self.create_execution_template_bulk_data(inventory=inventory_id),
+            # [2]
+            self.create_periodic_task_bulk_data(inventory=inventory_id),
+            # [3]
+            {
+                'method': 'patch',
+                'path': ['project', self.project.id, 'execution_templates', template_id],
+                'data': {'inventory': inventory_id},
+            },
+            # [4]
+            {
+                'method': 'patch',
+                'path': ['project', self.project.id, 'periodic_task', periodic_task_id],
+                'data': {'inventory': inventory_id},
+            },
+        ])
+        self.assertEqual(results[0]['status'], 400)
+        self.assertEqual(results[0]['data'], ['No Inventory matches the given query.'])
+        for idx in range(1, 5):
+            self.assertEqual(results[idx]['status'], 400)
+            self.assertEqual(results[idx]['data'], ['No Inventory matches the given query.'])
+
     def test_import_inventory(self):
         def check_import(file_import=False):
             inventory = (TEST_DATA_DIR / 'inventory.yml').read_text()
@@ -2778,6 +2822,7 @@ class HistoryTestCase(BaseProjectTestCase):
         self.assertEqual(results[4]['status'], 200)
         self.assertEqual(results[4]['data'], {'detail': f'Task canceled: {self.project.id}'})
 
+    @skipIf(settings.VST_PROJECT_LIB_NAME != 'polemarch', 'Stats may vary')
     def test_stats(self):
         def generate_history(status="OK"):
             project = self.get_model_class('main.Project').objects.create(name="Stats", repository='')
