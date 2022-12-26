@@ -560,7 +560,7 @@ As you can see, the form of new group creation consists of following fields:
 .. warning::
   By default SQLite's maximum expression tree depth is 1000. This could create
   problems with very nested groups. If you encounter so, please refer to
-  `documentation https://www.sqlite.org/limits.html#max_expr_depth`_.
+  `documentation <https://www.sqlite.org/limits.html#max_expr_depth>`_.
 
 After group creation you will see the next page:
 
