@@ -1,2 +1,3 @@
 # Docs
 -rrequirements.txt
+sphinxcontrib-openapi~=0.7.0
