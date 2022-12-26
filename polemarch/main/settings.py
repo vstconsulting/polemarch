@@ -34,10 +34,6 @@ AUTH_PASSWORD_VALIDATORS += [
 # API settings
 VST_API_VERSION = 'v3'
 
-REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = [
-    "{}.api.v2.permissions.ModelPermission".format(VST_PROJECT_LIB_NAME),
-]
-
 API_URL = VST_API_URL
 DEFAULT_API_URL = "/{}/{}".format(API_URL, VST_API_VERSION)
 API = {
@@ -52,7 +48,7 @@ API = {
         team={'view': '{}.api.v2.views.TeamViewSet'.format(VST_PROJECT_LIB_NAME)},
         token={'view': '{}.api.v2.views.TokenView'.format(VST_PROJECT_LIB_NAME), 'type': 'view'},
         hook={'view': '{}.api.v2.views.HookViewSet'.format(VST_PROJECT_LIB_NAME)},
-        stats={'view': '{}.api.v2.views.StatisticViewSet'.format(VST_PROJECT_LIB_NAME), 'op_types': ['get']}
+        stats={'view': '{}.api.v2.views.StatisticsViewSet'.format(VST_PROJECT_LIB_NAME), 'op_types': ['get']}
     )
 }
 API[VST_API_VERSION] = {
@@ -74,9 +70,11 @@ OPENAPI_HOOKS = [
     'polemarch.main.openapi.set_gui_menu_ce',
     'polemarch.main.openapi.set_inventory_field',
     'polemarch.main.openapi.set_periodic_task_variable_value_field',
+    'polemarch.main.openapi.set_template_option_field_to_fk',
 ]
 
 SWAGGER_SETTINGS['DEFAULT_INFO'] = '{}.api.v2.swagger.api_info'.format(VST_PROJECT_LIB_NAME)
+SWAGGER_SETTINGS['DEFAULT_AUTO_SCHEMA_CLASS'] = '{}.api.schema.PolemarchAutoSchema'.format(VST_PROJECT_LIB_NAME)
 
 OPENAPI_EXTRA_LINKS = dict()
 OPENAPI_EXTRA_LINKS['Request'] = [
@@ -176,9 +174,10 @@ class ArchiveSection(BaseAppendSection):
 
 git_fetch = {}
 git_clone = {}
+git_config_list = ()
 
 if TESTS_RUN:
-    config['git'] = dict(fetch=dict(), clone=dict())
+    config['git'] = dict(fetch={}, clone={}, config={'protocol.file.allow': 'always'})
 
 if 'git' in config:
     git = config['git']
@@ -188,6 +187,9 @@ if 'git' in config:
 
     if 'clone' in git:
         git_clone = GitCloneSection('git.clone', config, git['clone']).all()
+
+    if 'config' in git:
+        git_config_list = tuple(f'{k}={v}' for k, v in git['config'].items())
 
 
 archive_section = ArchiveSection('archive', config, config['archive']).all()
@@ -230,6 +232,7 @@ REPO_BACKENDS = {
         "OPTIONS": {
             "CLONE_KWARGS": git_clone,
             "FETCH_KWARGS": git_fetch,
+            "CONFIG_LIST": git_config_list,
             "GIT_ENV": {
                 "GLOBAL": {
                     "GIT_SSL_NO_VERIFY": "true"
@@ -267,12 +270,6 @@ NOTIFY_WITHOUT_QUEUE_MODELS = [
 
 CLONE_RETRY = rpc.getint('clone_retry_count', fallback=5)
 
-# ACL settings
-ACL = {
-    "MODEL_HANDLERS": {
-        "Default": "{}.main.acl.handlers.Default".format(VST_PROJECT_LIB_NAME)
-    }
-}
 
 # Outgoing hooks settings
 HOOKS = {
@@ -295,6 +292,8 @@ MANUAL_PROJECT_VARS = config['project_manual_vars'].all() or \
 
 PROJECT_REPOSYNC_WAIT_SECONDS = main.getseconds('repo_sync_on_run_timeout', fallback='1:00')
 PROJECT_CI_HANDLER_CLASS = "{}.main.ci.DefaultHandler".format(VST_PROJECT_LIB_NAME)
+METRICS_BACKEND_CLASS = "{}.metrics.PolemarchBackend".format(VST_PROJECT_LIB_NAME)
+HISTORY_METRICS_WINDOW = web.getseconds('history_metrics_window', fallback=600)
 
 
 __PWA_ICONS_SIZES = [

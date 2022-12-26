@@ -14,6 +14,8 @@ ENV_VARS_TYPE =  Dict[Text, Union[Text, bool]]  # pylint: disable=invalid-name
 
 
 class _VCS(_Base):  # nocv
+    __slots__ = ()
+
     def vcs_clone(self, *args, **kwargs):
         raise NotImplementedError()
 
@@ -25,7 +27,7 @@ class _VCS(_Base):  # nocv
 
 
 class Git(_VCS):
-    __slots__ = ('env', '_fetch_map',)
+    __slots__ = ('env', '_fetch_map', 'target_branch', 'persistent_config_options')
 
     _fetch_statuses = [
         "NEW_TAG", "NEW_HEAD", "HEAD_UPTODATE",
@@ -43,13 +45,17 @@ class Git(_VCS):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.env = self.options.get("GIT_ENV", {})
+        self.persistent_config_options = self.options.get("CONFIG_LIST", ())
         self._fetch_map = {
             1 << x: self._fetch_statuses[x] for x in range(8)
         }
         self.target_branch = self.proj.vars.get('repo_branch', None)
 
     def get_repo(self) -> git.Repo:
-        return git.Repo(self.path)
+        repo = git.Repo(self.path)
+        if self.persistent_config_options:
+            repo.git.set_persistent_git_options(c=self.persistent_config_options)
+        return repo
 
     def vcs_clone(self, source: str, destination, **kwargs) -> git.Repo:
         os.makedirs(destination)
@@ -60,6 +66,8 @@ class Git(_VCS):
                 **kwargs
             )
             repo = git.Repo(destination)
+            if self.persistent_config_options:
+                repo.git.set_persistent_git_options(c=self.persistent_config_options)
             with repo.git.custom_environment(**kwargs.get('env', {})):
                 self._update_submodules(repo, kill_after_timeout=kwargs.get('kill_after_timeout'))
         except git.GitCommandError as error:

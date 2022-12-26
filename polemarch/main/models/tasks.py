@@ -11,19 +11,19 @@ import re
 from celery.schedules import crontab
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
-from django.db import transaction
-from django.db.models import Q
+from django.db import transaction, models
 from django.utils import timezone
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
 from django.db.models import functions as dbfunc, Count
 from django.utils.timezone import now
 
+from vstutils.models import BaseModel, BModel, BQuerySet
 from vstutils.custom_model import ListModel, CustomQuerySet
 from vstutils.utils import translate as _
 from . import Inventory
 from ..exceptions import DataNotReady, NotApplicable
-from .base import ForeignKeyACL, BModel, ACLModel, BQuerySet, models, BaseModel
+from .base import ForeignKeyACL, ACLModel
 from .vars import AbstractModel, AbstractVarsQuerySet
 from .projects import Project, HISTORY_ID
 from ..constants import CYPHER, HiddenArgumentsEnum
@@ -34,7 +34,6 @@ InvOrString = TypeVar('InvOrString', str, int, Inventory, None)
 User = get_user_model()
 
 
-# Block of real models
 class Template(ACLModel):
     name          = models.CharField(max_length=512)
     kind          = models.CharField(max_length=32)
@@ -93,7 +92,9 @@ class Template(ACLModel):
         vars.update(option_vars)
         data.update(option_data)
         data.update(vars)
+        override = extra.pop('override', {})
         data.update(extra)
+        data.update(override)
         return data
 
     def get_plugin(self):
@@ -497,7 +498,7 @@ class History(BModel):
         data = self.get_raw(
             original=False,
             excludes=(
-                Q(line__contains="No config file") | Q(line__contains="as config file"),
+                models.Q(line__contains="No config file") | models.Q(line__contains="as config file"),
             )
         )
         regex = (

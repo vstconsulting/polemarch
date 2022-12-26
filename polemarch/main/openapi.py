@@ -71,8 +71,6 @@ def set_inventory_field(request, schema):
                     for type_field in field['x-options']['types'].values():
                         if isinstance(type_field, dict):
                             type_field['format'] = 'inventory'
-                else:
-                    field['format'] = 'inventory'
 
             elif field.get('format') == 'dynamic':
                 for type_field in field['x-options']['types'].values():
@@ -151,4 +149,16 @@ def set_periodic_task_variable_value_field(request, schema):  # pylint: disable=
         'name': 'kind',
         'readOnly': True,
         'x-hidden': True,
+    }
+
+
+def set_template_option_field_to_fk(request, schema):
+    schema['definitions']['TemplateExec']['properties']['option']['format'] = 'fk'
+    schema['definitions']['TemplateExec']['properties']['option']['x-options'] = {
+        'model': {'$ref': '#/definitions/TemplateOption'},
+        'value_field': 'name',
+        'view_field': 'name',
+        'makeLink': True,
+        'dependence': None,
+        'filters': None,
     }

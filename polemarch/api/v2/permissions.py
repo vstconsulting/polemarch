@@ -1,21 +1,19 @@
 from rest_framework import permissions
+from vstutils.utils import lazy_translate as __
 
 
-class ModelPermission(permissions.IsAuthenticated):
+class CreateTeamPermission(permissions.IsAuthenticated):
     def has_permission(self, request, view):
-        # pylint: disable=useless-super-delegation
-        return super().has_permission(request, view)
-
-    def get_user_permission(self, request, view, obj):  # nocv
-        # pylint: disable=unused-argument
-        if hasattr(obj, 'owner') and obj.owner == request.user:
+        if request.method == 'GET':
             return True
-        return False
+        return request.user.is_superuser or request.user.is_staff
+
+
+class SetOwnerPermission(permissions.IsAuthenticated):
+    message = __('Only owner can change owner.')
 
     def has_object_permission(self, request, view, obj):
-        if request.user.is_staff:
-            return True
-        return self.get_user_permission(request, view, obj)  # nocv
+        return request.user.is_superuser or obj.owner == request.user
 
 
 class InventoryItemsPermission(permissions.IsAuthenticated):

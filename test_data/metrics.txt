@@ -1,0 +1,9 @@
+python_info{version="$VERSION"} 1
+polemarch_database_connections 1
+polemarch_cache_connections 4
+polemarch_history_total{status="ERROR"} 310
+polemarch_history_total{status="OFFLINE"} 110
+polemarch_history_total{status="OK"} 10
+polemarch_project_total{status="ERROR"} 4
+polemarch_project_total{status="NEW"} 1
+polemarch_project_total{status="OK"} 3

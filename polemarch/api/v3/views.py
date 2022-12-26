@@ -6,6 +6,7 @@ from vstutils.api.filters import CharFilter
 from vstutils.api.responses import HTTP_201_CREATED
 from vstutils.utils import create_view, translate as _
 
+from ...main.models.utils import ensure_inventory_is_from_project
 from ...main.models import TemplateOption, Group, Project
 from ...main.executions import PLUGIN_HANDLERS
 from ..v2.filters import variables_filter, vars_help
@@ -128,6 +129,7 @@ class ProjectViewSetMeta(GenericViewSetMeta):
                 project: Project = self.get_object()
 
                 data = serializer.validated_data
+                ensure_inventory_is_from_project(data.get('inventory'), project)
                 history_id = project.execute(plugin, executor=request.user, execute_args=data)
 
                 response_serializer = ExecuteResponseSerializer(instance={

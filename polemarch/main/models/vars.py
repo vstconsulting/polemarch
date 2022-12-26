@@ -6,13 +6,14 @@ import uuid
 
 from functools import reduce
 from collections import OrderedDict
-from django.db import transaction
+from django.db import transaction, models
 from django.db.models import Case, When, Value
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from vstutils.utils import tmp_file
+from vstutils.models import BQuerySet, BModel
 from vstutils.api.decorators import cache_method_result
-from .base import ACLModel, BQuerySet, BModel, models
+from .base import ACLModel
 from ..constants import CYPHER, InventoryVariablesEnum
 
 logger = logging.getLogger("polemarch")

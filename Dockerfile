@@ -57,6 +57,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
         sudo \
         sshpass \
         libmysqlclient21 \
+        libpq5 \
         libpcre3 \
         libldap-2.4-2 \
         libsasl2-2 \

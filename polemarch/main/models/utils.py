@@ -14,6 +14,7 @@ from collections import OrderedDict
 from subprocess import Popen
 from django.apps import apps
 from django.utils import timezone
+from rest_framework.exceptions import ValidationError
 from vstutils.utils import KVExchanger
 
 from .hosts import Inventory
@@ -23,6 +24,18 @@ from ...plugins.base import BasePlugin
 
 
 logger = logging.getLogger("polemarch")
+
+
+def ensure_inventory_is_from_project(inventory, project):  # pylint: disable=invalid-name
+    if isinstance(inventory, Inventory):
+        inventory_id = inventory.id
+    elif isinstance(inventory, int):
+        inventory_id = inventory
+    else:
+        return
+
+    if not project.inventories.filter(id=inventory_id).exists():
+        raise ValidationError('No Inventory matches the given query.')
 
 
 # Classes and methods for support

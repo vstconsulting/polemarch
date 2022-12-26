@@ -1,6 +1,6 @@
 # set to local images because too long execution
 default:
-  image: vstconsulting/images:build
+  image: registry.gitlab.com/vstconsulting/images:build
 
 variables:
   GET_SOURCES_ATTEMPTS: 3
@@ -34,7 +34,7 @@ stages:
 ###########################################
 .branch_tests_template: &branch_tests
   stage: test
-  image: vstconsulting/images:tox
+  image: registry.gitlab.com/vstconsulting/images:tox
   coverage: '/\d+\%\s*$/'
   variables:
     TOX_ENVS: ""
@@ -51,6 +51,16 @@ stages:
       when: on_success
     - when: never
 
+
+.js_tests_template: &branch_js_tests
+  <<: *branch_tests
+  image: registry.gitlab.com/vstconsulting/images:node-tests
+  before_script:
+    - yarn install --pure-lockfile --mutex network
+  script:
+    - yarn test
+
+
 # Branch tests
 ###########################################
 code_style:
@@ -60,12 +70,12 @@ code_style:
     TOX_ENVS: "flake,pylint"
 
 js_style:
-  <<: *branch_tests
+  <<: *branch_js_tests
   stage: code_standarts
-  variables:
-    TOX_ENVS: "js_style"
+  script:
+    - yarn lint
 
-py38-coverage:
+py311-coverage:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
@@ -79,7 +89,7 @@ py36-install:
 ###########################################
 #deploy_environment:
 #  stage: release
-#  image: vstconsulting/images:tox
+#  image: registry.gitlab.com/vstconsulting/images:tox
 #  services:
 #    - name: "docker:19.03-dind"
 #      alias: "docker_service_host"
@@ -97,7 +107,7 @@ py36-install:
 #
 #delete_environment:
 #  stage: release
-#  image: vstconsulting/images:tox
+#  image: registry.gitlab.com/vstconsulting/images:tox
 #  script:
 #    - tox -e destroy_env
 #  environment:
@@ -111,7 +121,7 @@ py36-install:
 
 release:
   stage: release
-  image: vstconsulting/images:tox
+  image: registry.gitlab.com/vstconsulting/images:tox
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $GIT_ACCESS_USER && $GIT_ACCESS_PASSWORD'
       when: on_success
@@ -139,7 +149,7 @@ pages:
 
 release_pypi:
   stage: release
-  image: vstconsulting/images:build
+  image: registry.gitlab.com/vstconsulting/images:build
   rules:
     - if: '$CI_COMMIT_TAG && $PYPI_UPLOAD_PASSWORD && $PYPI_UPLOAD_NAME'
       when: on_success
@@ -157,21 +167,25 @@ release_pypi:
 
 publish_docker:
   stage: publish
-  image: vstconsulting/images:ubuntu
-  services:
-    - name: 'docker:19.03-dind'
-      alias: 'docker_service_host'
+  image: registry.werf.io/werf/werf
+  before_script:
+    - type werf && source $(werf ci-env gitlab --as-file)
+    - werf version
   script:
-    - pip install tox
-    - tox -e release-docker
+    - werf cr login -u $POLEMARCH_DOCKER_USER -p $POLEMARCH_DOCKER_PASSWORD index.docker.io
+    - werf export --repo=$WERF_REPO/storage --tag=$WERF_REPO:$CI_COMMIT_TAG --tag=index.docker.io/$POLEMARCH_DOCKER_IMAGE_NAME:$CI_COMMIT_TAG
+    - werf export --repo=$WERF_REPO/storage --tag=$WERF_REPO:latest --tag=index.docker.io/$POLEMARCH_DOCKER_IMAGE_NAME:latest
+  after_script:
+    - werf cr login -u nobody -p ${WERF_IMAGES_CLEANUP_PASSWORD} ${CI_REGISTRY}
+    - werf cleanup --repo=$WERF_REPO/storage
   rules:
-    - if: '$CI_COMMIT_TAG && $POLEMARCH_DOCKER_USER && $POLEMARCH_DOCKER_PASSWORD && $POLEMARCH_DOCKER_IMAGE_NAME'
+    - if: '$CI_COMMIT_TAG && $POLEMARCH_DOCKER_USER && $POLEMARCH_DOCKER_PASSWORD && $POLEMARCH_DOCKER_IMAGE_NAME && $WERF_IMAGES_CLEANUP_PASSWORD'
       when: on_success
     - when: never
 
 publish_release:
   stage: publish
-  image: vstconsulting/images:tox
+  image: registry.gitlab.com/vstconsulting/images:tox
   allow_failure: true
   needs: ["release_pypi"]
   rules:

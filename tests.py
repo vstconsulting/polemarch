@@ -2,6 +2,7 @@ import json
 import io
 import os
 import re
+import sys
 import time
 import shutil
 from threading import Thread
@@ -29,12 +30,12 @@ try:
     from polemarch.main.openapi import PROJECT_MENU
     from polemarch.main.constants import CYPHER
     from polemarch.main.models.utils import ProjectProxy
-    from polemarch.plugins.ansible import BaseAnsiblePlugin, BasePlugin, Module
+    from polemarch.plugins.ansible import BaseAnsiblePlugin, BasePlugin, Module, Playbook
 except ImportError:
     from pmlib.main.tasks import ScheduledTask
     from pmlib.main.models.utils import ProjectProxy
     from pmlib.main.constants import CYPHER
-    from pmlib.plugins.ansible import BaseAnsiblePlugin, BasePlugin, Module
+    from pmlib.plugins.ansible import BaseAnsiblePlugin, BasePlugin, Module, Playbook
 
 
 TEST_DATA_DIR = Path(__file__).parent.absolute()
@@ -315,6 +316,7 @@ class BaseProjectTestCase(BaseTestCase):
 class ProjectTestCase(BaseProjectTestCase):
     def test_set_owner(self):
         user = self._create_user(is_super_user=False, is_staff=True)
+        user2 = self._create_user(is_super_user=False, is_staff=True)
         results = self.bulk([
             {
                 'method': 'post',
@@ -326,16 +328,59 @@ class ProjectTestCase(BaseProjectTestCase):
                 'path': ['project', self.project.id, 'set_owner'],
                 'data': {'user_id': 146}
             },
-            {'method': 'get', 'path': ['project', self.project.id]}
+            {'method': 'get', 'path': ['project', self.project.id]},
         ])
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[1]['status'], 400)
         self.assertEqual(results[2]['status'], 200)
         self.assertEqual(results[2]['data']['owner']['id'], user.id)
 
+        with self.user_as(self, user2):
+            results = self.bulk([
+                {'method': 'post', 'path': ['project', self.project.id, 'set_owner'], 'data': {'user_id': user.id}},
+            ])
+        self.assertEqual(results[0]['status'], 403)
+        self.assertEqual(results[0]['data']['detail'], 'Only owner can change owner.')
+
 
 @own_projects_dir
 class InventoryTestCase(BaseProjectTestCase):
+    def test_fk_inventory_usage(self):
+        results = self.bulk_transactional([
+            {'method': 'post', 'path': 'inventory', 'name': 'unreachable'},
+            self.create_execution_template_bulk_data(),
+            self.create_periodic_task_bulk_data(),
+        ])
+        inventory_id = results[0]['data']['id']
+        template_id = results[1]['data']['id']
+        periodic_task_id = results[2]['data']['id']
+
+        results = self.bulk([
+            # [0]
+            self.execute_module_bulk_data(inventory=inventory_id),
+            # [1]
+            self.create_execution_template_bulk_data(inventory=inventory_id),
+            # [2]
+            self.create_periodic_task_bulk_data(inventory=inventory_id),
+            # [3]
+            {
+                'method': 'patch',
+                'path': ['project', self.project.id, 'execution_templates', template_id],
+                'data': {'inventory': inventory_id},
+            },
+            # [4]
+            {
+                'method': 'patch',
+                'path': ['project', self.project.id, 'periodic_task', periodic_task_id],
+                'data': {'inventory': inventory_id},
+            },
+        ])
+        self.assertEqual(results[0]['status'], 400)
+        self.assertEqual(results[0]['data'], ['No Inventory matches the given query.'])
+        for idx in range(1, 5):
+            self.assertEqual(results[idx]['status'], 400)
+            self.assertEqual(results[idx]['data'], ['No Inventory matches the given query.'])
+
     def test_import_inventory(self):
         def check_import(file_import=False):
             inventory = (TEST_DATA_DIR / 'inventory.yml').read_text()
@@ -915,6 +960,7 @@ class SyncTestCase(BaseProjectTestCase):
         submodule = git.Repo.init(submodule_dir)
         submodule.git.add('test_module.py')
         submodule.index.commit('Add module')
+        repo.git.set_persistent_git_options(c='protocol.file.allow=always')
         repo.git.submodule('add', '../submodule/.git', 'lib')
         repo.git.submodule('add', f'{submodule_dir}/.git', 'lib2')
         repo.git.add(all=True)
@@ -1755,6 +1801,8 @@ class SyncTestCase(BaseProjectTestCase):
         submodule = git.Repo.init(submodule_dir)
         submodule.git.add('test_module.py')
         submodule.index.commit('Add module')
+        submodule.git.set_persistent_git_options(c='protocol.file.allow=always')
+        repo.git.set_persistent_git_options(c='protocol.file.allow=always')
         repo.git.submodule('add', '../submodule/.git', 'lib')
         repo.git.submodule('add', f'{submodule_dir}/.git', 'lib2')
 
@@ -1897,6 +1945,8 @@ class SyncTestCase(BaseProjectTestCase):
             submodule = git.Repo.init(submodule_dir)
             submodule.git.add('test_module.py')
             submodule.index.commit('Add module')
+            submodule.git.set_persistent_git_options(c='protocol.file.allow=always')
+            repo.git.set_persistent_git_options(c='protocol.file.allow=always')
             repo.git.submodule('add', '../submodule/.git', 'lib')
             repo.git.submodule('add', f'{submodule_dir}/.git', 'lib2')
 
@@ -2772,6 +2822,7 @@ class HistoryTestCase(BaseProjectTestCase):
         self.assertEqual(results[4]['status'], 200)
         self.assertEqual(results[4]['data'], {'detail': f'Task canceled: {self.project.id}'})
 
+    @skipIf(settings.VST_PROJECT_LIB_NAME != 'polemarch', 'Stats may vary')
     def test_stats(self):
         def generate_history(status="OK"):
             project = self.get_model_class('main.Project').objects.create(name="Stats", repository='')
@@ -4243,6 +4294,8 @@ class OpenAPITestCase(BaseOpenAPITestCase):
         with raise_context():
             endpoint_schema['definitions']['PeriodicTaskVariable']['properties']['key']['x-options']['types'] = \
                 yml_schema['definitions']['PeriodicTaskVariable']['properties']['key']['x-options']['types']
+            endpoint_schema['definitions']['TemplateExec']['properties']['override']['x-options']['types'] = \
+                yml_schema['definitions']['TemplateExec']['properties']['override']['x-options']['types']
 
         del yml_schema['definitions']['_MainSettings']
         del endpoint_schema['definitions']['_MainSettings']
@@ -4271,6 +4324,38 @@ class OpenAPITestCase(BaseOpenAPITestCase):
         system_tab_user = self.system_tab
         system_tab_user['sublinks'] = [self.users_sublink]
         self.assertEqual(reg_schema['info']['x-menu'], PROJECT_MENU + [system_tab_user])
+
+
+class MetricsTestCase(VSTBaseTestCase):
+    def setUp(self):
+        super().setUp()
+        History = self.get_model_class('main.History')
+        Project = self.get_model_class('main.Project')
+
+        self.history_status_count_map = {
+            "OK": 10,
+            'OFFLINE': 110,
+            'ERROR': 310,
+        }
+
+        for status, count in self.history_status_count_map.items():
+            for i in range(count):
+                History.objects.create(status=status)
+
+        Project.objects.create(name=f'test_metrics_{i}')
+        for i in range(3):
+            Project.objects.create(name=f'test_metrics_{i}', status='OK')
+        for i in range(4):
+            Project.objects.create(name=f'test_metrics_{i}', status='ERROR')
+
+    def test_metrics(self):
+        result = self.get_result('get', '/api/metrics/')
+        expected = (Path(Path(__file__).parent) / 'test_data' / 'metrics.txt').read_text('utf-8')
+        expected = expected.replace(
+            '$VERSION',
+            f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}'
+        )
+        self.assertEqual(result, expected)
 
 
 class BaseExecutionPluginUnitTestCase(VSTBaseTestCase):
@@ -4304,3 +4389,138 @@ class AnsibleExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase):
         test_value = 'test_value'
         filepath = instance._put_into_tmpfile(test_value)
         self.assertEqual(Path(filepath).read_text(), test_value)
+        self.assertEqual(Path(filepath).stat().st_mode, 0o100600)
+
+
+class AnsiblePlaybookExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase):
+    plugin_class = Playbook
+
+    boolean_args = (
+        'force_handlers',
+        'flush_cache',
+        'become',
+        'check',
+        'syntax_check',
+        'diff',
+        'list_hosts',
+        'list_tasks',
+        'list_tags',
+    )
+    string_args = (
+        'user',
+        'connection',
+        'ssh_common_args',
+        'sftp_extra_args',
+        'scp_extra_args',
+        'ssh_extra_args',
+        'become_method',
+        'become_user',
+        'tags',
+        'skip_tags',
+        'inventory',
+        'limit',
+        'extra_vars',
+        'vault_id',
+        'start_at_task',
+        'args',
+    )
+    int_args = (
+        'timeout',
+        'forks',
+    )
+    file_args = (
+        'private_key',
+        'vault_password_file',
+        'module_path',
+    )
+
+    def test_process_arg(self):
+        instance = self.get_plugin_instance()
+
+        self.assertIsNone(instance._process_arg('unknown', 'unknown'))
+        self.assertEqual(instance._process_arg('verbose', 2), '-vv')
+        self.assertIsNone(instance._process_arg('verbose', 0))
+
+        for arg in self.boolean_args:
+            self.assertIsNone(instance._process_arg(arg, False))
+            self.assertEqual(instance._process_arg(arg, True), f'--{arg.replace("_", "-")}')
+
+        for arg in self.string_args:
+            self.assertIsNone(instance._process_arg(arg, ''))
+            self.assertEqual(instance._process_arg(arg, 'test-value'), f'--{arg.replace("_", "-")}=test-value')
+
+        for arg in self.int_args:
+            self.assertIsNone(instance._process_arg(arg, 0))
+            self.assertEqual(instance._process_arg(arg, 2), f'--{arg.replace("_", "-")}=2')
+
+        for arg in self.file_args:
+            self.assertIsNone(instance._process_arg(arg, ''))
+            processed_arg = instance._process_arg(arg, 'test-value')
+            filepath = processed_arg[processed_arg.index('=') + 1:]
+            self.assertEqual(Path(filepath).read_text(), 'test-value')
+
+
+class AnsibleModuleExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase):
+    plugin_class = Module
+
+    boolean_args = (
+        'become',
+        'list_hosts',
+        'one_line',
+        'check',
+        'syntax_check',
+        'diff',
+    )
+    string_args = (
+        'become_method',
+        'become_user',
+        'inventory',
+        'limit',
+        'tree',
+        'user',
+        'connection',
+        'ssh_common_args',
+        'sftp_extra_args',
+        'scp_extra_args',
+        'ssh_extra_args',
+        'extra_vars',
+        'vault_id',
+        'playbook_dir',
+        'args',
+        'group',
+    )
+    int_args = (
+        'poll',
+        'background',
+        'timeout',
+        'forks',
+    )
+    file_args = (
+        'private_key',
+        'vault_password_file'
+    )
+
+    def test_process_arg(self):
+        instance = self.get_plugin_instance()
+
+        self.assertIsNone(instance._process_arg('unknown', 'unknown'))
+        self.assertEqual(instance._process_arg('verbose', 3), '-vvv')
+        self.assertIsNone(instance._process_arg('verbose', 0))
+
+        for arg in self.boolean_args:
+            self.assertIsNone(instance._process_arg(arg, False))
+            self.assertEqual(instance._process_arg(arg, True), f'--{arg.replace("_", "-")}')
+
+        for arg in self.string_args:
+            self.assertIsNone(instance._process_arg(arg, ''))
+            self.assertEqual(instance._process_arg(arg, 'test-value'), f'--{arg.replace("_", "-")}=test-value')
+
+        for arg in self.int_args:
+            self.assertIsNone(instance._process_arg(arg, 0))
+            self.assertEqual(instance._process_arg(arg, 2), f'--{arg.replace("_", "-")}=2')
+
+        for arg in self.file_args:
+            self.assertIsNone(instance._process_arg(arg, ''))
+            processed_arg = instance._process_arg(arg, 'test-value')
+            filepath = processed_arg[processed_arg.index('=') + 1:]
+            self.assertEqual(Path(filepath).read_text(), 'test-value')
