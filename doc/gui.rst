@@ -557,6 +557,11 @@ As you can see, the form of new group creation consists of following fields:
 * **Notes** - not required field for some user’s notes, for example,
   for what purpose this group was created or something like this.
 
+.. warning::
+  By default SQLite's maximum expression tree depth is 1000. This could create
+  problems with very nested groups. If you encounter so, please refer to
+  `documentation https://www.sqlite.org/limits.html#max_expr_depth`_.
+
 After group creation you will see the next page:
 
 .. image:: new_screenshots/test_group.png
