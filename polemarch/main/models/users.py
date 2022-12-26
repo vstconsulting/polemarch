@@ -24,7 +24,7 @@ class UserGroup(BaseGroup, ACLModel):
 
 class ACLPermissionQuerySet(BQuerySet):
     def filter_by_user(self, user):  # noce
-        return self.filter(models.Q(user=user) | models.Q(uagroup__user=user))
+        return self.filter(models.Q(user=user) | models.Q(uagroup__id__in=user.groups.values('id')))
 
 
 class ACLPermission(BModel):
