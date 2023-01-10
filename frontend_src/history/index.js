@@ -1,7 +1,7 @@
 /* eslint-disable vue/one-component-per-file */
 import { computed } from 'vue';
 import OutputLines from './OutputLines.vue';
-import { RawInventoryField } from './raw-inventory';
+import { RawInventoryField } from './raw-inventory.js';
 import './style.scss';
 import { ExecutionTimeField } from './ExecutionTimeField.js';
 
