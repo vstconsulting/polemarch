@@ -10,6 +10,7 @@ module.exports = {
         commonjs: true,
         es6: true,
         node: true,
+        'vue/setup-compiler-macros': true,
     },
     rules: {
         'no-debugger': 'warn',
