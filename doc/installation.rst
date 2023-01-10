@@ -212,6 +212,10 @@ Install from PyPI
 
       polemarchctl migrate
 
+.. note::
+    The first time run this command, the first superuser ``admin`` will be created in the database with the same password.
+    We recommend changing the user's password immediately after the first login.
+
 #. Start Polemarch:
 
    .. sourcecode:: bash

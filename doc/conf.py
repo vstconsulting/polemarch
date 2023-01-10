@@ -44,10 +44,10 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx_autodoc_typehints',
     'sphinxcontrib.httpdomain',
-    'vstutils.api.doc_generator',
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.intersphinx',
     'sphinx.ext.extlinks',
+    'sphinxcontrib.openapi',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -63,7 +63,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Polemarch'
-copyright = 'VST Consulting, 2019-2022'
+copyright = 'VST Consulting, 2019-2023'
 author = 'VST Consulting'
 
 # The version info for the project you're documenting, acts as replacement for

@@ -6,7 +6,7 @@ because our GUI also uses this API to work. Below there is an information about 
 entity we have in Polemarch and methods applicable to it.
 
 This is an example of api schema, but you can find actual schema on Polemarch host at
-``/api/v2/openapi/``.
+``/api/v3/openapi/``.
 
 .. _structure:
 
@@ -26,4 +26,4 @@ In Polemarch we have some entities that can be nested to another entities. Below
 
 To add entities into another, you only need send ``[{"id": [instance_id]}, ...]`` to subpath. Also you can insert instead of data results of bulk request, inner mechanism add all entities in result to parent entity.
 
-.. vst_openapi:: ./api_schema.yaml
+.. openapi:: api_schema.yaml

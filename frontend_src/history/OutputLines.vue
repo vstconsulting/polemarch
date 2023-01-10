@@ -1,13 +1,13 @@
 <template>
     <div class="col-md-6 output-lines">
-        <Card card-body-classes="p-0" :title="title">
+        <Card card-body-classes="p-0" :title="`${$t('Execution output')} (${$t('stdout')})`">
             <template #tools>
-                <button v-show="loading" type="button" class="btn btn-tool">
+                <button v-show="isLoading" type="button" class="btn btn-tool">
                     <i class="fa fa-spinner fa-pulse fa-fw" />
                 </button>
                 <a
                     class="btn btn-tool"
-                    :href="page.instance.raw_stdout"
+                    :href="app.store.page.instance.raw_stdout"
                     :title="$t('Full raw stdout')"
                     target="_blank"
                 >
@@ -21,65 +21,126 @@
                     <i class="far fa-window-minimize" style="display: none" />
                 </button>
             </template>
-            <pre
-                ref="output"
-                class="history-stdout"
-                @scroll="scrollHandler"
-            ><HistoryLine v-for="line in gluedLines" :key="line.id" :content="line.text" /></pre>
+            <pre ref="outputEl" class="history-stdout" @scroll="handleScroll">
+                <HistoryLineVue v-for="(lineObj, idx) in lines" :key="idx" :content="lineObj.line" />
+            </pre>
         </Card>
     </div>
 </template>
 
-<script>
-    import OldLinesMixin from './OldLinesMixin.js';
+<script setup>
+    import { ref, onMounted, nextTick } from 'vue';
+    import HistoryLineVue from './HistoryLine.vue';
+    const Card = spa.components.Card;
 
-    /** @vue/component */
-    const HistoryLine = {
-        props: {
-            content: { type: String, required: true },
-        },
-        computed: {
-            htmlContent() {
-                return spa.colors.ansiToHTML(this.content);
-            },
-        },
-        render(h) {
-            return h('span', { domProps: { innerHTML: this.htmlContent } });
-        },
-    };
+    const LINES_LIMIT = 500;
 
-    export default {
-        components: {
-            Card: spa.components.Card,
-            HistoryLine,
-        },
-        mixins: [OldLinesMixin],
-        props: {
-            page: { type: Object, required: true },
-        },
-        data: () => ({
-            loading: false,
-        }),
-        computed: {
-            title() {
-                return `${this.$t('Execution output')} (${this.$t('stdout')})`;
-            },
-            instance() {
-                return this.page.instance;
-            },
-            rawInventory() {
-                return this.instance.raw_inventory;
-            },
-        },
-        methods: {
-            clear() {
-                this.page.executeAction(this.page.view.actions.get('clear'), this.page.instance);
-            },
-            toggleMaximize() {
-                document.body.classList.toggle('output-lines-maximized');
-            },
-        },
-    };
+    const app = spa.getApp();
+
+    const linesUrl = spa.utils.joinPaths(app.router.currentRoute.path, '/lines/');
+
+    spa.autoupdate.useAutoUpdate({
+        labels: ['history_lines'],
+        pk: app.store.page.instance.getPkValue(),
+        callback: loadLines,
+    });
+
+    const isLoading = ref(false);
+    const lines = ref([]);
+    const outputEl = ref(null);
+
+    onMounted(() => {
+        loadLines();
+    });
+
+    async function sendLinesRequest(query = {}) {
+        isLoading.value = true;
+        const response = await app.api.makeRequest({
+            method: spa.utils.HttpMethods.GET,
+            path: linesUrl,
+            query,
+            useBulk: true,
+        });
+        isLoading.value = false;
+        return response;
+    }
+
+    async function loadLines({ ascending = false } = {}) {
+        const query = { limit: LINES_LIMIT, ordering: '-line_gnumber' };
+
+        if (lines.value.length > 0) {
+            if (ascending) {
+                if (lines.value.at(0).line_gnumber === 1) return;
+                query.before = lines.value.at(0).line_gnumber;
+            } else {
+                query.after = lines.value.at(-1).line_gnumber;
+            }
+        }
+
+        const response = await sendLinesRequest(query);
+        saveLines({ newLines: response.data.results, ascending });
+
+        if (!ascending && !isLoading.value && outputEl.value.scrollHeight - outputEl.value.scrollTop < 800) {
+            nextTick(() => {
+                outputEl.value.scroll({ top: outputEl.value.scrollHeight });
+            });
+        }
+    }
+
+    function isSameLine(first, second) {
+        return first.line_number === second.line_number && first.line_gnumber === second.line_gnumber;
+    }
+
+    function saveLines({ newLines = [], ascending = false } = {}) {
+        if (!ascending) {
+            newLines = newLines.reverse();
+        }
+        for (const newLine of newLines) {
+            if (!lines.value.some((line) => isSameLine(line, newLine))) {
+                if (ascending) {
+                    lines.value.unshift(newLine);
+                } else {
+                    lines.value.push(newLine);
+                }
+            }
+        }
+    }
+
+    function clear() {
+        lines.value = [];
+    }
+
+    function toggleMaximize() {
+        document.body.classList.toggle('output-lines-maximized');
+    }
+
+    function _throttle(func, delay = 400) {
+        let shouldWait = false;
+        return (...args) => {
+            if (shouldWait) return;
+            func(...args);
+            shouldWait = true;
+            setTimeout(() => {
+                shouldWait = false;
+            }, delay);
+        };
+    }
+
+    const _loadTopThrottled = _throttle(async (prevHeight) => {
+        await loadLines({ ascending: true });
+        const newScroll = outputEl.value.scrollHeight - prevHeight;
+        if (newScroll > 0) {
+            outputEl.value.scroll({ top: newScroll });
+        }
+    });
+
+    async function handleScroll() {
+        if (outputEl.value.scrollTop > 600) {
+            return;
+        }
+        const prevHeight = outputEl.value.scrollHeight;
+        _loadTopThrottled(prevHeight);
+    }
 </script>
 
 <style lang="scss">
