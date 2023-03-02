@@ -1,7 +1,7 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
 
-from typing import Any, Dict, List, Iterable, TypeVar, Text
+from typing import Any, Dict, List, TypeVar
 import logging
 from collections import OrderedDict
 from datetime import timedelta, datetime
@@ -10,7 +10,7 @@ import re
 import signal
 
 from django.core.exceptions import ValidationError
-from django.db import transaction, models
+from django.db import models
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.db.models import functions as dbfunc, Count
@@ -19,9 +19,9 @@ from django.utils.timezone import now
 from vstutils.environment import get_celery_app
 from vstutils.models import BaseModel, BModel, BQuerySet
 from . import Inventory
-from ..exceptions import DataNotReady, NotApplicable
 from .projects import Project
 from ..constants import HiddenArgumentsEnum, HistoryInitiatorType, HistoryStatus
+from ..exceptions import NotApplicable
 from .execution_templates import ExecutionTemplate, TemplatePeriodicTask
 
 
@@ -167,63 +167,6 @@ class History(BModel):
         elif self.initiator_type == HistoryInitiatorType.TEMPLATE and self.initiator:
             return ExecutionTemplate.objects.get(id=self.initiator)
         return None
-
-    @property
-    def facts(self) -> Dict:
-        if self.status not in HistoryStatus.get_stopped_statuses():
-            raise DataNotReady("Execution still in process.")
-        if self.kind != 'ANSIBLE_MODULE' or self.mode != 'system.setup' or self.status != 'OK':
-            raise self.NoFactsAvailableException()
-        data = self.get_raw(
-            original=False,
-            excludes=(
-                models.Q(line__contains="No config file") | models.Q(line__contains="as config file"),
-            )
-        )
-        regex = (
-            r"^([\S]{1,})\s\|\s([\S]{1,}) \=>"
-            r" \{\s([^\r]*?\"[\w]{1,}\"\: .*?\s)\}\s{0,1}"
-        )
-        subst = '"\\1": {\n\t"status": "\\2", \n\\3},'
-        result = re.sub(regex, subst, data, 0, re.MULTILINE)
-        result = re.findall(r'^".*":[\s\S]*$', result, re.MULTILINE)[0]
-        result = "{" + result[:-1] + "\n}"
-        return json.loads(result)
-
-    def get_raw(self, original=True, filters=(), excludes=()) -> Text:
-        qs = self.raw_history_line.filter(*filters).exclude(*excludes)
-        qs = qs.order_by('line_gnumber', 'line_number')
-        data = "".join(qs.values_list("line", flat=True))
-        return data if original else self.ansi_escape.sub('', data)
-
-    @property
-    def raw_stdout(self) -> str:
-        return self.get_raw()
-
-    @raw_stdout.setter
-    @transaction.atomic
-    def raw_stdout(self, lines: Iterable) -> None:
-        del self.raw_stdout
-        self.check_output(lines)
-
-    @raw_stdout.deleter
-    def raw_stdout(self) -> None:
-        self.raw_history_line.all().delete()
-
-    def check_output(self, output: str) -> None:
-        raw_count = self.raw_history_line.all().count()
-        lines = re.findall(r'.+\n{0,}', output)
-        counter = 0
-        if raw_count >= len(lines):
-            return  # nocv
-        for line in lines[raw_count:]:
-            counter += 1
-            self.write_line(number=counter, value=line)
-
-    def write_line(self, value: str, number: int, endl: Text = "") -> None:
-        self.raw_history_line.bulk_create([
-            HistoryLines(line_gnumber=number, line_number=1, line=value + endl, history=self)
-        ])
 
     def cancel(self):
         if self.working and self.celery_task_id:

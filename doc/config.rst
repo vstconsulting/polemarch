@@ -387,6 +387,24 @@ Here you can specify settings used by archive (e.g. TAR) projects.
 * **max_content_length** - Maximum download file size. Format: ``30<unit>``, where unit is *b*, *kb*, *mb*, *gb*, *tb*.
 
 
+.. _history:
+
+History output plugins
+----------------------
+
+Section ``[history]``
+
+This section of the configuration provides to configure the output history plugin settings.
+
+* **output_plugins** - a comma-separated list of plugin names that are used to record history lines. Plugins must have the ``writeable`` attribute. Default: ``database``
+* **read_plugin** - the name of the plugin used to display the history lines in the api. Default is ``database``.
+
+Other parameters are set in the plugin options section: ``history.plugin.PLUGIN_NAME.options``.
+
+.. warning::
+    Be careful. The reader plugin must be able to read the data.
+    Therefore, the storage from which the reading plugin takes data must be filled with one of the writer plugins.
+
 Production web settings
 -----------------------
 

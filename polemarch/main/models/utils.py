@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
+import contextlib
 import threading
 from typing import Any, Iterable, Type, Union, Optional
 import time
@@ -13,11 +15,14 @@ from collections import OrderedDict
 from subprocess import Popen
 from django.apps import apps
 from django.utils import timezone
+from django.conf import settings
 from rest_framework.exceptions import ValidationError
+from vstutils.utils import ObjectHandlers
 
 from .hosts import Inventory
 from .history import History, Project
 from ...main.utils import CmdExecutor
+from ...main.history_plugins.base import BasePlugin as BaseHistoryPlugin
 from ...plugins.base import BasePlugin
 
 
@@ -32,6 +37,26 @@ def ensure_inventory_is_from_project(inventory, project):  # pylint: disable=inv
 
     if not project.inventories.filter(id=inventory_id).exists():
         raise ValidationError('No Inventory matches the given query.')
+
+
+class HistoryPluginHandler(ObjectHandlers):
+    __slots__ = ()
+
+    def __init__(self):
+        super().__init__('HISTORY_PLUGIN_SETTINGS')
+
+    def get_writers(self, history: History) -> Iterable[BaseHistoryPlugin]:
+        for name in self.list():
+            if name not in settings.HISTORY_OUTPUT_PLUGINS:
+                continue  # nocv
+            backend = self[name]
+            if backend.writeable:
+                yield backend(history, **self.opts(name))
+
+    def get_reader(self, history: History) -> Optional[BaseHistoryPlugin]:
+        backend = self[settings.HISTORY_READ_PLUGIN]
+        if backend.readable:
+            return backend(history, **self.opts(settings.HISTORY_READ_PLUGIN))
 
 
 class DummyHistory:
@@ -73,12 +98,14 @@ class Executor(CmdExecutor):
         'notificator_lock',
         'notification_last_time',
         'must_die',
+        'writers',
     )
 
-    def __init__(self, history: Union[History, DummyHistory]):
+    def __init__(self, history: Union[History, DummyHistory], writers: tuple = ()):
         super().__init__()
         self.history = history
         self.counter = 0
+        self.writers = writers
         if isinstance(history, DummyHistory):
             self.notificator = None
         else:
@@ -114,7 +141,8 @@ class Executor(CmdExecutor):
 
     def write_output(self, line: str):
         self.counter += 1
-        self.history.write_line(line, self.counter, '\n')
+        for writer in self.writers:
+            writer.write_line(line, self.counter, '\n')
         if self.notificator:
             with self.notificator_lock:
                 self.notificator.create_notification_from_instance(self.history)
@@ -165,9 +193,11 @@ class PluginExecutor:
         'execution_dir',
         'plugin',
         'executor',
+        'writers',
     )
 
     executor_class = Executor
+    history_plugins = HistoryPluginHandler()
 
     def __init__(
         self,
@@ -186,12 +216,13 @@ class PluginExecutor:
 
     def execute(self) -> None:
         try:
+            self.writers = tuple(self.history_plugins.get_writers(self.history))
             revision = self.get_execution_revision()
             self.execution_dir = self.create_execution_dir()
             self.history.revision = revision or 'NO VCS'
             self.project.repo_class.make_run_copy(str(self.execution_dir), revision)
 
-            self.executor = self.executor_class(self.history)
+            self.executor = self.executor_class(self.history, writers=self.writers)
             cmd, env_vars, self.history.raw_inventory = self.plugin.get_execution_data(
                 self.execution_dir,
                 self.raw_exec_args
@@ -211,6 +242,9 @@ class PluginExecutor:
         finally:
             self.history.stop_time = timezone.now()
             self.history.save()
+            for writer in self.writers:
+                with contextlib.suppress(Exception):
+                    writer.finalize_output()
             self.send_hook('after_execution')
             self.__del__()
 
@@ -225,13 +259,11 @@ class PluginExecutor:
         elif isinstance(exception, self.project.SyncError):
             raise exception
 
-        last_line_object = self.history.raw_history_line.last()
-        last_line = 0
-        if last_line_object:
-            last_line = last_line_object.line_number  # nocv
+        last_line = self.history_plugins.get_reader(self.history).get_max_line()
         for line in error_text.split('\n'):
             last_line += 1
-            self.history.write_line(line, last_line)
+            for writer in self.writers:
+                writer.write_line(line, last_line)
 
     def create_execution_dir(self) -> Path:
         exec_dir = Path(tempfile.mkdtemp()) / 'execution_dir'

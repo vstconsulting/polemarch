@@ -130,7 +130,7 @@ class InventoryVariablesEnum(BaseVariablesEnum):
     ANSIBLE_SHELL_EXECUTABLE = BaseEnum.LOWER
 
     @classmethod
-    @lru_cache
+    @lru_cache()
     def get_field_types(cls):
         return {
             cls.ANSIBLE_PASSWORD.value: vstfields.PasswordField(),
