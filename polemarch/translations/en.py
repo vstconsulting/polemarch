@@ -13,6 +13,7 @@ TRANSLATION = {
     'groups counter': 'groups | group | groups',
     'hosts counter': 'hosts | host | hosts',
     'users counter': 'users | user | users',
+    'execution_plugins counter': 'execution plugins | execution plugin | execution plugins',
     'all_tasks': 'all tasks',
 
     'Vars': 'Variables',

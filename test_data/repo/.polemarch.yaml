@@ -1,7 +1,8 @@
 ---
 sync_on_run: true
+
 templates:
-  test module:
+  deprecated_module:
     data:
       args: ''
       group: all
@@ -14,7 +15,8 @@ templates:
       uptime:
         args: uptime
         module: shell
-  test playbook:
+
+  deprecated_playbook:
     data:
       inventory: ./inventory.ini
       playbook: main.yml
@@ -25,7 +27,22 @@ templates:
     options:
       update:
         playbook: other.yml
+
+  actual_format:
+    plugin: TEST_ECHO
+    notes: Template from .polemarch.yaml which echoes something
+    options:
+      first:
+        notes: some_notes
+        arguments:
+          string: example
+          n: false
+      second:
+        arguments:
+          string: example 2
+
 templates_rewrite: false
+
 view:
   fields:
     str_field:

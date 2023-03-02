@@ -4,6 +4,19 @@ TRANSLATION = {
     'Invalid path. Path must not contain "..", "~" or any other special characters and must be relative.':
         'Неправильный путь. Путь не должен содержать "..", "~" и другие специальные символы, а также должен быть относительным.',
     '{} plugin was executed.': 'Запущен плагин {}.',
+    'Group cannot have child groups.': 'Группа не может содержать дочерних групп.',
+    'Group cannot have child hosts.': 'Группа не может содержать дочерних хостов.',
+    'Couldn\'t set CI/CD to project with "repo_sync_on_run" setting.':
+        'Не удалось установить CI/CD в проект с настройкой "repo_sync_on_run".',
+    'Couldn\'t set "repo_sync_on_run" setting for CI/CD project.':
+        'Не удалось установить "repo_sync_on_run" в CI/CD проект.',
+    "Cannot delete option {} because it's used by project as CI template.":
+        'Невозможно удалить опцию {}, так как она используется в проекте в качестве шаблона CI.',
+    'Project not synchronized.': 'Проект не синхронизирован.',
+    'HTTP: list of recipients, separated by "|". SCRIPT: script files, separated by "|" '
+    '<b>HTTP</b>: list of URLs, separated by "|".<br><b>SCRIPT</b>: script files, separated by "|" '
+    'Files must be in HOOKS_DIR directory.': '<b>HTTP</b>: список URL, разделённых "|". <br><b>SCRIPT</b>: '
+    'скрипт-файлы, разделённые "|". Файлы должны находиться в папке HOOKS_DIR.',
 
     # field titles and names
     'project id': 'id проекта',
@@ -29,9 +42,11 @@ TRANSLATION = {
     'inventory file': 'Файл инвентория',
     'branch': 'ветка',
     'Module': 'Модуль',
+    'Playbook': 'Плейбук',
+    'Ansible modules': 'Модули ansible',
+    'Ansible playbooks': 'Плейбуки ansible',
     'Group': 'Группа',
     'history id': 'id записи в истории',
-    'Playbook': 'Плейбук',
     'tags': 'тэги',
     'Type': 'Тип',
     'Save result': 'Сохранять результат',
@@ -75,8 +90,8 @@ TRANSLATION = {
     'pmwhostscounter': 'счетчик хостов',
     'pmwchartwidget': 'график',
     'Copy': 'Скопировать',
-    'Execute module': 'Запустить модуль',
-    'Execute playbook': 'Запустить плейбук',
+    'Execute ansible module': 'Запустить модуль ansible',
+    'Execute ansible playbook': 'Запустить плейбук ansible',
     'Set owner': 'Установить владельца',
     'Community template': 'Шаблон от сообщества',
     'Use it': 'Использовать',
@@ -162,6 +177,7 @@ TRANSLATION = {
     'groups counter': 'групп | группа | группы | групп',
     'hosts counter': 'хостов | хост | хоста | хостов',
     'users counter': 'пользователей | пользователь | пользователя | пользователей',
+    'execution_plugins counter': 'плагинов запуска | плагин запуска | плагина запуска | плагинов запуска',
 
     # pmCustomizer
     'history status ok': 'история - статус ok',

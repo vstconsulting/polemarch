@@ -3,9 +3,9 @@ import logging
 import traceback
 from django.conf import settings
 from vstutils.utils import import_class
-from ..utils import task, BaseTask
+from ..utils import task, BaseTask, TaskClass
 from .exceptions import TaskError
-from ..models import PeriodicTask
+from ..models import TemplatePeriodicTask, Project, History, Inventory
 from ..executions import PLUGIN_HANDLERS
 
 logger = logging.getLogger("polemarch")
@@ -24,11 +24,12 @@ class RepoTask(BaseTask):
     class UnknownRepoOperation(RepoTaskError):
         _default_message = "Unknown operation {}."
 
-    def __init__(self, app, project, operation="sync", *args, **kwargs):
+    def __init__(self, app, project_id, operation="sync", *args, **kwargs):
         super(RepoTask.task_class, self).__init__(app, *args, **kwargs)
-        self.project, self.operation = project, operation
+        self.operation = operation
         if self.operation not in self.accepted_operations:
             raise self.task_class.UnknownRepoOperation(self.operation)
+        self.project = Project.objects.get(id=project_id)
 
     def run(self):
         try:
@@ -48,31 +49,32 @@ class ScheduledTask(BaseTask):
 
     def run(self):
         try:
-            PeriodicTask.objects.get(id=self.job_id).execute()
-        except PeriodicTask.DoesNotExist:
-            return
-        except Exception:  # nocv
-            logger.error(traceback.format_exc())
-            raise
-
-
-@task(app, ignore_result=True, bind=True)
-class PluginTask(BaseTask):
-    def __init__(self, *args, plugin: str, project, history, execute_args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.plugin = plugin
-        self.project = project
-        self.history = history
-        self.execute_args = execute_args
-
-    def run(self):
-        try:
-            PLUGIN_HANDLERS.get_object(
-                self.plugin,
-                self.project,
-                self.history,
-                **self.execute_args,
-            ).execute()
+            TemplatePeriodicTask.objects.get(id=self.job_id).execute()
         except:
             logger.error(traceback.format_exc())
             raise
+
+
+class PluginTask(TaskClass):
+    ignore_result = True
+
+    def run(self, *, plugin: str, project_id, history_id, execute_args, **kwargs):
+        project = Project.objects.get(id=project_id)
+        history = None
+
+        if history_id is not None:
+            history = History.objects.get(id=history_id)
+            history.celery_task_id = self.request.id
+            history.save(update_fields=('celery_task_id',))
+
+        if isinstance(execute_args.get('inventory'), int):
+            execute_args['inventory'] = Inventory.objects.get(id=execute_args['inventory'])
+
+        try:
+            PLUGIN_HANDLERS.get_object(plugin, project, history, **execute_args).execute()
+        except:
+            logger.error(traceback.format_exc())
+            raise
+
+
+app.register_task(PluginTask())

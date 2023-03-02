@@ -7,9 +7,9 @@ from django.conf import settings
 from rest_framework import fields
 from vstutils.api.serializers import BaseSerializer
 from vstutils.api.fields import VSTCharField, SecretFileInString, AutoCompletionField
-from ..main.constants import ANSIBLE_REFERENCE, CYPHER, HiddenArgumentsEnum, HiddenVariablesEnum
+from ..main.constants import ANSIBLE_REFERENCE, CYPHER, HiddenArgumentsEnum, HiddenVariablesEnum, HistoryStatus
 from ..main.models import Inventory
-from ..api.v2.serializers import InventoryAutoCompletionField
+from ..api.fields import InventoryAutoCompletionField
 from .base import BasePlugin
 
 
@@ -26,9 +26,9 @@ class BaseAnsiblePlugin(BasePlugin):
     )), re.MULTILINE)
 
     error_codes = {
-        4: 'OFFLINE',
-        -9: 'INTERRUPTED',
-        -15: 'INTERRUPTED',
+        4: HistoryStatus.OFFLINE,
+        -9: HistoryStatus.INTERRUPTED,
+        -15: HistoryStatus.INTERRUPTED,
     }
 
     @classmethod
@@ -62,9 +62,6 @@ class BaseAnsiblePlugin(BasePlugin):
     def get_inventory(self, inventory: Optional[Union[Inventory, str, int]]) -> Tuple[Optional[str], str]:
         if inventory is None:
             return inventory, ''
-
-        if isinstance(inventory, int) or (isinstance(inventory, str) and inventory.isdigit()):
-            inventory = Inventory.objects.get(id=int(inventory))
 
         if isinstance(inventory, Inventory):
             text, self.files = inventory.get_inventory(tmp_dir=self.execution_dir)
@@ -143,13 +140,13 @@ class BaseAnsiblePlugin(BasePlugin):
         return serializer_fields
 
 
-class Playbook(BaseAnsiblePlugin):
+class AnsiblePlaybook(BaseAnsiblePlugin):
     __slots__ = ()
 
     reference = ANSIBLE_REFERENCE.raw_dict['playbook']
     arg_shown_on_history_as_mode = 'playbook'
     serializer_fields = {
-        'playbook': AutoCompletionField(autocomplete='Playbook', autocomplete_property='playbook')
+        'playbook': AutoCompletionField(autocomplete='AnsiblePlaybook', autocomplete_property='playbook')
     }
 
     @property
@@ -162,14 +159,14 @@ class Playbook(BaseAnsiblePlugin):
         return super()._process_arg(key, value)
 
 
-class Module(BaseAnsiblePlugin):
+class AnsibleModule(BaseAnsiblePlugin):
     __slots__ = ('group', 'module')
 
     reference = ANSIBLE_REFERENCE.raw_dict['module']
     serializer_fields = {
         'module': AutoCompletionField(
-            autocomplete='Module',
-            autocomplete_property='name',
+            autocomplete='AnsibleModule',
+            autocomplete_property='path',
             autocomplete_represent='path',
         )
     }
@@ -181,5 +178,8 @@ class Module(BaseAnsiblePlugin):
 
     def get_args(self, raw_args):
         self.group = raw_args.pop('group', 'all')
-        self.module = raw_args.pop('module')
+        self.module = self.get_module_value(raw_args.pop('module'))
         return super().get_args(raw_args)
+
+    def get_module_value(self, value):
+        return value.rsplit('.', maxsplit=1)[-1]

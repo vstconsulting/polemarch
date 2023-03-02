@@ -1,3 +1,4 @@
 # Docs
 -rrequirements.txt
+vstutils[doc]~=5.3.0
 sphinxcontrib-openapi~=0.7.0

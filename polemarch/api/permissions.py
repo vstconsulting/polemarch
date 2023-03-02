@@ -2,13 +2,6 @@ from rest_framework import permissions
 from vstutils.utils import lazy_translate as __
 
 
-class CreateTeamPermission(permissions.IsAuthenticated):
-    def has_permission(self, request, view):
-        if request.method == 'GET':
-            return True
-        return request.user.is_superuser or request.user.is_staff
-
-
 class SetOwnerPermission(permissions.IsAuthenticated):
     message = __('Only owner can change owner.')
 

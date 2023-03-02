@@ -21,8 +21,11 @@
                     <i class="far fa-window-minimize" style="display: none" />
                 </button>
             </template>
-            <pre ref="outputEl" class="history-stdout" @scroll="handleScroll">
-                <HistoryLineVue v-for="(lineObj, idx) in lines" :key="idx" :content="lineObj.line" />
+            <pre
+                ref="outputEl"
+                class="history-stdout"
+                @scroll="handleScroll"
+            ><HistoryLineVue v-for="(lineObj, idx) in lines" :key="idx" :content="lineObj.line" />
             </pre>
         </Card>
     </div>
@@ -106,8 +109,23 @@
         }
     }
 
-    function clear() {
-        lines.value = [];
+    async function clear() {
+        isLoading.value = true;
+        try {
+            const responses = await Promise.all([
+                app.api.makeRequest({
+                    method: spa.utils.HttpMethods.DELETE,
+                    path: spa.utils.joinPaths(app.router.currentRoute.path, '/clear/'),
+                    useBulk: true,
+                }),
+                sendLinesRequest(),
+            ]);
+            lines.value = responses[1].data.results;
+        } catch (e) {
+            app.error_handler.defineErrorAndShow(e.data.detail);
+        } finally {
+            isLoading.value = false;
+        }
     }
 
     function toggleMaximize() {

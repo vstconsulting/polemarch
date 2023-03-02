@@ -79,6 +79,8 @@ class BasePlugin(metaclass=classproperty.meta):
         """
 
         class Serializer(BaseSerializer, metaclass=cls._get_serializer_metaclass(exclude_fields=exclude_fields)):
+            _hide_not_required = True
+
             class Meta:
                 ref_name = f'Execute{cls.name}'
 

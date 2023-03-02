@@ -8,20 +8,25 @@ import logging
 from itertools import chain
 from collections import OrderedDict
 from django_celery_beat.models import IntervalSchedule, CrontabSchedule, PeriodicTask as CPTask
-from django.db.models import signals, IntegerField
+from django.db.models import signals, IntegerField, UUIDField
 from django.db import transaction
 from django.dispatch import receiver
 from django.db.models.functions import Cast
 from django.core.validators import ValidationError
 from django.conf import settings
 from rest_framework.exceptions import ValidationError as drfValidationError
-from vstutils.utils import raise_context, KVExchanger
+from vstutils.utils import raise_context, KVExchanger, translate as _
 
 from .vars import Variable
 from .hosts import Host, Group, Inventory
-from .projects import Project, Task, Module, ProjectTemplate, list_to_choices
+from .projects import Project, AnsiblePlaybook, Module, ProjectCommunityTemplate, list_to_choices
 from .users import get_user_model, UserGroup, ACLPermission
-from .tasks import PeriodicTask, History, HistoryLines, Template, TemplateOption
+from .history import History, HistoryLines
+from .execution_templates import (
+    ExecutionTemplate,
+    ExecutionTemplateOption,
+    TemplatePeriodicTask,
+)
 from .hooks import Hook
 from ..validators import RegexValidator, validate_hostname, path_validator
 from ..exceptions import UnknownTypeException, Conflict
@@ -84,12 +89,7 @@ def check_variables_values(instance: Variable, *args, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     content_object = instance.content_object
-    if isinstance(content_object, PeriodicTask):
-        cmd = "module" if content_object.kind == "MODULE" else "playbook"
-        if instance.key == 'revision':
-            return  # noce
-        ANSIBLE_REFERENCE.validate_args(cmd, {instance.key: instance.value})
-    elif isinstance(content_object, Host):
+    if isinstance(content_object, Host):
         if instance.key == 'ansible_host':
             validate_hostname(instance.value)
     elif isinstance(content_object, Project):
@@ -106,7 +106,7 @@ def check_project_variables_values(instance: Variable, *args, **kwargs) -> None:
     if instance.key == 'playbook_path':
         path_validator(instance.value)
 
-    project_object = instance.content_object
+    project = instance.content_object
 
     is_ci_var = instance.key.startswith('ci_')
     key_startswith = instance.key.startswith('env_') or is_ci_var
@@ -115,14 +115,27 @@ def check_project_variables_values(instance: Variable, *args, **kwargs) -> None:
         raise ValidationError(msg.format(instance.key, ProjectVariablesEnum.get_values()))
 
     is_ci_template = instance.key == 'ci_template'
-    qs_variables = project_object.variables.all()
+    qs_variables = project.variables.all()
 
     if is_ci_var and qs_variables.filter(key__startswith='repo_sync_on_run').exists():
-        raise Conflict('Couldnt install CI/CD to project with "repo_sync_on_run" settings.')
-    if instance.key.startswith('repo_sync_on_run') and project_object.get_vars_prefixed('ci'):
-        raise Conflict('Couldnt install "repo_sync_on_run" settings for CI/CD project.')
-    if is_ci_template and not project_object.template.filter(pk=instance.value).exists():
-        raise ValidationError('Template does not exists in this project.')
+        raise Conflict(_('Couldn\'t set CI/CD to project with "repo_sync_on_run" setting.'))
+    if instance.key.startswith('repo_sync_on_run') and project.get_vars_prefixed('ci'):
+        raise Conflict(_('Couldn\'t set "repo_sync_on_run" setting for CI/CD project.'))
+    if is_ci_template and not project.execution_templates.filter(options__id=instance.value).exists():
+        raise ValidationError('Template option does not exist in this project.')
+
+
+@receiver(signals.pre_delete, sender=ExecutionTemplateOption)
+def check_linked_ci_templates(instance: ExecutionTemplateOption, *args, **kwargs):
+    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
+        return
+
+    project: Project = instance.template.project
+    ci_template = project.get_vars_prefixed('ci').get('template')
+    if str(instance.id) == ci_template:
+        raise ValidationError(_(
+            "Cannot delete option {} because it's used by project as CI template."
+        ).format(instance.id))
 
 
 @receiver(signals.pre_save, sender=Group)
@@ -149,21 +162,14 @@ def check_circular_deps(instance: Group, action: Text, pk_set: Iterable, *args, 
             raise instance.CyclicDependencyError("The group has a dependence on itself.")
 
 
-@receiver(signals.pre_save, sender=PeriodicTask)
-def validate_inventory(instance: PeriodicTask, **kwargs) -> None:
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
-        return
-    ensure_inventory_is_from_project(instance.inventory, instance.project)
-
-
-@receiver(signals.pre_save, sender=PeriodicTask)
-def validate_crontab(instance: PeriodicTask, **kwargs) -> None:
+@receiver(signals.pre_save, sender=TemplatePeriodicTask)
+def validate_crontab(instance: TemplatePeriodicTask, **kwargs) -> None:
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     try:
         instance.get_schedule()
     except ValueError as ex:
-        msg = dict(schedule=["{}".format(ex)])
+        msg = {'schedule': str(ex)}
         raise ValidationError(msg) from ex
 
 
@@ -180,41 +186,14 @@ def validate_type_and_name(instance: Host, **kwargs) -> None:
         instance.range_validator(instance.name)
 
 
-@receiver(signals.pre_save, sender=Template)
-def validate_template_keys(instance: Template, **kwargs) -> None:
+@receiver(signals.pre_save, sender=ExecutionTemplateOption)
+def validate_template_option_inventory(instance: ExecutionTemplateOption, **kwargs):  # pylint: disable=invalid-name
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
-    errors = {}
-    if instance.kind in instance.template_fields:
-        fields_to_validate = instance.template_fields[instance.kind]
-        for _, data in chain(((None, instance.data),), instance.options.items()):
-            for key in data.keys():
-                if key not in fields_to_validate:
-                    errors[key] = ["Unknown key. Keys should be {}".format(fields_to_validate)]
-    if errors:
-        raise drfValidationError(errors)
-
-
-@receiver(signals.pre_save, sender=Template)
-def validate_template_args(instance: Template, **kwargs) -> None:
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
-        return
-    ensure_inventory_is_from_project(instance.inventory, instance.project)
-    if instance.kind in ["Host", "Group"]:
-        return  # nocv
-    ansible_args = dict(instance.data['vars'])
-    ansible_args.pop('revision', None)
-    if instance.kind == 'Task':
-        command = "playbook"
-    elif instance.kind == "Module":
-        command = "module"
-    else:
-        return
-    ANSIBLE_REFERENCE.validate_args(command, ansible_args)
-    for _, data in dict(instance.options).items():
-        ANSIBLE_REFERENCE.validate_args(
-            command, data.get('vars', {})
-        )
+    inventory = instance.arguments.get('inventory')
+    if isinstance(inventory, Inventory):
+        ensure_inventory_is_from_project(inventory, instance.template.project)
+        instance.arguments['inventory'] = inventory.id
 
 
 @receiver(signals.pre_delete, sender=Project)
@@ -236,9 +215,9 @@ def compare_schedules(new_schedule_data: Dict, old_schedule: Union[CrontabSchedu
     return True
 
 
-@receiver(signals.post_save, sender=PeriodicTask)
+@receiver(signals.post_save, sender=TemplatePeriodicTask)
 @transaction.atomic()
-def save_to_beat(instance: PeriodicTask, **kwargs) -> None:
+def save_to_beat(instance: TemplatePeriodicTask, **kwargs) -> None:
     """
     Signal handle create and edit for Polemarch Periodic Task objects
     :param instance: Polemarch Periodic Task object
@@ -313,9 +292,9 @@ def save_to_beat(instance: PeriodicTask, **kwargs) -> None:
         )
 
 
-@receiver(signals.post_delete, sender=PeriodicTask)
+@receiver(signals.post_delete, sender=TemplatePeriodicTask)
 @transaction.atomic()
-def delete_from_beat(instance: PeriodicTask, **kwargs) -> None:
+def delete_from_beat(instance: TemplatePeriodicTask, **kwargs) -> None:
     """
     Signal handle delete or disable for Polemarch Periodic Task objects
     :param instance: Polemarch Periodic Task object
@@ -348,17 +327,9 @@ def check_if_inventory_linked(instance: Inventory, action: Text, **kwargs) -> No
         return
     removing_inventories = instance.inventories.filter(pk__in=kwargs['pk_set'])
     check_id = removing_inventories.values_list('id', flat=True)
-    linked_templates = Template.objects.filter(inventory__iregex=r'^[0-9]{1,128}$').\
-        annotate(inventory__id=Cast('inventory', IntegerField())).\
-        filter(inventory__id__in=check_id)
-    linked_periodic_tasks = PeriodicTask.objects.filter(_inventory__in=check_id)
-    if linked_periodic_tasks.exists() or linked_templates.exists():
-        raise_linked_error(
-            linked_templates=list(linked_templates.values_list('id', flat=True)),
-            linked_periodic_tasks=list(
-                linked_periodic_tasks.values_list('id', flat=True)
-            ),
-        )
+    # FIXME: not working in postgres
+    ExecutionTemplateOption.objects.filter(arguments__inventory__in=check_id).delete()
+
 
 @receiver(signals.pre_delete, sender=Inventory)
 def delete_imported_file_inventories(instance: Inventory, **kwargs) -> None:
@@ -407,8 +378,9 @@ def user_add_hook(instance: BaseUser, **kwargs) -> None:
 
 @receiver([signals.post_save, signals.post_delete], sender=Variable)
 @receiver([signals.post_save, signals.post_delete], sender=Project)
-@receiver([signals.post_save, signals.post_delete], sender=PeriodicTask)
-@receiver([signals.post_save, signals.post_delete], sender=Template)
+@receiver([signals.post_save, signals.post_delete], sender=ExecutionTemplate)
+@receiver([signals.post_save, signals.post_delete], sender=ExecutionTemplateOption)
+@receiver([signals.post_save, signals.post_delete], sender=TemplatePeriodicTask)
 @receiver([signals.post_save, signals.post_delete], sender=Inventory)
 @receiver([signals.post_save, signals.post_delete], sender=Group)
 @receiver([signals.post_save, signals.post_delete], sender=Host)
@@ -429,17 +401,14 @@ def polemarch_hook(instance: Any, **kwargs) -> None:
     send_polemarch_models(when, instance)
 
 
-@receiver(signals.pre_save, sender=Template)
-def update_ptasks_with_templates(instance: Template, **kwargs) -> None:
-    if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
-        return
-    instance.periodic_task.all().update(project=instance.project)
-
-
 @receiver(signals.pre_delete, sender=History)
 def cancel_task_on_delete_history(instance: History, **kwargs) -> None:
-    exchange = KVExchanger(CmdExecutor.CANCEL_PREFIX + str(instance.id))
-    exchange.send(True, 60) if instance.working else None
+    instance.cancel()
+
+
+@receiver(signals.pre_save, sender=History)
+def check_if_inventory_is_from_project(instance: History, **kwargs):  # pylint: disable=invalid-name
+    ensure_inventory_is_from_project(instance.inventory, instance.project)
 
 
 @receiver(signals.post_migrate)

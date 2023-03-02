@@ -35,7 +35,7 @@ class VariablesQuerySet(BQuerySet):
 
     def sort_by_key(self) -> BQuerySet:
         args, kwargs = [], {}
-        keys = InventoryVariablesEnum.get_values_list()
+        keys = InventoryVariablesEnum.get_values()
         index = keys.index
         for key in keys:
             args.append(When(key=key, then=Value(index(key))))

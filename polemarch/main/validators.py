@@ -1,9 +1,11 @@
 from __future__ import unicode_literals
 from typing import AnyStr
 import re
-from django.utils.translation import ugettext_lazy as _
-from django.core.validators import (RegexValidator,
-                                    URLValidator as OldURLValidator)
+from django.core.validators import (
+    RegexValidator,
+    URLValidator as OldURLValidator
+)
+from vstutils.utils import lazy_translate as __
 
 
 ##############################################################################
@@ -14,12 +16,12 @@ class URLValidator(OldURLValidator):
 
 path_validator = RegexValidator(
     regex=r'^([\w\d_\-]+|[\.][\/\w\d_\-\+=\^,])(\.?[\w\d\-\/\\_()\+=\^,]+)+$',
-    message=_('Invalid path. Path must not contain "..", "~" or any other special characters and must be relative.')
+    message=__('Invalid path. Path must not contain "..", "~" or any other special characters and must be relative.')
 )
 
 
 class DomainNameValidator(RegexValidator):
-    message = _('Invalid domain name value.')
+    message = __('Invalid domain name value.')
     surl = URLValidator.ul
     ipv4_re = URLValidator.ipv4_re
     ipv6_re = URLValidator.ipv6_re
@@ -37,5 +39,5 @@ class DomainNameValidator(RegexValidator):
 
 
 def validate_hostname(address: AnyStr):
-    msg = _("Invalid hostname or IP '{}'.".format(address))
+    msg = __("Invalid hostname or IP '{}'.".format(address))
     DomainNameValidator(message=msg)(address)
