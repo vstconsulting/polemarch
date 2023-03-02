@@ -2270,6 +2270,10 @@ class SyncTestCase(BaseProjectTestCase):
                 ),
                 self.get_history_bulk_data('<<2[data][history_id]>>'),
                 self.get_raw_history_bulk_data('<<2[data][history_id]>>'),
+                {
+                    "method": "get",
+                    'path': ['project', project_id, 'history', '<<2[data][history_id]>>', 'lines'],
+                }
             ])
 
             self.assertEqual(results[3]['data']['status'], 'ERROR')

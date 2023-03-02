@@ -261,6 +261,29 @@ REPO_BACKENDS = {
 DEFAULT_COMMUNITY_REPOS_URL = 'https://gitlab.com/vstconsulting/polemarch-community-repos/raw/master/projects.yaml'
 COMMUNITY_REPOS_URL = main.get('community_projects_url', fallback=DEFAULT_COMMUNITY_REPOS_URL)
 
+# History plugins
+history = config['history']
+HISTORY_OUTPUT_PLUGINS = history.getlist('output_plugins', fallback='database')
+HISTORY_READ_PLUGIN = history.get('read_plugin', fallback='database')
+
+HISTORY_PLUGIN_SETTINGS = {
+    plugin: {
+        key.upper(): val
+        for key, val in history['plugin'][plugin].all().items()
+    }
+    for plugin in history['plugin'].keys()
+}
+
+LOGGING['formatters']['polemarch.history.output'] = {
+    "format": history['plugin']['logger'].get('format', fallback='%(message)s'),
+}
+LOGGING['handlers']['polemarch.history.output'] = HISTORY_PLUGIN_SETTINGS['logger']['OPTIONS']
+LOGGING['loggers']['polemarch.history.output'] = {
+    'handlers': list(filter(bool, ['console' if DEBUG else None, 'polemarch.history.output'])),
+    'level': 'INFO',
+    'propagate': True,
+}
+
 # RPC tasks settings
 CELERY_TASK_SERIALIZER = 'json'
 
@@ -344,3 +367,4 @@ if "test" in sys.argv:
     EXECUTION_PLUGINS['TEST_ANSIBLE_DOC'] = {'BACKEND': f'{tests_module_name}.TestAnsibleDoc', 'OPTIONS': {}}
     EXECUTION_PLUGINS['TEST_ECHO'] = {'BACKEND': f'{tests_module_name}.TestEcho', 'OPTIONS': {}}
     EXECUTION_PLUGINS['TEST_MODULE'] = {'BACKEND': f'{tests_module_name}.TestModule', 'OPTIONS': {}}
+    HISTORY_OUTPUT_PLUGINS = ['database', 'logger']

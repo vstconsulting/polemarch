@@ -9,7 +9,9 @@ from vstutils.api.base import HistoryModelViewSet
 from vstutils.api.actions import SimpleAction, EmptyAction
 from vstutils.api.decorators import subaction
 from ...main.models import History, HistoryLines
+from ...main.models.utils import HistoryPluginHandler
 from ...main.constants import HistoryStatus
+from ...main.exceptions import DataNotReady
 from .users import UserSerializer
 from ..fields import InventoryAutoCompletionField
 from .base import ResponseSerializer
@@ -24,11 +26,16 @@ class RawHistoryQuerySerializer(BaseSerializer):
 
 
 class HistoryViewMixin(HistoryModelViewSet):
+    plugin_handler = HistoryPluginHandler()
+
+    def get_manager_lines(self, history):
+        return self.plugin_handler.get_reader(history).get_lines()
+
     @EmptyAction(
         methods=['patch'],
         result_serializer_class=ResponseSerializer,
     )
-    def cancel(self, request, *args, **kwargs):
+    def cancel(self, *_, **__):
         """
         Cancel working task.
         """
@@ -44,7 +51,7 @@ class HistoryViewMixin(HistoryModelViewSet):
         query_serializer=RawHistoryQuerySerializer,
         schema=None,
     )
-    def raw(self, request, *args, **kwargs):
+    def raw(self, request, *_, **__):
         """
         Get raw output of execution.
         """
@@ -56,11 +63,16 @@ class HistoryViewMixin(HistoryModelViewSet):
         )
 
     @SimpleAction(serializer_class=FactsResponseSerializer)
-    def facts(self, request, *args, **kwargs):
+    def facts(self, *_, **__):
         """
         Get facts from "setup" ansible module execution.
         """
-        return {'facts': self.get_object().facts}
+        history = self.get_object()
+        if history.status not in HistoryStatus.get_stopped_statuses():
+            raise DataNotReady("Execution still in process.")
+        if history.kind != 'ANSIBLE_MODULE' or history.mode != 'system.setup' or history.status != 'OK':
+            raise history.NoFactsAvailableException()
+        return {'facts': self.plugin_handler.get_reader(history).get_facts()}
 
     @SimpleAction(methods=['delete'])
     def clear(self, request, *args, **kwargs):
@@ -70,16 +82,16 @@ class HistoryViewMixin(HistoryModelViewSet):
         return {'detail': 'Output truncated.\n'}
 
     @clear.deleter
-    def clear(self, instance, request, *args, **kwargs):
+    def clear(self, instance, *_, **__):
         msg = instance['detail']
         obj = self.get_object()
-        if obj.status in HistoryStatus.get_working_statuses() or \
-                obj.raw_stdout == msg:
+        reader_plugin = self.plugin_handler.get_reader(obj)
+        if obj.status in HistoryStatus.get_working_statuses() or reader_plugin.get_lines().last().line == msg:
             raise NotAcceptable('Job is running or already truncated.')
-        obj.raw_stdout = msg
+        reader_plugin.clear(msg)
 
     def get_raw(self, colored=False):
-        return self.get_object().get_raw(colored)
+        return self.plugin_handler.get_reader(self.get_object()).get_raw(colored)
 
 
 class OneHistorySerializer(VSTSerializer):
@@ -203,7 +215,6 @@ history_viewset_data = {
     'nested': {
         'lines': {
             'view': _HistoryLineViewSet,
-            'manager_name': 'raw_history_line',
             'schema': None,
         }
     },
