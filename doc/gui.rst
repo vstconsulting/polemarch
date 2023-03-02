@@ -93,7 +93,7 @@ and run playbooks from project:
 
       If you setup modules directory, we import all modules from this directory and set name ``polemarch.project.[module_name]``.
 
-    * Playbook - import all files with ``.yml`` extention from root directory of the **Project**.
+    * Playbook - import all files with ``.yml`` extension from root directory of the **Project**.
 
     * If you need to set variables globally, not only for run, you can use ``group_vars`` and ``host_vars`` in root directory of project.
 
@@ -127,24 +127,23 @@ Also there are some new buttons:
 
 Sublinks buttons:
 
-* :guilabel:`Execution template` - this button opens project's template list;
+* :guilabel:`Ansible modules` - this button opens project's module list;
+* :guilabel:`Ansible playbooks` - this button opens project's playbook list;
+* :guilabel:`Execution templates` - this button opens project's template list;
 * :guilabel:`History` - this button opens project executions' history list;
 * :guilabel:`Inventory` - this button opens project's inventory list;
-* :guilabel:`Module` - this button opens project's module list;
-* :guilabel:`Periodic task` - this button opens project's periodic task list;
-* :guilabel:`Playbook` - this button opens project's playbook list;
 * :guilabel:`Variables` - this button opens project's variables list.
 
 Action buttons:
 
 * :guilabel:`Copy` - |copy_button_def|;
-* :guilabel:`Execute module` - this button opens "execute module" action page;
-* :guilabel:`Execute playbook` - this button opens "execute playbook" action page;
+* :guilabel:`Execute ansible module` - this button opens "execute module" action page;
+* :guilabel:`Execute ansible playbook` - this button opens "execute playbook" action page;
 * :guilabel:`Set owner` - |set_owner_button_def|;
-* :guilabel:`Sync` - this button syncs your Polemarch project with GIT repository.
+* :guilabel:`Sync` - this button syncs your Polemarch project with repository.
 
 If you want to edit values of some fields on any page in Polemarch, you should click the
-:guilabel:`Edit` button to activate edit mod.
+:guilabel:`Edit` button to activate edit mode.
 
 .. image:: new_screenshots/test_project_1_edit.png
 
@@ -153,7 +152,7 @@ In this mode, you can change the project's name, update the repository URL, and 
 * :guilabel:`Save` - |save_button_def|.
 * :guilabel:`Reload` - |reload_button_def|.
 
-Now, let's back to read only mod of our project page.
+Now, let's back to read only mode of our project page.
 
 .. image:: new_screenshots/test_project_1.png
 
@@ -169,7 +168,7 @@ Once your project status changes to "OK", you can start working with Polemarch.
 
 .. warning::
       If you have trouble when cloning from *local* git repository, this may be caused by
-      ``protocol.file.allow`` setting is is set to ``user`` in your git config.
+      ``protocol.file.allow`` setting that is set to ``user`` in your git config.
       For more information please see
       `this topic <https://github.blog/2022-10-18-git-security-vulnerabilities-announced/#cve-2022-39253>`_.
       One of the solutions might be:
@@ -220,7 +219,7 @@ Other available project variables, that you can add with clicking the :guilabel:
   You can add ``ANSIBLE_CONFIG`` environment variable by creating ``env_ANSIBLE_CONFIG`` variable in your project.
   This will make your project to use specified config at every execution. Make sure that path is relative to project directory.
 
-Let's edit **repo_branch** variable. To do it you need click the **repo_branch** item in list.
+Let's edit **repo_branch** variable. To do it you to need click the **repo_branch** item in list.
 Then you will see the following page:
 
 .. image:: new_screenshots/test_project_variables_2.png
@@ -244,22 +243,22 @@ After successful project synchronization you will see selected branch name in 'b
 .. image:: new_screenshots/test_project_variables_4.png
 
 
-Module execution
-----------------
+Ansible Module execution
+------------------------
 
-The simplest way to start using Polemarch is to execute module.
-To make this action click the :guilabel:`Execute module` button on project page.
+The simplest way to start using Polemarch is to execute ansible module.
+To make this action click the :guilabel:`Execute ansible module` button on project page.
 
 .. image:: new_screenshots/execute_module_1.png
 
 As you can see, there are two fields on this page:
 
 * **Module** - autocomplete field with the list of project's modules.
-* **Add field** - select field, that provides user with new variables fields for module execution.
+* **Add field** - add additional argument.
 
 Also there is only one button on this page:
 
-* :guilabel:`Execute module` - |exec_button_def|.
+* :guilabel:`Execute ansible module` - |exec_button_def|.
 
 For example, let's execute module ``shell`` on ``localhost`` with argument ``uptime``.
 To do it we need to add next fields:
@@ -288,7 +287,7 @@ To do it before every module/playbook execution is rather inconvenient.
 In this case Polemarch templates save our time and nerves.
 Polemarch template is an object, that saves all options that user used during task execution.
 
-For example, let's create task template (template that uses playbooks).
+For example, let's create template which executes ansible playbook.
 To do it click the :guilabel:`Execution templates` button on project page.
 As you can see, there are no templates in the project's template list now.
 
@@ -304,19 +303,19 @@ To create template click the :guilabel:`Create` button on this page.
 
 As you can see, there are several fields on this page:
 
-* **Name** - name of template.
+* **Name** - name of template at your choice.
 
-* **Type** - type of template (MODULE or TASK).
+* **Plugin** - plugin which executes our task. There are two built in plugins: *ANSIBLE_PLAYBOOK*
+  and *ANSIBLE_MODULE* allows you work with Ansible.
 
-* **Notes** - not required field for some user’s notes, for example,
-  for what purpose this template was created or something like this.
+  .. note::
+    You can create your own execution plugin allows you to run any shell command. If you're
+    interested in, checkout `Execution plugins documentation <plugins.html>`_.
 
-* **Inventory** - it can be inventory from Polemarch system, list of hosts, that are separated by ``,``, or path to your inventory in project folder.
+* **Playbook** - name of playbook which will be used during execution.
 
-* **Playbook** - name of playbook, which template will be used during execution.
-
-* **Add fields** - here you can add variables for this template. In our case we need to create variable ``connection=local``,
-  because we use "localhost" as inventory.
+* **Add fields** - here you can add additional arguments for this template. In our case we're
+  going to use ``inventory`` and  ``connection`` arguments.
 
 After all fields have been filled, our page started look like:
 
@@ -326,139 +325,91 @@ After template creation you will see the next page:
 
 .. image:: new_screenshots/create_template_4.png
 
-As you can see there is only one new field on this page:
+Thought all our arguments are gone? Don't worry. When you create a template, Polemarch also creates
+a default *option* that holds all arguments. Let's check this out by going to
+:guilabel:`Sublinks` > :guilabel:`Options`:
 
-* **Id** - |id_field_def|.
+.. image:: new_screenshots/template_option_list.png
 
-There are also several buttons here:
+Here is the list of all options which our template can use. You can always create a new option.
+Let's click on *default*:
 
-* :guilabel:`Edit` - |edit_button_def|.
-* :guilabel:`Remove` - |remove_button_def| template.
+.. image:: new_screenshots/template_option_detail_default.png
 
-Sublinks buttons:
+Now we are ready to execute our template. To do it you have two ways:
 
-* :guilabel:`Option` - this button opens template's option list.
+* Being on the option page, click :guilabel:`Actions` > :guilabel:`Execute`
 
-Action buttons:
+* Being on the template page, click :guilabel:`Actions` > :guilabel:`Execute`,
+  select an appropriate option and click :guilabel:`Execute` again.
 
-* :guilabel:`Execute` - this button opens "execute template" action page.
+These scenarios are identical. Use the one that suites you best.
 
-Now we are ready to execute our template. To do it you need to click the :guilabel:`Execute` button.
+As we are already on the option page, let's use the first approach. So, clicking the
+:guilabel:`Execute` gives us the execution history page:
 
 .. image:: new_screenshots/execute_template_1.png
-
-As you can see, there is only one field on this page:
-
-* **Option** - autocomplete field with the list of template's options.
-
-Also there is only one button on this page:
-
-* :guilabel:`Execute` - |exec_button_def|
-
-We don't have any template's options in our system, so just click the :guilabel:`Execute` button.
-
-When status of your template execution changes to "OK" you will see the next page:
-
 .. image:: new_screenshots/execute_template_2.png
-.. image:: new_screenshots/execute_template_3.png
 
 
 Periodic tasks
 --------------
 
-Now let's imagine, that you need to execute some task (module/playbook/template)
-with some interval or on the first day of month, for example, and you do not want
-to execute it everytime by yourself.
+Now let's imagine, that you need to execute task with some interval or
+on the first day of month, for example, and you do not want
+to execute it every time by yourself.
 
-In this case, Polemarch has such useful object type, as periodic task.
+For this case Polemarch has periodic tasks.
 
-Periodic task - is a module/playbook/template execution
-which Polemarch makes by himself with some interval.
+Polemarch executes periodic tasks regularly after specified period of time
+or by crontab schedule.
 
-Let's create periodic task based on our "test-task-template".
-To do it open project page:
+Remember our *test-task-template* from previous example? Let's create a periodic task for it's
+*default* option.
 
-.. image:: new_screenshots/test_project_variables_4.png
+.. image:: new_screenshots/template_option_detail_default.png
 
-And choose :menuselection:`Sublinks --> Periodic task`:
+Click on the :guilabel:`Sublinks` > :guilabel:`Periodic tasks`.
 
 .. image:: new_screenshots/periodic_task_empty_list.png
 
-As you can see, there are no periodic tasks in the project's periodic task list now.
+As you can see, there are no periodic tasks for now.
 
 There is only one button here:
 
 * :guilabel:`Create` - |create_button_def| periodic task.
 
-To create periodic task click the :guilabel:`Create` button on this page.
+To create a periodic task click the :guilabel:`Create` button on this page.
 
 .. image:: new_screenshots/create_periodic_task_1.png
 
 As you can see, the form of new periodic task creation consists of following fields:
 
-* **Name** - name of your periodic task.
+* **Name** - name of periodic task at your choice.
 
-* **Notes** - not required field for some user’s notes, for example,
-  for what purpose this periodic task was created or something like this.
-
-**Execute Parameters**
-
-* **Task type** - type of periodic task (PLAYBOOK, MODULE, TEMPLATE).
-
-* **Mode** - name of module or playbook (for periodic tasks with PLAYBOOK/MODULE type only).
-
-* **Inventory** - it can be inventory from Polemarch system, list of hosts, that are separated by ``,``, or path to your inventory in project folder
-  (for periodic tasks with PLAYBOOK/MODULE type only).
-
-* **Template** - name of template (for periodic tasks with TEMPLATE type only).
-
-* **Template opt** - name of template's option (for periodic tasks with TEMPLATE type only).
-
-* **Save result** - boolean field, it means to save or not to save results of periodic tasks execution in history.
-
-**Schedule**
-
-* **Enable** - boolean field, it means to activate or deactivate periodic task.
-
-* **Interval type** - type of execution interval (CRONTAB, INTERVAL).
+* **Type** - type of schedule (INTERVAL or CRONTAB).
 
 * **Schedule** - value of execution interval.
 
-  * If "interval type" = INTERVAL, value of this field means amount of seconds.
-  * If "interval type" = CRONTAB, value of this field means CRONTAB interval.
+  * If "type" is INTERVAL, task runs every time after specified interval has elapsed.
+  * If "type" is CRONTAB, task runs according specified schedule.
+
+* **Enabled** - if active, the task will run, otherwise it won't.
+
+* **Save result** - if active than each execution will generate a history page,
+  otherwise it won't.
+
+* **Notes** - not required field for some user's notes, for example,
+  for what purpose this periodic task was created or something like this.
 
 After all fields have been filled, our page started look like:
 
 .. image:: new_screenshots/create_periodic_task_2.png
 
-After periodic task creation you will see the next page:
+Let's save the task.
 
-.. image:: new_screenshots/test_periodic_task.png
-
-As you can see there is only one new fields on this page:
-
-* **Id** - |id_field_def|.
-
-There are also several buttons here:
-
-* :guilabel:`Edit` - |edit_button_def|.
-* :guilabel:`Remove` - |remove_button_def| periodic task.
-
-Sublinks buttons:
-
-* :guilabel:`Variables` - this button opens project’s variables list (for periodic tasks with PLAYBOOK/MODULE type only).
-
-Action buttons:
-
-* :guilabel:`Execute` - this button opens "execute periodic task" action page.
-
-Let's start our periodic task execution. To do it click the :guilabel:`Execute` button.
-
-.. image:: new_screenshots/periodic_task_execution_1.png
-.. image:: new_screenshots/periodic_task_execution_2.png
-
-As you can see on history page, our 'test-periodic-task' executes every 10 seconds,
-as we set it during periodic task creation.
+Now you can check history list page. Every 10 seconds an execution history will be generated
+here. Periodic tasks differ from other tasks by "system" executor:
 
 .. image:: new_screenshots/periodic_task_execution_history.png
 
@@ -775,29 +726,23 @@ Example of ``.polemarch.yaml``:
 
     ---
     sync_on_run: true
-    templates:
-        test-module:
-            notes: Module test template
-            kind: Module
-            data:
-                group: all
-                vars: {}
-                args: ''
+    test-module:
+        plugin: ANSIBLE_MODULE
+        options:
+            default:
                 module: ping
+                group: all
                 inventory: localhost,
-            options:
-                uptime:
-                    args: uptime
-                    module: shell
-        test playbook:
-            notes: Playbook test template
-            kind: Task
-            data:
-                vars: {"become": true}
+            uptime:
+                module: ping
+                args: uptime
+                inventory: 127.0.0.1,
+    test-playbook:
+        plugin: ANSIBLE_PLAYBOOK
+        options:
+            update:
                 playbook: main.yml
-                inventory: localhost,
-            options:
-                update: {"playbook": "other.yml"}
+                become: true
     templates_rewrite: true
     view:
         fields:
@@ -837,6 +782,44 @@ Example of ``.polemarch.yaml``:
                 title: Execute title
                 help: Some help text
 
+
+.. note::
+  Since Polemarch v3.0.0 execution templates system has been changed a lot. Along with it,
+  the format for describing templates has also changed. We still support old format
+  like in the next example:
+
+  .. sourcecode:: yaml
+
+    ...
+    templates:
+        test-module:
+            notes: Module test template
+            kind: Module
+            data:
+                group: all
+                vars: {}
+                args: ''
+                module: ping
+                inventory: localhost,
+            options:
+                uptime:
+                    args: uptime
+                    module: shell
+        test playbook:
+            notes: Playbook test template
+            kind: Task
+            data:
+                vars: {"become": true}
+                playbook: main.yml
+                inventory: localhost,
+            options:
+                update: {"playbook": "other.yml"}
+      ...
+
+    Here *kind* (Task, Module) is converted to *plugin* (ANSIBLE_PLAYBOOK, ANSIBLE_MODULE)
+
+    But keep in mind that this format has been deprecated and it's
+    desirable to rewrite templates to match the new format.
 
 In GUI process of working with ``.polemarch.yaml`` will be the following:
 

@@ -5,12 +5,6 @@ import logging
 from django.db.models import Q
 from django.db import transaction
 
-from rest_framework import serializers, fields
-from vstutils.api.serializers import VSTSerializer
-from vstutils.utils import lazy_translate as __
-
-from ...api.v2.base_serializers import UserSerializer, _WithPermissionsSerializer
-
 try:
     from yaml import dump as to_yaml, CDumper as Dumper, ScalarNode
 except ImportError:  # nocv
@@ -24,17 +18,6 @@ from ...main.utils import AnsibleInventoryParser
 from ..validators import RegexValidator
 
 logger = logging.getLogger("polemarch")
-
-
-vars_help = 'List of variables to filter. Comma separated "key:value" list.'
-
-
-def variables_filter(queryset, field, value):
-    # filter applicable only to variables
-    # pylint: disable=unused-argument
-    items = value.split(",")
-    kwargs = {item.split(":")[0]: item.split(":")[1] for item in items}
-    return queryset.var_filter(**kwargs)
 
 
 def _delete_not_existing_objects(queryset, object_dict):
@@ -117,48 +100,7 @@ class Host(InventoryItems):
         return hvars or None, keys
 
 
-class GroupCreateMasterSerializer(VSTSerializer):
-    children = serializers.BooleanField(
-        write_only=True,
-        label='Contains groups',
-        default=False
-    )
-
-    class Meta:
-        __inject_from__ = 'detail'
-
-    def create(self, validated_data):
-        if 'owner' not in validated_data and 'request' in self.context:
-            validated_data['owner'] = self.context['request'].user
-        return super().create(validated_data)
-
-
-class GroupCopySerializer(VSTSerializer):
-    class Meta:
-        fields = ['name']
-
-
 class Group(InventoryItems):
-    """
-    retrieve:
-        Return a group instance.
-
-    list:
-        Return all groups.
-
-    create:
-        Create a new group.
-
-    destroy:
-        Remove an existing group.
-
-    partial_update:
-        Update one or more fields on an existing group.
-
-    update:
-        Update a group.
-    """
-
     CyclicDependencyError = CyclicDependencyError
 
     hosts = ManyToManyFieldACL(Host, related_query_name="groups")
@@ -174,31 +116,6 @@ class Group(InventoryItems):
             models.Index(fields=["children"]),
             models.Index(fields=["children", "id"]),
         ]
-        _list_fields = (
-            'id',
-            'name',
-            'children',
-            'from_project',
-        )
-        _detail_fields = (
-            'id',
-            'name',
-            'notes',
-            'children',
-            'owner',
-        )
-        _override_list_fields = {
-            'from_project': fields.BooleanField(label=__('Project based')),
-        }
-        _override_detail_fields = {
-            'owner': UserSerializer(read_only=True),
-            'children': fields.BooleanField(read_only=True, label='Contains groups'),
-        }
-        _serializer_class = _WithPermissionsSerializer
-        _extra_serializer_classes = {
-            'serializer_class_create': GroupCreateMasterSerializer,
-            'serializer_class_copy': GroupCopySerializer,
-        }
 
     def toDict(self, tmp_dir: Text = '/tmp') -> Tuple[Dict, List]:
         result = {}

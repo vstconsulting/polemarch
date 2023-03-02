@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from vstutils.settings import *
 
 WEBSERVER_COMMAND = 'webserver'
@@ -32,35 +31,47 @@ AUTH_PASSWORD_VALIDATORS += [
 ]
 
 # API settings
-VST_API_VERSION = 'v3'
+VST_API_VERSION = 'v4'
 
 API_URL = VST_API_URL
 DEFAULT_API_URL = "/{}/{}".format(API_URL, VST_API_VERSION)
-API = {
-    'v2': OrderedDict(
-        project={'view': '{}.api.v2.views.ProjectViewSet'.format(VST_PROJECT_LIB_NAME)},
-        community_template={'view': '{}.api.v2.views.ProjectTemplateViewSet'.format(VST_PROJECT_LIB_NAME)},
-        inventory={'view': '{}.api.v2.views.InventoryViewSet'.format(VST_PROJECT_LIB_NAME)},
-        group={'view': '{}.api.v2.views.GroupViewSet'.format(VST_PROJECT_LIB_NAME)},
-        host={'view': '{}.api.v2.views.HostViewSet'.format(VST_PROJECT_LIB_NAME)},
-        history={'view': '{}.api.v2.views.HistoryViewSet'.format(VST_PROJECT_LIB_NAME), "op_types": ['get', 'del', 'mod']},
-        user={'view': '{}.api.v2.views.UserViewSet'.format(VST_PROJECT_LIB_NAME)},
-        team={'view': '{}.api.v2.views.TeamViewSet'.format(VST_PROJECT_LIB_NAME)},
-        token={'view': '{}.api.v2.views.TokenView'.format(VST_PROJECT_LIB_NAME), 'type': 'view'},
-        hook={'view': '{}.api.v2.views.HookViewSet'.format(VST_PROJECT_LIB_NAME)},
-        stats={'view': '{}.api.v2.views.StatisticsViewSet'.format(VST_PROJECT_LIB_NAME), 'op_types': ['get']}
-    )
-}
+
+LANGUAGES = (
+    ('en', 'English'),
+    ('ru', 'Русский'),
+)
+
 API[VST_API_VERSION] = {
-    **API['v2'],
+    'host': {
+        'view': f'{VST_PROJECT_LIB_NAME}.api.v4.hosts.HostViewSet',
+    },
     'group': {
-        'view': '{}.api.v3.views.GroupViewSet'.format(VST_PROJECT_LIB_NAME)
+        'view': f'{VST_PROJECT_LIB_NAME}.api.v4.hosts.AnsibleGroupViewSet',
     },
     'inventory': {
-        'view': '{}.api.v3.views.InventoryViewSet'.format(VST_PROJECT_LIB_NAME)
+        'view': f'{VST_PROJECT_LIB_NAME}.api.v4.hosts.InventoryViewSet',
+    },
+    'history': {
+        'view': f'{VST_PROJECT_LIB_NAME}.api.v4.history.HistoryViewSet',
     },
     'project': {
-        'view': '{}.api.v3.views.ProjectViewSet'.format(VST_PROJECT_LIB_NAME)
+        'view': f'{VST_PROJECT_LIB_NAME}.api.v4.projects.ProjectViewSet',
+    },
+    'stats': {
+        'view': f'{VST_PROJECT_LIB_NAME}.api.v4.statistics.StatsViewSet',
+    },
+    'community_template': {
+        'view': f'{VST_PROJECT_LIB_NAME}.api.v4.projects.ProjectCommunityTemplateViewSet',
+    },
+    'hook': {
+        'view': f'{VST_PROJECT_LIB_NAME}.api.v4.hooks.HookViewSet',
+    },
+    'user': {
+        'view': f'{VST_PROJECT_LIB_NAME}.api.v4.users.UserViewSet',
+    },
+    'token': {
+        'view': f'{VST_PROJECT_LIB_NAME}.api.v4.users.TokenView',
+        'type': 'view',
     },
 }
 
@@ -68,12 +79,10 @@ PROJECT_GUI_MENU = []
 
 OPENAPI_HOOKS = [
     'polemarch.main.openapi.set_gui_menu_ce',
-    'polemarch.main.openapi.set_inventory_field',
-    'polemarch.main.openapi.set_periodic_task_variable_value_field',
-    'polemarch.main.openapi.set_template_option_field_to_fk',
+    'polemarch.main.openapi.hide_project_template_options_view',
 ]
 
-SWAGGER_SETTINGS['DEFAULT_INFO'] = '{}.api.v2.swagger.api_info'.format(VST_PROJECT_LIB_NAME)
+SWAGGER_SETTINGS['DEFAULT_INFO'] = '{}.api.swagger.api_info'.format(VST_PROJECT_LIB_NAME)
 SWAGGER_SETTINGS['DEFAULT_AUTO_SCHEMA_CLASS'] = '{}.api.schema.PolemarchAutoSchema'.format(VST_PROJECT_LIB_NAME)
 
 OPENAPI_EXTRA_LINKS = dict()
@@ -195,33 +204,35 @@ if 'git' in config:
 archive_section = ArchiveSection('archive', config, config['archive']).all()
 
 
-class PluginSection(BaseAppendSection):
+class ExecutionPluginSection(BaseAppendSection):
     types_map = {
         'backend': cconfig.StrType(),
     }
 
 
-class PluginOptionsSection(PluginSection):
+class ExecutionPluginOptionsSection(ExecutionPluginSection):
     pass
 
 
-PLUGINS = {}
+EXECUTION_PLUGINS = {}
 
-for plugin_name, plugin_config, in config['plugins'].items():
+for plugin_name, plugin_config, in config['execution']['plugin'].items():
     if 'backend' in plugin_config:
-        plugin_section = PluginSection(f'plugins.{plugin_name}', config, config['plugins'][plugin_name]).all()
-        options_section = PluginOptionsSection(
-            f'plugins.{plugin_name}.options',
+        plugin_section = ExecutionPluginSection(
+            f'execution.plugin.{plugin_name}', config, config['execution']['plugin'][plugin_name]
+        ).all()
+        options_section = ExecutionPluginOptionsSection(
+            f'execution.plugin.{plugin_name}.options',
             config,
             plugin_section.get('options', {})
         ).all()
 
-        PLUGINS[plugin_name.upper()] = {
+        EXECUTION_PLUGINS[plugin_name.upper()] = {
             "BACKEND": plugin_section['backend'],
             "OPTIONS": options_section
         }
 
-PLUGIN_HANDLERS_CLASS = f'{VST_PROJECT_LIB_NAME}.main.utils.ExecutionHandlers'
+EXECUTION_PLUGIN_HANDLERS_CLASS = f'{VST_PROJECT_LIB_NAME}.main.utils.ExecutionHandlers'
 
 REPO_BACKENDS = {
     "MANUAL": {
@@ -251,6 +262,8 @@ DEFAULT_COMMUNITY_REPOS_URL = 'https://gitlab.com/vstconsulting/polemarch-commun
 COMMUNITY_REPOS_URL = main.get('community_projects_url', fallback=DEFAULT_COMMUNITY_REPOS_URL)
 
 # RPC tasks settings
+CELERY_TASK_SERIALIZER = 'json'
+
 TASKS_HANDLERS = {
     "REPO": {
         "BACKEND": "{}.main.tasks.tasks.RepoTask".format(VST_PROJECT_LIB_NAME)
@@ -328,6 +341,6 @@ if "test" in sys.argv:
     tests_module_name = 'tests'
     if VST_PROJECT_LIB_NAME != 'polemarch':
         tests_module_name = 'tests_ce'  # noce
-    PLUGINS['TEST_ANSIBLE_DOC'] = {'BACKEND': f'{tests_module_name}.TestAnsibleDoc', 'OPTIONS': {}}
-    PLUGINS['TEST_ECHO'] = {'BACKEND': f'{tests_module_name}.TestEcho', 'OPTIONS': {}}
-    PLUGINS['TEST_MODULE'] = {'BACKEND': f'{tests_module_name}.TestModule', 'OPTIONS': {}}
+    EXECUTION_PLUGINS['TEST_ANSIBLE_DOC'] = {'BACKEND': f'{tests_module_name}.TestAnsibleDoc', 'OPTIONS': {}}
+    EXECUTION_PLUGINS['TEST_ECHO'] = {'BACKEND': f'{tests_module_name}.TestEcho', 'OPTIONS': {}}
+    EXECUTION_PLUGINS['TEST_MODULE'] = {'BACKEND': f'{tests_module_name}.TestModule', 'OPTIONS': {}}

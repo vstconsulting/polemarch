@@ -80,7 +80,7 @@ py311-coverage:
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
 
-py36-install:
+py38-install:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"

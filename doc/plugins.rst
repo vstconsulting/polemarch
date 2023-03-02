@@ -56,14 +56,14 @@ In your ``/etc/polemarch/settings.ini`` add following section:
 
 .. sourcecode:: ini
 
-    [plugins.echo]
+    [execution.plugin.echo]
     backend = polemarch.plugins.custom.Echo
 
 Also you may want to provide additional options directly to plugin:
 
 .. sourcecode:: ini
 
-    [plugins.echo.options]
+    [execution.plugin.echo.options]
     some_option = 'some_option'
 
 In this example `some_option` will be available in any plugin's method as ``self.config['some_option']``, as all options are initialized in the constructor.

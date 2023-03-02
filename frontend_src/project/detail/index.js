@@ -3,24 +3,27 @@ import './style.scss';
 /** @vue/component */
 import RunPlaybook from './RunPlaybook.vue';
 
-const ProjectDetailViewMixin = {
-    computed: {
-        fieldsGroups() {
+export function setupProjectDetailView() {
+    spa.signals.once('allViews.created', ({ views }) => {
+        const detailView = views.get('/project/{id}/');
+        detailView.objects.getResponseModelClass(spa.utils.RequestTypes.RETRIEVE).fieldsGroups = () => {
             const groups = [
                 {
                     title: 'General',
                     wrapperClasses: 'col-md-5',
-                    fields: ['id', 'name', 'repository', 'status', 'revision', 'branch', 'owner'],
+                    fields: ['id', 'name', 'repository', 'status', 'revision', 'branch', 'owner', 'notes'],
                 },
             ];
-            if (this.data.readme_content || this.data.notes) {
+            if (app.store.page.instance?.readme_content) {
                 groups.push({
                     title: 'Info',
-                    wrapperClasses: this.data.execute_view_data?.playbooks ? 'col-md-12' : 'col-md-7',
-                    fields: ['readme_content', 'notes'],
+                    wrapperClasses: app.store.page.instance.execute_view_data?.playbooks
+                        ? 'col-md-12'
+                        : 'col-md-7',
+                    fields: ['readme_content'],
                 });
             }
-            if (this.data.execute_view_data?.playbooks) {
+            if (app.store.page.instance?.execute_view_data?.playbooks) {
                 groups.push({
                     title: 'Quick playbook execution form',
                     wrapperClasses: 'col-md-7',
@@ -28,14 +31,7 @@ const ProjectDetailViewMixin = {
                 });
             }
             return groups;
-        },
-    },
-};
-
-export function setupProjectDetailView() {
-    spa.signals.once('allViews.created', ({ views }) => {
-        const detailView = views.get('/project/{id}/');
-        detailView.mixins.push(ProjectDetailViewMixin);
+        };
     });
 }
 

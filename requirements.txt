@@ -1,10 +1,9 @@
 # Main
-vstutils[rpc,doc,prod]~=5.2.5
-docutils~=0.16.0
-markdown2~=2.4.0
+vstutils[rpc,prod]~=5.3.0
+markdown2~=2.4.8
 
 # Repo types
-gitpython~=3.1.14
+gitpython~=3.1.30
 gitdb2~=4.0.2
 
 # Hooks

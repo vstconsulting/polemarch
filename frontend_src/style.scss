@@ -16,20 +16,20 @@ body {
 }
 
 $history-status-colors: (
-        "OK": var(--status-ok),
-        "ERROR": var(--status-error),
-        "INTERRUPTED": var(--status-interrupted),
-        "DELAY": var(--status-delay),
-        "OFFLINE": var(--status-offline),
-        "RUN": var(--status-run),
+    "OK": var(--status-ok),
+    "ERROR": var(--status-error),
+    "INTERRUPTED": var(--status-interrupted),
+    "DELAY": var(--status-delay),
+    "OFFLINE": var(--status-offline),
+    "RUN": var(--status-run),
 );
 
 $project-status-colors: (
-        "NEW": var(--project-status-new),
-        "ERROR": var(--project-status-error),
-        "OK": var(--project-status-ok),
-        "WAIT_SYNC": var(--project-status-wait-sync),
-        "SYNC": var(--project-status-sync),
+    "NEW": var(--project-status-new),
+    "ERROR": var(--project-status-error),
+    "OK": var(--project-status-ok),
+    "WAIT_SYNC": var(--project-status-wait-sync),
+    "SYNC": var(--project-status-sync),
 );
 
 @each $status, $color in $history-status-colors {

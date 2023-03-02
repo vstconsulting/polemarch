@@ -174,7 +174,7 @@ class Git(_VCS):
                     config_writer.set_value("user", "email", self.proj.owner.email).release()
                     user_name = self.proj.owner.username
                     if self.proj.owner.last_name and self.proj.owner.first_name:  # nocv
-                        user_name = '{u.fist_name} {u.last_name}'.format(u=self.proj.owner)
+                        user_name = '{u.first_name} {u.last_name}'.format(u=self.proj.owner)
                     config_writer.set_value("user", "name", user_name).release()
                     repo.git.add(A=True)
                     repo.git.commit(m='Create project from Polemarch.')

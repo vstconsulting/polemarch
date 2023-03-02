@@ -2,23 +2,21 @@
 from __future__ import unicode_literals
 import threading
 from typing import Any, Iterable, Type, Union, Optional
-import os
 import time
-import signal
 import shutil
 import logging
 import tempfile
 import traceback
+import signal
 from pathlib import Path
 from collections import OrderedDict
 from subprocess import Popen
 from django.apps import apps
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
-from vstutils.utils import KVExchanger
 
 from .hosts import Inventory
-from .tasks import History, Project
+from .history import History, Project
 from ...main.utils import CmdExecutor
 from ...plugins.base import BasePlugin
 
@@ -29,8 +27,6 @@ logger = logging.getLogger("polemarch")
 def ensure_inventory_is_from_project(inventory, project):  # pylint: disable=invalid-name
     if isinstance(inventory, Inventory):
         inventory_id = inventory.id
-    elif isinstance(inventory, int):
-        inventory_id = inventory
     else:
         return
 
@@ -38,7 +34,6 @@ def ensure_inventory_is_from_project(inventory, project):  # pylint: disable=inv
         raise ValidationError('No Inventory matches the given query.')
 
 
-# Classes and methods for support
 class DummyHistory:
     # pylint: disable=unused-argument
     def __init__(self, *args, **kwargs):
@@ -71,13 +66,19 @@ class DummyHistory:
 
 
 class Executor(CmdExecutor):
-    __slots__ = ('history', 'counter', 'exchanger', 'notificator',  'notificator_lock', 'notification_last_time')
+    __slots__ = (
+        'history',
+        'counter',
+        'notificator',
+        'notificator_lock',
+        'notification_last_time',
+        'must_die',
+    )
 
     def __init__(self, history: Union[History, DummyHistory]):
         super().__init__()
         self.history = history
         self.counter = 0
-        self.exchanger = KVExchanger(self.CANCEL_PREFIX + str(self.history.id))
         if isinstance(history, DummyHistory):
             self.notificator = None
         else:
@@ -85,6 +86,12 @@ class Executor(CmdExecutor):
             self.notificator = notificator_class([], label='history_lines')
             self.notificator_lock = threading.Lock()
             self.notification_last_time = 0
+
+        self.must_die = False
+        signal.signal(signal.SIGTERM, self.signal_handler)
+
+    def signal_handler(self, signum, frame):
+        self.must_die = True  # nocv
 
     @property
     def output(self) -> str:
@@ -96,20 +103,9 @@ class Executor(CmdExecutor):
         pass  # nocv
 
     def working_handler(self, proc: Popen):
-        if proc.poll() is None and self.exchanger.get() is not None:  # nocv
-            self.write_output("\n[ERROR]: User interrupted execution")
-            self.exchanger.delete()
-            for _ in range(5):
-                try:
-                    os.kill(-proc.pid, signal.SIGTERM)
-                except Exception:  # nocv
-                    break
-                proc.send_signal(signal.SIGINT)
-                time.sleep(5)
+        if proc.poll() is None and self.must_die:  # nocv
             proc.terminate()
-            proc.kill()
             proc.wait()
-        super().working_handler(proc)
         if self.notificator and time.time() - self.notification_last_time > 1:
             with self.notificator_lock:
                 if self.notificator.queue:
@@ -166,7 +162,7 @@ class PluginExecutor:
         'history',
         'raw_exec_args',
         'verbose_level',
-        '__execution_dir__',
+        'execution_dir',
         'plugin',
         'executor',
     )
@@ -184,13 +180,14 @@ class PluginExecutor:
         self.project = project
         self.history = history or DummyHistory()
         self.raw_exec_args = exec_args
-        self.__execution_dir__ = None
+        self.execution_dir = None
         self.plugin = plugin_class(plugin_options, ProjectProxy(project), self.verbose_output)
         self.verbose_level = self.plugin.get_verbose_level(exec_args)
 
     def execute(self) -> None:
         try:
             revision = self.get_execution_revision()
+            self.execution_dir = self.create_execution_dir()
             self.history.revision = revision or 'NO VCS'
             self.project.repo_class.make_run_copy(str(self.execution_dir), revision)
 
@@ -202,11 +199,10 @@ class PluginExecutor:
 
             self.history.status = 'RUN'
             self.history.save()
-
-            self.history.status = 'OK'
-            self.send_hook('on_execution', execution_dir=self.execution_dir)
+            self.send_hook('on_execution', execution_dir=str(self.execution_dir))
             self.verbose_output(f'Executing command {cmd}')
             self.executor.execute(cmd, str(self.execution_dir), env_vars)
+            self.history.status = 'OK'
 
         except Exception as exception:
             logger.error(traceback.format_exc())
@@ -237,16 +233,12 @@ class PluginExecutor:
             last_line += 1
             self.history.write_line(line, last_line)
 
-    @property
-    def execution_dir(self) -> Path:
-        if self.__execution_dir__ is not None:
-            return self.__execution_dir__
+    def create_execution_dir(self) -> Path:
         exec_dir = Path(tempfile.mkdtemp()) / 'execution_dir'
         self.verbose_output(f'Execution temp dir created: {exec_dir}')
-        self.__execution_dir__ = exec_dir
         return exec_dir
 
-    def send_hook(self, when: str, **kwargs) -> None:
+    def send_hook(self, when: str, **kwargs):
         msg = OrderedDict()
         msg['execution_type'] = self.history.kind
         msg['when'] = when
@@ -274,7 +266,7 @@ class PluginExecutor:
             logger.debug(message)
 
     def __del__(self):
-        exec_dir = getattr(self, '__execution_dir__', None)
+        exec_dir = getattr(self, 'execution_dir', None)
         if exec_dir is not None and exec_dir.is_dir():
             self.verbose_output(f'Temp dir {exec_dir} was cleared.')
             shutil.rmtree(exec_dir, ignore_errors=True)
