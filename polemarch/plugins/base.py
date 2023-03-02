@@ -43,8 +43,7 @@ class BasePlugin(metaclass=classproperty.meta):
 
     supports_inventory: bool = False
     """
-    Flag shows if the plugin supports working with inventory. For now it's only used to show or hide inventory field
-    in execution template create page.
+    Flag shows if the plugin supports working with inventory.
     """
 
     error_codes: Mapping[int, str] = {}

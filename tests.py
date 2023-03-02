@@ -124,6 +124,11 @@ class TestException(Exception):
 
 
 class DummyProject:
+    env_vars = {
+        'env1': 'env1_value',
+        'env2': 'env2_value',
+    }
+
     def __getattr__(self, name):
         return name
 
@@ -5051,7 +5056,7 @@ class BaseExecutionPluginUnitTestCase(VSTBaseTestCase):
         shutil.rmtree(self.dummy_execution_dir, ignore_errors=True)
 
     def dummy_output_handler(self, message, level):
-        self.dummy_output += f'message:{message},level:{level}'
+        self.dummy_output += f'message:{message},level:{level}\n'
 
     def get_plugin_instance(self, options=None, execution_dir=None):
         instance = self.plugin_class(
@@ -5141,6 +5146,134 @@ class AnsiblePlaybookExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase
             filepath = processed_arg[processed_arg.index('=') + 1:]
             self.assertEqual(Path(filepath).read_text(), 'test-value')
 
+    def test_get_execution_data(self):
+        instance = self.get_plugin_instance()
+
+        all_args = {'playbook': 'playbook.yml'}
+
+        for arg in self.boolean_args:
+            all_args[arg] = True
+
+        for arg in self.string_args:
+            all_args[arg] = f'{arg}:value'
+
+        for arg in self.int_args:
+            all_args[arg] = 1
+
+        for arg in self.file_args:
+            all_args[arg] = f'{arg}:value'
+
+        all_args['verbose'] = 3
+        all_args['invalid'] = 'invalid'
+
+        cmd, env, raw_inventory = instance.get_execution_data(
+            self.dummy_execution_dir,
+            all_args,
+        )
+        self.assertEqual(raw_inventory, 'inventory:value')
+        self.assertDictEqual(env, {
+            'env1': 'env1_value',
+            'env2': 'env2_value',
+        })
+        self.assertListEqual(cmd[:3], settings.EXECUTOR)
+        self.assertEqual(cmd[3], 'ansible-playbook')
+        self.assertEqual(cmd[4], 'playbook.yml')
+
+        # boolean args
+        self.assertSetEqual(set(cmd[5:14]), {
+            f'--{value.replace("_", "-")}'
+            for value in self.boolean_args
+        })
+
+        # string args
+        self.assertIn('--inventory=inventory:value', cmd)
+        self.assertSetEqual(set(cmd[14:29]), {
+            f'--{value.replace("_", "-")}={value}:value'
+            for value in self.string_args
+            if value not in ('group', 'inventory')
+        })
+
+        # int args
+        self.assertSetEqual(set(cmd[29:31]), {
+            f'--{value.replace("_", "-")}=1'
+            for value in self.int_args
+        })
+
+        # file args
+        for value in cmd[31:34]:
+            arg, *_, filename = value.split('=')
+            self.assertEqual(Path(filename).read_text(), f'{arg[2:].replace("-", "_")}:value')
+
+        # other args
+        self.assertIn('-vvv', cmd)
+        self.assertEqual([v for v in cmd if 'invalid' in v], [])
+
+        # check raw inventory hidden values
+        *_, raw_inventory = instance.get_execution_data(
+            self.dummy_execution_dir,
+            {
+                'module': 'unknown',
+                'inventory': """
+---
+somegroup:
+  hosts:
+    localhost:
+      vars:
+        ansible_password: pass
+        ansible_ssh_pass: pass
+        ansible_ssh_private_key_file: somefile
+                """
+            },
+        )
+        self.assertEqual(raw_inventory.strip(), f"""
+---
+somegroup:
+  hosts:
+    localhost:
+      vars:
+        ansible_password: {CYPHER}
+        ansible_ssh_pass: {CYPHER}
+        ansible_ssh_private_key_file: {CYPHER}
+        """.strip())
+
+        inventory = self.get_model_filter('main.Inventory').create(name='test')
+        inventory.variables.create(
+            key='ansible_password',
+            value='pass',
+        )
+        inventory.variables.create(
+            key='ansible_ssh_pass',
+            value='pass',
+        )
+
+        cmd, *_, raw_inventory = instance.get_execution_data(
+            self.dummy_execution_dir,
+            {
+                'playbook': 'playbook.yml',
+                'inventory': inventory,
+            }
+        )
+        self.assertEqual(raw_inventory.strip(), f"""
+---
+all:
+  vars:
+    ansible_password: {CYPHER}
+    ansible_ssh_pass: {CYPHER}
+        """.strip())
+
+        self.assertListEqual(cmd[:3], settings.EXECUTOR)
+        self.assertEqual(cmd[3], 'ansible-playbook')
+        self.assertEqual(cmd[4], 'playbook.yml')
+        self.assertIn('--inventory=', cmd[5])
+        generated_file = cmd[5].rsplit('=', maxsplit=1)[-1]
+        self.assertEqual(Path(generated_file).read_text().strip(), """
+---
+all:
+  vars:
+    ansible_password: pass
+    ansible_ssh_pass: pass
+        """.strip())
+
 
 class AnsibleModuleExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase):
     plugin_class = AnsibleModule
@@ -5206,3 +5339,135 @@ class AnsibleModuleExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase):
             processed_arg = instance._process_arg(arg, 'test-value')
             filepath = processed_arg[processed_arg.index('=') + 1:]
             self.assertEqual(Path(filepath).read_text(), 'test-value')
+
+    def test_get_execution_data(self):
+        instance = self.get_plugin_instance()
+
+        all_args = {'module': 'system.ping'}
+
+        for arg in self.boolean_args:
+            all_args[arg] = True
+
+        for arg in self.string_args:
+            all_args[arg] = f'{arg}:value'
+
+        for arg in self.int_args:
+            all_args[arg] = 1
+
+        for arg in self.file_args:
+            all_args[arg] = f'{arg}:value'
+
+        all_args['verbose'] = 3
+        all_args['invalid'] = 'invalid'
+
+        cmd, env, raw_inventory = instance.get_execution_data(
+            self.dummy_execution_dir,
+            all_args,
+        )
+        self.assertEqual(raw_inventory, 'inventory:value')
+        self.assertDictEqual(env, {
+            'env1': 'env1_value',
+            'env2': 'env2_value',
+        })
+        self.assertListEqual(cmd[:3], settings.EXECUTOR)
+        self.assertEqual(cmd[3], 'ansible')
+        self.assertEqual(cmd[4], 'group:value')
+        self.assertEqual(cmd[5], '-m')
+        self.assertEqual(cmd[6], 'ping')
+
+        # boolean args
+        self.assertSetEqual(set(cmd[7:13]), {
+            f'--{value.replace("_", "-")}'
+            for value in self.boolean_args
+        })
+
+        # string args
+        self.assertIn('--inventory=inventory:value', cmd)
+        self.assertSetEqual(set(cmd[13:27]), {
+            f'--{value.replace("_", "-")}={value}:value'
+            for value in self.string_args
+            if value not in ('group', 'inventory')
+        })
+
+        # int args
+        self.assertSetEqual(set(cmd[27:31]), {
+            f'--{value.replace("_", "-")}=1'
+            for value in self.int_args
+        })
+
+        # file args
+        for value in cmd[31:33]:
+            arg, *_, filename = value.split('=')
+            self.assertEqual(Path(filename).read_text(), f'{arg[2:].replace("-", "_")}:value')
+
+        # other args
+        self.assertIn('-vvv', cmd)
+        self.assertEqual([v for v in cmd if 'invalid' in v], [])
+
+        # check raw inventory hidden values
+        *_, raw_inventory = instance.get_execution_data(
+            self.dummy_execution_dir,
+            {
+                'module': 'unknown',
+                'inventory': """
+---
+somegroup:
+  hosts:
+    localhost:
+      vars:
+        ansible_password: pass
+        ansible_ssh_pass: pass
+        ansible_ssh_private_key_file: somefile
+                """
+            },
+        )
+        self.assertEqual(raw_inventory.strip(), f"""
+---
+somegroup:
+  hosts:
+    localhost:
+      vars:
+        ansible_password: {CYPHER}
+        ansible_ssh_pass: {CYPHER}
+        ansible_ssh_private_key_file: {CYPHER}
+        """.strip())
+
+        inventory = self.get_model_filter('main.Inventory').create(name='test')
+        inventory.variables.create(
+            key='ansible_password',
+            value='pass',
+        )
+        inventory.variables.create(
+            key='ansible_ssh_pass',
+            value='pass',
+        )
+
+        cmd, *_, raw_inventory = instance.get_execution_data(
+            self.dummy_execution_dir,
+            {
+                'module': 'system.ping',
+                'inventory': inventory,
+            }
+        )
+        self.assertEqual(raw_inventory.strip(), f"""
+---
+all:
+  vars:
+    ansible_password: {CYPHER}
+    ansible_ssh_pass: {CYPHER}
+        """.strip())
+
+        self.assertListEqual(cmd[:3], settings.EXECUTOR)
+        self.assertEqual(cmd[3], 'ansible')
+        self.assertEqual(cmd[4], 'all')
+        self.assertEqual(cmd[5], '-m')
+        self.assertEqual(cmd[6], 'ping')
+        self.assertIn('--inventory=', cmd[7])
+        generated_file = cmd[7].rsplit('=', maxsplit=1)[-1]
+        self.assertEqual(Path(generated_file).read_text().strip(), """
+---
+all:
+  vars:
+    ansible_password: pass
+    ansible_ssh_pass: pass
+        """.strip())

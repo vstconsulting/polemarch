@@ -1,5 +1,6 @@
 import os
 import re
+import contextlib
 from uuid import uuid1
 from functools import lru_cache
 from typing import Type, Mapping, Optional, Union, Tuple
@@ -69,8 +70,13 @@ class BaseAnsiblePlugin(BasePlugin):
             inventory_file.write_text(text)
             return str(inventory_file), self._get_raw_inventory(text)
 
-        if (self.execution_dir / inventory).is_file():
-            inventory_file = (self.execution_dir / inventory)
+        inventory_file = None
+        inventory_is_file = False
+        with contextlib.suppress(OSError):
+            inventory_file = self.execution_dir / inventory
+            inventory_is_file = inventory_file.is_file()
+
+        if inventory_is_file:
             self._inventory_filename = inventory_file.name
             text = inventory_file.read_text()
             return str(inventory_file), self._get_raw_inventory(text)
