@@ -11,7 +11,7 @@ This is an example of api schema, but you can find actual schema on Polemarch ho
 .. _structure:
 
 Structure
------------------------
+---------
 
 In Polemarch we have some entities that can be nested to another entities. Below examples of such entities:
 

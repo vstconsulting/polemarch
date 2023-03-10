@@ -1,13 +1,15 @@
+from django.db import transaction
 from rest_framework import fields as drffields
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from django_filters import CharFilter, ChoiceFilter
 from vstutils.utils import create_view
-from vstutils.api.actions import Action
+from vstutils.api.filters import extra_filter
+from vstutils.api.actions import Action, SimpleAction
 from vstutils.api import fields as vstfields
 from vstutils.api.serializers import VSTSerializer, BaseSerializer
 from vstutils.utils import translate as _, lazy_translate as __
-from ...main.models import Host, Group, Inventory
+from ...main.models import Host, Group, Inventory, InventoryState
 from .base import (
     VariablesCopyViewMixin,
     CopySerializer,
@@ -16,7 +18,7 @@ from .base import (
 )
 from .users import OwnerViewMixin, UserSerializer
 from ...main.constants import HostType
-from ..permissions import InventoryItemsPermission
+from ..permissions import InventoryPluginPermission
 from ...main.constants import InventoryVariablesEnum
 from ..filters import variables_filter, vars_help
 
@@ -73,7 +75,6 @@ host_viewset_data = {
     'list_fields': (
         'name',
         'type',
-        'from_project',
     ),
     'detail_fields': (
         'id',
@@ -82,15 +83,11 @@ host_viewset_data = {
         'type',
         'owner',
     ),
-    'override_list_fields': {
-        'from_project': drffields.BooleanField(read_only=True, label=__('Project based')),
-    },
     'override_detail_fields': {
         'type': drffields.ChoiceField(choices=HostType.to_choices(), required=False, default=HostType.HOST),
         'owner': vstfields.FkModelField(select=UserSerializer, read_only=True, autocomplete_represent='username'),
         'notes': vstfields.TextareaField(required=False, allow_blank=True),
     },
-    'permission_classes': (InventoryItemsPermission,),
     'extra_serializer_classes': {
         'serializer_class_copy': CopySerializer,
     },
@@ -147,12 +144,10 @@ class CreateGroupSerializer(VSTSerializer):
 ansible_group_viewset_data = {
     'model': Group,
     'view_class': (OwnerViewMixin, VariablesCopyViewMixin, None),
-    'permission_classes': (InventoryItemsPermission,),
     'list_fields': (
         'id',
         'name',
         'children',
-        'from_project',
     ),
     'detail_fields': (
         'id',
@@ -161,9 +156,6 @@ ansible_group_viewset_data = {
         'children',
         'owner',
     ),
-    'override_list_fields': {
-        'from_project': drffields.BooleanField(label=__('Project based')),
-    },
     'override_detail_fields': {
         'owner': vstfields.FkModelField(select=UserSerializer, read_only=True, autocomplete_represent='username'),
         'children': drffields.BooleanField(read_only=True, label=__('Contains groups')),
@@ -197,68 +189,137 @@ ansible_group_viewset_data = {
 
 
 class AnsibleGroupViewSet(create_view(**ansible_group_viewset_data)):
-    """
-    Manage inventory groups.
+    pass
 
-    retrieve:
-        Return a group instance.
 
-    list:
-        Return all groups.
-
-    create:
-        Create a new group.
-
-    destroy:
-        Remove an existing group.
-
-    partial_update:
-        Update one or more fields on an existing group.
-
-    update:
-        Update a group.
-    """
+inventory_plugin_choices = tuple((p, p) for p in Inventory.plugin_handlers.keys())
+inventory_import_data_types = {
+    plugin: Inventory.plugin_handlers.get_serializer_import_class(plugin)()
+    for plugin, backend in Inventory.plugin_handlers.items()
+    if backend.supports_import
+}
+inventory_import_plugin_choices = tuple((k, k) for k in inventory_import_data_types)
 
 
 class ImportInventorySerializer(BaseSerializer):
     inventory_id = vstfields.RedirectIntegerField(read_only=True, operation_name='inventory')
     name = drffields.CharField(write_only=True)
-    raw_data = vstfields.FileInStringField(write_only=True)
+    plugin = drffields.ChoiceField(choices=inventory_import_plugin_choices)
+    data = vstfields.DependEnumField(field='plugin', types=inventory_import_data_types, write_only=True)
+
+
+def get_inventory_state_data_field(source_view):
+    return vstfields.DynamicJsonTypeField(
+        field='plugin',
+        source_view=source_view,
+        types={
+            plugin: Inventory.plugin_handlers.get_serializer_class(plugin)()
+            for plugin in Inventory.plugin_handlers.keys()
+        }
+    )
+
+
+class InventoryStateSerializer(BaseSerializer):
+    data = get_inventory_state_data_field(source_view='<<parent>>')
+
+
+class InventoryStateUpdateSerializer(BaseSerializer):
+    data = get_inventory_state_data_field(source_view='<<parent>>.<<parent>>')
 
 
 class InventoryViewMixin:
-    @Action(
-        detail=False,
-        serializer_class=ImportInventorySerializer,
-    )
+    def copy_instance(self, instance):
+        # pylint: disable=protected-access
+        if instance.state_managed:
+            state = instance.inventory_state
+            instance._inventory_state_id = None
+            with transaction.atomic():
+                new_instance = super().copy_instance(instance)
+                new_instance._inventory_state = InventoryState.objects.create(data=state.data)
+                new_instance.save(update_fields=('_inventory_state',))
+            return new_instance
+
+        return super().copy_instance(instance)
+
+    @Action(detail=False, serializer_class=ImportInventorySerializer)
     def import_inventory(self, request, *args, **kwargs):
         """
         Import inventory from file.
         """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        inventory = self._perform_import_inventory(serializer.validated_data)
-        return {**serializer.validated_data, 'inventory_id': inventory.id}
+        data = serializer.validated_data
+        inventory = self._perform_import_inventory(
+            instance=Inventory.objects.create(name=data['name'], plugin=data['plugin']),
+            data=data['data'],
+        )
+        return {**data, 'inventory_id': inventory.id}
 
-    def _perform_import_inventory(self, data):
-        return Inventory.import_inventory_from_string(**data)
+    def _perform_import_inventory(self, instance: Inventory, data):
+        return Inventory.import_inventory(instance, data)
+
+    @SimpleAction(
+        serializer_class=InventoryStateUpdateSerializer,
+        result_serializer_class=InventoryStateSerializer,
+    )
+    def state(self, request, *args, **kwargs):
+        return self.get_object().inventory_state
+
+    @state.setter
+    def state(self, instance, request, serializer, *args, **kwargs):
+        inventory = self.get_object()
+        defaults = inventory.plugin_object.defaults
+        data = serializer.validated_data.get('data', {})
+        self.get_object().update_inventory_state(data={**defaults, **data})
+
+
+class CreateInventorySerializer(VSTSerializer):
+    plugin = drffields.ChoiceField(choices=inventory_plugin_choices)
+
+    @transaction.atomic()
+    def create(self, validated_data):
+        instance: Inventory = super().create(validated_data)
+        if instance.state_managed:
+            # pylint: disable=protected-access
+            instance._inventory_state = InventoryState.objects.create(data=instance.plugin_object.defaults)
+            instance.save(update_fields=('_inventory_state',))
+        return instance
+
+    class Meta:
+        __inject_from__ = 'detail'
 
 
 inventory_viewset_data = {
     'model': Inventory,
     'view_class': (InventoryViewMixin, OwnerViewMixin, VariablesCopyViewMixin, None),
-    'permission_classes': (InventoryItemsPermission,),
-    'list_fields': ('id', 'name', 'from_project'),
-    'detail_fields': ('id', 'name', 'notes', 'owner'),
+    'permission_classes': (InventoryPluginPermission,),
+    'list_fields': (
+        'id',
+        'name',
+        'plugin',
+        'state_managed',
+    ),
+    'detail_fields': (
+        'id',
+        'name',
+        'plugin',
+        'owner',
+        'notes',
+        'state_managed',
+    ),
     'override_list_fields': {
-        'from_project': drffields.BooleanField(label=__('Project based')),
+        'plugin': drffields.ChoiceField(choices=inventory_plugin_choices, read_only=True),
+        'state_managed': drffields.BooleanField(read_only=True),
     },
     'override_detail_fields': {
         'owner': vstfields.FkModelField(select=UserSerializer, read_only=True, autocomplete_represent='username'),
         'notes': vstfields.TextareaField(required=False, allow_blank=True),
+        'plugin': drffields.ChoiceField(choices=inventory_plugin_choices, read_only=True),
+        'state_managed': drffields.BooleanField(read_only=True),
     },
     'extra_serializer_classes': {
         'serializer_class_copy': CopySerializer,
+        'serializer_class_create': CreateInventorySerializer,
     },
     'extra_view_attributes': {
         'copy_related': ['hosts', 'groups'],
@@ -295,7 +356,8 @@ inventory_viewset_data = {
     'filterset_fields': {
         'id': None,
         'name': None,
-        'variables': CharFilter(method=variables_filter, help_text=vars_help)
+        'variables': CharFilter(method=variables_filter, help_text=__(vars_help)),
+        'plugin': CharFilter(method=extra_filter),
     },
 }
 

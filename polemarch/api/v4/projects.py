@@ -1,5 +1,4 @@
 from uuid import uuid1
-from pathlib import Path
 from functools import partial
 from django.db import transaction
 from django.db.models import F, Value
@@ -12,9 +11,8 @@ from vstutils.api.filter_backends import VSTFilterBackend
 from vstutils.api.filters import extra_filter
 from vstutils.api.actions import EmptyAction, Action
 from vstutils.api.serializers import DataSerializer, BaseSerializer
-from ...main.models import Project, Inventory, ProjectCommunityTemplate, ExecutionTemplateOption
+from ...main.models import Project, ProjectCommunityTemplate, ExecutionTemplateOption
 from ...main.constants import ProjectStatus, ProjectType, ProjectRepoAuthType, ProjectVariablesEnum
-from ...main.validators import path_validator
 from .base import (
     VariablesCopyViewMixin,
     ExecuteResponseSerializer,
@@ -127,24 +125,6 @@ class CreateProjectSerializer(BaseSerializer):
     }
 
 
-class ImportInventoryFromFileSerializer(BaseSerializer):
-    inventory_id = vstfields.RedirectIntegerField(read_only=True, operation_name='project_inventory')
-    filepath = drffields.CharField(validators=[path_validator], write_only=True)
-    raw_data = vstfields.VSTCharField(read_only=True)
-
-    def update(self, instance, validated_data):
-        inventory_path = Path(instance.path) / validated_data['filepath']
-        inventory: Inventory = instance.slave_inventory.get_or_create(name=inventory_path.stem)[0]
-        inventory.variables.update_or_create(key='inventory_extension', value=inventory_path.suffix, hidden=True)
-        Inventory.import_inventory_from_string(
-            raw_data=inventory_path.read_text(),
-            master_project=instance,
-            inventory_instance=inventory,
-            name=validated_data['filepath'],
-        )
-        return inventory
-
-
 class ProjectImportInventorySerializer(ImportInventorySerializer):
     inventory_id = vstfields.RedirectIntegerField(read_only=True, operation_name='project_inventory')
 
@@ -152,24 +132,10 @@ class ProjectImportInventorySerializer(ImportInventorySerializer):
 class ProjectInventoryViewMixin:
     serializer_class_import_inventory = ProjectImportInventorySerializer  # pylint: disable=invalid-name
 
-    def _perform_import_inventory(self, data):
-        inventory = super()._perform_import_inventory(data)
+    def _perform_import_inventory(self, instance, data):
+        inventory = super()._perform_import_inventory(instance, data)
         self.nested_manager.add(inventory)
         return inventory
-
-    @Action(
-        detail=False,
-        serializer_class=ImportInventoryFromFileSerializer,
-    )
-    def import_inventory_from_file(self, request, *args, **kwargs):
-        """
-        Import inventory using name of file in the project.
-        """
-        serializer = self.get_serializer(instance=self.nested_parent_object, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        instance = serializer.save()
-        self.nested_manager.add(instance)
-        return {'inventory_id': instance.id, **serializer.validated_data}
 
 
 class ProjectInventoryViewSet(ProjectInventoryViewMixin, InventoryViewSet):
@@ -250,7 +216,7 @@ def generate_execute_actions(cls):
             'detail': _('{} plugin was executed.').format(plugin),
         }
 
-    for plugin, backend in PLUGIN_HANDLERS.items():
+    for plugin in PLUGIN_HANDLERS.keys():
         action = partial(execute_action, plugin=plugin)
         action.__name__ = f'execute_{plugin.lower()}'
         action.__doc__ = f'Execute {plugin} plugin.'
@@ -258,7 +224,7 @@ def generate_execute_actions(cls):
             cls,
             action.__name__,
             Action(
-                serializer_class=backend.get_serializer_class(),
+                serializer_class=PLUGIN_HANDLERS.get_serializer_class(plugin),
                 result_serializer_class=ProjectExecuteResponseSerializer,
             )(action)
         )

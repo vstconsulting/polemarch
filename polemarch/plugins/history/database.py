@@ -1,6 +1,6 @@
 from django.db import transaction, models
 from .base import BasePlugin
-from ..models.history import HistoryLines
+from ...main.models.history import HistoryLines
 
 
 class Plugin(BasePlugin):

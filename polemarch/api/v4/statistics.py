@@ -43,6 +43,7 @@ class StatsSerializer(BaseSerializer):
     inventories = drffields.IntegerField()
     users = drffields.IntegerField()
     execution_plugins = drffields.IntegerField()
+    inventory_plugins = drffields.IntegerField()
     jobs = StatsJobsSerializer()
 
 
@@ -62,16 +63,19 @@ class StatsViewSet(NonModelsViewSet):
     def _get_execution_plugins_count(self):
         return len(PLUGIN_HANDLERS.keys())
 
+    def _get_inventory_plugins_count(self):
+        return len(Inventory.plugin_handlers.keys())
+
     def _get_history_stats(self):
         return History.objects.stats(int(self.request.query_params.get('last', '14')))
 
     def _get_data(self):
-        # TODO: inventory plugins count
         return {
             'projects': self._get_projects_count(),
             'inventories': self._get_inventories_count(),
             'users': self._get_users_count(),
             'execution_plugins': self._get_execution_plugins_count(),
+            'inventory_plugins': self._get_inventory_plugins_count(),
             'jobs': self._get_history_stats(),
         }
 

@@ -5,6 +5,7 @@ from ..main.validators import path_validator
 
 class InventoryAutoCompletionField(vstfields.VSTCharField):
     def __init__(self, **kwargs):
+        self.filters = kwargs.pop('filters', None)
         super().__init__(**kwargs)
 
     def to_internal_value(self, data):

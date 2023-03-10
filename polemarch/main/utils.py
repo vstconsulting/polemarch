@@ -26,7 +26,7 @@ from vstutils.utils import (
     Executor,
     UnhandledExecutor,
     ON_POSIX,
-    lazy_translate as __
+    translate as _
 )
 from vstutils.models.cent_notify import Notificator
 from vstutils.utils import ObjectHandlers
@@ -338,9 +338,11 @@ class PolemarchNotificator(Notificator):
 
 
 class ExecutionHandlers(ObjectHandlers):
+    __slots__ = ()
+
     def execute(self, plugin: str, project, execute_args, **kwargs):
         if project.status != 'OK':
-            raise project.SyncError(__('Project not synchronized.'))
+            raise project.SyncError(_('Project not synchronized.'))
 
         task_class = project.task_handlers.backend('EXECUTION')
         plugin_class = self.backend(plugin)
@@ -406,7 +408,29 @@ class ExecutionHandlers(ObjectHandlers):
             options=kwargs['options'],
         )
 
+    def get_compatible_inventory_plugins(self, name: str):
+        return self.opts(name).get('COMPATIBLE_INVENTORY_PLUGINS', ())
+
+    def get_plugin_object(self, name: str):
+        return self.backend(name)(options=self.opts(name))
+
+    def get_serializer_class(self, name: str):
+        return self.get_plugin_object(name).get_serializer_class()
+
     def get_object(self, plugin: str, project, history, **exec_args):  # noee
         from .models.utils import PluginExecutor  # pylint: disable=import-outside-toplevel
 
-        return PluginExecutor(self.backend(plugin), self.opts(plugin), project, history, exec_args)
+        return PluginExecutor(plugin, self.backend(plugin), self.opts(plugin), project, history, exec_args)
+
+
+class InventoryPluginHandlers(ObjectHandlers):
+    __slots__ = ()
+
+    def get_object(self, name: str):
+        return self[name](options=self.opts(name))
+
+    def get_serializer_import_class(self, name: str):
+        return self.get_object(name).get_serializer_import_class()
+
+    def get_serializer_class(self, name: str):
+        return self.get_object(name).get_serializer_class()

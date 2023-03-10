@@ -2,27 +2,31 @@ from typing import Callable, Union, Mapping, List, Tuple, Type, Optional, Any
 from pathlib import Path
 from rest_framework.fields import Field
 from vstutils.api.serializers import BaseSerializer
-from vstutils.utils import classproperty
-from ..main.models import Inventory
+from ...main.models import Inventory
 
 
-class BasePlugin(metaclass=classproperty.meta):
+class BasePlugin:
     """
-    Plugin class from which any other plugin should inherit. The plugin itself is an entity which, on the one hand
-    provides appropriate fields for the API, and on the other hand, processes arguments received from it to build
-    execution command.
+    Base execution plugin class from which any other plugin should inherit. The plugin itself is an entity which, on
+    the one hand provides appropriate fields for the API, and on the other hand, processes arguments received from
+    it to build execution command.
 
     For each configured plugin an endpoint will be generated allows you to choose arguments and execute it.
     Also, this plugin will be available to create template with.
 
-    :param config: ``settings.ini`` options mapping for this plugin.
-    :param project_data: proxy of the project instance, allows you to access it's readonly properties, such as
-                         ``config`` ``vars``, ``env_vars`` etc.
+    :param options: ``settings.ini`` options mapping for this plugin.
     :param output_handler: executor's function which handles logging and outputting to history. Used by
                            ``verbose_output`` method.
     """
 
-    __slots__ = ('config', '_output_handler', 'execution_dir', '_inventory_filename', 'project_data')
+    __slots__ = (
+        'options',
+        '_output_handler',
+        'execution_dir',
+        'secret_files',
+        'inventory',
+        'inventory_path',
+    )
 
     base_command: List[str]
     """
@@ -41,35 +45,26 @@ class BasePlugin(metaclass=classproperty.meta):
     ``[<plugin name> plugin]`` string.
     """
 
-    supports_inventory: bool = False
-    """
-    Flag shows if the plugin supports working with inventory.
-    """
-
     error_codes: Mapping[int, str] = {}
     """
     This mapping will be looked up to choose an appropriate error message for history output if execution finished with
     errors. If no code found, then just "ERROR" string outputs.
     """
 
-    def __init__(self, config: dict, project_data, output_handler: Callable):
-        self.config = config
+    def __init__(self, options: dict = None, output_handler: Optional[Callable] = None):
+        self.options = options or {}
         self._output_handler = output_handler
-        self._inventory_filename = 'inventory_file'
-        self.project_data = project_data
-        self.execution_dir = None
 
-    @classproperty
-    def name(cls) -> str:
+    @property
+    def name(self) -> str:
         """
         Returns name of plugin, class name by default. Primarily used to generate an appropriate model name for
         OpenAPI schema.
         """
 
-        return cls.__name__  # pylint: disable=no-member
+        return self.__class__.__name__  # pylint: disable=no-member
 
-    @classmethod
-    def get_serializer_class(cls, exclude_fields: tuple = ()) -> Type[BaseSerializer]:
+    def get_serializer_class(self, exclude_fields: tuple = ()) -> Type[BaseSerializer]:
         """
         Returns serializer class which will be used to generate fields for arguments. Uses metaclass returned by
         ``_get_serializer_metaclass`` method.
@@ -77,31 +72,43 @@ class BasePlugin(metaclass=classproperty.meta):
         :param exclude_fields: field names that should not be presented in serializer.
         """
 
-        class Serializer(BaseSerializer, metaclass=cls._get_serializer_metaclass(exclude_fields=exclude_fields)):
+        class Serializer(BaseSerializer, metaclass=self._get_serializer_metaclass(exclude_fields=exclude_fields)):
             _hide_not_required = True
 
             class Meta:
-                ref_name = f'Execute{cls.name}'
+                ref_name = f'Execute{self.name}'
 
         Serializer.__name__ = f'{Serializer.Meta.ref_name}Serializer'
         return Serializer
 
-    def get_execution_data(self, execution_dir: Path, raw_args: dict) -> Tuple[List[str], dict, str]:
+    def get_execution_data(
+        self,
+        execution_dir: Path,
+        raw_args: dict,
+        project_data,
+    ) -> Tuple[List[str], dict, Optional[Inventory], str]:
         """
-        Returns tuple of execution command, env variables and raw inventory string. This method will be called directly
-        by executor.
+        Returns tuple of execution command, env variables, inventory instance and raw inventory string. This method
+        will be called directly by executor before execution starts.
 
         :param execution_dir: path to execution directory in which project copy located. All additional files that
                               should be generated (e.g. inventory file) must be placed here.
         :param raw_args: argument name-value mapping which should be processed.
+        :param project_data: proxy of the project instance, allows you to access it's readonly properties, such as
+                     ``config`` ``vars``, ``env_vars`` etc.
         """
 
         self.prepare_execution_dir(execution_dir)
-        env_vars = self.get_env_vars()
-        inventory_arg, raw_inventory = self.get_inventory(raw_args.pop('inventory', None))
+        env_vars = self.get_env_vars(project_data)
+        self.inventory = raw_args.pop('inventory', None)
+        inventory_arg, raw_inventory = self.get_inventory(self.inventory)
         raw_args['inventory'] = inventory_arg
         args = self.get_args(raw_args)
-        return self.base_command + args, env_vars, raw_inventory
+        return (
+            self.base_command + args,
+            env_vars,
+            raw_inventory,
+        )
 
     def prepare_execution_dir(self, dir: Path) -> None:
         """
@@ -114,27 +121,35 @@ class BasePlugin(metaclass=classproperty.meta):
 
         self.execution_dir = dir
 
-    def get_inventory(self, inventory: Optional[Union[Inventory, str, int]]) -> Tuple[Optional[str], str]:
+    def get_inventory(self, inventory: Optional[Union[Inventory, str]]) -> Tuple[Optional[str], str]:
         """
         Returns tuple of inventory argument for execution command and raw inventory string used
         for representation in history. If no inventory presented, should return ``(None, '')``.
 
-        :param inventory: inventory, received from API, which can ``None`` if there is no inventory,
-                          ``polemarch.main.models.Inventory`` instance, int or str.
+        :param inventory: inventory, received from API, which can be ``None`` if there is no inventory,
+                          ``polemarch.main.models.Inventory`` instance, str.
         """
+
+        if isinstance(inventory, Inventory):
+            self.inventory_path, self.secret_files = inventory.plugin_object.render_inventory(
+                instance=inventory,
+                execution_dir=self.execution_dir,
+            )
+            inventory_string = Path(self.inventory_path).read_text()
+            raw_inventory = inventory.plugin_object.get_raw_inventory(inventory_string)
+            return str(self.inventory_path), raw_inventory
 
         return None, ''
 
-    def get_env_vars(self) -> Mapping[str, str]:
-        """Returns env variables which will be used in execution, project's env variables by default."""
+    def get_env_vars(self, project_data) -> Mapping[str, str]:
+        """
+        Returns env variables which will be used in execution, project's env variables by default.
 
-        return self.project_data.env_vars
+        :param project_data: proxy of the project instance, allows you to access it's readonly properties, such as
+                             ``config`` ``vars``, ``env_vars`` etc.
+        """
 
-    @property
-    def inventory_filename(self) -> str:
-        """Returns name of file with inventory content."""
-
-        return self._inventory_filename
+        return project_data.env_vars
 
     def get_args(self, raw_args: dict) -> List[str]:
         """
@@ -168,10 +183,17 @@ class BasePlugin(metaclass=classproperty.meta):
         :param level: verbosity level from which message should be outputted.
         """
 
-        self._output_handler(message, level)
+        if self._output_handler:
+            self._output_handler(message, level)
 
-    @classmethod
-    def _get_serializer_metaclass(cls, exclude_fields: tuple = ()) -> Type[Type[BaseSerializer]]:
+    def post_execute_hook(self, cmd: List[str]) -> None:
+        """
+        This method will be called after execution.
+
+        :param cmd: list of arguments which were used for execution.
+        """
+
+    def _get_serializer_metaclass(self, exclude_fields: tuple = ()) -> Type[Type[BaseSerializer]]:
         """
         Returns serializer metaclass used to generate fields in serializer.
 
@@ -180,21 +202,20 @@ class BasePlugin(metaclass=classproperty.meta):
 
         class SerializerMeta(type(BaseSerializer)):
             def __new__(mcs, name, bases, attrs):
-                attrs.update(cls._get_serializer_fields(exclude_fields=exclude_fields))
+                attrs.update(self._get_serializer_fields(exclude_fields=exclude_fields))
                 return super().__new__(mcs, name, bases, attrs)
 
         return SerializerMeta
 
-    @classmethod
-    def _get_serializer_fields(cls, exclude_fields: tuple = ()) -> dict:
+    def _get_serializer_fields(self, exclude_fields: tuple = ()) -> Mapping[str, Field]:
         """
-        Returns dict with field names and field instances used to generate fields for serializer.
+        Returns field name and field instance mapping used to generate fields for serializer.
 
         :param exclude_fields: field names that should not be presented in serializer.
         """
 
         return {
-            name: field for name, field in cls.serializer_fields.items()
+            name: field for name, field in self.serializer_fields.items()
             if name not in exclude_fields
         }
 

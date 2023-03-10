@@ -41,3 +41,11 @@ class SyncOnRunTimeout(PMException):
 class MaxContentLengthExceeded(NotApplicable):
     def __init__(self):
         super().__init__('Maximum content length exceeded.')
+
+
+class IncompatibleError(PMException):
+    pass
+
+
+class NotSupported(PMException):
+    pass

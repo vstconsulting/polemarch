@@ -425,11 +425,24 @@ you need to create it in Polemarch.
     Do not forget to add you inventory to project after it's creation.
     To do it click the :guilabel:`Inventory` button on project page.
 
-By inventory’s creation in this case, we mean creation of inventory
+Since v3.0.0 inventories can be state managed or not depending on plugin which is manages inventory. We will check
+them both with an example of built-in `ANSIBLE_STRING` and `ANSIBLE_FILE` inventories which are uses state, and
+`POLEMARCH_DB` inventory which is not.
+
+.. note::
+  You can create your own inventory plugin which will manage its state as you define. If you're
+  interested in, checkout `Inventory plugins documentation <plugins.html>`_.
+
+POLEMARCH_DB inventory
+~~~~~~~~~~~~~~~~~~~~~~
+
+POLEMARCH_DB inventory stores all data in separate entities - groups, hosts and variables and not uses state.
+
+By inventory's creation in this case, we mean creation of inventory
 that includes at least one group, which, in turn, includes at least one host.
 In other words, in addition to the inventory, the user must create a host and a group.
 
-To better understand this, let’s look at next images, which will explain you how to create
+To better understand this, let's look at next images, which will explain you how to create
 inventory.
 
 To create inventory you should choose 'Inventories' in left side menu and click the :guilabel:`Create` button.
@@ -437,11 +450,11 @@ Here you can see the inventory creation form.
 
 .. image:: new_screenshots/create_inventory.png
 
-As you can see, there are only 2 fields on this page:
+As you can see, there are only 3 fields on this page:
 
 * **Name** - name of inventory.
-
-* **Notes** - not required field for some user’s notes, for example,
+* **Plugin** - plugin which will manage our inventory. We will select `POLEMARCH_DB` plugin here.
+* **Notes** - not required field for some user's notes, for example,
   for what purpose this inventory was created or something like this.
 
 And there is only one button here:
@@ -478,12 +491,12 @@ Action buttons:
 * :guilabel:`Copy` - |copy_button_def|.
 * :guilabel:`Set owner` - |set_owner_button_def|.
 
-Let’s look how you can create a group for this inventory.
+Let's look how you can create a group for this inventory.
 To do it click the :guilabel:`Group` button.
 
 
 Group
------
+_____
 
 .. image:: new_screenshots/test_inventory_group.png
 
@@ -505,7 +518,7 @@ As you can see, the form of new group creation consists of following fields:
 
 * **Contains groups** - boolean field, it means ability of group to contain child groups.
 
-* **Notes** - not required field for some user’s notes, for example,
+* **Notes** - not required field for some user's notes, for example,
   for what purpose this group was created or something like this.
 
 .. warning::
@@ -539,9 +552,9 @@ Action buttons:
 * :guilabel:`Set owner` - |set_owner_button_def|.
 
 Hosts
------
+_____
 
-Let’s look how you can create a host for this group.
+Let's look how you can create a host for this group.
 To do it click the :guilabel:`Create` button.
 
 .. image:: new_screenshots/test_inventory_group_host.png
@@ -562,7 +575,7 @@ As you can see, the form of new host creation consists of following fields:
 
 * **Name** - name of your host.
 
-* **Notes** - not required field for some user’s notes, for example,
+* **Notes** - not required field for some user's notes, for example,
   for what purpose this host was created or something like this.
 
 * **Type** - type of host (RANGE, HOST).
@@ -594,11 +607,11 @@ Action buttons:
 * :guilabel:`Copy` - |copy_button_def|.
 * :guilabel:`Set owner` - |set_owner_button_def|.
 
-Let’s look how you can create a variables for host, group and inventory.
+Let's look how you can create a variables for host, group and inventory.
 
 
 Variables for inventory, group, hosts
--------------------------------------
+_____________________________________
 
 The process of variable creation for inventory is the same as for group or host.
 So, let's look it at the example of variable creation for host.
@@ -633,12 +646,69 @@ As you can see there is only 1 new field on this page:
 
 * **Id** - |id_field_def|.
 
+ANSIBLE_STRING inventory
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Let's return to inventory list page and create a new inventory:
+
+.. image:: new_screenshots/create_inventory_ansible_string.png
+
+Our created inventory looks like this:
+
+.. image:: new_screenshots/inventory_detail_ansible_string.png
+
+As you can see, compared to `POLEMARCH_DB` inventory, this one is state managed. Its sublinks will have the only
+`state` link. Let's click it and check the `state` page:
+
+.. image:: new_screenshots/inventory_state_ansible_string.png
+
+These types of inventory stores an extension of file, its body and specifies either file should be executable or not.
+Let's edit the state. Click :guilabel:`Edit` button:
+
+.. image:: new_screenshots/inventory_state_edit_ansible_string.png
+
+After saving:
+
+.. image:: new_screenshots/inventory_state_ansible_string_2.png
+
+Now inventory is ready for using..
+
+
+ANSIBLE_FILE inventory
+~~~~~~~~~~~~~~~~~~~~~~
+
+Again, returning to inventory list page, let's create and inventory with `ANSIBLE_FILE` plugin:
+
+.. image:: new_screenshots/create_inventory_ansible_file.png
+
+These inventories are also stores data in state as `State managed` hints us:
+
+.. image:: new_screenshots/inventory_detail_ansible_file.png
+
+Let's edit the state (click :guilabel:`Sublinks`, then :guilabel:`State` and then :guilabel:`Edit`):
+
+.. image:: new_screenshots/inventory_state_edit_ansible_file.png
+
+Here we specify the relative path of inventory file which should be inside the directory with project that will be
+executed.
+
+.. image:: new_screenshots/inventory_state_ansible_file_saved.png
+
+Done. Inventory is ready for use.
+
 
 Import inventory
 ----------------
 
 If you have an inventory file and you want to add items from it to Polemarch,
 you can do it quickly using "Import Inventory".
+
+.. note::
+    Import action may be available or not depending on which plugin inventory uses. For example, built-in
+    `POLEMARCH_DB`, `ANSIBLE_STRING` supports import but `ANSIBLE_FILE` is not.
+
+    Here we will look at import with an example of `POLEMARCH_DB` inventory. Import with `ANSIBLE_STRING` inventories
+    works similar except that imported data saves to inventory state.
 
 For example, let's use next inventory file:
 

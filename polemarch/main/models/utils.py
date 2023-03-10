@@ -17,13 +17,15 @@ from django.apps import apps
 from django.utils import timezone
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
-from vstutils.utils import ObjectHandlers
+from vstutils.utils import ObjectHandlers, translate as _
 
 from .hosts import Inventory
 from .history import History, Project
 from ...main.utils import CmdExecutor
-from ...main.history_plugins.base import BasePlugin as BaseHistoryPlugin
-from ...plugins.base import BasePlugin
+from ...plugins.history.base import BasePlugin as BaseHistoryPlugin
+from ...plugins.execution.base import BasePlugin
+from ..executions import PLUGIN_HANDLERS
+from ..exceptions import IncompatibleError
 
 
 logger = logging.getLogger("polemarch")
@@ -37,6 +39,17 @@ def ensure_inventory_is_from_project(inventory, project):  # pylint: disable=inv
 
     if not project.inventories.filter(id=inventory_id).exists():
         raise ValidationError('No Inventory matches the given query.')
+
+
+def ensure_inventory_is_compatible(inventory, execution_plugin: str):
+    if not isinstance(inventory, Inventory):
+        return
+
+    if inventory.plugin not in PLUGIN_HANDLERS.get_compatible_inventory_plugins(execution_plugin):
+        raise IncompatibleError(_('Inventory plugin {} is not compatible with execution plugin {}.').format(
+            inventory.plugin,
+            execution_plugin,
+        ))
 
 
 class HistoryPluginHandler(ObjectHandlers):
@@ -192,6 +205,7 @@ class PluginExecutor:
         'verbose_level',
         'execution_dir',
         'plugin',
+        'plugin_name',
         'executor',
         'writers',
     )
@@ -201,17 +215,20 @@ class PluginExecutor:
 
     def __init__(
         self,
+        plugin_name: str,
         plugin_class: Type[BasePlugin],
         plugin_options: dict,
         project: Project,
         history: Optional[History],
         exec_args,
     ):
+        # pylint: disable=too-many-arguments
         self.project = project
         self.history = history or DummyHistory()
         self.raw_exec_args = exec_args
         self.execution_dir = None
-        self.plugin = plugin_class(plugin_options, ProjectProxy(project), self.verbose_output)
+        self.plugin_name = plugin_name
+        self.plugin = plugin_class(output_handler=self.verbose_output, options=plugin_options)
         self.verbose_level = self.plugin.get_verbose_level(exec_args)
 
     def execute(self) -> None:
@@ -219,21 +236,20 @@ class PluginExecutor:
             self.writers = tuple(self.history_plugins.get_writers(self.history))
             revision = self.get_execution_revision()
             self.execution_dir = self.create_execution_dir()
-            self.history.revision = revision or 'NO VCS'
-            self.project.repo_class.make_run_copy(str(self.execution_dir), revision)
-
+            self.history.revision = self.project.repo_class.make_run_copy(str(self.execution_dir), revision)
             self.executor = self.executor_class(self.history, writers=self.writers)
             cmd, env_vars, self.history.raw_inventory = self.plugin.get_execution_data(
                 self.execution_dir,
-                self.raw_exec_args
+                self.raw_exec_args,
+                project_data=ProjectProxy(self.project),
             )
-
             self.history.status = 'RUN'
             self.history.save()
             self.send_hook('on_execution', execution_dir=str(self.execution_dir))
             self.verbose_output(f'Executing command {cmd}')
             self.executor.execute(cmd, str(self.execution_dir), env_vars)
             self.history.status = 'OK'
+            self.plugin.post_execute_hook(cmd)
 
         except Exception as exception:
             logger.error(traceback.format_exc())

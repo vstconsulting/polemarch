@@ -69,7 +69,7 @@ info:
   x-versions:
     application: 3.0.0
     library: 3.0.0
-    vstutils: 5.3.1
+    vstutils: 5.3.3
     django: 4.1.6
     djangorestframework: 3.14.0
     drf_yasg: 1.21.5
@@ -236,8 +236,8 @@ paths:
             $ref: '#/definitions/ProjectCommunityTemplateUseIt'
       tags:
         - community_template
-      x-title: Use it
       x-multiaction: false
+      x-title: Use it
     parameters:
       - name: id
         in: path
@@ -459,7 +459,7 @@ paths:
   /group/{id}/groups/:
     get:
       operationId: group_groups_list
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Return all groups.
       parameters:
         - name: __deep_parent
           in: query
@@ -566,7 +566,7 @@ paths:
       x-list: true
     post:
       operationId: group_groups_add
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Create a new group.
       parameters:
         - name: data
           in: body
@@ -590,7 +590,7 @@ paths:
   /group/{id}/groups/{groups_id}/:
     get:
       operationId: group_groups_get
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Return a group instance.
       parameters: []
       responses:
         '200':
@@ -604,7 +604,7 @@ paths:
       x-list: false
     put:
       operationId: group_groups_update
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Update a group.
       parameters:
         - name: data
           in: body
@@ -620,7 +620,7 @@ paths:
         - group
     patch:
       operationId: group_groups_edit
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Update one or more fields on an existing group.
       parameters:
         - name: data
           in: body
@@ -636,7 +636,7 @@ paths:
         - group
     delete:
       operationId: group_groups_remove
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Remove an existing group.
       parameters: []
       responses:
         '204':
@@ -944,8 +944,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - group
-      x-title: Set owner
       x-multiaction: false
+      x-title: Set owner
     parameters:
       - name: groups_id
         in: path
@@ -1188,8 +1188,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - group
-      x-title: Set owner
       x-multiaction: false
+      x-title: Set owner
     parameters:
       - name: groups_id
         in: path
@@ -1773,8 +1773,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - group
-      x-title: Set owner
       x-multiaction: false
+      x-title: Set owner
     parameters:
       - name: hosts_id
         in: path
@@ -2110,8 +2110,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - group
-      x-title: Set owner
       x-multiaction: false
+      x-title: Set owner
     parameters:
       - name: id
         in: path
@@ -2600,8 +2600,8 @@ paths:
             $ref: '#/definitions/Response'
       tags:
         - history
-      x-title: Cancel
       x-multiaction: false
+      x-title: Cancel
     parameters:
       - name: id
         in: path
@@ -2618,8 +2618,8 @@ paths:
           description: NO CONTENT
       tags:
         - history
-      x-title: Clear
       x-multiaction: false
+      x-title: Clear
     parameters:
       - name: id
         in: path
@@ -3085,8 +3085,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - host
-      x-title: Set owner
       x-multiaction: false
+      x-title: Set owner
     parameters:
       - name: id
         in: path
@@ -3416,6 +3416,16 @@ paths:
           description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
+        - name: plugin
+          in: query
+          description: ''
+          required: false
+          type: array
+          items:
+            type: string
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
         - name: id__not
           in: query
           description: A unique integer value (or comma separated list) identifying
@@ -3445,6 +3455,8 @@ paths:
               - -id
               - name
               - -name
+              - plugin
+              - -plugin
           collectionFormat: csv
           minItems: 1
           uniqueItems: true
@@ -3499,12 +3511,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OneInventory'
+            $ref: '#/definitions/CreateInventory'
       responses:
         '201':
           description: CREATED
           schema:
-            $ref: '#/definitions/OneInventory'
+            $ref: '#/definitions/CreateInventory'
       tags:
         - inventory
     parameters: []
@@ -3525,8 +3537,8 @@ paths:
             $ref: '#/definitions/ImportInventory'
       tags:
         - inventory
-      x-title: Import inventory
       x-multiaction: false
+      x-title: Import inventory
     parameters: []
   /inventory/{id}/:
     get:
@@ -3593,25 +3605,7 @@ paths:
   /inventory/{id}/all_groups/:
     get:
       operationId: inventory_all_groups_list
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Return all groups.
       parameters:
         - name: __deep_parent
           in: query
@@ -3726,25 +3720,7 @@ paths:
   /inventory/{id}/all_groups/{all_groups_id}/:
     get:
       operationId: inventory_all_groups_get
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Return a group instance.
       parameters: []
       responses:
         '200':
@@ -3972,25 +3948,7 @@ paths:
   /inventory/{id}/group/:
     get:
       operationId: inventory_group_list
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Return all groups.
       parameters:
         - name: __deep_parent
           in: query
@@ -4098,25 +4056,7 @@ paths:
       x-list: true
     post:
       operationId: inventory_group_add
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Create a new group.
       parameters:
         - name: data
           in: body
@@ -4140,25 +4080,7 @@ paths:
   /inventory/{id}/group/{group_id}/:
     get:
       operationId: inventory_group_get
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Return a group instance.
       parameters: []
       responses:
         '200':
@@ -4173,25 +4095,7 @@ paths:
       x-list: false
     put:
       operationId: inventory_group_update
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Update a group.
       parameters:
         - name: data
           in: body
@@ -4207,25 +4111,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_group_edit
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Update one or more fields on an existing group.
       parameters:
         - name: data
           in: body
@@ -4241,25 +4127,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_group_remove
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Remove an existing group.
       parameters: []
       responses:
         '204':
@@ -4279,25 +4147,7 @@ paths:
   /inventory/{id}/group/{group_id}/copy/:
     post:
       operationId: inventory_group_copy
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Endpoint which copy instance with deps.
       parameters:
         - name: data
           in: body
@@ -4324,25 +4174,7 @@ paths:
   /inventory/{id}/group/{group_id}/groups/:
     get:
       operationId: inventory_group_groups_list
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Return all groups.
       parameters:
         - name: __deep_parent
           in: query
@@ -4449,25 +4281,7 @@ paths:
       x-list: true
     post:
       operationId: inventory_group_groups_add
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Create a new group.
       parameters:
         - name: data
           in: body
@@ -4495,25 +4309,7 @@ paths:
   /inventory/{id}/group/{group_id}/groups/{groups_id}/:
     get:
       operationId: inventory_group_groups_get
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Return a group instance.
       parameters: []
       responses:
         '200':
@@ -4527,25 +4323,7 @@ paths:
       x-list: false
     put:
       operationId: inventory_group_groups_update
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Update a group.
       parameters:
         - name: data
           in: body
@@ -4561,25 +4339,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_group_groups_edit
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Update one or more fields on an existing group.
       parameters:
         - name: data
           in: body
@@ -4595,25 +4355,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_group_groups_remove
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Remove an existing group.
       parameters: []
       responses:
         '204':
@@ -4638,25 +4380,7 @@ paths:
   /inventory/{id}/group/{group_id}/groups/{groups_id}/copy/:
     post:
       operationId: inventory_group_groups_group_copy
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Endpoint which copy instance with deps.
       parameters:
         - name: data
           in: body
@@ -4688,25 +4412,7 @@ paths:
   /inventory/{id}/group/{group_id}/groups/{groups_id}/hosts/:
     get:
       operationId: inventory_group_groups_hosts_list
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Return all hosts.
       parameters:
         - name: id
           in: query
@@ -4817,25 +4523,7 @@ paths:
       x-list: true
     post:
       operationId: inventory_group_groups_hosts_add
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Create a new host.
       parameters:
         - name: data
           in: body
@@ -4868,25 +4556,7 @@ paths:
   /inventory/{id}/group/{group_id}/groups/{groups_id}/hosts/{hosts_id}/:
     get:
       operationId: inventory_group_groups_hosts_get
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Return a host instance.
       parameters: []
       responses:
         '200':
@@ -4900,25 +4570,7 @@ paths:
       x-list: false
     put:
       operationId: inventory_group_groups_hosts_update
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Update a host.
       parameters:
         - name: data
           in: body
@@ -4934,25 +4586,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_group_groups_hosts_edit
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Update one or more fields on an existing host.
       parameters:
         - name: data
           in: body
@@ -4968,25 +4602,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_group_groups_hosts_remove
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Remove an existing host.
       parameters: []
       responses:
         '204':
@@ -5016,25 +4632,7 @@ paths:
   /inventory/{id}/group/{group_id}/groups/{groups_id}/hosts/{hosts_id}/copy/:
     post:
       operationId: inventory_group_groups_hosts_group_groups_copy
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Endpoint which copy instance with deps.
       parameters:
         - name: data
           in: body
@@ -5085,8 +4683,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - inventory
-      x-title: Set owner
       x-multiaction: false
+      x-title: Set owner
     parameters:
       - name: group_id
         in: path
@@ -5110,25 +4708,7 @@ paths:
   /inventory/{id}/group/{group_id}/groups/{groups_id}/hosts/{hosts_id}/variables/:
     get:
       operationId: inventory_group_groups_hosts_variables_list
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Return all variables of inventory host.
       parameters:
         - name: id
           in: query
@@ -5225,25 +4805,7 @@ paths:
       x-list: true
     post:
       operationId: inventory_group_groups_hosts_variables_add
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Create a new variable of inventory host.
       parameters:
         - name: data
           in: body
@@ -5281,25 +4843,7 @@ paths:
   /inventory/{id}/group/{group_id}/groups/{groups_id}/hosts/{hosts_id}/variables/{variables_id}/:
     get:
       operationId: inventory_group_groups_hosts_variables_get
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Return a variable of inventory host.
       parameters: []
       responses:
         '200':
@@ -5313,25 +4857,7 @@ paths:
       x-list: false
     put:
       operationId: inventory_group_groups_hosts_variables_update
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Update variable value.
       parameters:
         - name: data
           in: body
@@ -5347,25 +4873,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_group_groups_hosts_variables_edit
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Update one or more fields on an existing variable.
       parameters:
         - name: data
           in: body
@@ -5381,25 +4889,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_group_groups_hosts_variables_remove
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Remove an existing variable.
       parameters: []
       responses:
         '204':
@@ -5449,8 +4939,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - inventory
-      x-title: Set owner
       x-multiaction: false
+      x-title: Set owner
     parameters:
       - name: group_id
         in: path
@@ -5469,25 +4959,7 @@ paths:
   /inventory/{id}/group/{group_id}/groups/{groups_id}/variables/:
     get:
       operationId: inventory_group_groups_variables_list
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Return all variables of inventory host.
       parameters:
         - name: id
           in: query
@@ -5584,25 +5056,7 @@ paths:
       x-list: true
     post:
       operationId: inventory_group_groups_variables_add
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Create a new variable of inventory host.
       parameters:
         - name: data
           in: body
@@ -5635,25 +5089,7 @@ paths:
   /inventory/{id}/group/{group_id}/groups/{groups_id}/variables/{variables_id}/:
     get:
       operationId: inventory_group_groups_variables_get
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Return a variable of inventory host.
       parameters: []
       responses:
         '200':
@@ -5667,25 +5103,7 @@ paths:
       x-list: false
     put:
       operationId: inventory_group_groups_variables_update
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Update variable value.
       parameters:
         - name: data
           in: body
@@ -5701,25 +5119,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_group_groups_variables_edit
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Update one or more fields on an existing variable.
       parameters:
         - name: data
           in: body
@@ -5735,25 +5135,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_group_groups_variables_remove
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Remove an existing variable.
       parameters: []
       responses:
         '204':
@@ -5784,25 +5166,7 @@ paths:
   /inventory/{id}/group/{group_id}/hosts/:
     get:
       operationId: inventory_group_hosts_list
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Return all hosts.
       parameters:
         - name: id
           in: query
@@ -5913,25 +5277,7 @@ paths:
       x-list: true
     post:
       operationId: inventory_group_hosts_add
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Create a new host.
       parameters:
         - name: data
           in: body
@@ -5959,25 +5305,7 @@ paths:
   /inventory/{id}/group/{group_id}/hosts/{hosts_id}/:
     get:
       operationId: inventory_group_hosts_get
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Return a host instance.
       parameters: []
       responses:
         '200':
@@ -5991,25 +5319,7 @@ paths:
       x-list: false
     put:
       operationId: inventory_group_hosts_update
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Update a host.
       parameters:
         - name: data
           in: body
@@ -6025,25 +5335,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_group_hosts_edit
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Update one or more fields on an existing host.
       parameters:
         - name: data
           in: body
@@ -6059,25 +5351,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_group_hosts_remove
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Remove an existing host.
       parameters: []
       responses:
         '204':
@@ -6102,25 +5376,7 @@ paths:
   /inventory/{id}/group/{group_id}/hosts/{hosts_id}/copy/:
     post:
       operationId: inventory_group_hosts_group_copy
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Endpoint which copy instance with deps.
       parameters:
         - name: data
           in: body
@@ -6166,8 +5422,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - inventory
-      x-title: Set owner
       x-multiaction: false
+      x-title: Set owner
     parameters:
       - name: group_id
         in: path
@@ -6186,25 +5442,7 @@ paths:
   /inventory/{id}/group/{group_id}/hosts/{hosts_id}/variables/:
     get:
       operationId: inventory_group_hosts_variables_list
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Return all variables of inventory host.
       parameters:
         - name: id
           in: query
@@ -6301,25 +5539,7 @@ paths:
       x-list: true
     post:
       operationId: inventory_group_hosts_variables_add
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Create a new variable of inventory host.
       parameters:
         - name: data
           in: body
@@ -6352,25 +5572,7 @@ paths:
   /inventory/{id}/group/{group_id}/hosts/{hosts_id}/variables/{variables_id}/:
     get:
       operationId: inventory_group_hosts_variables_get
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Return a variable of inventory host.
       parameters: []
       responses:
         '200':
@@ -6384,25 +5586,7 @@ paths:
       x-list: false
     put:
       operationId: inventory_group_hosts_variables_update
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Update variable value.
       parameters:
         - name: data
           in: body
@@ -6418,25 +5602,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_group_hosts_variables_edit
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Update one or more fields on an existing variable.
       parameters:
         - name: data
           in: body
@@ -6452,25 +5618,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_group_hosts_variables_remove
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Remove an existing variable.
       parameters: []
       responses:
         '204':
@@ -6515,8 +5663,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - inventory
-      x-title: Set owner
       x-multiaction: false
+      x-title: Set owner
     parameters:
       - name: group_id
         in: path
@@ -6530,25 +5678,7 @@ paths:
   /inventory/{id}/group/{group_id}/variables/:
     get:
       operationId: inventory_group_variables_list
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Return all variables of inventory host.
       parameters:
         - name: id
           in: query
@@ -6645,25 +5775,7 @@ paths:
       x-list: true
     post:
       operationId: inventory_group_variables_add
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Create a new variable of inventory host.
       parameters:
         - name: data
           in: body
@@ -6691,25 +5803,7 @@ paths:
   /inventory/{id}/group/{group_id}/variables/{variables_id}/:
     get:
       operationId: inventory_group_variables_get
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Return a variable of inventory host.
       parameters: []
       responses:
         '200':
@@ -6723,25 +5817,7 @@ paths:
       x-list: false
     put:
       operationId: inventory_group_variables_update
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Update variable value.
       parameters:
         - name: data
           in: body
@@ -6757,25 +5833,7 @@ paths:
         - inventory
     patch:
       operationId: inventory_group_variables_edit
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Update one or more fields on an existing variable.
       parameters:
         - name: data
           in: body
@@ -6791,25 +5849,7 @@ paths:
         - inventory
     delete:
       operationId: inventory_group_variables_remove
-      summary: Manage inventory groups.
-      description: |-
-        retrieve:
-                Return a group instance.
-
-            list:
-                Return all groups.
-
-            create:
-                Create a new group.
-
-            destroy:
-                Remove an existing group.
-
-            partial_update:
-                Update one or more fields on an existing group.
-
-            update:
-                Update a group.
+      description: Remove an existing variable.
       parameters: []
       responses:
         '204':
@@ -7205,8 +6245,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - inventory
-      x-title: Set owner
       x-multiaction: false
+      x-title: Set owner
     parameters:
       - name: hosts_id
         in: path
@@ -7542,7 +6582,62 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - inventory
+      x-multiaction: false
       x-title: Set owner
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this inventory.
+        required: true
+        type: integer
+  /inventory/{id}/state/:
+    get:
+      operationId: inventory_state_get
+      description: State
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InventoryState'
+      tags:
+        - inventory
+      x-subscribe-labels:
+        - main.Inventory
+      x-list: false
+    put:
+      operationId: inventory_state_update
+      description: State
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/InventoryStateUpdate'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InventoryState'
+      tags:
+        - inventory
+      x-multiaction: false
+    patch:
+      operationId: inventory_state_edit
+      description: State
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/InventoryStateUpdate'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InventoryState'
+      tags:
+        - inventory
       x-multiaction: false
     parameters:
       - name: id
@@ -8464,8 +7559,8 @@ paths:
             $ref: '#/definitions/ProjectExecuteResponse'
       tags:
         - project
-      x-title: Execute ansible module
       x-multiaction: false
+      x-title: Execute ansible module
     parameters:
       - name: id
         in: path
@@ -8489,8 +7584,8 @@ paths:
             $ref: '#/definitions/ProjectExecuteResponse'
       tags:
         - project
-      x-title: Execute ansible playbook
       x-multiaction: false
+      x-title: Execute ansible playbook
     parameters:
       - name: id
         in: path
@@ -8820,8 +7915,8 @@ paths:
             $ref: '#/definitions/ExecuteTemplateResponse'
       tags:
         - project
-      x-title: Execute
       x-multiaction: false
+      x-title: Execute
     parameters:
       - name: execution_templates_id
         in: path
@@ -9095,8 +8190,8 @@ paths:
             $ref: '#/definitions/Response'
       tags:
         - project
-      x-title: Cancel
       x-multiaction: false
+      x-title: Cancel
     parameters:
       - name: execution_templates_id
         in: path
@@ -9124,8 +8219,8 @@ paths:
           description: NO CONTENT
       tags:
         - project
-      x-title: Clear
       x-multiaction: false
+      x-title: Clear
     parameters:
       - name: execution_templates_id
         in: path
@@ -9497,8 +8592,8 @@ paths:
             $ref: '#/definitions/ExecuteTemplateResponse'
       tags:
         - project
-      x-title: Execute
       x-multiaction: false
+      x-title: Execute
     parameters:
       - name: execution_templates_id
         in: path
@@ -10071,8 +9166,8 @@ paths:
             $ref: '#/definitions/Response'
       tags:
         - project
-      x-title: Cancel
       x-multiaction: false
+      x-title: Cancel
     parameters:
       - name: history_id
         in: path
@@ -10094,8 +9189,8 @@ paths:
           description: NO CONTENT
       tags:
         - project
-      x-title: Clear
       x-multiaction: false
+      x-title: Clear
     parameters:
       - name: history_id
         in: path
@@ -10136,7 +9231,7 @@ paths:
   /project/{id}/inventory/:
     get:
       operationId: project_inventory_list
-      description: Inventory(id, hidden, notes, owner, name, master_project)
+      description: Inventory(id, hidden, notes, owner, name, plugin, _inventory_state)
       parameters:
         - name: id
           in: query
@@ -10159,6 +9254,16 @@ paths:
           description: List of variables to filter. Comma separated "key:value" list.
           required: false
           type: string
+        - name: plugin
+          in: query
+          description: ''
+          required: false
+          type: array
+          items:
+            type: string
+          collectionFormat: csv
+          minItems: 1
+          uniqueItems: true
         - name: id__not
           in: query
           description: A unique integer value (or comma separated list) identifying
@@ -10188,6 +9293,8 @@ paths:
               - -id
               - name
               - -name
+              - plugin
+              - -plugin
           collectionFormat: csv
           minItems: 1
           uniqueItems: true
@@ -10236,18 +9343,18 @@ paths:
       x-list: true
     post:
       operationId: project_inventory_add
-      description: Inventory(id, hidden, notes, owner, name, master_project)
+      description: Inventory(id, hidden, notes, owner, name, plugin, _inventory_state)
       parameters:
         - name: data
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OneInventory'
+            $ref: '#/definitions/CreateInventory'
       responses:
         '201':
           description: CREATED
           schema:
-            $ref: '#/definitions/OneInventory'
+            $ref: '#/definitions/CreateInventory'
       tags:
         - project
       x-allow-append: true
@@ -10274,33 +9381,8 @@ paths:
             $ref: '#/definitions/ProjectImportInventory'
       tags:
         - project
+      x-multiaction: false
       x-title: Import inventory
-      x-multiaction: false
-    parameters:
-      - name: id
-        in: path
-        description: A unique integer value identifying this project.
-        required: true
-        type: integer
-  /project/{id}/inventory/import_inventory_from_file/:
-    post:
-      operationId: project_inventory_import_from_file
-      description: Import inventory using name of file in the project.
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/ImportInventoryFromFile'
-      responses:
-        '201':
-          description: CREATED
-          schema:
-            $ref: '#/definitions/ImportInventoryFromFile'
-      tags:
-        - project
-      x-title: Import inventory from file
-      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -10310,7 +9392,7 @@ paths:
   /project/{id}/inventory/{inventory_id}/:
     get:
       operationId: project_inventory_get
-      description: Inventory(id, hidden, notes, owner, name, master_project)
+      description: Inventory(id, hidden, notes, owner, name, plugin, _inventory_state)
       parameters: []
       responses:
         '200':
@@ -10324,7 +9406,7 @@ paths:
       x-list: false
     put:
       operationId: project_inventory_update
-      description: Inventory(id, hidden, notes, owner, name, master_project)
+      description: Inventory(id, hidden, notes, owner, name, plugin, _inventory_state)
       parameters:
         - name: data
           in: body
@@ -10340,7 +9422,7 @@ paths:
         - project
     patch:
       operationId: project_inventory_edit
-      description: Inventory(id, hidden, notes, owner, name, master_project)
+      description: Inventory(id, hidden, notes, owner, name, plugin, _inventory_state)
       parameters:
         - name: data
           in: body
@@ -10356,7 +9438,7 @@ paths:
         - project
     delete:
       operationId: project_inventory_remove
-      description: Inventory(id, hidden, notes, owner, name, master_project)
+      description: Inventory(id, hidden, notes, owner, name, plugin, _inventory_state)
       parameters: []
       responses:
         '204':
@@ -10941,7 +10023,7 @@ paths:
   /project/{id}/inventory/{inventory_id}/group/{group_id}/groups/:
     get:
       operationId: project_inventory_group_groups_list
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Return all groups.
       parameters:
         - name: __deep_parent
           in: query
@@ -11048,7 +10130,7 @@ paths:
       x-list: true
     post:
       operationId: project_inventory_group_groups_add
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Create a new group.
       parameters:
         - name: data
           in: body
@@ -11080,7 +10162,7 @@ paths:
   /project/{id}/inventory/{inventory_id}/group/{group_id}/groups/{groups_id}/:
     get:
       operationId: project_inventory_group_groups_get
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Return a group instance.
       parameters: []
       responses:
         '200':
@@ -11094,7 +10176,7 @@ paths:
       x-list: false
     put:
       operationId: project_inventory_group_groups_update
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Update a group.
       parameters:
         - name: data
           in: body
@@ -11110,7 +10192,7 @@ paths:
         - project
     patch:
       operationId: project_inventory_group_groups_edit
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Update one or more fields on an existing group.
       parameters:
         - name: data
           in: body
@@ -11126,7 +10208,7 @@ paths:
         - project
     delete:
       operationId: project_inventory_group_groups_remove
-      description: Group(id, hidden, notes, owner, name, master_project, children)
+      description: Remove an existing group.
       parameters: []
       responses:
         '204':
@@ -11474,8 +10556,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - project
-      x-title: Set owner
       x-multiaction: false
+      x-title: Set owner
     parameters:
       - name: group_id
         in: path
@@ -11742,8 +10824,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - project
-      x-title: Set owner
       x-multiaction: false
+      x-title: Set owner
     parameters:
       - name: group_id
         in: path
@@ -12249,8 +11331,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - project
-      x-title: Set owner
       x-multiaction: false
+      x-title: Set owner
     parameters:
       - name: group_id
         in: path
@@ -12502,8 +11584,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - project
-      x-title: Set owner
       x-multiaction: false
+      x-title: Set owner
     parameters:
       - name: group_id
         in: path
@@ -12982,8 +12064,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - project
-      x-title: Set owner
       x-multiaction: false
+      x-title: Set owner
     parameters:
       - name: hosts_id
         in: path
@@ -13223,7 +12305,66 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - project
+      x-multiaction: false
       x-title: Set owner
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this project.
+        required: true
+        type: integer
+      - name: inventory_id
+        in: path
+        required: true
+        type: string
+  /project/{id}/inventory/{inventory_id}/state/:
+    get:
+      operationId: project_inventory_state_get
+      description: State
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InventoryState'
+      tags:
+        - project
+      x-subscribe-labels:
+        - main.Inventory
+      x-list: false
+    put:
+      operationId: project_inventory_state_update
+      description: State
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/InventoryStateUpdate'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InventoryState'
+      tags:
+        - project
+      x-multiaction: false
+    patch:
+      operationId: project_inventory_state_edit
+      description: State
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/InventoryStateUpdate'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InventoryState'
+      tags:
+        - project
       x-multiaction: false
     parameters:
       - name: id
@@ -13449,8 +12590,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - project
-      x-title: Set owner
       x-multiaction: false
+      x-title: Set owner
     parameters:
       - name: id
         in: path
@@ -13474,8 +12615,8 @@ paths:
             $ref: '#/definitions/Response'
       tags:
         - project
-      x-title: Sync
       x-multiaction: false
+      x-title: Sync
     parameters:
       - name: id
         in: path
@@ -13693,6 +12834,8 @@ paths:
               - -users
               - execution_plugins
               - -execution_plugins
+              - inventory_plugins
+              - -inventory_plugins
               - jobs
               - -jobs
           collectionFormat: csv
@@ -14148,8 +13291,6 @@ definitions:
         - name
     x-view-field-name: name
   Group:
-    required:
-      - from_project
     type: object
     properties:
       id:
@@ -14164,15 +13305,11 @@ definitions:
       children:
         title: Children
         type: boolean
-      from_project:
-        title: Project based
-        type: boolean
     x-properties-groups:
       '':
         - id
         - name
         - children
-        - from_project
     x-view-field-name: name
   CreateGroup:
     type: object
@@ -14292,16 +13429,11 @@ definitions:
         type: string
         maxLength: 5
         minLength: 1
-      from_project:
-        title: Project based
-        type: boolean
-        readOnly: true
     x-properties-groups:
       '':
         - id
         - name
         - type
-        - from_project
     x-view-field-name: name
   OneHost:
     type: object
@@ -14517,6 +13649,8 @@ definitions:
         type: string
         format: inventory
         readOnly: true
+        x-options:
+          filters: null
       kind:
         title: Kind
         type: string
@@ -14831,8 +13965,6 @@ definitions:
         - recipients
     x-view-field-name: name
   Inventory:
-    required:
-      - from_project
     type: object
     properties:
       id:
@@ -14844,16 +13976,28 @@ definitions:
         type: string
         maxLength: 512
         minLength: 1
-      from_project:
-        title: Project based
+      plugin:
+        title: Plugin
+        type: string
+        enum:
+          - POLEMARCH_DB
+          - ANSIBLE_STRING
+          - ANSIBLE_FILE
+        readOnly: true
+      state_managed:
+        title: State managed
         type: boolean
+        readOnly: true
     x-properties-groups:
       '':
         - id
         - name
-        - from_project
+        - plugin
+        - state_managed
     x-view-field-name: name
-  OneInventory:
+  CreateInventory:
+    required:
+      - plugin
     type: object
     properties:
       id:
@@ -14865,10 +14009,13 @@ definitions:
         type: string
         maxLength: 512
         minLength: 1
-      notes:
-        title: Notes
+      plugin:
+        title: Plugin
         type: string
-        format: textarea
+        enum:
+          - POLEMARCH_DB
+          - ANSIBLE_STRING
+          - ANSIBLE_FILE
       owner:
         title: Owner
         type: integer
@@ -14883,17 +14030,28 @@ definitions:
           makeLink: true
           dependence: null
           filters: null
+      notes:
+        title: Notes
+        type: string
+        format: textarea
+      state_managed:
+        title: State managed
+        type: boolean
+        readOnly: true
     x-properties-groups:
       '':
         - id
         - name
-        - notes
+        - plugin
         - owner
+        - notes
+        - state_managed
     x-view-field-name: name
   ImportInventory:
     required:
       - name
-      - raw_data
+      - plugin
+      - data
     type: object
     properties:
       inventory_id:
@@ -14909,19 +14067,259 @@ definitions:
         title: Name
         type: string
         minLength: 1
-      raw_data:
-        title: Raw data
+      plugin:
+        title: Plugin
         type: string
-        format: file
+        enum:
+          - POLEMARCH_DB
+          - ANSIBLE_STRING
+      data:
+        title: Data
+        type: string
+        format: dynamic
         x-options:
-          media_types:
-            - '*/*'
+          field: plugin
+          choices: {}
+          types:
+            POLEMARCH_DB:
+              required:
+                - body
+              type: object
+              properties:
+                body:
+                  title: Body
+                  type: string
+                  format: file
+                  x-options:
+                    media_types:
+                      - '*/*'
+              x-properties-groups:
+                '':
+                  - body
+              x-view-field-name: body
+            ANSIBLE_STRING:
+              required:
+                - body
+              type: object
+              properties:
+                extension:
+                  title: Extension
+                  type: string
+                  format: autocomplete
+                  enum:
+                    - yaml
+                    - ini
+                    - json
+                  default: yaml
+                executable:
+                  title: Executable
+                  type: boolean
+                  default: false
+                body:
+                  title: Body
+                  type: string
+                  format: file
+                  x-options:
+                    media_types:
+                      - '*/*'
+              x-properties-groups:
+                '':
+                  - extension
+                  - executable
+                  - body
+              x-view-field-name: executable
     x-properties-groups:
       '':
         - inventory_id
         - name
-        - raw_data
+        - plugin
+        - data
     x-view-field-name: name
+  OneInventory:
+    type: object
+    properties:
+      id:
+        title: Id
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 512
+        minLength: 1
+      plugin:
+        title: Plugin
+        type: string
+        enum:
+          - POLEMARCH_DB
+          - ANSIBLE_STRING
+          - ANSIBLE_FILE
+        readOnly: true
+      owner:
+        title: Owner
+        type: integer
+        format: fk
+        readOnly: true
+        x-options:
+          model:
+            $ref: '#/definitions/User'
+          value_field: id
+          view_field: username
+          usePrefetch: true
+          makeLink: true
+          dependence: null
+          filters: null
+      notes:
+        title: Notes
+        type: string
+        format: textarea
+      state_managed:
+        title: State managed
+        type: boolean
+        readOnly: true
+    x-properties-groups:
+      '':
+        - id
+        - name
+        - plugin
+        - owner
+        - notes
+        - state_managed
+    x-view-field-name: name
+  InventoryState:
+    required:
+      - data
+    type: object
+    properties:
+      data:
+        title: Data
+        type: string
+        format: dynamic
+        x-options:
+          field: plugin
+          source_view: <<parent>>
+          choices: {}
+          types:
+            POLEMARCH_DB:
+              type: object
+              properties: {}
+              x-properties-groups:
+                '': []
+              x-view-field-name: null
+            ANSIBLE_STRING:
+              required:
+                - body
+              type: object
+              properties:
+                extension:
+                  title: Extension
+                  type: string
+                  format: autocomplete
+                  enum:
+                    - yaml
+                    - ini
+                    - json
+                  default: yaml
+                executable:
+                  title: Executable
+                  type: boolean
+                  default: false
+                body:
+                  title: Body
+                  type: string
+                  format: file
+                  x-options:
+                    media_types:
+                      - '*/*'
+              x-properties-groups:
+                '':
+                  - extension
+                  - executable
+                  - body
+              x-view-field-name: executable
+            ANSIBLE_FILE:
+              type: object
+              properties:
+                path:
+                  title: Path
+                  type: string
+                  default: ''
+                  minLength: 1
+              x-properties-groups:
+                '':
+                  - path
+              x-view-field-name: path
+    x-properties-groups:
+      '':
+        - data
+    x-view-field-name: data
+  InventoryStateUpdate:
+    required:
+      - data
+    type: object
+    properties:
+      data:
+        title: Data
+        type: string
+        format: dynamic
+        x-options:
+          field: plugin
+          source_view: <<parent>>.<<parent>>
+          choices: {}
+          types:
+            POLEMARCH_DB:
+              type: object
+              properties: {}
+              x-properties-groups:
+                '': []
+              x-view-field-name: null
+            ANSIBLE_STRING:
+              required:
+                - body
+              type: object
+              properties:
+                extension:
+                  title: Extension
+                  type: string
+                  format: autocomplete
+                  enum:
+                    - yaml
+                    - ini
+                    - json
+                  default: yaml
+                executable:
+                  title: Executable
+                  type: boolean
+                  default: false
+                body:
+                  title: Body
+                  type: string
+                  format: file
+                  x-options:
+                    media_types:
+                      - '*/*'
+              x-properties-groups:
+                '':
+                  - extension
+                  - executable
+                  - body
+              x-view-field-name: executable
+            ANSIBLE_FILE:
+              type: object
+              properties:
+                path:
+                  title: Path
+                  type: string
+                  default: ''
+                  minLength: 1
+              x-properties-groups:
+                '':
+                  - path
+              x-view-field-name: path
+    x-properties-groups:
+      '':
+        - data
+    x-view-field-name: data
   Project:
     type: object
     properties:
@@ -15372,6 +14770,9 @@ definitions:
           is deprecated
         type: string
         format: inventory
+        x-options:
+          filters:
+            plugin: POLEMARCH_DB,ANSIBLE_FILE,ANSIBLE_STRING
       limit:
         title: Limit
         description: further limit selected hosts to an additional pattern
@@ -15587,6 +14988,9 @@ definitions:
           is deprecated
         type: string
         format: inventory
+        x-options:
+          filters:
+            plugin: POLEMARCH_DB,ANSIBLE_FILE,ANSIBLE_STRING
       limit:
         title: Limit
         description: further limit selected hosts to an additional pattern
@@ -15823,6 +15227,9 @@ definitions:
                     list. --inventory-file is deprecated
                   type: string
                   format: inventory
+                  x-options:
+                    filters:
+                      plugin: POLEMARCH_DB,ANSIBLE_FILE,ANSIBLE_STRING
                 limit:
                   title: Limit
                   description: further limit selected hosts to an additional pattern
@@ -16006,6 +15413,9 @@ definitions:
                     list. --inventory-file is deprecated
                   type: string
                   format: inventory
+                  x-options:
+                    filters:
+                      plugin: POLEMARCH_DB,ANSIBLE_FILE,ANSIBLE_STRING
                 limit:
                   title: Limit
                   description: further limit selected hosts to an additional pattern
@@ -16334,6 +15744,9 @@ definitions:
                     list. --inventory-file is deprecated
                   type: string
                   format: inventory
+                  x-options:
+                    filters:
+                      plugin: POLEMARCH_DB,ANSIBLE_FILE,ANSIBLE_STRING
                 limit:
                   title: Limit
                   description: further limit selected hosts to an additional pattern
@@ -16517,6 +15930,9 @@ definitions:
                     list. --inventory-file is deprecated
                   type: string
                   format: inventory
+                  x-options:
+                    filters:
+                      plugin: POLEMARCH_DB,ANSIBLE_FILE,ANSIBLE_STRING
                 limit:
                   title: Limit
                   description: further limit selected hosts to an additional pattern
@@ -16742,7 +16158,8 @@ definitions:
   ProjectImportInventory:
     required:
       - name
-      - raw_data
+      - plugin
+      - data
     type: object
     properties:
       inventory_id:
@@ -16758,49 +16175,74 @@ definitions:
         title: Name
         type: string
         minLength: 1
-      raw_data:
-        title: Raw data
+      plugin:
+        title: Plugin
         type: string
-        format: file
+        enum:
+          - POLEMARCH_DB
+          - ANSIBLE_STRING
+      data:
+        title: Data
+        type: string
+        format: dynamic
         x-options:
-          media_types:
-            - '*/*'
+          field: plugin
+          choices: {}
+          types:
+            POLEMARCH_DB:
+              required:
+                - body
+              type: object
+              properties:
+                body:
+                  title: Body
+                  type: string
+                  format: file
+                  x-options:
+                    media_types:
+                      - '*/*'
+              x-properties-groups:
+                '':
+                  - body
+              x-view-field-name: body
+            ANSIBLE_STRING:
+              required:
+                - body
+              type: object
+              properties:
+                extension:
+                  title: Extension
+                  type: string
+                  format: autocomplete
+                  enum:
+                    - yaml
+                    - ini
+                    - json
+                  default: yaml
+                executable:
+                  title: Executable
+                  type: boolean
+                  default: false
+                body:
+                  title: Body
+                  type: string
+                  format: file
+                  x-options:
+                    media_types:
+                      - '*/*'
+              x-properties-groups:
+                '':
+                  - extension
+                  - executable
+                  - body
+              x-view-field-name: executable
     x-properties-groups:
       '':
         - inventory_id
         - name
-        - raw_data
+        - plugin
+        - data
     x-view-field-name: name
-  ImportInventoryFromFile:
-    required:
-      - filepath
-    type: object
-    properties:
-      inventory_id:
-        title: Inventory id
-        type: integer
-        readOnly: true
-        x-options:
-          redirect:
-            operation_name: project_inventory
-            depend_field: null
-            concat_field_name: false
-      filepath:
-        title: Filepath
-        type: string
-        pattern: ^([\w\d_\-]+|[\.][\/\w\d_\-\+=\^,])(\.?[\w\d\-\/\\_()\+=\^,]+)+$
-        minLength: 1
-      raw_data:
-        title: Raw data
-        type: string
-        readOnly: true
-        minLength: 1
-    x-properties-groups:
-      '':
-        - inventory_id
-        - filepath
-        - raw_data
-    x-view-field-name: filepath
   ProjectVariable:
     required:
       - key
@@ -16992,6 +16434,7 @@ definitions:
       - inventories
       - users
       - execution_plugins
+      - inventory_plugins
       - jobs
     type: object
     properties:
@@ -17007,6 +16450,9 @@ definitions:
       execution_plugins:
         title: Execution plugins
         type: integer
+      inventory_plugins:
+        title: Inventory plugins
+        type: integer
       jobs:
         $ref: '#/definitions/StatsJobs'
     x-properties-groups:
@@ -17015,6 +16461,7 @@ definitions:
         - inventories
         - users
         - execution_plugins
+        - inventory_plugins
         - jobs
     x-view-field-name: inventories
   User:

@@ -8,17 +8,17 @@ import logging
 from itertools import chain
 from collections import OrderedDict
 from django_celery_beat.models import IntervalSchedule, CrontabSchedule, PeriodicTask as CPTask
-from django.db.models import signals, IntegerField, UUIDField
+from django.db.models import signals, IntegerField, UUIDField, CharField
 from django.db import transaction
 from django.dispatch import receiver
 from django.db.models.functions import Cast
 from django.core.validators import ValidationError
 from django.conf import settings
 from rest_framework.exceptions import ValidationError as drfValidationError
-from vstutils.utils import raise_context, KVExchanger, translate as _
+from vstutils.utils import raise_context, KVExchanger, translate as _, lazy_translate as __
 
 from .vars import Variable
-from .hosts import Host, Group, Inventory
+from .hosts import Host, Group, Inventory, InventoryState
 from .projects import Project, AnsiblePlaybook, Module, ProjectCommunityTemplate, list_to_choices
 from .users import get_user_model, UserGroup, ACLPermission
 from .history import History, HistoryLines
@@ -29,9 +29,9 @@ from .execution_templates import (
 )
 from .hooks import Hook
 from ..validators import RegexValidator, validate_hostname, path_validator
-from ..exceptions import UnknownTypeException, Conflict
+from ..exceptions import UnknownTypeException, Conflict, IncompatibleError
 from ..utils import CmdExecutor
-from .utils import ensure_inventory_is_from_project
+from .utils import ensure_inventory_is_from_project, ensure_inventory_is_compatible
 from ...main.constants import ProjectVariablesEnum, ANSIBLE_REFERENCE
 
 
@@ -191,8 +191,11 @@ def validate_template_option_inventory(instance: ExecutionTemplateOption, **kwar
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     inventory = instance.arguments.get('inventory')
+    if isinstance(inventory, int):
+        inventory = Inventory.objects.get(id=inventory)
     if isinstance(inventory, Inventory):
         ensure_inventory_is_from_project(inventory, instance.template.project)
+        ensure_inventory_is_compatible(inventory, instance.plugin)
         instance.arguments['inventory'] = inventory.id
 
 
@@ -326,18 +329,20 @@ def check_if_inventory_linked(instance: Inventory, action: Text, **kwargs) -> No
     if action != "pre_remove":
         return
     removing_inventories = instance.inventories.filter(pk__in=kwargs['pk_set'])
-    check_id = removing_inventories.values_list('id', flat=True)
-    # FIXME: not working in postgres
-    ExecutionTemplateOption.objects.filter(arguments__inventory__in=check_id).delete()
+    check_id = removing_inventories \
+        .annotate(inventory_id=Cast('id', CharField())) \
+        .values_list('inventory_id', flat=True)
+    ExecutionTemplateOption.objects \
+        .annotate(inventory=Cast('arguments__inventory', CharField())) \
+        .filter(inventory__in=check_id) \
+        .delete()
 
 
-@receiver(signals.pre_delete, sender=Inventory)
-def delete_imported_file_inventories(instance: Inventory, **kwargs) -> None:
-    # pylint: disable=invalid-name
-    if instance.master_project is not None:
-        instance.hosts.all().delete()
-        instance.groups.all().delete()
-        instance.projects.clear()
+@receiver(signals.post_delete, sender=Inventory)
+def delete_inventory_state(instance: Inventory, **kwargs) -> None:
+    # pylint: disable=protected-access
+    if instance._inventory_state_id is not None:
+        InventoryState.objects.filter(id=instance._inventory_state_id).delete()
 
 
 @receiver(signals.pre_delete, sender=Inventory)
@@ -407,8 +412,9 @@ def cancel_task_on_delete_history(instance: History, **kwargs) -> None:
 
 
 @receiver(signals.pre_save, sender=History)
-def check_if_inventory_is_from_project(instance: History, **kwargs):  # pylint: disable=invalid-name
+def check_history_inventory(instance: History, **kwargs):  # pylint: disable=invalid-name
     ensure_inventory_is_from_project(instance.inventory, instance.project)
+    ensure_inventory_is_compatible(instance.inventory, instance.kind)
 
 
 @receiver(signals.post_migrate)
