@@ -14,6 +14,7 @@ from django.test import override_settings
 from django_test_migrations.contrib.unittest_case import MigratorTestCase
 from django.core.exceptions import FieldDoesNotExist
 from rest_framework import fields as drffields
+from django.conf import settings
 import git
 import yaml
 from uuid import uuid1
@@ -26,20 +27,23 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from vstutils.tests import BaseTestCase as VSTBaseTestCase
 from vstutils.api import fields as vstfields
-from django.conf import settings
 try:
     from polemarch.main.openapi import PROJECT_MENU
     from polemarch.main.tasks import ScheduledTask
     from polemarch.main.constants import CYPHER
     from polemarch.main.executions import PLUGIN_HANDLERS
     from polemarch.main.models.utils import ProjectProxy
-    from polemarch.plugins.ansible import BaseAnsiblePlugin, BasePlugin, AnsibleModule, AnsiblePlaybook
+    from polemarch.plugins.execution.ansible import BaseAnsiblePlugin, BasePlugin, AnsibleModule, AnsiblePlaybook
+    from polemarch.plugins.inventory.base import BasePlugin as BaseInventoryPlugin
+    from polemarch.main.exceptions import NotApplicable
 except ImportError:
     from pmlib.main.tasks import ScheduledTask
     from pmlib.main.constants import CYPHER
     from pmlib.main.executions import PLUGIN_HANDLERS
     from pmlib.main.models.utils import ProjectProxy
-    from pmlib.plugins.ansible import BaseAnsiblePlugin, BasePlugin, AnsibleModule, AnsiblePlaybook
+    from pmlib.plugins.execution.ansible import BaseAnsiblePlugin, BasePlugin, AnsibleModule, AnsiblePlaybook
+    from pmlib.plugins.inventory.base import BasePlugin as BaseInventoryPlugin
+    from pmlib.main.exceptions import NotApplicable
 
 
 logger = logging.getLogger('polemarch')
@@ -141,7 +145,6 @@ class TestAnsibleDoc(BaseAnsiblePlugin):
     }
     serializer_fields = {'target': vstfields.VSTCharField()}
     arg_shown_on_history_as_mode = 'target'
-    supports_inventory = False
 
     @property
     def base_command(self):
@@ -177,7 +180,45 @@ class TestEcho(BasePlugin):
 
 
 class TestModule(AnsibleModule):
-    pass
+    def post_execute_hook(self, cmd):
+        if not self.inventory.plugin_object.state_managed:
+            return
+
+        state = self.inventory.inventory_state
+        if 'counter' not in state.data:
+            state.data['counter'] = 1
+        else:
+            state.data['counter'] += 1
+        state.save(update_fields=('data',))
+
+
+class TestInventoryPlugin(BaseInventoryPlugin):
+    supports_import = True
+
+    serializer_fields = {
+        'body': vstfields.TextareaField(allow_blank=True, default=''),
+    }
+    defaults = {
+        'body': 'localhost ansible_connection=local',
+    }
+    serializer_import_fields = {
+        'body': vstfields.FileInStringField(),
+    }
+
+    def render_inventory(self, instance, execution_dir):
+        state_data = instance.inventory_state.data
+        filename = str(uuid1())
+        filepath = Path(execution_dir) / filename
+        filepath.write_text(state_data['body'])
+        return filepath, []
+
+    def get_raw_inventory(self, inventory_string):
+        return f'File contents:\n{inventory_string}'
+
+    @classmethod
+    def import_inventory(cls, instance, data):
+        instance.update_inventory_state(data=data)
+        return instance
 
 
 class BaseTestCase(VSTBaseTestCase):
@@ -243,8 +284,46 @@ class BaseProjectTestCase(BaseTestCase):
             shutil.rmtree(settings.PROJECTS_DIR)
         super().tearDown()
 
-    @staticmethod
-    def create_project_bulk_data(type='MANUAL', **kwargs):
+    def create_inventory_bulk_data(self, plugin='POLEMARCH_DB', project_id=None, **kwargs):
+        return {
+            'method': 'post',
+            'path': 'inventory' if project_id is None else ['project', project_id, 'inventory'],
+            'data': {
+                'name': 'test-inventory',
+                'plugin': plugin,
+                **kwargs,
+            }
+        }
+
+    def update_inventory_state_bulk_data(self, inventory_id, project_id=None, **kwargs):
+        path = ['inventory', inventory_id, 'state']
+        if project_id is not None:
+            path = ['project', project_id] + path
+        return {
+            'method': 'patch',
+            'path': path,
+            'data': kwargs,
+        }
+
+    def get_inventory_state_bulk_data(self, inventory_id, project_id=None):
+        path = ['inventory', inventory_id, 'state']
+        if project_id is not None:
+            path = ['project', project_id] + path
+        return {
+            'method': 'get',
+            'path': path,
+        }
+
+    def get_inventory_bulk_data(self, inventory_id, project_id=None):
+        path = ['inventory', inventory_id]
+        if project_id is not None:
+            path = ['project', project_id] + path
+        return {
+            'method': 'get',
+            'path': path,
+        }
+
+    def create_project_bulk_data(self, type='MANUAL', **kwargs):
         return {
             'method': 'post',
             'path': 'project',
@@ -416,6 +495,14 @@ class BaseProjectTestCase(BaseTestCase):
 
 @own_projects_dir
 class ProjectTestCase(BaseProjectTestCase):
+    def test_project_files_deletion(self):
+        project_path = Path(self.project.path)
+        self.assertTrue(project_path.is_dir())
+        self.bulk_transactional(
+            {'method': 'delete', 'path': ['project', self.project.id]},
+        )
+        self.assertFalse(project_path.is_dir())
+
     def test_copy_project(self):
         results = self.bulk_transactional([
             # [0] add variable to project
@@ -518,9 +605,216 @@ class ProjectTestCase(BaseProjectTestCase):
 
 @own_projects_dir
 class InventoryTestCase(BaseProjectTestCase):
+    def test_ansible_string_inventory(self):
+        inventory_string = (TEST_DATA_DIR / 'repo' / 'inventory.ini').read_text()
+
+        results = self.bulk_transactional([
+            # [0]
+            self.create_inventory_bulk_data('ANSIBLE_STRING', self.project.id),
+            # [1]
+            self.get_inventory_state_bulk_data(inventory_id='<<0[data][id]>>'),
+        ])
+        self.assertEqual(results[0]['data']['plugin'], 'ANSIBLE_STRING')
+        self.assertDictEqual(results[1]['data']['data'], {
+            'body': '',
+            'extension': 'yaml',
+            'executable': False,
+        })
+
+        inventory_id = results[0]['data']['id']
+
+        results = self.bulk_transactional([
+            # [0]
+            self.update_inventory_state_bulk_data(
+                inventory_id=inventory_id,
+                data={
+                    'executable': True,
+                    'extension': 'ini',
+                    'body': inventory_string,
+                }
+            ),
+            # [1]
+            self.execute_plugin_bulk_data(
+                'ANSIBLE_MODULE',
+                module='system.ping',
+                inventory=inventory_id,
+            ),
+            # [2]
+            self.get_history_bulk_data('<<1[data][history_id]>>'),
+        ])
+        self.assertDictEqual(results[0]['data']['data'], {
+            'body': inventory_string,
+            'extension': 'ini',
+            'executable': True,
+        })
+        self.assertEqual(results[2]['data']['status'], 'OK')
+        self.assertEqual(results[2]['data']['inventory'], inventory_id)
+        self.assertEqual(results[2]['data']['raw_inventory'], inventory_string)
+
+        # check hosts and groups path are unavailable
+        bulk_data = [
+            {
+                'method': 'get',
+                'path': ['inventory', inventory_id, endpoint],
+            }
+            for endpoint in ['variables', 'hosts', 'group', 'all_hosts', 'all_groups']
+        ]
+        results = self.bulk(bulk_data)
+        for result in results:
+            self.assertEqual(result['status'], 404)
+
+        # check that state deletes with inventory
+        state_id = self.get_model_filter('main.Inventory').get(id=inventory_id)._inventory_state_id
+        self.assertIsNotNone(state_id)
+        self.bulk_transactional([
+            {
+                'method': 'delete',
+                'path': ['project', self.project.id, 'inventory', inventory_id],
+                'headers': {'HTTP_X_Purge_Nested': 'true'}
+            },
+        ])
+        self.assertFalse(self.get_model_filter('main.Inventory').filter(id=inventory_id).exists())
+        self.assertFalse(self.get_model_filter('main.InventoryState').filter(id=state_id).exists())
+
+    @use_temp_dir
+    def test_ansible_file_inventory(self, temp_dir):
+        repo_dir = f'{temp_dir}/repo'
+        shutil.copytree(TEST_DATA_DIR / 'repo', repo_dir)
+        repo = git.Repo.init(repo_dir)
+        repo.git.add(all=True)
+        repo.index.commit('Initial commit')
+
+        results = self.bulk_transactional([
+            # [0]
+            self.create_project_bulk_data(type='GIT', repository=repo_dir),
+            # [1]
+            self.sync_project_bulk_data('<<0[data][id]>>'),
+            # [2]
+            self.create_inventory_bulk_data('ANSIBLE_FILE', project_id='<<0[data][id]>>'),
+            # [3]
+            self.get_inventory_state_bulk_data('<<2[data][id]>>'),
+        ])
+        self.assertDictEqual(results[3]['data']['data'], {'path': ''})
+
+        project_id = results[0]['data']['id']
+        inventory_id = results[2]['data']['id']
+
+        results = self.bulk_transactional([
+            # [0]
+            self.update_inventory_state_bulk_data(inventory_id, data={'path': './inventory.ini'}),
+            # [1]
+            self.execute_plugin_bulk_data(
+                'ANSIBLE_MODULE',
+                module='system.ping',
+                project_id=project_id,
+                inventory=inventory_id,
+            ),
+            # [2]
+            self.get_history_bulk_data('<<1[data][history_id]>>'),
+            # [3] create new inventory and check that its state has defaults
+            self.create_inventory_bulk_data('ANSIBLE_FILE', project_id=project_id),
+            # [4]
+            self.get_inventory_state_bulk_data('<<3[data][id]>>'),
+        ])
+        self.assertDictEqual(results[0]['data']['data'], {'path': './inventory.ini'})
+        self.assertEqual(results[2]['data']['status'], 'OK')
+        self.assertEqual(results[2]['data']['inventory'], inventory_id)
+        self.assertEqual(
+            results[2]['data']['raw_inventory'],
+            (TEST_DATA_DIR / 'repo' / 'inventory.ini').read_text()
+        )
+        self.assertDictEqual(results[4]['data']['data'], {'path': ''})
+
+        # check hosts and groups path are unavailable
+        bulk_data = [
+            {
+                'method': 'get',
+                'path': ['inventory', inventory_id, endpoint],
+            }
+            for endpoint in ['variables', 'hosts', 'group', 'all_hosts', 'all_groups']
+        ]
+        results = self.bulk(bulk_data)
+        for result in results:
+            self.assertEqual(result['status'], 404)
+
+        # check copy
+        results = self.bulk_transactional([
+            {
+                'method': 'post',
+                'path': ['project', project_id, 'inventory', inventory_id, 'copy'],
+                'data': {'name': 'copied'},
+            },
+            self.get_inventory_state_bulk_data('<<0[data][id]>>'),
+        ])
+        self.assertDictEqual(results[1]['data']['data'], {'path': './inventory.ini'})
+
+        # check that state deletes with inventory
+        state_id = self.get_model_filter('main.Inventory').get(id=inventory_id)._inventory_state_id
+        self.assertIsNotNone(state_id)
+        self.bulk_transactional([
+            {
+                'method': 'delete',
+                'path': ['project', project_id, 'inventory', inventory_id],
+                'headers': {'HTTP_X_Purge_Nested': 'true'}
+            },
+        ])
+        self.assertFalse(self.get_model_filter('main.Inventory').filter(id=inventory_id).exists())
+        self.assertFalse(self.get_model_filter('main.InventoryState').filter(id=state_id).exists())
+
+    def test_custom_inventory_plugin(self):
+        results = self.bulk_transactional([
+            # [0]
+            self.create_inventory_bulk_data('TEST_INVENTORY_PLUGIN', project_id=self.project.id),
+            # [1]
+            self.get_inventory_state_bulk_data('<<0[data][id]>>'),
+        ])
+        self.assertDictEqual(results[1]['data']['data'], {'body': 'localhost ansible_connection=local'})
+
+        inventory = self.get_model_filter('main.Inventory').get(id=results[0]['data']['id'])
+        self.assertDictEqual(inventory.inventory_state.data, {'body': 'localhost ansible_connection=local'})
+
+        # check post_execute_hook
+        results = self.bulk_transactional([
+            self.execute_plugin_bulk_data(
+                'TEST_MODULE',
+                module='system.ping',
+                inventory=inventory.id,
+            ),
+            self.get_history_bulk_data('<<0[data][history_id]>>'),
+        ])
+        self.assertEqual(results[1]['data']['status'], 'OK')
+        self.assertEqual(results[1]['data']['inventory'], inventory.id)
+        self.assertEqual(results[1]['data']['raw_inventory'], 'File contents:\nlocalhost ansible_connection=local')
+
+        inventory.inventory_state.refresh_from_db()
+        self.assertDictEqual(inventory.inventory_state.data, {
+            'body': 'localhost ansible_connection=local',
+            'counter': 1,
+        })
+
+        results = self.bulk([
+            # [0] try to execute incompatible execution plugin
+            self.execute_plugin_bulk_data(
+                'ANSIBLE_MODULE',
+                module='system.ping',
+                inventory=inventory.id,
+            ),
+            # [1] try to create option with incompatible plugin
+            self.create_template_option_bulk_data(arguments={
+                'module': 'system.ping',
+                'inventory': inventory.id,
+            }),
+        ])
+        for result in results:
+            self.assertEqual(result['status'], 400)
+            self.assertEqual(
+                result['data']['detail'],
+                'Inventory plugin TEST_INVENTORY_PLUGIN is not compatible with execution plugin ANSIBLE_MODULE.',
+            )
+
     def test_fk_inventory_usage(self):
         results = self.bulk_transactional([
-            {'method': 'post', 'path': 'inventory', 'name': 'unreachable'},
+            self.create_inventory_bulk_data(name='unreachable'),
             self.create_template_bulk_data(),
 
         ])
@@ -549,110 +843,66 @@ class InventoryTestCase(BaseProjectTestCase):
             self.assertEqual(results[idx]['status'], 400, f'Failed on {idx}')
             self.assertEqual(results[idx]['data'], ['No Inventory matches the given query.'])
 
-    def test_import_inventory(self):
-        def check_import(file_import=False):
-            inventory = (TEST_DATA_DIR / 'inventory.yml').read_text()
-            shutil.copy(
-                f'{TEST_DATA_DIR}/inventory.yml',
-                f'{settings.PROJECTS_DIR}/{self.project.id}/inventory.yml'
-            )
+    def test_import_polemarch_db_inventory(self):
+        inventory = (TEST_DATA_DIR / 'inventory.yml').read_text()
+        shutil.copy(
+            TEST_DATA_DIR / 'inventory.yml',
+            Path(settings.PROJECTS_DIR) / str(self.project.id) / 'inventory.yml'
+        )
 
-            raw_import_request = {
+        results = self.bulk_transactional([
+            # [0]
+            {
                 'method': 'post',
                 'path': ['project', self.project.id, 'inventory', 'import_inventory'],
-                'data': {'name': 'inventory', 'raw_data': inventory}
-            }
-            file_import_request = {
+                'data': {'name': 'inventory', 'plugin': 'POLEMARCH_DB', 'data': {'body': inventory}},
+            },
+            # [1] check hosts added
+            {'method': 'get', 'path': ['inventory', '<<0[data][inventory_id]>>', 'all_hosts']},
+            # [2] check groups added
+            {'method': 'get', 'path': ['inventory', '<<0[data][inventory_id]>>', 'all_groups']},
+            # [3] check variables added
+            {'method': 'get', 'path': ['inventory', '<<0[data][inventory_id]>>', 'variables']},
+            # [4] check created inventory in project
+            self.get_inventory_bulk_data('<<0[data][inventory_id]>>', self.project.id),
+        ])
+        self.assertEqual(results[1]['data']['count'], 3)
+        self.assertEqual(results[2]['data']['count'], 3)
+        self.assertEqual(results[3]['data']['count'], 1)
+        self.assertEqual(results[4]['data']['name'], 'inventory')
+        self.assertEqual(results[4]['data']['plugin'], 'POLEMARCH_DB')
+
+        inventory_id = results[0]['data']['inventory_id']
+
+        # check copy
+        results = self.bulk_transactional([
+            # [0]
+            {
                 'method': 'post',
-                'path': ['project', self.project.id, 'inventory', 'import_inventory_from_file'],
-                'data': {'filepath': 'inventory.yml'}
-            }
-            results = self.bulk([
-                # [0] import inventory from string or file to project
-                file_import_request if file_import else raw_import_request,
-                # [1] check hosts added
-                {'method': 'get', 'path': ['inventory', '<<0[data][inventory_id]>>', 'all_hosts']},
-                # [2] check groups added
-                {'method': 'get', 'path': ['inventory', '<<0[data][inventory_id]>>', 'all_groups']},
-                # [3] check variables added
-                {'method': 'get', 'path': ['inventory', '<<0[data][inventory_id]>>', 'variables']},
-                # [4] check created inventory in project
-                {'method': 'get', 'path': ['project', self.project.id, 'inventory', '<<0[data][inventory_id]>>']},
-            ])
-            self.assertEqual(results[0]['status'], 201)
-            self.assertEqual(results[1]['status'], 200, results[1])
-            self.assertEqual(results[1]['data']['count'], 3)
-            self.assertEqual(results[2]['status'], 200)
-            self.assertEqual(results[2]['data']['count'], 3)
-            self.assertEqual(results[3]['status'], 200)
-            self.assertEqual(results[3]['data']['count'], 1)
-            self.assertEqual(results[4]['status'], 200)
-            self.assertEqual(results[4]['data']['name'], 'inventory')
-
-            return results[0]['data']['inventory_id']
-
-        check_import(file_import=False)
-        imported_inventory_id = check_import(file_import=True)
+                'path': ['inventory', inventory_id, 'copy'],
+                'data': {'name': 'copied'},
+            },
+            # [1] check hosts added
+            {'method': 'get', 'path': ['inventory', '<<0[data][id]>>', 'all_hosts']},
+            # [2] check groups added
+            {'method': 'get', 'path': ['inventory', '<<0[data][id]>>', 'all_groups']},
+            # [3] check variables added
+            {'method': 'get', 'path': ['inventory', '<<0[data][id]>>', 'variables']},
+        ])
+        self.assertEqual(results[1]['data']['count'], 3)
+        self.assertEqual(results[2]['data']['count'], 3)
+        self.assertEqual(results[3]['data']['count'], 1)
 
         # check invalid inventory
         results = self.bulk([
             {
                 'method': 'post',
                 'path': ['project', self.project.id, 'inventory', 'import_inventory'],
-                'data': {'name': 'lol', 'raw_data': '*_lol_*'}
+                'data': {'name': 'lol', 'plugin': 'POLEMARCH_DB', 'data': {'body': '*&^?invalid'}}
             },
-            {
-                'method': 'post',
-                'path': ['project', self.project.id, 'inventory', 'import_inventory_from_file'],
-                'data': {'filepath': 'not_exists.yml'}
-            }
         ])
         self.assertEqual(results[0]['status'], 400)
         self.assertIn('Invalid hostname or IP', results[0]['data']['detail']['other_errors'][0])
-        self.assertEqual(results[1]['status'], 400)
-        self.assertIn('No such file or directory', results[1]['data']['detail'], results[1]['data'])
-
-        # check file imported inventory updates with project
-        inventory_file = Path(settings.PROJECTS_DIR) / str(self.project.id) / 'inventory.yml'
-        inventory_file.write_text(
-            '---\n  all:\n    hosts:\n      127.0.0.1'
-        )
-        results = self.bulk([
-            self.sync_project_bulk_data(),
-            {'method': 'get', 'path': ['inventory', imported_inventory_id, 'all_hosts']},
-            {'method': 'get', 'path': ['inventory', imported_inventory_id, 'all_groups']},
-        ])
-        for result in results:
-            self.assertIn(result['status'], {200, 201}, result)
-        self.assertEqual(results[1]['data']['count'], 1)
-        self.assertEqual(results[2]['data']['count'], 0)
-
-        # remove inventory from file system and sync
-        inventory_file.unlink()
-        self.bulk([self.sync_project_bulk_data()])
-        self.assertFalse(self.get_model_class('main.Inventory').objects.filter(pk=imported_inventory_id).exists())
-
-        # check remove project also removes imported inventory
-        imported_inventory_id = check_import(file_import=True)
-        results = self.bulk([
-            {  # [0] check have no permission to change imported inventory items
-                'method': 'post',
-                'path': ['inventory', imported_inventory_id, 'variables'],
-                'data': {'key': 'lol', 'value': 'kek'}
-            },
-            {  # [1] check cannot delete imported inventory while linked project exists
-                'method': 'delete',
-                'path': ['inventory', imported_inventory_id]
-            },
-            {  # [2] delete linked project
-                'method': 'delete',
-                'path': ['project', self.project.id],
-            },
-        ])
-        self.assertEqual(results[0]['status'], 403)
-        self.assertEqual(results[1]['status'], 403)
-        self.assertEqual(results[2]['status'], 204)
-        self.assertFalse(self.get_model_class('main.Inventory').objects.filter(pk=imported_inventory_id).exists())
 
     def test_delete_linked_inventory(self):
         # check linked inventory to project
@@ -678,11 +928,8 @@ class InventoryTestCase(BaseProjectTestCase):
     @use_temp_dir
     def test_valid_inventory(self, temp_dir):
         results = self.bulk_transactional([
-            {  # [0] create inventory with name
-                'method': 'post',
-                'path': 'inventory',
-                'data': {'name': 'inventory', 'notes': 'inventory'},
-            },
+            # [0]
+            self.create_inventory_bulk_data(name='inventory', notes='inventory'),
             {  # [1] create host with type RANGE
                 'method': 'post',
                 'path': ['inventory', '<<0[data][id]>>', 'hosts'],
@@ -745,9 +992,11 @@ class InventoryTestCase(BaseProjectTestCase):
 
         # compare generated inventory with ready one
         generated_inventory_id = results[0]['data']['id']
-        generated_inventory = self.get_model_class('main.Inventory').objects.get(
-            pk=generated_inventory_id
-        ).get_inventory(temp_dir)[0]
+        generated_inventory_obj = self.get_model_class('main.Inventory').objects.get(pk=generated_inventory_id)
+        generated_inventory = generated_inventory_obj.plugin_object.render_inventory(
+            generated_inventory_obj,
+            Path(temp_dir),
+        )[0].read_text()
         inventory_to_compare = (TEST_DATA_DIR / 'inventory.yml').read_text()
         # remove possible spaces between last symbol and \n
         # e.g. "word   \n  word" becomes "word\n  word"
@@ -760,17 +1009,17 @@ class InventoryTestCase(BaseProjectTestCase):
             self.assertEqual(wr_string, 'lol_file')
 
         with self.patch('vstutils.utils.tmp_file.write', side_effect=check_wr_string):
-            results = self.bulk([
+            results = self.bulk_transactional([
                 {  # [0] create ansible_ssh_private_key_file variable
                     'method': 'post',
                     'path': ['inventory', generated_inventory_id, 'variables'],
                     'data': {'key': 'ansible_ssh_private_key_file', 'value': 'lol_file'}
                 },
             ])
-            self.assertEqual(results[0]['status'], 201)
-            self.get_model_class('main.Inventory').objects.get(pk=generated_inventory_id).get_inventory(temp_dir)
+            inventory_obj = self.get_model_class('main.Inventory').objects.get(pk=generated_inventory_id)
+            inventory_obj.plugin_object.render_inventory(inventory_obj, Path(temp_dir))
 
-        results = self.bulk([
+        results = self.bulk_transactional([
             {  # [0] get all groups
                 'method': 'get',
                 'path': ['inventory', generated_inventory_id, 'all_groups']
@@ -780,10 +1029,21 @@ class InventoryTestCase(BaseProjectTestCase):
                 'path': ['inventory', generated_inventory_id, 'all_hosts']
             },
         ])
-        self.assertEqual(results[0]['status'], 200)
         self.assertEqual(results[0]['data']['count'], 3)
-        self.assertEqual(results[1]['status'], 200)
         self.assertEqual(results[1]['data']['count'], 3)
+
+        # check that POLEMARCH_DB inventory has not 'state' path
+        results = self.bulk(
+            {
+                'method': 'get',
+                'path': ['inventory', generated_inventory_id, 'state'],
+            }
+        )
+        self.assertEqual(results[0]['status'], 404)
+
+        # check that cannot access inventory state
+        with self.assertRaises(NotApplicable):
+            self.get_model_filter('main.Inventory').get(id=generated_inventory_id).inventory_state
 
     def test_groups_cyclic_dependence(self):
         results = self.bulk([
@@ -1081,7 +1341,7 @@ class InventoryTestCase(BaseProjectTestCase):
         user1 = self._create_user(is_super_user=False, is_staff=False)
         with self.user_as(self, user1):
             results = self.bulk_transactional([
-                {'method': 'post', 'path': 'inventory', 'data': {'name': 'test'}},
+                self.create_inventory_bulk_data(name='test'),
                 {'method': 'get', 'path': ['inventory', '<<0[data][id]>>']},
             ])
         self.assertEqual(results[1]['data']['owner'], user1.id)
@@ -2129,7 +2389,6 @@ class SyncTestCase(BaseProjectTestCase):
             if not no_assert:
                 # history
                 self.assertEqual(results[-2]['data']['status'], 'OK')
-                self.assertEqual(results[-2]['data']['revision'], revision)
                 # project
                 self.assertEqual(results[-1]['data']['revision'], revision0)
                 self.assertEqual(results[-1]['data']['status'], 'OK')
@@ -2143,7 +2402,6 @@ class SyncTestCase(BaseProjectTestCase):
 
         results = check_execution('invalid', no_assert=True)
         self.assertEqual(results[-2]['data']['status'], 'ERROR')
-        self.assertEqual(results[-2]['data']['revision'], 'invalid')
         self.assertEqual(results[-1]['data']['revision'], revision0)
         self.assertEqual(results[-1]['data']['status'], 'OK')
 
@@ -2164,7 +2422,6 @@ class SyncTestCase(BaseProjectTestCase):
             self.get_project_bulk_data(project_id)
         ])
         self.assertEqual(results[-2]['data']['status'], 'OK')
-        self.assertEqual(results[-2]['data']['revision'], 'master')
         self.assertEqual(results[-1]['data']['revision'], revision0)
         self.assertEqual(results[-1]['data']['status'], 'OK')
 
@@ -2203,7 +2460,7 @@ class SyncTestCase(BaseProjectTestCase):
                 self.get_history_bulk_data('<<0[data][history_id]>>'),
             ])
             self.assertEqual(results[-1]['data']['status'], 'ERROR')
-            self.assertEqual(results[-1]['data']['revision'], 'NO VCS')
+            self.assertIsNone(results[-1]['data']['revision'])
 
             # check that with repo_sync_on_run=False project will be copied
             results = self.bulk_transactional([
@@ -2354,7 +2611,15 @@ class SyncTestCase(BaseProjectTestCase):
         # test cannot set not existing option
         with self.assertRaises(ValidationError):
             self.project.vars = {'ci_template': str(uuid1())}
-            # TODO: check that cannot set option from other project's template
+
+        # check that cannot set option from other project's template
+        results = self.bulk_transactional([
+            self.create_project_bulk_data(),
+            self.create_template_bulk_data('<<0[data][id]>>'),
+        ])
+        option_id = self.get_default_template_option(template_id=results[1]['data']['id']).id
+        with self.assertRaises(ValidationError):
+            self.project.vars = {'ci_template': str(option_id)}
 
         results = self.bulk_transactional([
             # [0] setup execution template
@@ -2783,10 +3048,10 @@ class PlaybookAndModuleTestCase(BaseProjectTestCase):
         self.assertEqual(results[5]['data']['detail'], 'test string 2\n')
 
         # check that plugin cannot access other than allowed Project's attributes
-        def access_unsafe(inner_self, *args, **kwargs):
-            inner_self.project_data.objects.delete()
+        def access_unsafe(inner_self, project_data):
+            project_data.objects.delete()
 
-        with self.patch(f'{TESTS_MODULE}.TestEcho.get_args', side_effect=access_unsafe, autospec=True):
+        with self.patch(f'{TESTS_MODULE}.TestEcho.get_env_vars', side_effect=access_unsafe, autospec=True):
             results = self.bulk_transactional([
                 # [0]
                 self.execute_plugin_bulk_data('test_echo', string='test string'),
@@ -2966,6 +3231,30 @@ class PlaybookAndModuleTestCase(BaseProjectTestCase):
 
 @own_projects_dir
 class HistoryTestCase(BaseProjectTestCase):
+    @use_temp_dir
+    def test_execution_revision(self, temp_dir):
+        repo_dir = f'{temp_dir}/repo'
+        shutil.copytree(f'{TEST_DATA_DIR}/repo', repo_dir)
+        repo = git.Repo.init(repo_dir)
+        repo.git.add(all=True)
+        repo.index.commit('Initial commit')
+
+        results = self.bulk_transactional([
+            self.create_project_bulk_data(type='GIT', repository=repo_dir),
+            self.sync_project_bulk_data('<<0[data][id]>>'),
+            self.execute_plugin_bulk_data(
+                'ANSIBLE_MODULE',
+                module='system.ping',
+                inventory=self.inventory_path,
+                connection='local',
+                project_id='<<0[data][id]>>',
+            ),
+            self.get_history_bulk_data('<<2[data][history_id]>>'),
+        ])
+        project = self.get_model_filter('main.Project').get(id=results[0]['data']['id'])
+        self.assertEqual(project.revision, repo.head.object.hexsha)
+        self.assertEqual(results[-1]['data']['revision'], repo.head.object.hexsha)
+
     def test_history_str_inventory(self):
         results = self.bulk_transactional([
             self.execute_plugin_bulk_data(
@@ -3098,12 +3387,17 @@ class HistoryTestCase(BaseProjectTestCase):
             'inventories',
             'users',
             'execution_plugins',
+            'inventory_plugins',
             'jobs',
         })
         self.assertEqual(results[0]['data']['projects'], self.get_model_filter('main.Project').count())
         self.assertEqual(results[0]['data']['inventories'], self.get_model_filter('main.Inventory').count())
         self.assertEqual(results[0]['data']['users'], User.objects.count())
         self.assertEqual(results[0]['data']['execution_plugins'], len(PLUGIN_HANDLERS))
+        self.assertEqual(
+            results[0]['data']['inventory_plugins'],
+            len(self.get_model_class('main.Inventory').plugin_handlers.keys()),
+        )
         for unit in ['day', 'month', 'year']:
             self.assertEqual(results[0]['data']['jobs'][unit][0]['status'], 'ERROR')
             self.assertEqual(results[0]['data']['jobs'][unit][1]['status'], 'OK')
@@ -4255,6 +4549,7 @@ class BaseOpenAPITestCase(VSTBaseTestCase):
     maxDiff = None
     _schema = None
     builtin_execution_plugins = {'ANSIBLE_PLAYBOOK', 'ANSIBLE_MODULE'}
+    builtin_inventory_plugins = {'POLEMARCH_DB', 'ANSIBLE_STRING', 'ANSIBLE_FILE'}
 
     system_tab = {
         'name': 'System',
@@ -4292,6 +4587,13 @@ class BaseOpenAPITestCase(VSTBaseTestCase):
             'External execution plugins are not allowed in generated YML schema.'
         )
 
+    def check_inventory_plugins(self, values, exclude=set()):
+        self.assertSetEqual(
+            set(values),
+            self.builtin_inventory_plugins - exclude,
+            'External inventory plugins are not allowed in generated YML schema.'
+        )
+
     def get_schemas_for_test(self):
         endpoint_schema = self.schema()
         yml_schema = yaml.load(Path(self.openapi_schema_yaml).read_text(), Loader=yaml.SafeLoader)
@@ -4327,6 +4629,24 @@ class BaseOpenAPITestCase(VSTBaseTestCase):
         ):
             if query_def['name'] == 'plugin':
                 yml_schema['paths']['/project/{id}/execution_templates/']['get']['parameters'][idx] = query_def
+
+        for def_ in ('Inventory', 'OneInventory', 'CreateInventory'):
+            yml_enum = yml_schema['definitions'][def_]['properties']['plugin']['enum']
+            self.check_inventory_plugins(yml_enum)
+            endpoint_schema['definitions'][def_]['properties']['plugin']['enum'] = yml_enum
+
+        for def_ in ('InventoryState', 'InventoryStateUpdate'):
+            yml_types = yml_schema['definitions'][def_]['properties']['data']['x-options']['types']
+            self.check_inventory_plugins(yml_types.keys())
+            endpoint_schema['definitions'][def_]['properties']['data']['x-options']['types'] = yml_types
+
+        for def_ in ('ImportInventory', 'ProjectImportInventory'):
+            yml_enum = yml_schema['definitions'][def_]['properties']['plugin']['enum']
+            yml_types = yml_schema['definitions'][def_]['properties']['data']['x-options']['types']
+            self.check_inventory_plugins(yml_enum, exclude={'ANSIBLE_FILE'})
+            self.check_inventory_plugins(yml_types.keys(), exclude={'ANSIBLE_FILE'})
+            endpoint_schema['definitions'][def_]['properties']['plugin']['enum'] = yml_enum
+            endpoint_schema['definitions'][def_]['properties']['data']['x-options']['types'] = yml_types
 
         del yml_schema['definitions']['_MainSettings']
         del endpoint_schema['definitions']['_MainSettings']
@@ -4406,7 +4726,7 @@ class MetricsTestCase(VSTBaseTestCase):
         for i in range(4):
             Project.objects.create(name=f'test_metrics_{i}', status='ERROR')
 
-    def test_metrics(self):  # FIXME (EE)
+    def test_metrics(self):
         result = self.get_result('get', '/api/metrics/')
         expected = (Path(__file__).parent / 'test_data' / 'metrics.txt').read_text('utf-8')
         expected = expected.replace(
@@ -5060,9 +5380,8 @@ class BaseExecutionPluginUnitTestCase(VSTBaseTestCase):
 
     def get_plugin_instance(self, options=None, execution_dir=None):
         instance = self.plugin_class(
-            options or {},
-            ProjectProxy(DummyProject()),
-            self.dummy_output_handler
+            options=options or {},
+            output_handler=self.dummy_output_handler
         )
         instance.execution_dir = execution_dir or self.dummy_execution_dir
         return instance
@@ -5169,6 +5488,7 @@ class AnsiblePlaybookExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase
         cmd, env, raw_inventory = instance.get_execution_data(
             self.dummy_execution_dir,
             all_args,
+            ProjectProxy(DummyProject()),
         )
         self.assertEqual(raw_inventory, 'inventory:value')
         self.assertDictEqual(env, {
@@ -5224,6 +5544,7 @@ somegroup:
         ansible_ssh_private_key_file: somefile
                 """
             },
+            ProjectProxy(DummyProject()),
         )
         self.assertEqual(raw_inventory.strip(), f"""
 ---
@@ -5251,7 +5572,8 @@ somegroup:
             {
                 'playbook': 'playbook.yml',
                 'inventory': inventory,
-            }
+            },
+            ProjectProxy(DummyProject()),
         )
         self.assertEqual(raw_inventory.strip(), f"""
 ---
@@ -5363,6 +5685,7 @@ class AnsibleModuleExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase):
         cmd, env, raw_inventory = instance.get_execution_data(
             self.dummy_execution_dir,
             all_args,
+            ProjectProxy(DummyProject()),
         )
         self.assertEqual(raw_inventory, 'inventory:value')
         self.assertDictEqual(env, {
@@ -5420,6 +5743,7 @@ somegroup:
         ansible_ssh_private_key_file: somefile
                 """
             },
+            ProjectProxy(DummyProject()),
         )
         self.assertEqual(raw_inventory.strip(), f"""
 ---
@@ -5447,7 +5771,8 @@ somegroup:
             {
                 'module': 'system.ping',
                 'inventory': inventory,
-            }
+            },
+            ProjectProxy(DummyProject()),
         )
         self.assertEqual(raw_inventory.strip(), f"""
 ---

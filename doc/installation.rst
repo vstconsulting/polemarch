@@ -152,11 +152,11 @@ Install from PyPI
       .. code-block:: ini
 
          [cache]
-         backend = django_redis.cache.RedisCache
+         backend = django.core.cache.backends.redis.RedisCache
          location = redis://127.0.0.1:6379/1
 
          [locks]
-         backend = django_redis.cache.RedisCache
+         backend = django.core.cache.backends.redis.RedisCache
          location = redis://127.0.0.1:6379/2
 
       .. note:: Set host ip and port instead of 127.0.0.1:6379 if you connect to remote server.

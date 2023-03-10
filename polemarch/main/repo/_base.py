@@ -244,24 +244,11 @@ class _Base:
 
         return chain(self.search_files(repo, '*.yml'), path_list_additional)
 
-    def _update_slave_inventories(self, slave_inventory_list):
-        for slave_inv in slave_inventory_list:
-            ext = getattr(slave_inv.variables.filter(key='inventory_extension').last(), 'value', '')
-            file_path = pathlib.Path(f"{settings.PROJECTS_DIR}/{self.proj.id}/{slave_inv.name}{ext}")
-            if not file_path.exists():
-                slave_inv.delete()
-                continue
-            slave_inv.import_inventory_from_string(
-                raw_data=file_path.read_text(),
-                name=slave_inv.name,
-                inventory_instance=slave_inv
-            )
-
     def _make_operations(self, operation: Callable) -> Any:
         '''
         Handle VCS operations and sync data from project.
 
-        :param operation: function that should be hdandled.
+        :param operation: function that should be handled.
         :return: tuple with repo-object and fetch-results
         '''
         self._set_status("SYNC")
@@ -272,7 +259,6 @@ class _Base:
                 self._update_tasks(self._get_playbook_path(result[0]))
                 self._set_project_modules()
                 self._handle_yaml(self._load_yaml() or {})
-                self._update_slave_inventories(self.proj.slave_inventory.all())
                 self.proj.save()
         except Exception as err:
             logger.debug(traceback.format_exc())
@@ -300,7 +286,7 @@ class _Base:
         '''
         raise NotImplementedError
 
-    def get_revision(self, *args, **kwargs) -> Text:
+    def get_revision(self, *args, repo=None, **kwargs) -> Text:
         # pylint: disable=unused-argument
         return "NO VCS"
 
@@ -346,8 +332,9 @@ class _Base:
     def revision(self) -> Text:
         return self._operate(self.get_revision)
 
-    def make_run_copy(self, destination: Text, revision: Text):
+    def make_run_copy(self, destination: Text, revision: Text) -> str:
         shutil.copytree(self.proj.path, destination)
+        return self.get_revision()
 
 
 class _ArchiveRepo(_Base):
@@ -384,12 +371,13 @@ class _ArchiveRepo(_Base):
     def _extract(self, archive, path, options):
         raise NotImplementedError  # nocv
 
-    def make_run_copy(self, destination: Text, revision: Text):
+    def make_run_copy(self, destination: Text, revision: Text) -> str:
         if self.proj.repo_sync_on_run:
-            return self.make_clone({
+            self.make_clone({
                 'destination': destination,
                 'revision': revision,
                 'no_update': True,
                 'timeout': self.proj.repo_sync_timeout,
             })
+            return self.get_revision()
         return super().make_run_copy(destination, revision)

@@ -424,7 +424,8 @@ Configuration options
 
 This section contains additional information for configure additional elements.
 
-#. If you need set ``https`` for your web settings, you can do it using HAProxy, Nginx or configure it in ``settings.ini``.
+#. If you need to set ``https`` for your web settings, you can do it using HAProxy, Nginx or configure it in
+``settings.ini``.
 
     .. sourcecode:: ini
 
@@ -437,28 +438,58 @@ This section contains additional information for configure additional elements.
 .. note:: If you need more options you can find it in :doc:`vstutils:config` in the official vstutils documentation.
 
 
-.. _plugins_config:
+.. _inventory_plugins_config:
 
-Execution plugins
------------------
+Inventory plugins config
+------------------------
 
-To connect a plugin to Polemarch, there should be a section
+To connect an inventory plugin to Polemarch, there should be a section
 
 .. sourcecode:: ini
 
-    [plugin.<plugin_name>]
+    [inventory.plugin.<plugin_name>]
     backend = import.path.to.plugin.Class
 
 Where
 
-* **<plugin_name>** - name that will available in API to work with
+* **<plugin_name>** - name that will be available in API to work with
 * **backend** - is a python import path to plugin class
 
 Also you may add options which will be available in plugin:
 
 .. sourcecode:: ini
 
-    [plugin.<plugin_name>.options]
+    [inventory.plugin.<plugin_name>.options]
+    some_option = some_option
+
+To read more about plugins, please see :doc:`plugins`.
+
+
+.. _execution_plugins_config:
+
+Execution plugins config
+------------------------
+
+To connect an execution plugin to Polemarch, there should be a section
+
+.. sourcecode:: ini
+
+    [execution.plugin.<plugin_name>]
+    backend = import.path.to.plugin.Class
+    compatible_inventory_plugins = <inventory_plugin1>,<inventory_plugin1>
+
+Where
+
+* **<plugin_name>** - name that will be available in API to work with
+* **backend** - is a python import path to plugin class
+* **compatible_inventory_plugins** - inventory plugins which are compatible with this execution plugin. If omitted,
+                                   it's supposed that execution plugin cannot work with any inventory.
+
+Also you may add options which will be available in plugin:
+
+.. sourcecode:: ini
+
+    [execution.plugin.<plugin_name>.options]
     some_option = some_option
 
 To read more about plugins, please see :doc:`plugins`.

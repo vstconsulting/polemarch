@@ -36,6 +36,7 @@ spa.signals.once('allViews.created', ({ views }) => {
             { key: 'projects', label: 'Projects', href: '#/project', icon: 'fa fa-cog' },
             { key: 'users', label: 'Users', href: '#/user', icon: 'fa fa-cog' },
             { key: 'inventories', label: 'Inventories', href: '#/inventory', icon: 'fas fa-cog' },
+            { key: 'inventory_plugins', label: 'Inventory plugins', icon: 'fas fa-cog' },
             { key: 'execution_plugins', label: 'Execution plugins', icon: 'fas fa-cog' },
         ]);
         const additionalSections = computed(() => []);

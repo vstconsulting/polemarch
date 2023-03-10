@@ -121,6 +121,21 @@ history_line_viewset_data = {
 _HistoryLineViewSet = create_view(**history_line_viewset_data)
 
 
+history_executor_field_types = {
+    'project': vstfields.FkModelField(select=UserSerializer, read_only=True, autocomplete_represent='username'),
+    'template': vstfields.FkModelField(
+        select=UserSerializer,
+        read_only=True,
+        autocomplete_represent='username',
+    ),
+    'scheduler': {
+        'type': 'string',
+        'format': 'static_value',
+        'x-options': {'staticValue': 'system', 'realField': 'string'},
+    },
+}
+
+
 history_viewset_data = {
     'model': History,
     'view_class': (HistoryViewMixin,),
@@ -164,37 +179,13 @@ history_viewset_data = {
     'override_list_fields': {
         'inventory': InventoryAutoCompletionField(read_only=True),
         'status': drffields.ChoiceField(choices=HistoryStatus.to_choices()),
-        'executor': vstfields.DependEnumField(field='initiator_type', types={
-            'project': vstfields.FkModelField(select=UserSerializer, read_only=True, autocomplete_represent='username'),
-            'template': vstfields.FkModelField(
-                select=UserSerializer,
-                read_only=True,
-                autocomplete_represent='username'
-            ),
-            'scheduler': {
-                'type': 'string',
-                'format': 'static_value',
-                'x-options': {'staticValue': 'system', 'realField': 'string'}
-            }
-        })
+        'executor': vstfields.DependEnumField(field='initiator_type', types=history_executor_field_types)
     },
     'override_detail_fields': {
         'raw_stdout': drffields.SerializerMethodField(read_only=True),
         'execution_time': vstfields.UptimeField(),
         'status': drffields.ChoiceField(choices=HistoryStatus.to_choices()),
-        'executor': vstfields.DependEnumField(field='initiator_type', types={
-            'project': vstfields.FkModelField(select=UserSerializer, read_only=True, autocomplete_represent='username'),
-            'template': vstfields.FkModelField(
-                select=UserSerializer,
-                read_only=True,
-                autocomplete_represent='username'
-            ),
-            'scheduler': {
-                'type': 'string',
-                'format': 'static_value',
-                'x-options': {'staticValue': 'system', 'realField': 'string'}
-            }
-        })
+        'executor': vstfields.DependEnumField(field='initiator_type', types=history_executor_field_types)
     },
     'filterset_fields': {
         'id': None,

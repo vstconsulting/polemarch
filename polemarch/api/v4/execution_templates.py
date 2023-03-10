@@ -18,8 +18,8 @@ from .history import HistoryViewSet
 
 
 ARGUMENTS_TYPES = {
-    plugin: backend.get_serializer_class()()
-    for plugin, backend in PLUGIN_HANDLERS.items()
+    plugin: PLUGIN_HANDLERS.get_serializer_class(plugin)()
+    for plugin in PLUGIN_HANDLERS.keys()
 }
 
 

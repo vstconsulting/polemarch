@@ -203,37 +203,6 @@ if 'git' in config:
 
 archive_section = ArchiveSection('archive', config, config['archive']).all()
 
-
-class ExecutionPluginSection(BaseAppendSection):
-    types_map = {
-        'backend': cconfig.StrType(),
-    }
-
-
-class ExecutionPluginOptionsSection(ExecutionPluginSection):
-    pass
-
-
-EXECUTION_PLUGINS = {}
-
-for plugin_name, plugin_config, in config['execution']['plugin'].items():
-    if 'backend' in plugin_config:
-        plugin_section = ExecutionPluginSection(
-            f'execution.plugin.{plugin_name}', config, config['execution']['plugin'][plugin_name]
-        ).all()
-        options_section = ExecutionPluginOptionsSection(
-            f'execution.plugin.{plugin_name}.options',
-            config,
-            plugin_section.get('options', {})
-        ).all()
-
-        EXECUTION_PLUGINS[plugin_name.upper()] = {
-            "BACKEND": plugin_section['backend'],
-            "OPTIONS": options_section
-        }
-
-EXECUTION_PLUGIN_HANDLERS_CLASS = f'{VST_PROJECT_LIB_NAME}.main.utils.ExecutionHandlers'
-
 REPO_BACKENDS = {
     "MANUAL": {
         "BACKEND": "{}.main.repo.Manual".format(VST_PROJECT_LIB_NAME),
@@ -260,6 +229,51 @@ REPO_BACKENDS = {
 # Custom user repos
 DEFAULT_COMMUNITY_REPOS_URL = 'https://gitlab.com/vstconsulting/polemarch-community-repos/raw/master/projects.yaml'
 COMMUNITY_REPOS_URL = main.get('community_projects_url', fallback=DEFAULT_COMMUNITY_REPOS_URL)
+
+# Execution plugins
+class ExecutionPluginSection(BaseAppendSection):
+    types_map = {
+        'backend': cconfig.StrType(),
+    }
+
+
+class ExecutionPluginOptionsSection(ExecutionPluginSection):
+    types_map = {
+        'compatible_inventory_plugins': cconfig.ListType(),
+    }
+
+# Execution plugins
+EXECUTION_PLUGIN_HANDLERS_CLASS = f'{VST_PROJECT_LIB_NAME}.main.utils.ExecutionHandlers'
+EXECUTION_PLUGINS = {}
+
+for plugin_name, plugin_config, in config['execution']['plugin'].items():
+    if 'backend' in plugin_config:
+        plugin_section = ExecutionPluginSection(
+            f'execution.plugin.{plugin_name}', config, config['execution']['plugin'][plugin_name]
+        ).all()
+        options_section = ExecutionPluginOptionsSection(
+            f'execution.plugin.{plugin_name}.options',
+            config,
+            plugin_section.get('options', {})
+        ).all()
+        options_section = {key.upper(): val for key, val in options_section.items()}
+        if 'COMPATIBLE_INVENTORY_PLUGINS' in options_section:
+            options_section['COMPATIBLE_INVENTORY_PLUGINS'] = \
+                tuple(k.upper() for k in options_section['COMPATIBLE_INVENTORY_PLUGINS'])
+
+        EXECUTION_PLUGINS[plugin_name.upper()] = {
+            "BACKEND": plugin_section['backend'],
+            "OPTIONS": options_section
+        }
+
+# Inventory plugins
+INVENTORY_PLUGINS = {
+    plugin.upper(): {
+        key.upper(): val
+        for key, val in config['inventory']['plugin'][plugin].all().items()
+    }
+    for plugin in config['inventory']['plugin'].keys()
+}
 
 # History plugins
 history = config['history']
@@ -364,7 +378,24 @@ if "test" in sys.argv:
     tests_module_name = 'tests'
     if VST_PROJECT_LIB_NAME != 'polemarch':
         tests_module_name = 'tests_ce'  # noce
-    EXECUTION_PLUGINS['TEST_ANSIBLE_DOC'] = {'BACKEND': f'{tests_module_name}.TestAnsibleDoc', 'OPTIONS': {}}
-    EXECUTION_PLUGINS['TEST_ECHO'] = {'BACKEND': f'{tests_module_name}.TestEcho', 'OPTIONS': {}}
-    EXECUTION_PLUGINS['TEST_MODULE'] = {'BACKEND': f'{tests_module_name}.TestModule', 'OPTIONS': {}}
+    EXECUTION_PLUGINS['TEST_ANSIBLE_DOC'] = {
+        'BACKEND': f'{tests_module_name}.TestAnsibleDoc',
+        'OPTIONS': {},
+    }
+    EXECUTION_PLUGINS['TEST_ECHO'] = {
+        'BACKEND': f'{tests_module_name}.TestEcho',
+        'OPTIONS': {},
+    }
+    EXECUTION_PLUGINS['TEST_MODULE'] = {
+        'BACKEND': f'{tests_module_name}.TestModule',
+        'OPTIONS': {
+            'COMPATIBLE_INVENTORY_PLUGINS': [
+                'POLEMARCH_DB',
+                'ANSIBLE_FILE',
+                'ANSIBLE_STRING',
+                'TEST_INVENTORY_PLUGIN',
+            ],
+        }
+    }
+    INVENTORY_PLUGINS['TEST_INVENTORY_PLUGIN'] = {'BACKEND': f'{tests_module_name}.TestInventoryPlugin'}
     HISTORY_OUTPUT_PLUGINS = ['database', 'logger']

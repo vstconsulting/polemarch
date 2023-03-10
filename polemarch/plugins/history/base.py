@@ -3,7 +3,7 @@ import contextlib
 
 import orjson
 
-from ..models import History
+from ...main.models import History
 
 
 class BasePlugin:

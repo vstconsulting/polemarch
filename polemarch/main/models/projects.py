@@ -30,6 +30,7 @@ from .base import ManyToManyFieldACL
 from .hooks import Hook
 from ..utils import AnsibleModules, AnsibleConfigParser, SubCacheInterface
 from ..constants import ProjectStatus
+from ..executions import PLUGIN_HANDLERS
 
 
 logger = logging.getLogger("polemarch")
@@ -248,8 +249,6 @@ class Project(AbstractModel):
         Hook.objects.all().execute(when, msg)
 
     def execute(self, plugin: str, execute_args, **kwargs):
-        from ..executions import PLUGIN_HANDLERS  # pylint: disable=import-outside-toplevel
-
         return PLUGIN_HANDLERS.execute(
             plugin,
             self,

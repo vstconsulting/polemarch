@@ -1,76 +1,29 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
-from typing import Any, List, Tuple, Dict, Text
 import logging
+from functools import cached_property
 from django.db.models import Q
-from django.db import transaction
-
-try:
-    from yaml import dump as to_yaml, CDumper as Dumper, ScalarNode
-except ImportError:  # nocv
-    from yaml import dump as to_yaml, Dumper, ScalarNode
-
+from vstutils.models import BModel
+from vstutils.utils import translate as _
 from .base import models
 from .base import ManyToManyFieldACL, ManyToManyFieldACLReverse
 from .vars import AbstractModel, AbstractVarsQuerySet
 from ...main import exceptions as ex
-from ...main.utils import AnsibleInventoryParser
+from ...main.utils import InventoryPluginHandlers
 from ..validators import RegexValidator
+from ...main.exceptions import NotApplicable
+
 
 logger = logging.getLogger("polemarch")
 
 
-def _delete_not_existing_objects(queryset, object_dict):
-    queryset.exclude(name__in=[n['name'] for n in object_dict]).delete()
-
-
-# Helpfull methods
-def _get_dict(objects: AbstractVarsQuerySet, keys: List = None, tmp_dir: Text = '/tmp') -> Tuple[Dict, List]:
-    keys = keys if keys else []
-    result = {}
-    for obj in objects:
-        result[obj.name], obj_keys = obj.toDict(tmp_dir)
-        keys += obj_keys
-    return result, keys
-
-
-class InventoryDumper(Dumper):
-    """
-    Yaml Dumper class for PyYAML
-    """
-    yaml_representers = getattr(Dumper, 'yaml_representers', {}).copy()
-    yaml_representers[type(None)] = lambda dumper, value: (
-        ScalarNode(tag='tag:yaml.org,2002:null', value='')
-    )
-    yaml_representers[str] = lambda dumper, value: (
-        ScalarNode(tag='tag:yaml.org,2002:str', value=value)
-    )
-
-
-# Helpfull exceptions
+# Helpful exceptions
 class CyclicDependencyError(ex.PMException):
     _def_message = "A cyclic dependence was found. {}"
 
-    def __init__(self, tp: Text = ""):
+    def __init__(self, tp: str = ""):
         msg = self._def_message.format(tp)
         super().__init__(msg)
-
-
-# Block of models
-class InventoryItems(AbstractModel):
-    master_project = models.ForeignKey(
-        null=True,
-        on_delete=models.CASCADE,
-        related_name='slave_%(class)s',
-        to='main.Project'
-    )
-
-    class Meta:
-        abstract = True
-
-    @property
-    def from_project(self):
-        return bool(self.master_project)
 
 
 class HostQuerySet(AbstractVarsQuerySet):
@@ -78,7 +31,7 @@ class HostQuerySet(AbstractVarsQuerySet):
     pass
 
 
-class Host(InventoryItems):
+class Host(AbstractModel):
     objects = HostQuerySet.as_manager()
     type = models.CharField(max_length=5, default="HOST")
 
@@ -95,12 +48,30 @@ class Host(InventoryItems):
     def __unicode__(self):
         return "{}".format(self.name)  # nocv
 
-    def toDict(self, tmp_dir: Text = '/tmp') -> Tuple[Any, List]:
-        hvars, keys = self.get_generated_vars(tmp_dir)
-        return hvars or None, keys
 
+class Group(AbstractModel):
+    """
+    Manage inventory groups.
 
-class Group(InventoryItems):
+    retrieve:
+        Return a group instance.
+
+    list:
+        Return all groups.
+
+    create:
+        Create a new group.
+
+    destroy:
+        Remove an existing group.
+
+    partial_update:
+        Update one or more fields on an existing group.
+
+    update:
+        Update a group.
+    """
+
     CyclicDependencyError = CyclicDependencyError
 
     hosts = ManyToManyFieldACL(Host, related_query_name="groups")
@@ -117,42 +88,48 @@ class Group(InventoryItems):
             models.Index(fields=["children", "id"]),
         ]
 
-    def toDict(self, tmp_dir: Text = '/tmp') -> Tuple[Dict, List]:
-        result = {}
-        hvars, keys = self.get_generated_vars(tmp_dir)
-        if self.children:
-            objs = self.groups
-            key_name = 'children'
-        else:
-            objs = self.hosts
-            key_name = 'hosts'
-        objs_dict, obj_keys = _get_dict(objs.all(), keys, tmp_dir)
-        if objs_dict:
-            result[key_name] = objs_dict
-        if self.vars:
-            result['vars'] = hvars
-        keys += obj_keys
-        return result, keys
+
+class InventoryState(BModel):
+    data = models.JSONField(default=dict)
 
 
-class Inventory(InventoryItems):
+class Inventory(AbstractModel):
     hosts = ManyToManyFieldACL(Host)
     groups = ManyToManyFieldACL(Group)
+    plugin = models.CharField(max_length=32, default='POLEMARCH_DB', db_index=True)
+    _inventory_state = models.OneToOneField(InventoryState, null=True, on_delete=models.SET_NULL)
 
-    _to_yaml_kwargs = dict(
-        Dumper=InventoryDumper,
-        indent=2,
-        explicit_start=True,
-        default_flow_style=False,
-        allow_unicode=True
-    )
-    parser_class = AnsibleInventoryParser
+    plugin_handlers = InventoryPluginHandlers('INVENTORY_PLUGINS', 'plugin not found')
 
     class Meta:
         default_related_name = "inventories"
 
     def __unicode__(self):
         return str(self.id)  # pragma: no cover
+
+    @cached_property
+    def plugin_object(self):
+        return self.plugin_handlers.get_object(self.plugin)
+
+    @property
+    def state_managed(self):
+        return self.plugin_object.state_managed
+
+    @property
+    def inventory_state(self):
+        return self._get_inventory_state()
+
+    def update_inventory_state(self, **kwargs):
+        state = self._get_inventory_state()
+        for attr, value in kwargs.items():
+            setattr(state, attr, value)
+        state.save(update_fields=tuple(kwargs.keys()))
+
+    def _get_inventory_state(self):
+        # pylint: disable=no-member
+        if not self.plugin_object.state_managed:
+            raise NotApplicable(_('Plugin {} does not support working with state.').format(self.plugin))
+        return self._inventory_state
 
     @property
     def groups_list(self):
@@ -172,21 +149,6 @@ class Inventory(InventoryItems):
         '''
         return self.hosts.all().order_by("name")
 
-    def get_inventory(self, tmp_dir='/tmp/') -> Tuple[Text, List]:
-        inv = {'all': {}}
-        hvars, keys = self.get_generated_vars(tmp_dir)
-        hosts = self.hosts.all().order_by("name")
-        groups = self.groups.all().order_by("name")
-        hosts_dicts, keys = _get_dict(hosts, keys, tmp_dir)
-        groups_dicts, keys = _get_dict(groups, keys, tmp_dir)
-        if hosts_dicts:
-            inv['all']['hosts'] = hosts_dicts
-        if groups_dicts:
-            inv['all']['children'] = groups_dicts
-        if hvars:
-            inv['all']['vars'] = hvars
-        return to_yaml(inv, **self._to_yaml_kwargs), keys
-
     @property
     def all_groups(self):
         return self.groups_list
@@ -198,40 +160,5 @@ class Inventory(InventoryItems):
         ).distinct()
 
     @classmethod
-    def parse_inventory_from_str(cls, data):
-        return cls.parser_class().get_inventory_data(data)
-
-    @classmethod
-    @transaction.atomic()
-    def import_inventory_from_string(cls, name, raw_data, **kwargs):
-        inv_json = cls.parse_inventory_from_str(raw_data)
-
-        inventory = kwargs.pop('inventory_instance', None)
-        if inventory is None:
-            inventory = cls.objects.create(name=name, **kwargs)
-
-        inventory.vars = inv_json['vars']
-        created_hosts, created_groups = {}, {}
-
-        _delete_not_existing_objects(inventory.hosts, inv_json['hosts'])
-        for host in inv_json['hosts']:
-            inv_host, _ = inventory.hosts.get_or_create(name=host['name'], **kwargs)
-            inv_host.vars = host['vars']
-            created_hosts[inv_host.name] = inv_host
-
-        _delete_not_existing_objects(inventory.groups, inv_json['groups'])
-        for group in inv_json['groups']:
-            children = not len(group['groups']) == 0
-            inv_group, _ = inventory.groups.get_or_create(name=group['name'], children=children, **kwargs)
-            inv_group.vars = group['vars']
-            created_groups[inv_group.name] = inv_group
-
-        for group in inv_json['groups']:
-            inv_group = created_groups[group['name']]
-            if inv_group.children:
-                inv_group.groups.set((created_groups[n] for n in group['groups']))
-            else:
-                inv_group.hosts.set((created_hosts[n] for n in group['hosts']))
-
-        inventory.raw_data = raw_data
-        return inventory
+    def import_inventory(cls, instance, data):
+        return cls.plugin_handlers.backend(instance.plugin).import_inventory(instance, data)

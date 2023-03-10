@@ -17,6 +17,9 @@ TRANSLATION = {
     '<b>HTTP</b>: list of URLs, separated by "|".<br><b>SCRIPT</b>: script files, separated by "|" '
     'Files must be in HOOKS_DIR directory.': '<b>HTTP</b>: список URL, разделённых "|". <br><b>SCRIPT</b>: '
     'скрипт-файлы, разделённые "|". Файлы должны находиться в папке HOOKS_DIR.',
+    'Inventory plugin {} is not compatible with execution plugin {}.':
+        'Плагин инвентория {} не совместим с плагином запуска {}.',
+    'Plugin {} does not support working with state.': 'Плагин {} не поддерживает работу с состоянием.',
 
     # field titles and names
     'project id': 'id проекта',
@@ -56,7 +59,6 @@ TRANSLATION = {
 
     'General': 'Общее',
     'New owner': 'Новый владелец',
-    'Project based': 'Основан на проекте',
     'Repo type': 'Тип репозитория',
     'Repo url': 'URL репозитория',
     'Auth data': 'Данные авторизации',
@@ -139,6 +141,12 @@ TRANSLATION = {
     'execute parameters': 'параметры запуска',
     'additional execute parameters': 'дополнительные параметры запуска',
     'Execution output': 'Результаты запуска',
+    'Plugin': 'Плагин',
+    'State': 'Состояние',
+    'State managed': 'Управляется состоянием',
+    'Extension': 'Расширение',
+    'Executable': 'Исполняемый',
+    'Body': 'Тело',
 
     'Period': 'Период',
     'last 3 years': 'последние 3 года',
@@ -178,6 +186,7 @@ TRANSLATION = {
     'hosts counter': 'хостов | хост | хоста | хостов',
     'users counter': 'пользователей | пользователь | пользователя | пользователей',
     'execution_plugins counter': 'плагинов запуска | плагин запуска | плагина запуска | плагинов запуска',
+    'inventory_plugins counter': 'плагинов инвентория | плагин инвентория | плагина инвентория | плагинов инвентория',
 
     # pmCustomizer
     'history status ok': 'история - статус ok',

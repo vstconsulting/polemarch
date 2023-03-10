@@ -15,6 +15,7 @@ from vstutils.models.model import BaseModel
 from vstutils.models.fields import FkModelField
 from .projects import Project
 from ..constants import CrontabTimeType, PeriodicTaskScheduleType, HistoryInitiatorType
+from ..executions import PLUGIN_HANDLERS
 
 
 User = get_user_model()
@@ -31,8 +32,6 @@ class ExecutionTemplate(BaseModel):
         default_related_name = 'execution_templates'
 
     def execute(self, executor: User, option, arguments: dict = None):
-        from ..executions import PLUGIN_HANDLERS  # pylint: disable=import-outside-toplevel
-
         return PLUGIN_HANDLERS.execute(
             self.plugin,
             project=self.project,
@@ -92,8 +91,6 @@ class TemplatePeriodicTask(BaseModel):
 
     def execute(self):
         # pylint: disable=no-member
-        from ..executions import PLUGIN_HANDLERS  # pylint: disable=import-outside-toplevel
-
         return PLUGIN_HANDLERS.execute(
             self.template_option.plugin,
             project=self.template_option.project,

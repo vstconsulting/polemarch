@@ -8,10 +8,11 @@ from django.conf import settings
 from rest_framework import fields
 from vstutils.api.serializers import BaseSerializer
 from vstutils.api.fields import VSTCharField, SecretFileInString, AutoCompletionField
-from ..main.constants import ANSIBLE_REFERENCE, CYPHER, HiddenArgumentsEnum, HiddenVariablesEnum, HistoryStatus
-from ..main.models import Inventory
-from ..api.fields import InventoryAutoCompletionField
+from ...main.constants import ANSIBLE_REFERENCE, HiddenArgumentsEnum, HiddenVariablesEnum, HistoryStatus
+from ...main.models import Inventory
+from ...api.fields import InventoryAutoCompletionField
 from .base import BasePlugin
+from ...plugins.inventory.ansible import BaseAnsiblePlugin as BaseAnsibleInventoryPlugin
 
 
 class BaseAnsiblePlugin(BasePlugin):
@@ -20,7 +21,6 @@ class BaseAnsiblePlugin(BasePlugin):
     reference = {}
     base_command = settings.EXECUTOR
     raw_inventory_hidden_vars = HiddenVariablesEnum.get_values()
-    supports_inventory = True
     hide_passwords_regex = re.compile(r'|'.join((
         r"(?<=" + hidden_var + r":\s).{1,}?(?=[\n\t\s])"
         for hidden_var in raw_inventory_hidden_vars
@@ -32,9 +32,8 @@ class BaseAnsiblePlugin(BasePlugin):
         -15: HistoryStatus.INTERRUPTED,
     }
 
-    @classmethod
     @lru_cache()
-    def get_serializer_class(cls, exclude_fields=()) -> Type[BaseSerializer]:
+    def get_serializer_class(self, exclude_fields=()) -> Type[BaseSerializer]:
         class AnsibleSerializer(super().get_serializer_class(exclude_fields=exclude_fields)):
             def to_representation(self, instance):
                 representation = super().to_representation(instance)
@@ -44,8 +43,8 @@ class BaseAnsiblePlugin(BasePlugin):
         AnsibleSerializer.__name__ = f'{AnsibleSerializer.Meta.ref_name}Serializer'
         return AnsibleSerializer
 
-    def get_env_vars(self) -> Mapping[str, str]:
-        env_vars = super().get_env_vars()
+    def get_env_vars(self, project_data) -> Mapping[str, str]:
+        env_vars = super().get_env_vars(project_data)
         ansible_config = env_vars.pop('ANSIBLE_CONFIG', None)
 
         if ansible_config is not None:
@@ -61,14 +60,8 @@ class BaseAnsiblePlugin(BasePlugin):
         return env_vars
 
     def get_inventory(self, inventory: Optional[Union[Inventory, str, int]]) -> Tuple[Optional[str], str]:
-        if inventory is None:
-            return inventory, ''
-
-        if isinstance(inventory, Inventory):
-            text, self.files = inventory.get_inventory(tmp_dir=self.execution_dir)
-            inventory_file = self.execution_dir / self.inventory_filename
-            inventory_file.write_text(text)
-            return str(inventory_file), self._get_raw_inventory(text)
+        if isinstance(inventory, (Inventory, type(None))):
+            return super().get_inventory(inventory)
 
         inventory_file = None
         inventory_is_file = False
@@ -77,17 +70,14 @@ class BaseAnsiblePlugin(BasePlugin):
             inventory_is_file = inventory_file.is_file()
 
         if inventory_is_file:
-            self._inventory_filename = inventory_file.name
             text = inventory_file.read_text()
-            return str(inventory_file), self._get_raw_inventory(text)
+            raw_inventory = BaseAnsibleInventoryPlugin.get_raw_inventory(text)
+            return inventory_file, raw_inventory
 
-        return inventory, self._get_raw_inventory(inventory)
+        return inventory, BaseAnsibleInventoryPlugin.get_raw_inventory(inventory)
 
     def get_verbose_level(self, raw_args: dict) -> int:
         return int(raw_args.get('verbose', 0))
-
-    def _get_raw_inventory(self, raw_inventory: str) -> str:
-        return self.hide_passwords_regex.sub(CYPHER, raw_inventory, 0)
 
     def _process_arg(self, key: str, value) -> Optional[str]:
         key = key.replace('_', '-')
@@ -109,10 +99,9 @@ class BaseAnsiblePlugin(BasePlugin):
         tmpfile.chmod(0o600)
         return str(tmpfile)
 
-    @classmethod
-    def _get_serializer_fields(cls, exclude_fields=()):
+    def _get_serializer_fields(self, exclude_fields=()):
         serializer_fields = super()._get_serializer_fields(exclude_fields=exclude_fields)
-        for field_name, field_def in cls.reference.items():
+        for field_name, field_def in self.reference.items():
             if field_name in ('help', 'version', *exclude_fields):
                 continue
             field_type = field_def.get('type')
@@ -133,6 +122,9 @@ class BaseAnsiblePlugin(BasePlugin):
                 field = SecretFileInString
             if field_name == 'inventory':
                 field = InventoryAutoCompletionField
+                inventory_filters = self.options.get('COMPATIBLE_INVENTORY_PLUGINS', ())
+                inventory_filters = ','.join(inventory_filters) or None
+                kwargs['filters'] = {'plugin': inventory_filters}
             if field_name == 'group':
                 kwargs['default'] = 'all'
 

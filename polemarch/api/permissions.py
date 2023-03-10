@@ -1,4 +1,6 @@
+import re
 from rest_framework import permissions
+from rest_framework.exceptions import NotFound
 from vstutils.utils import lazy_translate as __
 
 
@@ -9,13 +11,22 @@ class SetOwnerPermission(permissions.IsAuthenticated):
         return request.user.is_superuser or obj.owner == request.user
 
 
-class InventoryItemsPermission(permissions.IsAuthenticated):
+class InventoryPluginPermission(permissions.IsAuthenticated):
+    state_managed_actions_regex = re.compile(r'^state$')
+    db_managed_actions_regex = re.compile('|'.join((
+        r'^variables',
+        r'^hosts',
+        r'^group',
+        r'^all_hosts',
+        r'^all_groups',
+    )))
+
     def has_object_permission(self, request, view, obj):
-        if request.method.lower() == 'get':
-            return True
-        elif obj.master_project is None:
-            return True
-        return False
+        if obj.plugin_object.state_managed and self.db_managed_actions_regex.match(view.action):
+            raise NotFound
+        if not obj.plugin_object.state_managed and self.state_managed_actions_regex.match(view.action):
+            raise NotFound
+        return super().has_object_permission(request, view, obj)
 
 
 class CreateUsersPermission(permissions.IsAuthenticated):
