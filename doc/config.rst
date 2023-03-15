@@ -414,7 +414,7 @@ Here placed settings related to web-server used by Polemarch in production
 (for deb and rpm packages by default). Most of them related to system paths
 (logging, PID-file and so on).
 
-.. note:: More settings in :doc:`uwsgi:Configuration`.
+.. note:: More settings in :doc:`uwsgi:Configuration` (deprecated) and `uvicorn docs <https://www.uvicorn.org/settings/#production>`_.
 
 .. warning:: In production, it is recommended to use Centrifugo in order to reduce the load on the backend from automatic page updates.
 
@@ -429,9 +429,9 @@ This section contains additional information for configure additional elements.
 
     .. sourcecode:: ini
 
-        [uwsgi]
-        https = 0.0.0.0:8443,foobar.crt,foobar.key
-        addrport = 127.0.0.1:8080
+        # [uvicorn]
+        # ssl_keyfile = /etc/polemarch/polemarch.key
+        # ssl_certfile = /etc/polemarch/polemarch.crt
 
 #. We strictly do not recommend running the web server from root. Use HTTP proxy to run on privileged ports.
 

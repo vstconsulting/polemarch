@@ -186,7 +186,7 @@ texinfo_documents = [
 intersphinx_mapping = {
     'environ': ('https://django-environ.readthedocs.io/en/stable', None),
     'vstutils': ('https://vstutils.vstconsulting.net/en/stable', None),
-    'python': ('https://docs.python.org/3.6', None),
+    'python': ('https://docs.python.org/3.8', None),
     'uwsgi': ('https://uwsgi-docs.readthedocs.io/en/latest', None),
     'celery': ('https://docs.celeryq.dev/en/latest/', None),
 }
@@ -194,7 +194,7 @@ intersphinx_disabled_reftypes = []
 
 extlinks = {
     'wiki': ('https://en.wikipedia.org/wiki/%s', None),
-    'django_docs': ('https://docs.djangoproject.com/en/3.2/ref/%s', None),
+    'django_docs': ('https://docs.djangoproject.com/en/4.1/ref/%s', None),
 }
 
 set_type_checking_flag = True

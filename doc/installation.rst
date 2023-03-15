@@ -19,18 +19,25 @@ Install from PyPI
 
       sudo apt-get install python3-virtualenv python3.8 python3.8-dev gcc libffi-dev libkrb5-dev libffi7 libssl-dev libyaml-dev libsasl2-dev libldap2-dev default-libmysqlclient-dev sshpass git
 
-   Required packages on Debian 10 (as root user):
+   Required packages on Ubuntu 22.04:
 
    .. sourcecode:: bash
 
-      apt-get install python3-virtualenv python3.7 python3.7-dev gcc libffi-dev libkrb5-dev libffi6 libssl-dev libyaml-dev libsasl2-dev libldap2-dev default-libmysqlclient-dev sshpass git virtualenv
+      sudo apt-get install python3-virtualenv python3.10 python3.10-dev gcc libffi-dev libkrb5-dev libffi7 libssl-dev libyaml-dev libsasl2-dev libldap2-dev default-libmysqlclient-dev sshpass git
 
-   Required packages on Red Hat/CentOS 7:
+   Required packages on Debian 11 (as root user):
 
    .. sourcecode:: bash
 
-      sudo yum install epel-release
-      sudo yum install python36 python36-devel python36-virtualenv openssl-devel libyaml-devel krb5-devel krb5-libs openldap-devel mysql-devel git sshpass
+      apt-get install python3-virtualenv python3.9 python3.9-dev gcc libffi-dev libkrb5-dev libffi7 libssl-dev libyaml-dev libsasl2-dev libldap2-dev default-libmysqlclient-dev sshpass git
+
+   Required packages on Red Hat/CentOS 7 (sqlite not supported):
+
+   .. sourcecode:: bash
+
+      sudo yum install epel-release centos-release-scl-rh centos-release-scl
+      sudo yum --enablerepo=centos-sclo-rh install rh-python38 rh-python38-python-devel gcc openssl-devel libyaml-devel krb5-devel krb5-libs openldap-devel mysql-devel git sshpass
+      sudo /opt/rh/rh-python38/root/usr/bin/python -m pip install virtualenv
 
    Required packages on Red Hat/Alma/Rocky 8:
 
@@ -39,7 +46,9 @@ Install from PyPI
       sudo dnf install epel-release
       sudo dnf install python38-devel python3-virtualenv gcc openssl-devel libyaml krb5-devel krb5-libs openldap-devel mysql-devel git sshpass
 
-   .. note:: If your OS is not in the list of presented OS, but you understand the differences between these OS and yours, then you can adapt this list of packages to your platform. We dont tie environment to system package versions as much as possible.
+   .. note::
+      If your OS is not in the list of presented OS, but you understand the differences between these OS and yours,
+      then you can adapt this list of packages to your platform. We dont tie environment to system package versions as much as possible.
 
 
 #. Install mysql-server:
@@ -50,6 +59,9 @@ Install from PyPI
    .. sourcecode:: bash
 
       sudo apt-get install default-mysql-server
+
+   .. warning::
+      Do not use MySQL version less then 8.0.
 
 
 #. Create database in mysql with this commands:
@@ -89,16 +101,23 @@ Install from PyPI
 
    .. sourcecode:: bash
 
-      # For Debian 10 use python3.7
-      # For rhel/centos7 use python3.6
       # In some cases use sudo for first command.
+      # For rhel/centos7 use:
+      /opt/rh/rh-python38/root/usr/bin/python -m virtualenv /opt/polemarch
+      # For Debian with Python 3.9:
+      virtualenv --python=python3.9 /opt/polemarch
+      # For Ubuntu 22.04 and other debian distributions with Python 3.10:
+      virtualenv --python=python3.10 /opt/polemarch
+      # For other distributions:
       virtualenv --python=python3.8 /opt/polemarch
+
+      # Make required directories
       sudo mkdir -p /etc/polemarch
       sudo chown -R polemarch:polemarch /opt/polemarch /etc/polemarch
       sudo -u polemarch -i
       source /opt/polemarch/bin/activate
 
-   .. note:: If you have more then one Python version, recommended use Python 3.6 or newer for virtualenv.
+   .. note:: If you have more then one Python version, recommended use Python 3.8 or newer for virtualenv.
 
 
 #. Install Polemarch:
@@ -181,14 +200,13 @@ Install from PyPI
       .. code-block:: ini
 
          [uwsgi]
-         harakiri = 120
-         vacuum = True
-         http-keepalive = true
          pidfile = /opt/polemarch/pid/polemarch.pid
          log_file = /opt/polemarch/logs/polemarch_web.log
-         # Uncomment it for HTTPS and install `uwsgi` pypi package to env:
-         # addrport = 127.0.0.1:8080
-         # https = 0.0.0.0:443,/etc/polemarch/polemarch.crt,/etc/polemarch/polemarch.key
+
+         # Uncomment it for HTTPS:
+         # [uvicorn]
+         # ssl_keyfile = /etc/polemarch/polemarch.key
+         # ssl_certfile = /etc/polemarch/polemarch.crt
 
          [worker]
          # output will be /opt/polemarch/logs/polemarch_worker.log
@@ -200,7 +218,7 @@ Install from PyPI
       Also if you need to set your own path for logfile or pidfile,
       different from the path from example, you can do it, but make sure,
       that user, which starts Polemarch has write-permissions for these directory and file.
-      If you run it as root, we recommend to add in ```[uwsig]``` params ```uid``` and ```gid```
+      If you run it as root, we recommend to add in ``[uwsig]`` params ``uid`` and ``gid``
       (`read more <https://uwsgi-docs.readthedocs.io/en/latest/Namespaces.html#the-old-way-the-namespace-option>`_).
 
       .. tip:: More configuration settings you can find in :doc:`Configuration manual </config>`.

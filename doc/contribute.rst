@@ -20,7 +20,7 @@ Here is how to proceed:
 
       sudo apt-get install python3-virtualenv python3.8 python3.8-dev gcc libffi-dev libkrb5-dev libffi7 libssl-dev libyaml-dev libsasl2-dev libldap2-dev default-libmysqlclient-dev sshpass git tox
 
-   .. note:: Your patch must work at Python 3.6 because older Python may not work correctly with Polemarch.
+   .. note:: Your patch must work at Python 3.8 because older Python may not work correctly with Polemarch.
 
 #. Make fork of our repository and clone it to your local development
    machine.

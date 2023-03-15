@@ -2,7 +2,7 @@ version: '3'
 
 services:
   traefik:
-    image: traefik:2.8
+    image: traefik:2.9
     restart: unless-stopped
     volumes:
       - ./traefik_dynamic.yml:/traefik_dynamic.yml:ro
