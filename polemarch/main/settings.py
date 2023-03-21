@@ -238,9 +238,8 @@ class ExecutionPluginSection(BaseAppendSection):
 
 
 class ExecutionPluginOptionsSection(ExecutionPluginSection):
-    types_map = {
-        'compatible_inventory_plugins': cconfig.ListType(),
-    }
+    pass
+
 
 # Execution plugins
 EXECUTION_PLUGIN_HANDLERS_CLASS = f'{VST_PROJECT_LIB_NAME}.main.utils.ExecutionHandlers'
@@ -258,8 +257,10 @@ for plugin_name, plugin_config, in config['execution']['plugin'].items():
         ).all()
         options_section = {key.upper(): val for key, val in options_section.items()}
         if 'COMPATIBLE_INVENTORY_PLUGINS' in options_section:
-            options_section['COMPATIBLE_INVENTORY_PLUGINS'] = \
-                tuple(k.upper() for k in options_section['COMPATIBLE_INVENTORY_PLUGINS'])
+            for field_name, suitable_plugins in options_section['COMPATIBLE_INVENTORY_PLUGINS'].items():
+                options_section['COMPATIBLE_INVENTORY_PLUGINS'][field_name] = tuple(
+                    k.upper() for k in options_section['COMPATIBLE_INVENTORY_PLUGINS'][field_name].split(',')
+                )
 
         EXECUTION_PLUGINS[plugin_name.upper()] = {
             "BACKEND": plugin_section['backend'],
@@ -389,12 +390,14 @@ if "test" in sys.argv:
     EXECUTION_PLUGINS['TEST_MODULE'] = {
         'BACKEND': f'{tests_module_name}.TestModule',
         'OPTIONS': {
-            'COMPATIBLE_INVENTORY_PLUGINS': [
-                'POLEMARCH_DB',
-                'ANSIBLE_FILE',
-                'ANSIBLE_STRING',
-                'TEST_INVENTORY_PLUGIN',
-            ],
+            'COMPATIBLE_INVENTORY_PLUGINS': {
+                'inventory': [
+                    'POLEMARCH_DB',
+                    'ANSIBLE_FILE',
+                    'ANSIBLE_STRING',
+                    'TEST_INVENTORY_PLUGIN',
+                ],
+            }
         }
     }
     INVENTORY_PLUGINS['TEST_INVENTORY_PLUGIN'] = {'BACKEND': f'{tests_module_name}.TestInventoryPlugin'}

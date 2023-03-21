@@ -3,7 +3,7 @@ import re
 import contextlib
 from uuid import uuid1
 from functools import lru_cache
-from typing import Type, Mapping, Optional, Union, Tuple
+from typing import Type, Mapping, Optional
 from django.conf import settings
 from rest_framework import fields
 from vstutils.api.serializers import BaseSerializer
@@ -16,7 +16,7 @@ from ...plugins.inventory.ansible import BaseAnsiblePlugin as BaseAnsibleInvento
 
 
 class BaseAnsiblePlugin(BasePlugin):
-    __slots__ = ('files',)
+    __slots__ = ('inventory', 'inventory_path')
 
     reference = {}
     base_command = settings.EXECUTOR
@@ -31,6 +31,11 @@ class BaseAnsiblePlugin(BasePlugin):
         -9: HistoryStatus.INTERRUPTED,
         -15: HistoryStatus.INTERRUPTED,
     }
+
+    def __init__(self, options=None, output_handler=None):
+        super().__init__(options, output_handler)
+        self.inventory = None
+        self.inventory_path = None
 
     @lru_cache()
     def get_serializer_class(self, exclude_fields=()) -> Type[BaseSerializer]:
@@ -59,29 +64,40 @@ class BaseAnsiblePlugin(BasePlugin):
 
         return env_vars
 
-    def get_inventory(self, inventory: Optional[Union[Inventory, str, int]]) -> Tuple[Optional[str], str]:
-        if isinstance(inventory, (Inventory, type(None))):
-            return super().get_inventory(inventory)
+    def _get_inventory_arg_value(self, inventory):
+        self.inventory = inventory
 
-        inventory_file = None
-        inventory_is_file = False
-        with contextlib.suppress(OSError):
-            inventory_file = self.execution_dir / inventory
-            inventory_is_file = inventory_file.is_file()
+        if isinstance(inventory, Inventory):
+            self.inventory_path, self.secret_files = inventory.plugin_object.render_inventory(
+                instance=inventory,
+                execution_dir=self.execution_dir,
+            )
+            return str(self.inventory_path)
 
-        if inventory_is_file:
-            text = inventory_file.read_text()
-            raw_inventory = BaseAnsibleInventoryPlugin.get_raw_inventory(text)
-            return inventory_file, raw_inventory
+        if isinstance(inventory, str):
+            inventory_file = None
+            inventory_is_file = False
+            with contextlib.suppress(OSError):
+                inventory_file = self.execution_dir / inventory
+                inventory_is_file = inventory_file.is_file()
 
-        return inventory, BaseAnsibleInventoryPlugin.get_raw_inventory(inventory)
+            if inventory_is_file:
+                return str(inventory_file)
 
-    def get_verbose_level(self, raw_args: dict) -> int:
-        return int(raw_args.get('verbose', 0))
+        return inventory
+
+    def get_raw_inventory(self):
+        if isinstance(self.inventory, str):
+            return BaseAnsibleInventoryPlugin.get_raw_inventory(self.inventory)
+        if isinstance(self.inventory, Inventory):
+            return self.inventory.plugin_object.get_raw_inventory(self.inventory_path.read_text())
+        return super().get_raw_inventory()
 
     def _process_arg(self, key: str, value) -> Optional[str]:
         key = key.replace('_', '-')
         if key in self.reference:
+            if key == 'inventory' and value:
+                return f'--{key}={self._get_inventory_arg_value(value)}'
             if not value:
                 return None
             if key == 'verbose':
@@ -117,12 +133,12 @@ class BaseAnsiblePlugin(BasePlugin):
 
             if field_name == 'verbose':
                 field = fields.IntegerField
-                kwargs.update({'max_value': 4})
+                kwargs.update({'min_value': 0, 'max_value': 4})
             if field_name in HiddenArgumentsEnum.get_values():
                 field = SecretFileInString
             if field_name == 'inventory':
                 field = InventoryAutoCompletionField
-                inventory_filters = self.options.get('COMPATIBLE_INVENTORY_PLUGINS', ())
+                inventory_filters = self.options.get('COMPATIBLE_INVENTORY_PLUGINS', {}).get('inventory', ())
                 inventory_filters = ','.join(inventory_filters) or None
                 kwargs['filters'] = {'plugin': inventory_filters}
             if field_name == 'group':

@@ -1,7 +1,10 @@
 import re
+import base64
+import mimetypes
 from uuid import uuid1
 from typing import Tuple, Any
 from pathlib import Path
+import orjson
 
 try:
     from yaml import dump as to_yaml, CDumper as Dumper, ScalarNode
@@ -176,10 +179,15 @@ class AnsibleString(BaseAnsiblePlugin):
     # pylint: disable=abstract-method
     __slots__ = ()
 
+    supports_import = True
+
     serializer_fields = {
         'body': vstfields.FileInStringField(),
         'extension': vstfields.AutoCompletionField(autocomplete=('yaml', 'ini', 'json'), default='yaml'),
         'executable': drffields.BooleanField(default=False),
+    }
+    serializer_import_fields = {
+        'file': vstfields.NamedBinaryFileInJsonField(),
     }
     defaults = {
         'body': '',
@@ -200,3 +208,20 @@ class AnsibleString(BaseAnsiblePlugin):
             filepath.chmod(0o700)
 
         return filepath, []
+
+    @classmethod
+    def import_inventory(cls, instance, data):
+        loaded = orjson.loads(data['file'])  # pylint: disable=no-member
+        media_type = loaded['mediaType'] or ''
+        extension = mimetypes.guess_extension(media_type, strict=False) or ''
+        if extension != '':
+            extension = extension.replace('.', '', 1)
+        elif '.' in loaded['name']:
+            extension = loaded['name'].rsplit('.', maxsplit=1)[-1]
+        body = base64.b64decode(loaded['content']).decode('utf-8')
+        instance.update_inventory_state(data={
+            'body': body,
+            'extension': extension,
+            'executable': body.startswith('#!/'),
+        })
+        return instance

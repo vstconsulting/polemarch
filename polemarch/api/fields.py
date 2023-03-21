@@ -16,3 +16,8 @@ class InventoryAutoCompletionField(vstfields.VSTCharField):
             if ',' not in inventory:
                 path_validator(inventory)
         return inventory
+
+
+class DynamicPluginField(vstfields.DependEnumField):
+    def get_real_field(self, data):
+        return self.types.get(self.context['view'].get_object().plugin)

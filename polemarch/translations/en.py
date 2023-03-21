@@ -17,6 +17,5 @@ TRANSLATION = {
     'inventory_plugins counter': 'inventory plugins | inventory plugin | inventory plugins',
     'all_tasks': 'all tasks',
 
-    'Vars': 'Variables',
     'Acl': 'ACL'
 }

@@ -21,6 +21,7 @@ from ...main.constants import HostType
 from ..permissions import InventoryPluginPermission
 from ...main.constants import InventoryVariablesEnum
 from ..filters import variables_filter, vars_help
+from ..fields import DynamicPluginField
 
 
 class NestedGroupError(ValidationError):
@@ -209,7 +210,7 @@ class ImportInventorySerializer(BaseSerializer):
 
 
 def get_inventory_state_data_field(source_view):
-    return vstfields.DynamicJsonTypeField(
+    return DynamicPluginField(
         field='plugin',
         source_view=source_view,
         types={
@@ -242,6 +243,7 @@ class InventoryViewMixin:
         return super().copy_instance(instance)
 
     @Action(detail=False, serializer_class=ImportInventorySerializer)
+    @transaction.atomic()
     def import_inventory(self, request, *args, **kwargs):
         """
         Import inventory from file.
@@ -249,8 +251,18 @@ class InventoryViewMixin:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
+        instance = Inventory.objects.create(
+            name=data['name'],
+            plugin=data['plugin'],
+        )
+        if instance.state_managed:
+            # pylint: disable=protected-access
+            instance._inventory_state = InventoryState.objects.create(
+                data=Inventory.plugin_handlers.backend(data['plugin']).defaults
+            )
+            instance.save(update_fields=('_inventory_state',))
         inventory = self._perform_import_inventory(
-            instance=Inventory.objects.create(name=data['name'], plugin=data['plugin']),
+            instance=instance,
             data=data['data'],
         )
         return {**data, 'inventory_id': inventory.id}
@@ -261,6 +273,7 @@ class InventoryViewMixin:
     @SimpleAction(
         serializer_class=InventoryStateUpdateSerializer,
         result_serializer_class=InventoryStateSerializer,
+        methods=['get', 'put'],
     )
     def state(self, request, *args, **kwargs):
         return self.get_object().inventory_state
