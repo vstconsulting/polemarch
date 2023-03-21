@@ -1,4 +1,5 @@
 import json
+import base64
 import io
 import os
 import re
@@ -128,10 +129,11 @@ class TestException(Exception):
 
 
 class DummyProject:
-    env_vars = {
-        'env1': 'env1_value',
-        'env2': 'env2_value',
-    }
+    def __init__(self):
+        self.env_vars = {
+            'env1': 'env1_value',
+            'env2': 'env2_value',
+        }
 
     def __getattr__(self, name):
         return name
@@ -150,9 +152,8 @@ class TestAnsibleDoc(BaseAnsiblePlugin):
     def base_command(self):
         return super().base_command + ['ansible-doc']
 
-    def get_inventory(self, *args, **kwargs):
+    def post_execute_hook(self, *args, **kwargs):
         self.verbose_output('Test log from test plugin', level=2)
-        return super().get_inventory(*args, **kwargs)
 
     def _process_arg(self, key, value):
         if key == 'target':
@@ -180,7 +181,7 @@ class TestEcho(BasePlugin):
 
 
 class TestModule(AnsibleModule):
-    def post_execute_hook(self, cmd):
+    def post_execute_hook(self, cmd, raw_args):
         if not self.inventory.plugin_object.state_managed:
             return
 
@@ -190,6 +191,9 @@ class TestModule(AnsibleModule):
         else:
             state.data['counter'] += 1
         state.save(update_fields=('data',))
+
+    def get_pre_commands(self, *args, **kwargs):
+        return [['echo', 'echo_first'], ['echo', 'echo_second']]
 
 
 class TestInventoryPlugin(BaseInventoryPlugin):
@@ -300,9 +304,22 @@ class BaseProjectTestCase(BaseTestCase):
         if project_id is not None:
             path = ['project', project_id] + path
         return {
-            'method': 'patch',
+            'method': 'put',
             'path': path,
             'data': kwargs,
+        }
+
+    def import_inventory_bulk_data(self, plugin, data, project_id=None, name='test_imported_inventory'):
+        project_prefix = [] if project_id is None else ['project', project_id]
+        path = project_prefix + ['inventory', 'import_inventory']
+        return {
+            'method': 'post',
+            'path': path,
+            'data': {
+                'name': name,
+                'plugin': plugin,
+                'data': data,
+            }
         }
 
     def get_inventory_state_bulk_data(self, inventory_id, project_id=None):
@@ -642,14 +659,12 @@ class InventoryTestCase(BaseProjectTestCase):
             # [2]
             self.get_history_bulk_data('<<1[data][history_id]>>'),
         ])
-        self.assertDictEqual(results[0]['data']['data'], {
-            'body': inventory_string,
-            'extension': 'ini',
-            'executable': True,
-        })
+        self.assertEqual(results[0]['data']['data']['body'].strip(), inventory_string.strip())
+        self.assertEqual(results[0]['data']['data']['extension'], 'ini')
+        self.assertTrue(results[0]['data']['data']['executable'])
         self.assertEqual(results[2]['data']['status'], 'OK')
         self.assertEqual(results[2]['data']['inventory'], inventory_id)
-        self.assertEqual(results[2]['data']['raw_inventory'], inventory_string)
+        self.assertEqual(results[2]['data']['raw_inventory'].strip(), inventory_string.strip())
 
         # check hosts and groups path are unavailable
         bulk_data = [
@@ -773,7 +788,7 @@ class InventoryTestCase(BaseProjectTestCase):
         inventory = self.get_model_filter('main.Inventory').get(id=results[0]['data']['id'])
         self.assertDictEqual(inventory.inventory_state.data, {'body': 'localhost ansible_connection=local'})
 
-        # check post_execute_hook
+        # check post_execute_hook and get_pre_commands
         results = self.bulk_transactional([
             self.execute_plugin_bulk_data(
                 'TEST_MODULE',
@@ -781,10 +796,17 @@ class InventoryTestCase(BaseProjectTestCase):
                 inventory=inventory.id,
             ),
             self.get_history_bulk_data('<<0[data][history_id]>>'),
+            self.get_raw_history_bulk_data('<<0[data][history_id]>>'),
         ])
         self.assertEqual(results[1]['data']['status'], 'OK')
         self.assertEqual(results[1]['data']['inventory'], inventory.id)
         self.assertEqual(results[1]['data']['raw_inventory'], 'File contents:\nlocalhost ansible_connection=local')
+        self.assertTrue(
+            results[1]['data']['raw_args'].startswith('echo echo_first && echo echo_second &&'),
+        )
+        self.assertTrue(
+            results[2]['data']['detail'].startswith('echo_first\necho_second')
+        )
 
         inventory.inventory_state.refresh_from_db()
         self.assertDictEqual(inventory.inventory_state.data, {
@@ -809,8 +831,18 @@ class InventoryTestCase(BaseProjectTestCase):
             self.assertEqual(result['status'], 400)
             self.assertEqual(
                 result['data']['detail'],
-                'Inventory plugin TEST_INVENTORY_PLUGIN is not compatible with execution plugin ANSIBLE_MODULE.',
+                'Field "inventory" is not compatible with TEST_INVENTORY_PLUGIN inventory plugin.',
             )
+
+        # test import
+        results = self.bulk_transactional([
+            self.import_inventory_bulk_data(
+                plugin='TEST_INVENTORY_PLUGIN',
+                data={'body': 'some_data'},
+            ),
+            self.get_inventory_state_bulk_data('<<0[data][inventory_id]>>'),
+        ])
+        self.assertDictEqual(results[-1]['data']['data'], {'body': 'some_data'})
 
     def test_fk_inventory_usage(self):
         results = self.bulk_transactional([
@@ -843,6 +875,81 @@ class InventoryTestCase(BaseProjectTestCase):
             self.assertEqual(results[idx]['status'], 400, f'Failed on {idx}')
             self.assertEqual(results[idx]['data'], ['No Inventory matches the given query.'])
 
+    def test_import_ansible_string_inventory(self):
+        json_file = {
+            'content': base64.b64encode(b'{"json": true}').decode('utf-8'),
+            'mediaType': 'application/json',
+            'name': '1.json',
+        }
+        yml_file = {
+            'content': base64.b64encode(b'---\nyml:\n  true').decode('utf-8'),
+            'mediaType': 'application/x-yaml',
+            'name': '2.yml',
+        }
+        ini_file = {
+            'content': base64.b64encode(b'[example]\nini = true').decode('utf-8'),
+            'mediaType': None,
+            'name': '3.ini',
+        }
+        sh_file = {
+            'content': base64.b64encode(b'#!/bin/sh\necho example').decode('utf-8'),
+            'mediaType': 'application/x-shellscript',
+            'name': '4.sh',
+        }
+        unknown_file = {
+            'content': '',
+            'mediaType': None,
+            'name': 'unknown',
+        }
+
+        results = self.bulk_transactional([
+            # [0]
+            self.import_inventory_bulk_data(plugin='ANSIBLE_STRING', data={'file': json_file}),
+            # [1]
+            self.get_inventory_state_bulk_data('<<0[data][inventory_id]>>'),
+            # [2]
+            self.import_inventory_bulk_data(plugin='ANSIBLE_STRING', data={'file': yml_file}),
+            # [3]
+            self.get_inventory_state_bulk_data('<<2[data][inventory_id]>>'),
+            # [4]
+            self.import_inventory_bulk_data(plugin='ANSIBLE_STRING', data={'file': ini_file}),
+            # [5]
+            self.get_inventory_state_bulk_data('<<4[data][inventory_id]>>'),
+            # [6]
+            self.import_inventory_bulk_data(plugin='ANSIBLE_STRING', data={'file': sh_file}),
+            # [7]
+            self.get_inventory_state_bulk_data('<<6[data][inventory_id]>>'),
+            # [8]
+            self.import_inventory_bulk_data(plugin='ANSIBLE_STRING', data={'file': unknown_file}),
+            # [9]
+            self.get_inventory_state_bulk_data('<<8[data][inventory_id]>>'),
+        ])
+        self.assertDictEqual(results[1]['data']['data'], {
+            'extension': 'json',
+            'executable': False,
+            'body': '{"json": true}',
+        })
+        self.assertDictEqual(results[3]['data']['data'], {
+            'extension': 'yml',
+            'executable': False,
+            'body': '---\nyml:\n  true',
+        })
+        self.assertDictEqual(results[5]['data']['data'], {
+            'extension': 'ini',
+            'executable': False,
+            'body': '[example]\nini = true',
+        })
+        self.assertDictEqual(results[7]['data']['data'], {
+            'extension': 'sh',
+            'executable': True,
+            'body': '#!/bin/sh\necho example',
+        })
+        self.assertDictEqual(results[9]['data']['data'], {
+            'extension': '',
+            'executable': False,
+            'body': '',
+        })
+
     def test_import_polemarch_db_inventory(self):
         inventory = (TEST_DATA_DIR / 'inventory.yml').read_text()
         shutil.copy(
@@ -852,11 +959,12 @@ class InventoryTestCase(BaseProjectTestCase):
 
         results = self.bulk_transactional([
             # [0]
-            {
-                'method': 'post',
-                'path': ['project', self.project.id, 'inventory', 'import_inventory'],
-                'data': {'name': 'inventory', 'plugin': 'POLEMARCH_DB', 'data': {'body': inventory}},
-            },
+            self.import_inventory_bulk_data(
+                plugin='POLEMARCH_DB',
+                project_id=self.project.id,
+                data={'body': inventory},
+                name='inventory',
+            ),
             # [1] check hosts added
             {'method': 'get', 'path': ['inventory', '<<0[data][inventory_id]>>', 'all_hosts']},
             # [2] check groups added
@@ -895,11 +1003,11 @@ class InventoryTestCase(BaseProjectTestCase):
 
         # check invalid inventory
         results = self.bulk([
-            {
-                'method': 'post',
-                'path': ['project', self.project.id, 'inventory', 'import_inventory'],
-                'data': {'name': 'lol', 'plugin': 'POLEMARCH_DB', 'data': {'body': '*&^?invalid'}}
-            },
+            self.import_inventory_bulk_data(
+                plugin='POLEMARCH_DB',
+                project_id=self.project.id,
+                data={'body': '*&^?invalid'}
+            ),
         ])
         self.assertEqual(results[0]['status'], 400)
         self.assertIn('Invalid hostname or IP', results[0]['data']['detail']['other_errors'][0])
@@ -3277,7 +3385,7 @@ class HistoryTestCase(BaseProjectTestCase):
             self.get_history_bulk_data('<<2[data][history_id]>>'),
         ])
         self.assertEqual(results[3]['data']['inventory'], self.inventory.id)
-        self.assertNotIn('inventory', results[3]['data']['execute_args'])
+        self.assertIn('inventory', results[3]['data']['execute_args'])
         self.assertIsNone(results[4]['data']['inventory'])
         self.assertEqual(results[4]['data']['execute_args']['inventory'], self.inventory_path)
         self.assertIsNone(results[5]['data']['inventory'])
@@ -4550,6 +4658,7 @@ class BaseOpenAPITestCase(VSTBaseTestCase):
     _schema = None
     builtin_execution_plugins = {'ANSIBLE_PLAYBOOK', 'ANSIBLE_MODULE'}
     builtin_inventory_plugins = {'POLEMARCH_DB', 'ANSIBLE_STRING', 'ANSIBLE_FILE'}
+    import_excluded_inventory_plugins = {'ANSIBLE_FILE'}
 
     system_tab = {
         'name': 'System',
@@ -4591,6 +4700,7 @@ class BaseOpenAPITestCase(VSTBaseTestCase):
         self.assertSetEqual(
             set(values),
             self.builtin_inventory_plugins - exclude,
+            'plugin is either not excluded or external. '
             'External inventory plugins are not allowed in generated YML schema.'
         )
 
@@ -4614,6 +4724,10 @@ class BaseOpenAPITestCase(VSTBaseTestCase):
         yml_enum = yml_schema['definitions']['CreateExecutionTemplate']['properties']['plugin']['enum']
         self.check_execution_plugins(yml_enum)
         endpoint_schema['definitions']['CreateExecutionTemplate']['properties']['plugin']['enum'] = yml_enum
+
+        yml_types = yml_schema['definitions']['OneHistory']['properties']['execute_args']['x-options']['types']
+        self.check_execution_plugins(yml_types.keys())
+        endpoint_schema['definitions']['OneHistory']['properties']['execute_args']['x-options']['types'] = yml_types
 
         template_types_depend_on_plugins = (
             'CreateExecutionTemplate',
@@ -4643,8 +4757,8 @@ class BaseOpenAPITestCase(VSTBaseTestCase):
         for def_ in ('ImportInventory', 'ProjectImportInventory'):
             yml_enum = yml_schema['definitions'][def_]['properties']['plugin']['enum']
             yml_types = yml_schema['definitions'][def_]['properties']['data']['x-options']['types']
-            self.check_inventory_plugins(yml_enum, exclude={'ANSIBLE_FILE'})
-            self.check_inventory_plugins(yml_types.keys(), exclude={'ANSIBLE_FILE'})
+            self.check_inventory_plugins(yml_enum, exclude=self.import_excluded_inventory_plugins)
+            self.check_inventory_plugins(yml_types.keys(), exclude=self.import_excluded_inventory_plugins)
             endpoint_schema['definitions'][def_]['properties']['plugin']['enum'] = yml_enum
             endpoint_schema['definitions'][def_]['properties']['data']['x-options']['types'] = yml_types
 
@@ -5378,7 +5492,7 @@ class BaseExecutionPluginUnitTestCase(VSTBaseTestCase):
     def dummy_output_handler(self, message, level):
         self.dummy_output += f'message:{message},level:{level}\n'
 
-    def get_plugin_instance(self, options=None, execution_dir=None):
+    def get_plugin_instance(self, options=None, execution_dir=None) -> BasePlugin:
         instance = self.plugin_class(
             options=options or {},
             output_handler=self.dummy_output_handler
@@ -5485,11 +5599,12 @@ class AnsiblePlaybookExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase
         all_args['verbose'] = 3
         all_args['invalid'] = 'invalid'
 
-        cmd, env, raw_inventory = instance.get_execution_data(
+        cmd, env = instance.get_execution_data(
             self.dummy_execution_dir,
             all_args,
             ProjectProxy(DummyProject()),
         )
+        raw_inventory = instance.get_raw_inventory()
         self.assertEqual(raw_inventory, 'inventory:value')
         self.assertDictEqual(env, {
             'env1': 'env1_value',
@@ -5507,20 +5622,20 @@ class AnsiblePlaybookExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase
 
         # string args
         self.assertIn('--inventory=inventory:value', cmd)
-        self.assertSetEqual(set(cmd[14:29]), {
+        self.assertSetEqual(set(cmd[14:30]), {
             f'--{value.replace("_", "-")}={value}:value'
             for value in self.string_args
-            if value not in ('group', 'inventory')
+            if value != 'group'
         })
 
         # int args
-        self.assertSetEqual(set(cmd[29:31]), {
+        self.assertSetEqual(set(cmd[30:32]), {
             f'--{value.replace("_", "-")}=1'
             for value in self.int_args
         })
 
         # file args
-        for value in cmd[31:34]:
+        for value in cmd[32:35]:
             arg, *_, filename = value.split('=')
             self.assertEqual(Path(filename).read_text(), f'{arg[2:].replace("-", "_")}:value')
 
@@ -5528,12 +5643,10 @@ class AnsiblePlaybookExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase
         self.assertIn('-vvv', cmd)
         self.assertEqual([v for v in cmd if 'invalid' in v], [])
 
-        # check raw inventory hidden values
-        *_, raw_inventory = instance.get_execution_data(
-            self.dummy_execution_dir,
-            {
-                'module': 'unknown',
-                'inventory': """
+    def test_get_raw_inventory(self):
+        instance = self.get_plugin_instance()
+
+        inventory = """
 ---
 somegroup:
   hosts:
@@ -5542,10 +5655,10 @@ somegroup:
         ansible_password: pass
         ansible_ssh_pass: pass
         ansible_ssh_private_key_file: somefile
-                """
-            },
-            ProjectProxy(DummyProject()),
-        )
+"""
+        instance.inventory = inventory
+        raw_inventory = instance.get_raw_inventory()
+
         self.assertEqual(raw_inventory.strip(), f"""
 ---
 somegroup:
@@ -5567,14 +5680,12 @@ somegroup:
             value='pass',
         )
 
-        cmd, *_, raw_inventory = instance.get_execution_data(
+        cmd, _ = instance.get_execution_data(
             self.dummy_execution_dir,
-            {
-                'playbook': 'playbook.yml',
-                'inventory': inventory,
-            },
+            {'playbook': 'playbook.yml', 'inventory': inventory},
             ProjectProxy(DummyProject()),
         )
+        raw_inventory = instance.get_raw_inventory()
         self.assertEqual(raw_inventory.strip(), f"""
 ---
 all:
@@ -5682,11 +5793,12 @@ class AnsibleModuleExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase):
         all_args['verbose'] = 3
         all_args['invalid'] = 'invalid'
 
-        cmd, env, raw_inventory = instance.get_execution_data(
+        cmd, env = instance.get_execution_data(
             self.dummy_execution_dir,
             all_args,
             ProjectProxy(DummyProject()),
         )
+        raw_inventory = instance.get_raw_inventory()
         self.assertEqual(raw_inventory, 'inventory:value')
         self.assertDictEqual(env, {
             'env1': 'env1_value',
@@ -5705,21 +5817,20 @@ class AnsibleModuleExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase):
         })
 
         # string args
-        self.assertIn('--inventory=inventory:value', cmd)
-        self.assertSetEqual(set(cmd[13:27]), {
+        self.assertSetEqual(set(cmd[13:28]), {
             f'--{value.replace("_", "-")}={value}:value'
             for value in self.string_args
-            if value not in ('group', 'inventory')
+            if value != 'group'
         })
 
         # int args
-        self.assertSetEqual(set(cmd[27:31]), {
+        self.assertSetEqual(set(cmd[28:32]), {
             f'--{value.replace("_", "-")}=1'
             for value in self.int_args
         })
 
         # file args
-        for value in cmd[31:33]:
+        for value in cmd[32:34]:
             arg, *_, filename = value.split('=')
             self.assertEqual(Path(filename).read_text(), f'{arg[2:].replace("-", "_")}:value')
 
@@ -5727,12 +5838,10 @@ class AnsibleModuleExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase):
         self.assertIn('-vvv', cmd)
         self.assertEqual([v for v in cmd if 'invalid' in v], [])
 
-        # check raw inventory hidden values
-        *_, raw_inventory = instance.get_execution_data(
-            self.dummy_execution_dir,
-            {
-                'module': 'unknown',
-                'inventory': """
+    def test_get_raw_inventory(self):
+        instance = self.get_plugin_instance()
+
+        instance.inventory = """
 ---
 somegroup:
   hosts:
@@ -5741,10 +5850,8 @@ somegroup:
         ansible_password: pass
         ansible_ssh_pass: pass
         ansible_ssh_private_key_file: somefile
-                """
-            },
-            ProjectProxy(DummyProject()),
-        )
+"""
+        raw_inventory = instance.get_raw_inventory()
         self.assertEqual(raw_inventory.strip(), f"""
 ---
 somegroup:
@@ -5766,14 +5873,12 @@ somegroup:
             value='pass',
         )
 
-        cmd, *_, raw_inventory = instance.get_execution_data(
+        cmd, _ = instance.get_execution_data(
             self.dummy_execution_dir,
-            {
-                'module': 'system.ping',
-                'inventory': inventory,
-            },
+            {'module': 'system.ping', 'inventory': inventory},
             ProjectProxy(DummyProject()),
         )
+        raw_inventory = instance.get_raw_inventory()
         self.assertEqual(raw_inventory.strip(), f"""
 ---
 all:

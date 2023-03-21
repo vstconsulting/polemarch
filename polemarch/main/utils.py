@@ -344,6 +344,9 @@ class ExecutionHandlers(ObjectHandlers):
         if project.status != 'OK':
             raise project.SyncError(_('Project not synchronized.'))
 
+        from ..main.models.utils import validate_inventory_arguments  # pylint: disable=import-outside-toplevel
+        validate_inventory_arguments(plugin, execute_args, project)
+
         task_class = project.task_handlers.backend('EXECUTION')
         plugin_class = self.backend(plugin)
 
@@ -385,7 +388,7 @@ class ExecutionHandlers(ObjectHandlers):
             return None
 
         history_execute_args = {**execute_args}
-        inventory = history_execute_args.pop('inventory', None)
+        inventory = history_execute_args.get('inventory', None)
         if isinstance(inventory, str):
             history_execute_args['inventory'] = inventory
             inventory = None
@@ -409,7 +412,7 @@ class ExecutionHandlers(ObjectHandlers):
         )
 
     def get_compatible_inventory_plugins(self, name: str):
-        return self.opts(name).get('COMPATIBLE_INVENTORY_PLUGINS', ())
+        return self.opts(name).get('COMPATIBLE_INVENTORY_PLUGINS', {})
 
     def get_plugin_object(self, name: str):
         return self.backend(name)(options=self.opts(name))

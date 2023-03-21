@@ -28,18 +28,41 @@
             ><HistoryLineVue v-for="(lineObj, idx) in lines" :key="idx" :content="lineObj.line" />
             </pre>
         </Card>
+        <Card card-body-classes="p-0" :title="$t('Execute args')" collapsable>
+            <ModelFields
+                :key="ExecuteArgsModel.name"
+                :data="app.store.page.instance"
+                :model="ExecuteArgsModel"
+                flat-if-possible
+                flat-fields-classes="col-12 execute-args"
+                @set-value="({ field, value }) => $set(app.store.page.instance, field, value)"
+            />
+        </Card>
     </div>
 </template>
 
 <script setup>
-    import { ref, onMounted, nextTick } from 'vue';
+    import { ref, onMounted, nextTick, computed } from 'vue';
     import HistoryLineVue from './HistoryLine.vue';
     const Card = spa.components.Card;
-
-    const LINES_LIMIT = 500;
+    const ModelFields = spa.components.page.ModelFields;
 
     const app = spa.getApp();
 
+    const ExecuteArgsModel = computed(() => {
+        const OneHistoryModel = app.schema.definitions.OneHistory;
+        return app.modelsResolver.bySchemaObject(
+            {
+                properties: {
+                    execute_args: OneHistoryModel.properties.execute_args,
+                },
+                type: 'object',
+            },
+            'ExecuteArgsModel',
+        );
+    });
+
+    const LINES_LIMIT = 500;
     const linesUrl = spa.utils.joinPaths(app.router.currentRoute.path, '/lines/');
 
     spa.autoupdate.useAutoUpdate({
@@ -197,11 +220,19 @@
     }
     @media (max-width: 767.98px) {
         .output-lines {
-            order: 1;
-        }
-        .history-info {
             order: 0;
         }
+        .history-info {
+            order: 1;
+        }
+    }
+
+    .execute-args .fields-group > .card {
+        display: contents;
+    }
+
+    .execute-args > label {
+        display: none !important;
     }
 </style>
 
@@ -211,7 +242,7 @@
         color: #ececec;
         overflow-x: auto;
         overflow-y: scroll;
-        height: 638px;
+        height: 645px;
         padding: 0 15px;
         margin: 0;
         font-weight: normal !important;

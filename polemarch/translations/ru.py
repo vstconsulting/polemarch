@@ -17,8 +17,7 @@ TRANSLATION = {
     '<b>HTTP</b>: list of URLs, separated by "|".<br><b>SCRIPT</b>: script files, separated by "|" '
     'Files must be in HOOKS_DIR directory.': '<b>HTTP</b>: список URL, разделённых "|". <br><b>SCRIPT</b>: '
     'скрипт-файлы, разделённые "|". Файлы должны находиться в папке HOOKS_DIR.',
-    'Inventory plugin {} is not compatible with execution plugin {}.':
-        'Плагин инвентория {} не совместим с плагином запуска {}.',
+    'Field "{}" is not compatible with {} inventory plugin.': 'Поле "{}" не совместимо с плагином инвентория {}.',
     'Plugin {} does not support working with state.': 'Плагин {} не поддерживает работу с состоянием.',
 
     # field titles and names

@@ -18,6 +18,7 @@ from django.utils import timezone
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
 from vstutils.utils import ObjectHandlers, translate as _
+from vstutils.api import fields as vstfields
 
 from .hosts import Inventory
 from .history import History, Project
@@ -26,30 +27,46 @@ from ...plugins.history.base import BasePlugin as BaseHistoryPlugin
 from ...plugins.execution.base import BasePlugin
 from ..executions import PLUGIN_HANDLERS
 from ..exceptions import IncompatibleError
+from ...api.fields import InventoryAutoCompletionField
 
 
 logger = logging.getLogger("polemarch")
 
 
-def ensure_inventory_is_from_project(inventory, project):  # pylint: disable=invalid-name
-    if isinstance(inventory, Inventory):
-        inventory_id = inventory.id
-    else:
-        return
-
-    if not project.inventories.filter(id=inventory_id).exists():
-        raise ValidationError('No Inventory matches the given query.')
-
-
-def ensure_inventory_is_compatible(inventory, execution_plugin: str):
-    if not isinstance(inventory, Inventory):
-        return
-
-    if inventory.plugin not in PLUGIN_HANDLERS.get_compatible_inventory_plugins(execution_plugin):
-        raise IncompatibleError(_('Inventory plugin {} is not compatible with execution plugin {}.').format(
-            inventory.plugin,
-            execution_plugin,
-        ))
+def validate_inventory_arguments(execution_plugin, arguments: dict, project):
+    inventory_field_names = tuple(
+        # pylint: disable=protected-access
+        key for key, value in PLUGIN_HANDLERS.get_serializer_class(execution_plugin)._declared_fields.items()
+        if (
+            isinstance(value, InventoryAutoCompletionField)
+            or (isinstance(value, vstfields.FkModelField) and isinstance(value.select_model, Inventory))
+            or (isinstance(value, vstfields.FkField) and (
+                isinstance(value.select_model, Inventory) or value.select_model == 'Inventory',
+            ))
+        )
+    )
+    compatible_inventory_plugins = PLUGIN_HANDLERS.get_compatible_inventory_plugins(execution_plugin)
+    invalid_fields = set(compatible_inventory_plugins.keys()) - set(inventory_field_names)
+    if invalid_fields:
+        logger.warning(
+            f'Execution plugin {execution_plugin} has invalid fields for "compatible_inventory_plugins" '
+            f'option: {invalid_fields}'
+        )  # nocv
+    for field_name in inventory_field_names:
+        field_value = arguments.get(field_name)
+        if field_value is None:
+            continue
+        if isinstance(field_value, int):
+            field_value = Inventory.objects.get(id=field_value)
+        if isinstance(field_value, Inventory):
+            if not project.inventories.filter(id=field_value.id).exists():
+                raise ValidationError('No Inventory matches the given query.')
+            if field_value.plugin not in compatible_inventory_plugins.get(field_name, ()):
+                raise IncompatibleError(_('Field "{}" is not compatible with {} inventory plugin.').format(
+                    field_name,
+                    field_value.plugin,
+                ))
+            arguments[field_name] = field_value.id
 
 
 class HistoryPluginHandler(ObjectHandlers):
@@ -163,7 +180,11 @@ class Executor(CmdExecutor):
     def execute(self, cmd: Iterable[str], cwd: str, env_vars: dict):
         self.env = env_vars
         pm_ansible_path = ' '.join(self.pm_ansible())
-        self.history.raw_args = " ".join(cmd).replace(pm_ansible_path, '').lstrip()
+        plain_command = ' '.join(cmd).replace(pm_ansible_path, '').lstrip()
+        if not self.history.raw_args:
+            self.history.raw_args = plain_command
+        else:
+            self.history.raw_args += f' && {plain_command}'
         ret = super().execute(cmd, cwd)
         if self.notificator:
             self.notificator.disconnect_all()
@@ -238,18 +259,24 @@ class PluginExecutor:
             self.execution_dir = self.create_execution_dir()
             self.history.revision = self.project.repo_class.make_run_copy(str(self.execution_dir), revision)
             self.executor = self.executor_class(self.history, writers=self.writers)
-            cmd, env_vars, self.history.raw_inventory = self.plugin.get_execution_data(
+            cmd, env_vars = self.plugin.get_execution_data(
                 self.execution_dir,
                 self.raw_exec_args,
                 project_data=ProjectProxy(self.project),
             )
+            self.history.raw_inventory = self.plugin.get_raw_inventory()
             self.history.status = 'RUN'
             self.history.save()
             self.send_hook('on_execution', execution_dir=str(self.execution_dir))
+
+            for pre_cmd in self.plugin.get_pre_commands(self.raw_exec_args):
+                self.verbose_output(f'Executing pre-command {pre_cmd}')
+                self.executor.execute(pre_cmd, str(self.execution_dir), env_vars)
+
             self.verbose_output(f'Executing command {cmd}')
             self.executor.execute(cmd, str(self.execution_dir), env_vars)
             self.history.status = 'OK'
-            self.plugin.post_execute_hook(cmd)
+            self.plugin.post_execute_hook(cmd, self.raw_exec_args)
 
         except Exception as exception:
             logger.error(traceback.format_exc())

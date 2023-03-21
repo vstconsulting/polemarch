@@ -69,7 +69,7 @@ info:
   x-versions:
     application: 3.0.0
     library: 3.0.0
-    vstutils: 5.3.3
+    vstutils: 5.4.0
     django: 4.1.6
     djangorestframework: 3.14.0
     drf_yasg: 1.21.5
@@ -236,8 +236,8 @@ paths:
             $ref: '#/definitions/ProjectCommunityTemplateUseIt'
       tags:
         - community_template
-      x-multiaction: false
       x-title: Use it
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -944,8 +944,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - group
-      x-multiaction: false
       x-title: Set owner
+      x-multiaction: false
     parameters:
       - name: groups_id
         in: path
@@ -1188,8 +1188,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - group
-      x-multiaction: false
       x-title: Set owner
+      x-multiaction: false
     parameters:
       - name: groups_id
         in: path
@@ -1773,8 +1773,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - group
-      x-multiaction: false
       x-title: Set owner
+      x-multiaction: false
     parameters:
       - name: hosts_id
         in: path
@@ -2110,8 +2110,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - group
-      x-multiaction: false
       x-title: Set owner
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -2600,8 +2600,8 @@ paths:
             $ref: '#/definitions/Response'
       tags:
         - history
-      x-multiaction: false
       x-title: Cancel
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -2618,8 +2618,8 @@ paths:
           description: NO CONTENT
       tags:
         - history
-      x-multiaction: false
       x-title: Clear
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -3085,8 +3085,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - host
-      x-multiaction: false
       x-title: Set owner
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -3537,8 +3537,8 @@ paths:
             $ref: '#/definitions/ImportInventory'
       tags:
         - inventory
-      x-multiaction: false
       x-title: Import inventory
+      x-multiaction: false
     parameters: []
   /inventory/{id}/:
     get:
@@ -4683,8 +4683,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - inventory
-      x-multiaction: false
       x-title: Set owner
+      x-multiaction: false
     parameters:
       - name: group_id
         in: path
@@ -4939,8 +4939,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - inventory
-      x-multiaction: false
       x-title: Set owner
+      x-multiaction: false
     parameters:
       - name: group_id
         in: path
@@ -5422,8 +5422,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - inventory
-      x-multiaction: false
       x-title: Set owner
+      x-multiaction: false
     parameters:
       - name: group_id
         in: path
@@ -5663,8 +5663,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - inventory
-      x-multiaction: false
       x-title: Set owner
+      x-multiaction: false
     parameters:
       - name: group_id
         in: path
@@ -6245,8 +6245,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - inventory
-      x-multiaction: false
       x-title: Set owner
+      x-multiaction: false
     parameters:
       - name: hosts_id
         in: path
@@ -6582,8 +6582,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - inventory
-      x-multiaction: false
       x-title: Set owner
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -6607,23 +6607,6 @@ paths:
       x-list: false
     put:
       operationId: inventory_state_update
-      description: State
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/InventoryStateUpdate'
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/InventoryState'
-      tags:
-        - inventory
-      x-multiaction: false
-    patch:
-      operationId: inventory_state_edit
       description: State
       parameters:
         - name: data
@@ -7559,8 +7542,8 @@ paths:
             $ref: '#/definitions/ProjectExecuteResponse'
       tags:
         - project
-      x-multiaction: false
       x-title: Execute ansible module
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -7584,8 +7567,8 @@ paths:
             $ref: '#/definitions/ProjectExecuteResponse'
       tags:
         - project
-      x-multiaction: false
       x-title: Execute ansible playbook
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -7915,8 +7898,8 @@ paths:
             $ref: '#/definitions/ExecuteTemplateResponse'
       tags:
         - project
-      x-multiaction: false
       x-title: Execute
+      x-multiaction: false
     parameters:
       - name: execution_templates_id
         in: path
@@ -8190,8 +8173,8 @@ paths:
             $ref: '#/definitions/Response'
       tags:
         - project
-      x-multiaction: false
       x-title: Cancel
+      x-multiaction: false
     parameters:
       - name: execution_templates_id
         in: path
@@ -8219,8 +8202,8 @@ paths:
           description: NO CONTENT
       tags:
         - project
-      x-multiaction: false
       x-title: Clear
+      x-multiaction: false
     parameters:
       - name: execution_templates_id
         in: path
@@ -8592,8 +8575,8 @@ paths:
             $ref: '#/definitions/ExecuteTemplateResponse'
       tags:
         - project
-      x-multiaction: false
       x-title: Execute
+      x-multiaction: false
     parameters:
       - name: execution_templates_id
         in: path
@@ -9166,8 +9149,8 @@ paths:
             $ref: '#/definitions/Response'
       tags:
         - project
-      x-multiaction: false
       x-title: Cancel
+      x-multiaction: false
     parameters:
       - name: history_id
         in: path
@@ -9189,8 +9172,8 @@ paths:
           description: NO CONTENT
       tags:
         - project
-      x-multiaction: false
       x-title: Clear
+      x-multiaction: false
     parameters:
       - name: history_id
         in: path
@@ -9381,8 +9364,8 @@ paths:
             $ref: '#/definitions/ProjectImportInventory'
       tags:
         - project
-      x-multiaction: false
       x-title: Import inventory
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -10556,8 +10539,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - project
-      x-multiaction: false
       x-title: Set owner
+      x-multiaction: false
     parameters:
       - name: group_id
         in: path
@@ -10824,8 +10807,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - project
-      x-multiaction: false
       x-title: Set owner
+      x-multiaction: false
     parameters:
       - name: group_id
         in: path
@@ -11331,8 +11314,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - project
-      x-multiaction: false
       x-title: Set owner
+      x-multiaction: false
     parameters:
       - name: group_id
         in: path
@@ -11584,8 +11567,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - project
-      x-multiaction: false
       x-title: Set owner
+      x-multiaction: false
     parameters:
       - name: group_id
         in: path
@@ -12064,8 +12047,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - project
-      x-multiaction: false
       x-title: Set owner
+      x-multiaction: false
     parameters:
       - name: hosts_id
         in: path
@@ -12305,8 +12288,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - project
-      x-multiaction: false
       x-title: Set owner
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -12334,23 +12317,6 @@ paths:
       x-list: false
     put:
       operationId: project_inventory_state_update
-      description: State
-      parameters:
-        - name: data
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/InventoryStateUpdate'
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/InventoryState'
-      tags:
-        - project
-      x-multiaction: false
-    patch:
-      operationId: project_inventory_state_edit
       description: State
       parameters:
         - name: data
@@ -12590,8 +12556,8 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
         - project
-      x-multiaction: false
       x-title: Set owner
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -12615,8 +12581,8 @@ paths:
             $ref: '#/definitions/Response'
       tags:
         - project
-      x-multiaction: false
       x-title: Sync
+      x-multiaction: false
     parameters:
       - name: id
         in: path
@@ -13700,6 +13666,7 @@ definitions:
       - status
       - executor
       - mode
+      - execute_args
       - execution_time
     type: object
     properties:
@@ -13781,7 +13748,384 @@ definitions:
       execute_args:
         title: Execute args
         type: string
-        readOnly: true
+        format: dynamic
+        x-options:
+          field: kind
+          choices: {}
+          types:
+            ANSIBLE_PLAYBOOK:
+              required:
+                - playbook
+              type: object
+              properties:
+                playbook:
+                  title: Playbook
+                  type: string
+                  format: fk_autocomplete
+                  x-options:
+                    model:
+                      $ref: '#/definitions/AnsiblePlaybook'
+                    value_field: playbook
+                    view_field: name
+                    usePrefetch: true
+                args:
+                  title: Args
+                  description: Playbook(s)
+                  type: string
+                become:
+                  title: Become
+                  description: run operations with become (does not imply password
+                    prompting)
+                  type: boolean
+                become_method:
+                  title: Become method
+                  description: privilege escalation method to use (default=sudo),
+                    use `ansible-doc -t become -l` to list valid choices.
+                  type: string
+                check:
+                  title: Check
+                  description: don't make any changes; instead, try to predict some
+                    of the changes that may occur
+                  type: boolean
+                connection:
+                  title: Connection
+                  description: connection type to use (default=smart)
+                  type: string
+                diff:
+                  title: Diff
+                  description: when changing (small) files and templates, show the
+                    differences in those files; works great with --check
+                  type: boolean
+                extra_vars:
+                  title: Extra vars
+                  description: set additional variables as key=value or YAML/JSON,
+                    if filename prepend with @
+                  type: string
+                flush_cache:
+                  title: Flush cache
+                  description: clear the fact cache for every host in inventory
+                  type: boolean
+                force_handlers:
+                  title: Force handlers
+                  description: run handlers even if a task fails
+                  type: boolean
+                forks:
+                  title: Forks
+                  description: specify number of parallel processes to use (default=5)
+                  type: integer
+                inventory:
+                  title: Inventory
+                  description: specify inventory host path or comma separated host
+                    list. --inventory-file is deprecated
+                  type: string
+                  format: inventory
+                  x-options:
+                    filters:
+                      plugin: POLEMARCH_DB,ANSIBLE_FILE,ANSIBLE_STRING
+                limit:
+                  title: Limit
+                  description: further limit selected hosts to an additional pattern
+                  type: string
+                list_hosts:
+                  title: List hosts
+                  description: outputs a list of matching hosts; does not execute
+                    anything else
+                  type: boolean
+                list_tags:
+                  title: List tags
+                  description: list all available tags
+                  type: boolean
+                list_tasks:
+                  title: List tasks
+                  description: list all tasks that would be executed
+                  type: boolean
+                private_key:
+                  title: Private key
+                  description: use this file to authenticate the connection
+                  type: string
+                  format: secretfile
+                  x-options:
+                    media_types:
+                      - '*/*'
+                scp_extra_args:
+                  title: Scp extra args
+                  description: specify extra arguments to pass to scp only (e.g. -l)
+                  type: string
+                sftp_extra_args:
+                  title: Sftp extra args
+                  description: specify extra arguments to pass to sftp only (e.g.
+                    -f, -l)
+                  type: string
+                skip_tags:
+                  title: Skip tags
+                  description: only run plays and tasks whose tags do not match these
+                    values
+                  type: string
+                ssh_common_args:
+                  title: Ssh common args
+                  description: specify common arguments to pass to sftp/scp/ssh (e.g.
+                    ProxyCommand)
+                  type: string
+                ssh_extra_args:
+                  title: Ssh extra args
+                  description: specify extra arguments to pass to ssh only (e.g. -R)
+                  type: string
+                start_at_task:
+                  title: Start at task
+                  description: start the playbook at the task matching this name
+                  type: string
+                step:
+                  title: Step
+                  description: 'one-step-at-a-time: confirm each task before running'
+                  type: boolean
+                syntax_check:
+                  title: Syntax check
+                  description: perform a syntax check on the playbook, but do not
+                    execute it
+                  type: boolean
+                tags:
+                  title: Tags
+                  description: only run plays and tasks tagged with these values
+                  type: string
+                timeout:
+                  title: Timeout
+                  description: override the connection timeout in seconds (default=10)
+                  type: integer
+                user:
+                  title: User
+                  description: connect as this user (default=None)
+                  type: string
+                vault_password_file:
+                  title: Vault password file
+                  description: vault password file
+                  type: string
+                  format: secretfile
+                  x-options:
+                    media_types:
+                      - '*/*'
+                verbose:
+                  title: Verbose
+                  description: verbose mode (-vvv for more, -vvvv to enable connection
+                    debugging)
+                  type: integer
+                  maximum: 4
+                  minimum: 0
+              x-properties-groups:
+                '':
+                  - playbook
+                  - args
+                  - become
+                  - become_method
+                  - check
+                  - connection
+                  - diff
+                  - extra_vars
+                  - flush_cache
+                  - force_handlers
+                  - forks
+                  - inventory
+                  - limit
+                  - list_hosts
+                  - list_tags
+                  - list_tasks
+                  - private_key
+                  - scp_extra_args
+                  - sftp_extra_args
+                  - skip_tags
+                  - ssh_common_args
+                  - ssh_extra_args
+                  - start_at_task
+                  - step
+                  - syntax_check
+                  - tags
+                  - timeout
+                  - user
+                  - vault_password_file
+                  - verbose
+              x-view-field-name: args
+              x-hide-not-required: true
+            ANSIBLE_MODULE:
+              required:
+                - module
+              type: object
+              properties:
+                module:
+                  title: Module
+                  type: string
+                  format: fk_autocomplete
+                  x-options:
+                    model:
+                      $ref: '#/definitions/AnsibleModule'
+                    value_field: path
+                    view_field: path
+                    usePrefetch: true
+                args:
+                  title: Args
+                  description: host pattern
+                  type: string
+                background:
+                  title: Background
+                  description: run asynchronously, failing after X seconds (default=N/A)
+                  type: integer
+                become:
+                  title: Become
+                  description: run operations with become (does not imply password
+                    prompting)
+                  type: boolean
+                become_method:
+                  title: Become method
+                  description: privilege escalation method to use (default=sudo),
+                    use `ansible-doc -t become -l` to list valid choices.
+                  type: string
+                check:
+                  title: Check
+                  description: don't make any changes; instead, try to predict some
+                    of the changes that may occur
+                  type: boolean
+                connection:
+                  title: Connection
+                  description: connection type to use (default=smart)
+                  type: string
+                diff:
+                  title: Diff
+                  description: when changing (small) files and templates, show the
+                    differences in those files; works great with --check
+                  type: boolean
+                extra_vars:
+                  title: Extra vars
+                  description: set additional variables as key=value or YAML/JSON,
+                    if filename prepend with @
+                  type: string
+                forks:
+                  title: Forks
+                  description: specify number of parallel processes to use (default=5)
+                  type: integer
+                inventory:
+                  title: Inventory
+                  description: specify inventory host path or comma separated host
+                    list. --inventory-file is deprecated
+                  type: string
+                  format: inventory
+                  x-options:
+                    filters:
+                      plugin: POLEMARCH_DB,ANSIBLE_FILE,ANSIBLE_STRING
+                limit:
+                  title: Limit
+                  description: further limit selected hosts to an additional pattern
+                  type: string
+                list_hosts:
+                  title: List hosts
+                  description: outputs a list of matching hosts; does not execute
+                    anything else
+                  type: boolean
+                one_line:
+                  title: One line
+                  description: condense output
+                  type: boolean
+                playbook_dir:
+                  title: Playbook dir
+                  description: Since this tool does not use playbooks, use this as
+                    a substitute playbook directory.This sets the relative path for
+                    many features including roles/ group_vars/ etc.
+                  type: string
+                poll:
+                  title: Poll
+                  description: set the poll interval if using -B (default=15)
+                  type: integer
+                private_key:
+                  title: Private key
+                  description: use this file to authenticate the connection
+                  type: string
+                  format: secretfile
+                  x-options:
+                    media_types:
+                      - '*/*'
+                scp_extra_args:
+                  title: Scp extra args
+                  description: specify extra arguments to pass to scp only (e.g. -l)
+                  type: string
+                sftp_extra_args:
+                  title: Sftp extra args
+                  description: specify extra arguments to pass to sftp only (e.g.
+                    -f, -l)
+                  type: string
+                ssh_common_args:
+                  title: Ssh common args
+                  description: specify common arguments to pass to sftp/scp/ssh (e.g.
+                    ProxyCommand)
+                  type: string
+                ssh_extra_args:
+                  title: Ssh extra args
+                  description: specify extra arguments to pass to ssh only (e.g. -R)
+                  type: string
+                syntax_check:
+                  title: Syntax check
+                  description: perform a syntax check on the playbook, but do not
+                    execute it
+                  type: boolean
+                timeout:
+                  title: Timeout
+                  description: override the connection timeout in seconds (default=10)
+                  type: integer
+                tree:
+                  title: Tree
+                  description: log output to this directory
+                  type: string
+                user:
+                  title: User
+                  description: connect as this user (default=None)
+                  type: string
+                vault_password_file:
+                  title: Vault password file
+                  description: vault password file
+                  type: string
+                  format: secretfile
+                  x-options:
+                    media_types:
+                      - '*/*'
+                verbose:
+                  title: Verbose
+                  description: verbose mode (-vvv for more, -vvvv to enable connection
+                    debugging)
+                  type: integer
+                  maximum: 4
+                  minimum: 0
+                group:
+                  title: Group
+                  type: string
+                  default: all
+              x-properties-groups:
+                '':
+                  - module
+                  - args
+                  - background
+                  - become
+                  - become_method
+                  - check
+                  - connection
+                  - diff
+                  - extra_vars
+                  - forks
+                  - inventory
+                  - limit
+                  - list_hosts
+                  - one_line
+                  - playbook_dir
+                  - poll
+                  - private_key
+                  - scp_extra_args
+                  - sftp_extra_args
+                  - ssh_common_args
+                  - ssh_extra_args
+                  - syntax_check
+                  - timeout
+                  - tree
+                  - user
+                  - vault_password_file
+                  - verbose
+                  - group
+              x-view-field-name: args
+              x-hide-not-required: true
       execution_time:
         title: Execution time
         type: integer
@@ -14099,35 +14443,28 @@ definitions:
               x-view-field-name: body
             ANSIBLE_STRING:
               required:
-                - body
+                - file
               type: object
               properties:
-                extension:
-                  title: Extension
-                  type: string
-                  format: autocomplete
-                  enum:
-                    - yaml
-                    - ini
-                    - json
-                  default: yaml
-                executable:
-                  title: Executable
-                  type: boolean
-                  default: false
-                body:
-                  title: Body
-                  type: string
-                  format: file
-                  x-options:
-                    media_types:
-                      - '*/*'
+                file:
+                  title: File
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      x-nullable: true
+                    content:
+                      type: string
+                      x-nullable: true
+                    mediaType:
+                      type: string
+                      x-nullable: true
+                  x-format: namedbinfile
+                  x-validators: {}
               x-properties-groups:
                 '':
-                  - extension
-                  - executable
-                  - body
-              x-view-field-name: executable
+                  - file
+              x-view-field-name: file
     x-properties-groups:
       '':
         - inventory_id
@@ -14211,6 +14548,13 @@ definitions:
                 - body
               type: object
               properties:
+                body:
+                  title: Body
+                  type: string
+                  format: file
+                  x-options:
+                    media_types:
+                      - '*/*'
                 extension:
                   title: Extension
                   type: string
@@ -14224,19 +14568,12 @@ definitions:
                   title: Executable
                   type: boolean
                   default: false
-                body:
-                  title: Body
-                  type: string
-                  format: file
-                  x-options:
-                    media_types:
-                      - '*/*'
               x-properties-groups:
                 '':
+                  - body
                   - extension
                   - executable
-                  - body
-              x-view-field-name: executable
+              x-view-field-name: extension
             ANSIBLE_FILE:
               type: object
               properties:
@@ -14278,6 +14615,13 @@ definitions:
                 - body
               type: object
               properties:
+                body:
+                  title: Body
+                  type: string
+                  format: file
+                  x-options:
+                    media_types:
+                      - '*/*'
                 extension:
                   title: Extension
                   type: string
@@ -14291,19 +14635,12 @@ definitions:
                   title: Executable
                   type: boolean
                   default: false
-                body:
-                  title: Body
-                  type: string
-                  format: file
-                  x-options:
-                    media_types:
-                      - '*/*'
               x-properties-groups:
                 '':
+                  - body
                   - extension
                   - executable
-                  - body
-              x-view-field-name: executable
+              x-view-field-name: extension
             ANSIBLE_FILE:
               type: object
               properties:
@@ -14848,6 +15185,7 @@ definitions:
         description: verbose mode (-vvv for more, -vvvv to enable connection debugging)
         type: integer
         maximum: 4
+        minimum: 0
       group:
         title: Group
         type: string
@@ -15072,6 +15410,7 @@ definitions:
         description: verbose mode (-vvv for more, -vvvv to enable connection debugging)
         type: integer
         maximum: 4
+        minimum: 0
     x-properties-groups:
       '':
         - playbook
@@ -15317,6 +15656,7 @@ definitions:
                     debugging)
                   type: integer
                   maximum: 4
+                  minimum: 0
               x-properties-groups:
                 '':
                   - playbook
@@ -15496,6 +15836,7 @@ definitions:
                     debugging)
                   type: integer
                   maximum: 4
+                  minimum: 0
                 group:
                   title: Group
                   type: string
@@ -15834,6 +16175,7 @@ definitions:
                     debugging)
                   type: integer
                   maximum: 4
+                  minimum: 0
               x-properties-groups:
                 '':
                   - playbook
@@ -16013,6 +16355,7 @@ definitions:
                     debugging)
                   type: integer
                   maximum: 4
+                  minimum: 0
                 group:
                   title: Group
                   type: string
@@ -16207,35 +16550,28 @@ definitions:
               x-view-field-name: body
             ANSIBLE_STRING:
               required:
-                - body
+                - file
               type: object
               properties:
-                extension:
-                  title: Extension
-                  type: string
-                  format: autocomplete
-                  enum:
-                    - yaml
-                    - ini
-                    - json
-                  default: yaml
-                executable:
-                  title: Executable
-                  type: boolean
-                  default: false
-                body:
-                  title: Body
-                  type: string
-                  format: file
-                  x-options:
-                    media_types:
-                      - '*/*'
+                file:
+                  title: File
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      x-nullable: true
+                    content:
+                      type: string
+                      x-nullable: true
+                    mediaType:
+                      type: string
+                      x-nullable: true
+                  x-format: namedbinfile
+                  x-validators: {}
               x-properties-groups:
                 '':
-                  - extension
-                  - executable
-                  - body
-              x-view-field-name: executable
+                  - file
+              x-view-field-name: file
     x-properties-groups:
       '':
         - inventory_id

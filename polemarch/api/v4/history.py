@@ -14,7 +14,7 @@ from ...main.constants import HistoryStatus
 from ...main.exceptions import DataNotReady
 from .users import UserSerializer
 from ..fields import InventoryAutoCompletionField
-from .base import ResponseSerializer
+from .base import ResponseSerializer, PLUGIN_ARGUMENT_TYPES
 
 
 class FactsResponseSerializer(BaseSerializer):
@@ -185,7 +185,8 @@ history_viewset_data = {
         'raw_stdout': drffields.SerializerMethodField(read_only=True),
         'execution_time': vstfields.UptimeField(),
         'status': drffields.ChoiceField(choices=HistoryStatus.to_choices()),
-        'executor': vstfields.DependEnumField(field='initiator_type', types=history_executor_field_types)
+        'executor': vstfields.DependEnumField(field='initiator_type', types=history_executor_field_types),
+        'execute_args': vstfields.DependEnumField(field='kind', types=PLUGIN_ARGUMENT_TYPES),
     },
     'filterset_fields': {
         'id': None,

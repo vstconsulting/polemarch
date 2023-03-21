@@ -155,7 +155,6 @@ for (const modelName of HISTORY_MODELS) {
 }
 
 spa.signals.once('models[OneHistory].fields.beforeInit', (fields) => {
-    fields.execute_args.format = 'json';
     fields.raw_inventory.format = RawInventoryField.format;
     fields.execution_time.format = ExecutionTimeField.format;
 
@@ -193,7 +192,7 @@ export function setupDetailView(path) {
         detailView.wrapperClasses = 'col-md-6 history-info';
         detailView.objects.getResponseModelClass(spa.utils.RequestTypes.RETRIEVE).fieldsGroups = () => [
             {
-                title: '',
+                title: 'History info',
                 wrapperClasses: 'col-12',
                 fields: [
                     'id',
@@ -201,7 +200,6 @@ export function setupDetailView(path) {
                     'executor',
                     'revision',
                     'mode',
-                    'execute_args',
                     'execution_time',
                     'start_time',
                     'stop_time',

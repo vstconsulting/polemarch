@@ -1,4 +1,4 @@
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,disable=invalid-name
 from __future__ import absolute_import
 from pathlib import Path
 from typing import Any, Text, Iterable, Dict, Union
@@ -29,9 +29,9 @@ from .execution_templates import (
 )
 from .hooks import Hook
 from ..validators import RegexValidator, validate_hostname, path_validator
-from ..exceptions import UnknownTypeException, Conflict, IncompatibleError
+from ..exceptions import UnknownTypeException, Conflict
 from ..utils import CmdExecutor
-from .utils import ensure_inventory_is_from_project, ensure_inventory_is_compatible
+from .utils import validate_inventory_arguments
 from ...main.constants import ProjectVariablesEnum, ANSIBLE_REFERENCE
 
 
@@ -187,16 +187,10 @@ def validate_type_and_name(instance: Host, **kwargs) -> None:
 
 
 @receiver(signals.pre_save, sender=ExecutionTemplateOption)
-def validate_template_option_inventory(instance: ExecutionTemplateOption, **kwargs):  # pylint: disable=invalid-name
+def validate_template_option_inventory_fields(instance: ExecutionTemplateOption, **kwargs):
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
-    inventory = instance.arguments.get('inventory')
-    if isinstance(inventory, int):
-        inventory = Inventory.objects.get(id=inventory)
-    if isinstance(inventory, Inventory):
-        ensure_inventory_is_from_project(inventory, instance.template.project)
-        ensure_inventory_is_compatible(inventory, instance.plugin)
-        instance.arguments['inventory'] = inventory.id
+    validate_inventory_arguments(instance.plugin, instance.arguments, instance.project)
 
 
 @receiver(signals.pre_delete, sender=Project)
@@ -347,7 +341,6 @@ def delete_inventory_state(instance: Inventory, **kwargs) -> None:
 
 @receiver(signals.pre_delete, sender=Inventory)
 def check_if_inventory_linked_project(instance: Inventory, **kwargs) -> None:
-    # pylint: disable=invalid-name
     if 'loaddata' in sys.argv or kwargs.get('raw', False):  # nocv
         return
     if instance.projects.exists():
@@ -409,12 +402,6 @@ def polemarch_hook(instance: Any, **kwargs) -> None:
 @receiver(signals.pre_delete, sender=History)
 def cancel_task_on_delete_history(instance: History, **kwargs) -> None:
     instance.cancel()
-
-
-@receiver(signals.pre_save, sender=History)
-def check_history_inventory(instance: History, **kwargs):  # pylint: disable=invalid-name
-    ensure_inventory_is_from_project(instance.inventory, instance.project)
-    ensure_inventory_is_compatible(instance.inventory, instance.kind)
 
 
 @receiver(signals.post_migrate)

@@ -15,19 +15,14 @@ from ...main.models import (
 from ...main.constants import PeriodicTaskScheduleType, HistoryInitiatorType
 from .base import ExecuteResponseSerializer
 from .history import HistoryViewSet
-
-
-ARGUMENTS_TYPES = {
-    plugin: PLUGIN_HANDLERS.get_serializer_class(plugin)()
-    for plugin in PLUGIN_HANDLERS.keys()
-}
+from .base import PLUGIN_ARGUMENT_TYPES
 
 
 class CreateExecutionTemplateSerializer(BaseSerializer):
     id = drffields.IntegerField(read_only=True)
     name = drffields.CharField()
     plugin = drffields.ChoiceField(choices=tuple((k, k) for k in PLUGIN_HANDLERS.keys()))
-    arguments = vstfields.DependEnumField(field='plugin', types=ARGUMENTS_TYPES, write_only=True)
+    arguments = vstfields.DependEnumField(field='plugin', types=PLUGIN_ARGUMENT_TYPES, write_only=True)
 
     @transaction.atomic()
     def create(self, validated_data):
@@ -152,7 +147,7 @@ execution_template_option_viewset_data = {
         'arguments': vstfields.DependEnumField(
             field='plugin',
             source_view='/project/{id}/execution_templates/{execution_templates_id}/',
-            types=ARGUMENTS_TYPES,
+            types=PLUGIN_ARGUMENT_TYPES,
         )
     },
     'extra_serializer_classes': {
@@ -227,7 +222,7 @@ execution_template_viewset_data = {
     'filterset_fields': {
         'id': None,
         'name': None,
-        'plugin': ChoiceFilter(choices=tuple((t, t) for t in ARGUMENTS_TYPES.keys())),
+        'plugin': ChoiceFilter(choices=tuple((t, t) for t in PLUGIN_ARGUMENT_TYPES.keys())),
     },
     'nested': {
         'options': {

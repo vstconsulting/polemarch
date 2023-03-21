@@ -6,9 +6,16 @@ from vstutils.api.base import CopyMixin, ModelViewSet
 from ...main.models import Variable
 from ...main.constants import HiddenVariablesEnum, CYPHER
 from ..filters import VariableFilter
+from ...main.executions import PLUGIN_HANDLERS
 
 
 User = get_user_model()
+
+
+PLUGIN_ARGUMENT_TYPES = {
+    plugin: PLUGIN_HANDLERS.get_serializer_class(plugin)()
+    for plugin in PLUGIN_HANDLERS.keys()
+}
 
 
 class VariablesCopyViewMixin(CopyMixin):

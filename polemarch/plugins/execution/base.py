@@ -1,8 +1,7 @@
-from typing import Callable, Union, Mapping, List, Tuple, Type, Optional, Any
+from typing import Callable, Mapping, List, Tuple, Type, Optional, Any
 from pathlib import Path
 from rest_framework.fields import Field
 from vstutils.api.serializers import BaseSerializer
-from ...main.models import Inventory
 
 
 class BasePlugin:
@@ -24,8 +23,7 @@ class BasePlugin:
         '_output_handler',
         'execution_dir',
         'secret_files',
-        'inventory',
-        'inventory_path',
+        'env_vars',
     )
 
     base_command: List[str]
@@ -71,8 +69,8 @@ class BasePlugin:
 
         :param exclude_fields: field names that should not be presented in serializer.
         """
-
         class Serializer(BaseSerializer, metaclass=self._get_serializer_metaclass(exclude_fields=exclude_fields)):
+
             _hide_not_required = True
 
             class Meta:
@@ -86,10 +84,10 @@ class BasePlugin:
         execution_dir: Path,
         raw_args: dict,
         project_data,
-    ) -> Tuple[List[str], dict, Optional[Inventory], str]:
+    ) -> Tuple[List[str], dict]:
         """
-        Returns tuple of execution command, env variables, inventory instance and raw inventory string. This method
-        will be called directly by executor before execution starts.
+        Returns tuple of execution command and env variables. This method will be called directly by executor before
+        execution starts.
 
         :param execution_dir: path to execution directory in which project copy located. All additional files that
                               should be generated (e.g. inventory file) must be placed here.
@@ -99,16 +97,9 @@ class BasePlugin:
         """
 
         self.prepare_execution_dir(execution_dir)
-        env_vars = self.get_env_vars(project_data)
-        self.inventory = raw_args.pop('inventory', None)
-        inventory_arg, raw_inventory = self.get_inventory(self.inventory)
-        raw_args['inventory'] = inventory_arg
+        self.env_vars = self.get_env_vars(project_data)
         args = self.get_args(raw_args)
-        return (
-            self.base_command + args,
-            env_vars,
-            raw_inventory,
-        )
+        return self.base_command + args, self.env_vars
 
     def prepare_execution_dir(self, dir: Path) -> None:
         """
@@ -121,25 +112,12 @@ class BasePlugin:
 
         self.execution_dir = dir
 
-    def get_inventory(self, inventory: Optional[Union[Inventory, str]]) -> Tuple[Optional[str], str]:
+    def get_raw_inventory(self) -> str:
         """
-        Returns tuple of inventory argument for execution command and raw inventory string used
-        for representation in history. If no inventory presented, should return ``(None, '')``.
-
-        :param inventory: inventory, received from API, which can be ``None`` if there is no inventory,
-                          ``polemarch.main.models.Inventory`` instance, str.
+        Returns raw inventory string used to show it on history page.
         """
 
-        if isinstance(inventory, Inventory):
-            self.inventory_path, self.secret_files = inventory.plugin_object.render_inventory(
-                instance=inventory,
-                execution_dir=self.execution_dir,
-            )
-            inventory_string = Path(self.inventory_path).read_text()
-            raw_inventory = inventory.plugin_object.get_raw_inventory(inventory_string)
-            return str(self.inventory_path), raw_inventory
-
-        return None, ''
+        return ''
 
     def get_env_vars(self, project_data) -> Mapping[str, str]:
         """
@@ -173,7 +151,7 @@ class BasePlugin:
         :param raw_args: argument name-value mapping which should be processed.
         """
 
-        return 0
+        return int(raw_args.get('verbose', 0))
 
     def verbose_output(self, message: str, level: int = 3) -> None:
         """
@@ -186,11 +164,22 @@ class BasePlugin:
         if self._output_handler:
             self._output_handler(message, level)
 
-    def post_execute_hook(self, cmd: List[str]) -> None:
+    def get_pre_commands(self, raw_args: dict) -> List[List[str]]:
+        """
+        This method will be called before execution. Returns list of commands which are needed to be executed before
+        main execution command.
+
+        :param raw_args: dictionary with arguments received from API.
+        """
+
+        return []  # nocv
+
+    def post_execute_hook(self, cmd: List[str], raw_args: dict) -> None:
         """
         This method will be called after execution.
 
         :param cmd: list of arguments which were used for execution.
+        :param raw_args: dictionary with arguments received from API.
         """
 
     def _get_serializer_metaclass(self, exclude_fields: tuple = ()) -> Type[Type[BaseSerializer]]:
