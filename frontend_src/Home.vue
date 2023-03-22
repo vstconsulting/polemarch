@@ -1,7 +1,7 @@
 <template>
     <div class="container-fluid pt-3">
         <div class="row">
-            <div v-for="box in store.smallBoxes" :key="box.key" class="col-6 col-lg-2">
+            <div v-for="box in store.smallBoxes" :key="box.key" class="col">
                 <SmallBoxWidget
                     :value="smallBoxesValues[box.key]"
                     :label="$u.capitalize($tc(box.key + ' counter', smallBoxesValues[box.key]))"

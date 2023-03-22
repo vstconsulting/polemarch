@@ -1,7 +1,8 @@
-from typing import Text
+from typing import Text, Optional
 import logging
 import traceback
-from .models.tasks import BModel, Template
+from vstutils.models import BModel
+from .models.execution_templates import ExecutionTemplateOption
 
 
 logger = logging.getLogger('polemarch')
@@ -9,7 +10,7 @@ logger = logging.getLogger('polemarch')
 
 class DefaultHandler:
     ci_types = {
-        'template': Template
+        'template': ExecutionTemplateOption
     }
 
     def __init__(self, repo, results):
@@ -20,7 +21,7 @@ class DefaultHandler:
     def event_log(self, message: Text, *args, **kwargs) -> None:
         logger.info(message.format(*args, *kwargs))
 
-    def get_ci_call_object(self) -> [BModel, None]:
+    def get_ci_call_object(self) -> Optional[BModel]:
         ci_keys = self.ci_vars.keys()
         if not ci_keys:
             return None

@@ -13,8 +13,9 @@ TRANSLATION = {
     'groups counter': 'groups | group | groups',
     'hosts counter': 'hosts | host | hosts',
     'users counter': 'users | user | users',
+    'execution_plugins counter': 'execution plugins | execution plugin | execution plugins',
+    'inventory_plugins counter': 'inventory plugins | inventory plugin | inventory plugins',
     'all_tasks': 'all tasks',
 
-    'Vars': 'Variables',
     'Acl': 'ACL'
 }

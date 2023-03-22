@@ -57,7 +57,3 @@ class ACLModel(BModel):
 
     class Meta:
         abstract = True
-
-    def set_owner(self, new_owner_id):
-        self.owner = User.objects.get(id=new_owner_id)
-        self.save(update_fields=('owner',))

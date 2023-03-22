@@ -1,7 +1,7 @@
 # pylint: disable=protected-access,no-member,unused-argument
 from __future__ import unicode_literals
 
-from typing import Any, Dict, List, Tuple, Iterable, TypeVar, Text
+from typing import Any, Dict, List, Tuple, Iterable
 import os
 import logging
 import traceback
@@ -12,9 +12,9 @@ from markdown2 import Markdown
 from django.conf import settings
 from django.db.models import Q
 from django.core.cache import caches
-from vstutils.utils import ModelHandlers, raise_context_decorator_with_default, classproperty
+from vstutils.utils import ModelHandlers, raise_context_decorator_with_default, classproperty, raise_context
 # pylint: disable=no-name-in-module
-from vstutils import custom_model
+from vstutils.models import custom_model
 from vstutils.models import BQuerySet, BModel
 from yaml import load
 
@@ -24,16 +24,16 @@ except ImportError:  # nocv
     from yaml import Loader
 
 from . import hosts as hosts_models
-from ..validators import path_validator
 from .vars import AbstractModel, AbstractVarsQuerySet, models
 from ..exceptions import PMException
 from .base import ManyToManyFieldACL
 from .hooks import Hook
 from ..utils import AnsibleModules, AnsibleConfigParser, SubCacheInterface
+from ..constants import ProjectStatus
+from ..executions import PLUGIN_HANDLERS
 
 
 logger = logging.getLogger("polemarch")
-HISTORY_ID = TypeVar('HISTORY_ID', int, None)  # pylint: disable=C0103
 
 
 def list_to_choices(items_list: Iterable) -> List[Tuple[str, str]]:
@@ -106,7 +106,7 @@ class Project(AbstractModel):
 
     class ReadMe(ReadMe):
         """
-        Object for getting readme with different extention.
+        Object for getting readme with different extension.
         """
 
     BOOLEAN_VARS = [
@@ -121,33 +121,22 @@ class Project(AbstractModel):
         'boolean': bool,
     }
 
-    BUSY_STATUSES = [
-        'WAIT_SYNC',
-        'SYNC',
-    ]
-
-    STATUSES = [
-        'NEW',
-        'ERROR',
-        'OK',
-    ] + BUSY_STATUSES
-
     @classproperty
-    def PROJECTS_DIR(cls) -> Text:
+    def PROJECTS_DIR(cls) -> str:
         # pylint: disable=invalid-name
         return getattr(settings, 'PROJECTS_DIR')
 
     def __unicode__(self):
         return str(self.name)  # pragma: no cover
 
-    def get_hook_data(self, when: Text) -> Dict:
+    def get_hook_data(self, when: str) -> dict:
         data = super().get_hook_data(when)
         data['type'] = self.type
         data['repository'] = self.repository
         return data
 
     @property
-    def path(self) -> Text:
+    def path(self) -> str:
         project_dir = (
             self.PROJECTS_DIR
             if not self.hidden
@@ -160,11 +149,11 @@ class Project(AbstractModel):
         return self.repo_handlers(self.type, self)
 
     @property
-    def env_vars(self) -> Dict[Text, Any]:
+    def env_vars(self) -> Dict[str, Any]:
         return self.get_vars_prefixed('env')
 
     @property
-    def type(self) -> Text:
+    def type(self) -> str:
         return self.vars.get('repo_type', 'MANUAL')
 
     @property
@@ -176,7 +165,7 @@ class Project(AbstractModel):
         return self.vars.get('repo_sync_on_run', False)
 
     @property
-    def config(self) -> Dict[Text, Any]:
+    def config(self) -> Dict[str, Any]:
         return self.get_ansible_config_parser().get_data()
 
     def get_ansible_config_parser(self) -> AnsibleConfigParser:
@@ -184,10 +173,10 @@ class Project(AbstractModel):
             self.config_parser = AnsibleConfigParser(self.path)
         return self.config_parser
 
-    def get_yaml_subcache(self, suffix: Text = '') -> SubCacheInterface:
+    def get_yaml_subcache(self, suffix: str = '') -> SubCacheInterface:
         return SubCacheInterface(''.join(['project', str(self.id), suffix]))
 
-    def __parse_yaml_view(self, data: Dict[Text, Any]) -> Dict[Text, Dict]:
+    def __parse_yaml_view(self, data: Dict[str, Any]) -> Dict[str, dict]:
         valid_formats = self.PM_YAML_FORMATS
         parsed_data = {'fields': {}, 'playbooks': {}}
         # Parse fields
@@ -218,14 +207,14 @@ class Project(AbstractModel):
         return parsed_data
 
     @property
-    def yaml_path(self) -> Text:
+    def yaml_path(self) -> str:
         return '/'.join([self.path, '.polemarch.yaml']).replace('//', '/')
 
     @property
     def yaml_path_exists(self) -> bool:
         return os.path.exists(self.yaml_path) and os.path.isfile(self.yaml_path)
 
-    def get_yaml(self) -> Dict[Text, Any]:
+    def get_yaml(self) -> Dict[str, Any]:
         yaml_path = self.yaml_path
         if not self.yaml_path_exists:
             return {}
@@ -245,7 +234,7 @@ class Project(AbstractModel):
 
     @property
     @raise_context_decorator_with_default()
-    def execute_view_data(self) -> Dict[str, Dict[str, Dict]]:
+    def execute_view_data(self) -> Dict[str, Dict[str, dict]]:
         cached_view_data = self.get_yaml_subcache('view').get()
         if cached_view_data and self.yaml_path_exists:
             return cached_view_data
@@ -256,16 +245,10 @@ class Project(AbstractModel):
         self.get_yaml_subcache('view').set(view_data)
         return view_data
 
-    def check_path(self, inventory) -> None:
-        if not isinstance(inventory, str):  # nocv
-            return
-        path_validator(inventory)
-
     def hook(self, when, msg) -> None:
         Hook.objects.all().execute(when, msg)
 
-    def execute(self, plugin: str, execute_args, **kwargs) -> HISTORY_ID:
-        from ..executions import PLUGIN_HANDLERS  # pylint: disable=import-outside-toplevel
+    def execute(self, plugin: str, execute_args, **kwargs):
         return PLUGIN_HANDLERS.execute(
             plugin,
             self,
@@ -277,13 +260,13 @@ class Project(AbstractModel):
 
     def set_status(self, status) -> None:
         self.status = status
-        self.save()
+        self.save(update_fields=('status',))
 
-    def start_repo_task(self, operation='sync'):
-        if self.status == 'NEW':
+    def start_repo_task(self, operation='sync', **kwargs):
+        if self.status == ProjectStatus.NEW:
             operation = 'clone'
-        self.set_status("WAIT_SYNC")
-        return self.task_handlers.backend("REPO").delay(self, operation)
+        self.set_status(ProjectStatus.WAIT_SYNC)
+        return self.task_handlers.backend("REPO").delay(self.id, operation, **kwargs)
 
     def sync(self, *args, **kwargs) -> Any:
         return self.repo_class.get()
@@ -311,7 +294,7 @@ class Project(AbstractModel):
         return f'{current_branch} => {required_branch}'
 
     @property
-    def module(self) -> BQuerySet:
+    def all_ansible_modules(self) -> BQuerySet:
         return Module.objects.filter(Q(project=self) | Q(project=None))
 
     @raise_context_decorator_with_default()
@@ -329,18 +312,18 @@ class Project(AbstractModel):
         return self.__get_readme().ext  # nocv
 
 
-class TaskFilterQuerySet(BQuerySet):
+class AnsiblePlaybookQuerySet(BQuerySet):
     use_for_related_fields = True
 
 
-class Task(BModel):
-    objects = TaskFilterQuerySet.as_manager()
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_query_name="playbook")
+class AnsiblePlaybook(BModel):
+    objects = AnsiblePlaybookQuerySet.as_manager()
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_query_name="ansible_playbooks")
     name = models.CharField(max_length=251, default=uuid.uuid1)
     playbook = models.CharField(max_length=256)
 
     class Meta:
-        default_related_name = "playbook"
+        default_related_name = 'ansible_playbooks'
 
     def __unicode__(self):
         return str(self.name)  # nocv
@@ -357,21 +340,17 @@ class Module(BModel):
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
-        related_query_name="modules",
-        null=True, blank=True, default=None,
+        related_query_name='ansible_modules',
+        null=True,
+        blank=True,
+        default=None,
     )
 
     class Meta:
-        default_related_name = "modules"
+        default_related_name = 'ansible_modules'
+        _serializer_class_name = 'AnsibleModule'
 
-    def __unicode__(self):
-        return str(self.name)  # nocv
-
-    @property
-    def name(self) -> str:
-        return self.path.split('.')[-1]
-
-    def _load_data(self, data) -> Dict:
+    def _load_data(self, data) -> dict:
         return load(data, Loader=Loader) if data and data != '{}' else {}
 
     def _get_module_data_from_cli(self):
@@ -385,8 +364,9 @@ class Module(BModel):
         if module:
             doc_data = module['doc_data']
             data = self._load_data(doc_data)
-            self._data = doc_data
-            self.save()
+            with raise_context():
+                self._data = doc_data
+                self.save(update_fields=('_data',))
             return data
 
     @property
@@ -397,7 +377,7 @@ class Module(BModel):
         return data
 
 
-class ProjectTemplate(custom_model.FileModel):
+class ProjectCommunityTemplate(custom_model.FileModel):
     _template_types = (t for t in Project.repo_handlers.keys() if t != 'MANUAL')
     _auth_types = ['NONE', 'KEY', 'PASSWORD']
 

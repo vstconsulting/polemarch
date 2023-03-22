@@ -1,9 +1,8 @@
 from drf_yasg.inspectors.base import FieldInspector, NotHandled
 from drf_yasg import openapi
 from vstutils.api.schema.schema import VSTAutoSchema
-from vstutils.api.schema.inspectors import field_extra_handler
-
-from .v2.serializers import InventoryAutoCompletionField
+from vstutils.api.schema.inspectors import field_extra_handler, X_OPTIONS
+from .fields import InventoryAutoCompletionField
 
 
 class InventoryFieldInspector(FieldInspector):
@@ -16,8 +15,11 @@ class InventoryFieldInspector(FieldInspector):
             field, swagger_object_type, use_references, **kw
         )
         kwargs = {
-            'type': openapi.TYPE_INTEGER if field.real_type == int else openapi.TYPE_STRING,
-            'format': 'inventory'
+            'type': openapi.TYPE_STRING,
+            'format': 'inventory',
+            X_OPTIONS: {
+                'filters': field.filters,
+            }
         }
 
         return SwaggerType(**field_extra_handler(field, **kwargs))

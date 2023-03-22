@@ -22,6 +22,7 @@ const InventoryFieldMixin = {
                     view_field: 'name',
                     makeLink: true,
                     usePrefetch: true,
+                    ...this.field.props,
                 },
             });
             field.prepareFieldForView(this.view?.path);
@@ -91,3 +92,25 @@ spa.signals.once('APP_CREATED', (app) => {
         app.fieldsResolver.registerField(type, InventoryField.format, InventoryField);
     }
 });
+
+function filterSublinks({ path, detail }) {
+    spa.signals.connect(`<${path}>filterSublinks`, (obj) => {
+        if (!detail && !obj.isListItem) return;
+        if (obj.data.state_managed) {
+            obj.sublinks = obj.sublinks.filter(
+                (sublink) =>
+                    !['all_groups', 'all_hosts', 'group', 'hosts', 'variables'].includes(sublink.name),
+            );
+        } else {
+            obj.sublinks = obj.sublinks.filter((sublink) => sublink.name != 'state');
+        }
+    });
+}
+
+for (const path of ['/inventory/{id}/', '/project/{id}/inventory/{inventory_id}/']) {
+    filterSublinks({ path, detail: true });
+}
+
+for (const path of ['/inventory/', '/project/{id}/inventory/']) {
+    filterSublinks({ path, detail: false });
+}

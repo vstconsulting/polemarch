@@ -1,39 +1,44 @@
 import os
 import re
+import contextlib
 from uuid import uuid1
 from functools import lru_cache
-from typing import Type, Mapping, Optional, Union, Tuple
+from typing import Type, Mapping, Optional
 from django.conf import settings
 from rest_framework import fields
 from vstutils.api.serializers import BaseSerializer
 from vstutils.api.fields import VSTCharField, SecretFileInString, AutoCompletionField
-from ..main.constants import ANSIBLE_REFERENCE, CYPHER, HiddenArgumentsEnum, HiddenVariablesEnum
-from ..main.models import Inventory
-from ..api.v2.serializers import InventoryAutoCompletionField
+from ...main.constants import ANSIBLE_REFERENCE, HiddenArgumentsEnum, HiddenVariablesEnum, HistoryStatus
+from ...main.models import Inventory
+from ...api.fields import InventoryAutoCompletionField
 from .base import BasePlugin
+from ...plugins.inventory.ansible import BaseAnsiblePlugin as BaseAnsibleInventoryPlugin
 
 
 class BaseAnsiblePlugin(BasePlugin):
-    __slots__ = ('files',)
+    __slots__ = ('inventory', 'inventory_path')
 
     reference = {}
     base_command = settings.EXECUTOR
     raw_inventory_hidden_vars = HiddenVariablesEnum.get_values()
-    supports_inventory = True
     hide_passwords_regex = re.compile(r'|'.join((
         r"(?<=" + hidden_var + r":\s).{1,}?(?=[\n\t\s])"
         for hidden_var in raw_inventory_hidden_vars
     )), re.MULTILINE)
 
     error_codes = {
-        4: 'OFFLINE',
-        -9: 'INTERRUPTED',
-        -15: 'INTERRUPTED',
+        4: HistoryStatus.OFFLINE,
+        -9: HistoryStatus.INTERRUPTED,
+        -15: HistoryStatus.INTERRUPTED,
     }
 
-    @classmethod
+    def __init__(self, options=None, output_handler=None):
+        super().__init__(options, output_handler)
+        self.inventory = None
+        self.inventory_path = None
+
     @lru_cache()
-    def get_serializer_class(cls, exclude_fields=()) -> Type[BaseSerializer]:
+    def get_serializer_class(self, exclude_fields=()) -> Type[BaseSerializer]:
         class AnsibleSerializer(super().get_serializer_class(exclude_fields=exclude_fields)):
             def to_representation(self, instance):
                 representation = super().to_representation(instance)
@@ -43,8 +48,8 @@ class BaseAnsiblePlugin(BasePlugin):
         AnsibleSerializer.__name__ = f'{AnsibleSerializer.Meta.ref_name}Serializer'
         return AnsibleSerializer
 
-    def get_env_vars(self) -> Mapping[str, str]:
-        env_vars = super().get_env_vars()
+    def get_env_vars(self, project_data) -> Mapping[str, str]:
+        env_vars = super().get_env_vars(project_data)
         ansible_config = env_vars.pop('ANSIBLE_CONFIG', None)
 
         if ansible_config is not None:
@@ -59,36 +64,40 @@ class BaseAnsiblePlugin(BasePlugin):
 
         return env_vars
 
-    def get_inventory(self, inventory: Optional[Union[Inventory, str, int]]) -> Tuple[Optional[str], str]:
-        if inventory is None:
-            return inventory, ''
-
-        if isinstance(inventory, int) or (isinstance(inventory, str) and inventory.isdigit()):
-            inventory = Inventory.objects.get(id=int(inventory))
+    def _get_inventory_arg_value(self, inventory):
+        self.inventory = inventory
 
         if isinstance(inventory, Inventory):
-            text, self.files = inventory.get_inventory(tmp_dir=self.execution_dir)
-            inventory_file = self.execution_dir / self.inventory_filename
-            inventory_file.write_text(text)
-            return str(inventory_file), self._get_raw_inventory(text)
+            self.inventory_path, self.secret_files = inventory.plugin_object.render_inventory(
+                instance=inventory,
+                execution_dir=self.execution_dir,
+            )
+            return str(self.inventory_path)
 
-        if (self.execution_dir / inventory).is_file():
-            inventory_file = (self.execution_dir / inventory)
-            self._inventory_filename = inventory_file.name
-            text = inventory_file.read_text()
-            return str(inventory_file), self._get_raw_inventory(text)
+        if isinstance(inventory, str):
+            inventory_file = None
+            inventory_is_file = False
+            with contextlib.suppress(OSError):
+                inventory_file = self.execution_dir / inventory
+                inventory_is_file = inventory_file.is_file()
 
-        return inventory, self._get_raw_inventory(inventory)
+            if inventory_is_file:
+                return str(inventory_file)
 
-    def get_verbose_level(self, raw_args: dict) -> int:
-        return int(raw_args.get('verbose', 0))
+        return inventory
 
-    def _get_raw_inventory(self, raw_inventory: str) -> str:
-        return self.hide_passwords_regex.sub(CYPHER, raw_inventory, 0)
+    def get_raw_inventory(self):
+        if isinstance(self.inventory, str):
+            return BaseAnsibleInventoryPlugin.get_raw_inventory(self.inventory)
+        if isinstance(self.inventory, Inventory):
+            return self.inventory.plugin_object.get_raw_inventory(self.inventory_path.read_text())
+        return super().get_raw_inventory()
 
     def _process_arg(self, key: str, value) -> Optional[str]:
         key = key.replace('_', '-')
         if key in self.reference:
+            if key == 'inventory' and value:
+                return f'--{key}={self._get_inventory_arg_value(value)}'
             if not value:
                 return None
             if key == 'verbose':
@@ -106,10 +115,9 @@ class BaseAnsiblePlugin(BasePlugin):
         tmpfile.chmod(0o600)
         return str(tmpfile)
 
-    @classmethod
-    def _get_serializer_fields(cls, exclude_fields=()):
+    def _get_serializer_fields(self, exclude_fields=()):
         serializer_fields = super()._get_serializer_fields(exclude_fields=exclude_fields)
-        for field_name, field_def in cls.reference.items():
+        for field_name, field_def in self.reference.items():
             if field_name in ('help', 'version', *exclude_fields):
                 continue
             field_type = field_def.get('type')
@@ -125,11 +133,14 @@ class BaseAnsiblePlugin(BasePlugin):
 
             if field_name == 'verbose':
                 field = fields.IntegerField
-                kwargs.update({'max_value': 4})
+                kwargs.update({'min_value': 0, 'max_value': 4})
             if field_name in HiddenArgumentsEnum.get_values():
                 field = SecretFileInString
             if field_name == 'inventory':
                 field = InventoryAutoCompletionField
+                inventory_filters = self.options.get('COMPATIBLE_INVENTORY_PLUGINS', {}).get('inventory', ())
+                inventory_filters = ','.join(inventory_filters) or None
+                kwargs['filters'] = {'plugin': inventory_filters}
             if field_name == 'group':
                 kwargs['default'] = 'all'
 
@@ -143,13 +154,13 @@ class BaseAnsiblePlugin(BasePlugin):
         return serializer_fields
 
 
-class Playbook(BaseAnsiblePlugin):
+class AnsiblePlaybook(BaseAnsiblePlugin):
     __slots__ = ()
 
     reference = ANSIBLE_REFERENCE.raw_dict['playbook']
     arg_shown_on_history_as_mode = 'playbook'
     serializer_fields = {
-        'playbook': AutoCompletionField(autocomplete='Playbook', autocomplete_property='playbook')
+        'playbook': AutoCompletionField(autocomplete='AnsiblePlaybook', autocomplete_property='playbook')
     }
 
     @property
@@ -162,14 +173,14 @@ class Playbook(BaseAnsiblePlugin):
         return super()._process_arg(key, value)
 
 
-class Module(BaseAnsiblePlugin):
+class AnsibleModule(BaseAnsiblePlugin):
     __slots__ = ('group', 'module')
 
     reference = ANSIBLE_REFERENCE.raw_dict['module']
     serializer_fields = {
         'module': AutoCompletionField(
-            autocomplete='Module',
-            autocomplete_property='name',
+            autocomplete='AnsibleModule',
+            autocomplete_property='path',
             autocomplete_represent='path',
         )
     }
@@ -181,5 +192,8 @@ class Module(BaseAnsiblePlugin):
 
     def get_args(self, raw_args):
         self.group = raw_args.pop('group', 'all')
-        self.module = raw_args.pop('module')
+        self.module = self.get_module_value(raw_args.pop('module'))
         return super().get_args(raw_args)
+
+    def get_module_value(self, value):
+        return value.rsplit('.', maxsplit=1)[-1]

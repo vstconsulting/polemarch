@@ -3,14 +3,18 @@
         <ModelFields
             :editable="true"
             :data="mainData"
-            :model="AnsibleModule"
+            :model="MainModel"
             :fields-groups="[{ title: '', fields: ['inventory', 'user', 'private_key'] }]"
+            flat-if-possible
+            flat-fields-classes="col-12"
             @set-value="({ field, value }) => $set(mainData, field, value)"
         />
         <ModelFields
             :editable="true"
             :data="argsData"
             :model="ArgsModel"
+            flat-if-possible
+            flat-fields-classes="col-12"
             @set-value="({ field, value }) => $set(argsData, field, value)"
         />
         <div class="execute-btns">
@@ -20,7 +24,7 @@
                 :title="help"
                 type="button"
                 class="btn btn-secondary"
-                @click="executePlaybook(playbookName)"
+                @click="executeAnsiblePlaybook(playbookName)"
             >
                 {{ title }}
             </button>
@@ -37,12 +41,22 @@
         mixins: [spa.fields.base.BaseFieldMixin],
         data() {
             return {
-                AnsibleModule: this.$app.modelsResolver.get('ExecuteModule'),
+                AnsiblePlaybook: this.$app.modelsResolver.get('ExecuteAnsiblePlaybook'),
                 mainData: {},
                 argsData: {},
             };
         },
         computed: {
+            MainModel() {
+                return this.$app.modelsResolver.bySchemaObject({
+                    type: 'object',
+                    properties: {
+                        inventory: this.AnsiblePlaybook.fields.get('inventory'),
+                        user: this.AnsiblePlaybook.fields.get('user'),
+                        private_key: this.AnsiblePlaybook.fields.get('private_key'),
+                    },
+                });
+            },
             ArgsModel() {
                 const properties = {};
                 for (const [name, field] of Object.entries(this.executeData.fields)) {
@@ -73,11 +87,11 @@
             },
         },
         methods: {
-            async executePlaybook(name) {
-                const actionView = this.$app.views.get('/project/{id}/execute_playbook/');
+            async executeAnsiblePlaybook(name) {
+                const actionView = this.$app.views.get('/project/{id}/execute_ansible_playbook/');
                 try {
-                    const mainDataInstance = new this.AnsibleModule();
-                    mainDataInstance._validateAndSetData(this.mainData);
+                    const mainDataInstance = new this.AnsiblePlaybook();
+                    mainDataInstance._validateAndSetData({ playbook: name, ...this.mainData });
                     const response = await this.$app.api.makeRequest({
                         useBulk: true,
                         method: spa.utils.HttpMethods.POST,

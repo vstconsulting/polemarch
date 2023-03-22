@@ -174,7 +174,7 @@ class Git(_VCS):
                     config_writer.set_value("user", "email", self.proj.owner.email).release()
                     user_name = self.proj.owner.username
                     if self.proj.owner.last_name and self.proj.owner.first_name:  # nocv
-                        user_name = '{u.fist_name} {u.last_name}'.format(u=self.proj.owner)
+                        user_name = '{u.first_name} {u.last_name}'.format(u=self.proj.owner)
                     config_writer.set_value("user", "name", user_name).release()
                     repo.git.add(A=True)
                     repo.git.commit(m='Create project from Polemarch.')
@@ -188,11 +188,11 @@ class Git(_VCS):
 
         return (repo, result)
 
-    def get_revision(self, *args, **kwargs):
+    def get_revision(self, *args, repo=None, **kwargs):
         # pylint: disable=unused-argument
         if self.proj.status == 'NEW':
             return 'NOT_SYNCED'
-        repo = self.get_repo()
+        repo = repo or self.get_repo()
         return repo.head.object.hexsha
 
     def _with_password(self, tmp, env_vars: ENV_VARS_TYPE) -> ENV_VARS_TYPE:
@@ -256,11 +256,11 @@ class Git(_VCS):
         except git.GitError:
             return "ERROR"
 
-    def make_run_copy(self, destination: Text, revision: Text):
+    def make_run_copy(self, destination: Text, revision: Text) -> str:
         source = self.proj.path
         if self.proj.repo_sync_on_run:
             source = self.proj.repository
-        self._operate(
+        repo, _ = self._operate(
             self.make_clone,
             source=source,
             destination=str(destination),
@@ -268,3 +268,4 @@ class Git(_VCS):
             revision=revision,
             timeout=self.proj.repo_sync_timeout
         )
+        return self.get_revision(repo=repo)

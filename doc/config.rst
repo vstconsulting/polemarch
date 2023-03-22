@@ -387,6 +387,24 @@ Here you can specify settings used by archive (e.g. TAR) projects.
 * **max_content_length** - Maximum download file size. Format: ``30<unit>``, where unit is *b*, *kb*, *mb*, *gb*, *tb*.
 
 
+.. _history:
+
+History output plugins
+----------------------
+
+Section ``[history]``
+
+This section of the configuration provides to configure the output history plugin settings.
+
+* **output_plugins** - a comma-separated list of plugin names that are used to record history lines. Plugins must have the ``writeable`` attribute. Default: ``database``
+* **read_plugin** - the name of the plugin used to display the history lines in the api. Default is ``database``.
+
+Other parameters are set in the plugin options section: ``history.plugin.PLUGIN_NAME.options``.
+
+.. warning::
+    Be careful. The reader plugin must be able to read the data.
+    Therefore, the storage from which the reading plugin takes data must be filled with one of the writer plugins.
+
 Production web settings
 -----------------------
 
@@ -396,7 +414,7 @@ Here placed settings related to web-server used by Polemarch in production
 (for deb and rpm packages by default). Most of them related to system paths
 (logging, PID-file and so on).
 
-.. note:: More settings in :doc:`uwsgi:Configuration`.
+.. note:: More settings in :doc:`uwsgi:Configuration` (deprecated) and `uvicorn docs <https://www.uvicorn.org/settings/#production>`_.
 
 .. warning:: In production, it is recommended to use Centrifugo in order to reduce the load on the backend from automatic page updates.
 
@@ -406,41 +424,72 @@ Configuration options
 
 This section contains additional information for configure additional elements.
 
-#. If you need set ``https`` for your web settings, you can do it using HAProxy, Nginx or configure it in ``settings.ini``.
+#. If you need to set ``https`` for your web settings, you can do it using HAProxy, Nginx or configure it in
+``settings.ini``.
 
     .. sourcecode:: ini
 
-        [uwsgi]
-        https = 0.0.0.0:8443,foobar.crt,foobar.key
-        addrport = 127.0.0.1:8080
+        # [uvicorn]
+        # ssl_keyfile = /etc/polemarch/polemarch.key
+        # ssl_certfile = /etc/polemarch/polemarch.crt
 
 #. We strictly do not recommend running the web server from root. Use HTTP proxy to run on privileged ports.
 
 .. note:: If you need more options you can find it in :doc:`vstutils:config` in the official vstutils documentation.
 
 
-.. _plugins_config:
+.. _inventory_plugins_config:
 
-Execution plugins
------------------
+Inventory plugins config
+------------------------
 
-To connect a plugin to Polemarch, there should be a section
+To connect an inventory plugin to Polemarch, there should be a section
 
 .. sourcecode:: ini
 
-    [plugin.<plugin_name>]
+    [inventory.plugin.<plugin_name>]
     backend = import.path.to.plugin.Class
 
 Where
 
-* **<plugin_name>** - name that will available in API to work with
+* **<plugin_name>** - name that will be available in API to work with
 * **backend** - is a python import path to plugin class
 
 Also you may add options which will be available in plugin:
 
 .. sourcecode:: ini
 
-    [plugin.<plugin_name>.options]
+    [inventory.plugin.<plugin_name>.options]
+    some_option = some_option
+
+To read more about plugins, please see :doc:`plugins`.
+
+
+.. _execution_plugins_config:
+
+Execution plugins config
+------------------------
+
+To connect an execution plugin to Polemarch, there should be a section
+
+.. sourcecode:: ini
+
+    [execution.plugin.<plugin_name>]
+    backend = import.path.to.plugin.Class
+    compatible_inventory_plugins = <inventory_plugin1>,<inventory_plugin1>
+
+Where
+
+* **<plugin_name>** - name that will be available in API to work with
+* **backend** - is a python import path to plugin class
+* **compatible_inventory_plugins** - inventory plugins which are compatible with this execution plugin. If omitted,
+                                   it's supposed that execution plugin cannot work with any inventory.
+
+Also you may add options which will be available in plugin:
+
+.. sourcecode:: ini
+
+    [execution.plugin.<plugin_name>.options]
     some_option = some_option
 
 To read more about plugins, please see :doc:`plugins`.

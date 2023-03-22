@@ -1,5 +1,6 @@
 # pylint: disable=invalid-name,ungrouped-imports
 from __future__ import unicode_literals
+from functools import partial
 
 import logging
 import os
@@ -11,23 +12,25 @@ import json
 from os.path import dirname
 from django.conf import settings
 from django.utils import timezone
-from vstutils.models.cent_notify import Notificator
-from vstutils.utils import ObjectHandlers
+from django.db import transaction
 
 try:
     from yaml import CLoader as Loader, CDumper as Dumper, load, dump
 except ImportError:  # nocv
     from yaml import Loader, Dumper, load, dump
 
-from django.core.validators import ValidationError
-
 from vstutils.tasks import TaskClass
 from vstutils.utils import (
     tmp_file_context,
     BaseVstObject,
     Executor,
-    UnhandledExecutor, ON_POSIX,
+    UnhandledExecutor,
+    ON_POSIX,
+    translate as _
 )
+from vstutils.models.cent_notify import Notificator
+from vstutils.utils import ObjectHandlers
+from vstutils.utils import raise_context
 
 
 from . import __file__ as file
@@ -230,7 +233,7 @@ class AnsibleArgumentsReference(PMAnsible):
         # Excluded because we use this differently in code
         # 'verbose', 'inventory-file', 'inventory', 'module-name',
         'inventory-file', 'module-name',
-        # Excluded because now we could not send any to worker proccess
+        # Excluded because now we could not send any to worker process
         'ask-sudo-pass', 'ask-su-pass', 'ask-pass',
         'ask-vault-pass', 'ask-become-pass',
     ]
@@ -238,27 +241,6 @@ class AnsibleArgumentsReference(PMAnsible):
     def __init__(self):
         super().__init__()
         self.raw_dict = self._extract_from_cli()
-
-    def is_valid_value(self, command: str, argument: str, value):
-        argument = argument.replace('_', '-')
-        argument_data = self.raw_dict[command][argument]
-        mtype = argument_data["type"]
-        if mtype == 'int':
-            int(value)
-        elif mtype is not None and value is None:  # nocv
-            raise AssertionError("This argument should have value")
-        return True
-
-    def validate_args(self, command: str, args):
-        argument = None
-        try:
-            for argument, value in args.items():
-                self.is_valid_value(command, argument, value)
-        except (KeyError, ValueError, AssertionError) as e:
-            raise ValidationError({
-                command: "Incorrect argument: {}.".format(str(e)),
-                'argument': argument
-            }) from e
 
     def get_args(self):
         cmd = super().get_args()
@@ -356,10 +338,14 @@ class PolemarchNotificator(Notificator):
 
 
 class ExecutionHandlers(ObjectHandlers):
+    __slots__ = ()
+
     def execute(self, plugin: str, project, execute_args, **kwargs):
-        sync = kwargs.pop('sync', False)
-        if project.status != 'OK' and not sync:
-            raise project.SyncError('ERROR project not synchronized')
+        if project.status != 'OK':
+            raise project.SyncError(_('Project not synchronized.'))
+
+        from ..main.models.utils import validate_inventory_arguments  # pylint: disable=import-outside-toplevel
+        validate_inventory_arguments(plugin, execute_args, project)
 
         task_class = project.task_handlers.backend('EXECUTION')
         plugin_class = self.backend(plugin)
@@ -377,37 +363,37 @@ class ExecutionHandlers(ObjectHandlers):
             initiator_type=kwargs.pop('initiator_type', 'project'),
             executor=kwargs.pop('executor', None),
             save_result=kwargs.pop('save_result', True),
-            template_option=kwargs.pop('template_option', None),
+            options=kwargs.pop('options', {}),
         )
+
+        with raise_context():
+            execute_args['inventory'] = execute_args['inventory'].id
+
         task_kwargs = {
             'plugin': plugin,
-            'project': project,
-            'history': history,
+            'project_id': project.id,
+            'history_id': history.id if history is not None else None,
             'execute_args': execute_args,
         }
 
-        if sync:
-            task_class(**task_kwargs)
+        if settings.TESTS_RUN:  # TODO: do something better?
+            task_class.do(**task_kwargs)
         else:
-            task_class.delay(**task_kwargs)
+            transaction.on_commit(partial(task_class.do, **task_kwargs))  # nocv
 
-        return history.id if history else None
+        return history
 
     def create_history(self, project, kind, mode, execute_args, **kwargs):
         if not kwargs['save_result']:
             return None
 
         history_execute_args = {**execute_args}
-        inventory = history_execute_args.pop('inventory', None)
+        inventory = history_execute_args.get('inventory', None)
         if isinstance(inventory, str):
             history_execute_args['inventory'] = inventory
             inventory = None
         elif isinstance(inventory, int):
             inventory = project.inventories.get(id=inventory)
-
-        options = {}
-        if kwargs['template_option'] is not None:
-            options['template_option'] = kwargs['template_option']
 
         return project.history.create(
             status='DELAY',
@@ -422,10 +408,32 @@ class ExecutionHandlers(ObjectHandlers):
             initiator_type=kwargs['initiator_type'],
             executor=kwargs['executor'],
             hidden=project.hidden,
-            options=options,
+            options=kwargs['options'],
         )
+
+    def get_compatible_inventory_plugins(self, name: str):
+        return self.opts(name).get('COMPATIBLE_INVENTORY_PLUGINS', {})
+
+    def get_plugin_object(self, name: str):
+        return self.backend(name)(options=self.opts(name))
+
+    def get_serializer_class(self, name: str):
+        return self.get_plugin_object(name).get_serializer_class()
 
     def get_object(self, plugin: str, project, history, **exec_args):  # noee
         from .models.utils import PluginExecutor  # pylint: disable=import-outside-toplevel
 
-        return PluginExecutor(self.backend(plugin), self.opts(plugin), project, history, exec_args)
+        return PluginExecutor(plugin, self.backend(plugin), self.opts(plugin), project, history, exec_args)
+
+
+class InventoryPluginHandlers(ObjectHandlers):
+    __slots__ = ()
+
+    def get_object(self, name: str):
+        return self[name](options=self.opts(name))
+
+    def get_serializer_import_class(self, name: str):
+        return self.get_object(name).get_serializer_import_class()
+
+    def get_serializer_class(self, name: str):
+        return self.get_object(name).get_serializer_class()

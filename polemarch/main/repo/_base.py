@@ -14,8 +14,8 @@ from django.conf import settings
 from vstutils.utils import raise_context, import_class
 from ..utils import AnsibleModules
 from ..models.projects import Project
-from ..models.tasks import Template
 from ...main.exceptions import MaxContentLengthExceeded, SyncOnRunTimeout
+from ...main.constants import TEMPLATE_KIND_PLUGIN_MAP
 
 logger = logging.getLogger("polemarch")
 FILENAME = TypeVar('FILENAME', Text, str)
@@ -73,19 +73,57 @@ class _Base:
             '{} repo_sync_on_run to {}'.format('Set' if created else 'Update', value)
         )
 
+    def _format_template_data(self, template_data):
+        if 'plugin' in template_data:
+            template = template_data
+            options = template.pop('options', {})
+            return template, options
+
+        # handle deprecated format for old templates
+        self.message('Template is written in deprecated format.', level='warning')
+
+        template = {
+            'plugin': TEMPLATE_KIND_PLUGIN_MAP.get(template_data['kind'], template_data['kind']),
+            'notes': template_data['notes'],
+        }
+        data = template_data['data']
+        default_option = {
+            'default': {
+                'arguments': {
+                    **data.pop('vars', {}),
+                    **data,
+                }
+            }
+        }
+        other_options = {
+            name: {'arguments': data}
+            for name, data in template_data['options'].items()
+        }
+        return template, {**default_option, **other_options}
+
     @raise_context()
-    def __create_template(self, template_name: Text, template_data: Dict) -> Template:
+    def __create_template(self, template_name: Text, template_data: Dict):
         '''
-        Creates one template from `.polemarch.yaml`.
+        Creates one template with options from `.polemarch.yaml`.
 
         :param template_name: Template name
         :param template_data: Template data
         :return: created Template object
         '''
         self.message(f'Loading template[{template_name}] into the project.')
-        obj, created = self.proj.template.update_or_create(name=template_name, defaults=template_data)
-        self.message(f'Template[{obj.name}] {"created" if created else "updated"} in the project.')
-        return obj
+        formatted_template, formatted_options = self._format_template_data(template_data)
+
+        template, created = self.proj.execution_templates.update_or_create(
+            name=template_name,
+            defaults=formatted_template,
+        )
+        self.message(f'Template[{template.name}] {"created" if created else "updated"} in the project.')
+
+        options = template.options.bulk_create([
+            template.options.model(name=name, template=template, **data)
+            for name, data in formatted_options.items()
+        ])
+        self.message(f'{len(options)} option(s) created in template.')
 
     def pm_handle_templates(self, feature: Text, data: Dict) -> None:
         '''
@@ -96,7 +134,7 @@ class _Base:
         '''
         rewrite = data.get('templates_rewrite', False)
         data = data[feature]
-        qs_existed = self.proj.template.filter(name__in=data.keys())
+        qs_existed = self.proj.execution_templates.filter(name__in=data.keys())
         existed = qs_existed.values_list('name', flat=True)
         for template_name, template_data in data.items():
             if not rewrite and template_name in existed:
@@ -140,8 +178,8 @@ class _Base:
         """
         # pylint: disable=invalid-name
         project = self.proj
-        project.playbook.all().delete()
-        PlaybookModel = self.proj.playbook.model
+        project.ansible_playbooks.all().delete()
+        PlaybookModel = self.proj.ansible_playbooks.model
         hidden = project.hidden
         split = str.split
         playbook_objects = (
@@ -170,8 +208,8 @@ class _Base:
         # pylint: disable=invalid-name
         project = self.proj
         project.get_ansible_config_parser().clear_cache()
-        project.modules.all().delete()
-        ModuleClass = self.proj.modules.model
+        project.ansible_modules.all().delete()
+        ModuleClass = self.proj.ansible_modules.model
         paths = project.config.get('DEFAULT_MODULE_PATH', [])
         paths = filter(lambda mp: project.path in mp, paths)
         modules = self.__get_project_modules(paths)
@@ -206,24 +244,11 @@ class _Base:
 
         return chain(self.search_files(repo, '*.yml'), path_list_additional)
 
-    def _update_slave_inventories(self, slave_inventory_list):
-        for slave_inv in slave_inventory_list:
-            ext = getattr(slave_inv.variables.filter(key='inventory_extension').last(), 'value', '')
-            file_path = pathlib.Path(f"{settings.PROJECTS_DIR}/{self.proj.id}/{slave_inv.name}{ext}")
-            if not file_path.exists():
-                slave_inv.delete()
-                continue
-            slave_inv.import_inventory_from_string(
-                raw_data=file_path.read_text(),
-                name=slave_inv.name,
-                inventory_instance=slave_inv
-            )
-
     def _make_operations(self, operation: Callable) -> Any:
         '''
         Handle VCS operations and sync data from project.
 
-        :param operation: function that should be hdandled.
+        :param operation: function that should be handled.
         :return: tuple with repo-object and fetch-results
         '''
         self._set_status("SYNC")
@@ -234,7 +259,6 @@ class _Base:
                 self._update_tasks(self._get_playbook_path(result[0]))
                 self._set_project_modules()
                 self._handle_yaml(self._load_yaml() or {})
-                self._update_slave_inventories(self.proj.slave_inventory.all())
                 self.proj.save()
         except Exception as err:
             logger.debug(traceback.format_exc())
@@ -262,7 +286,7 @@ class _Base:
         '''
         raise NotImplementedError
 
-    def get_revision(self, *args, **kwargs) -> Text:
+    def get_revision(self, *args, repo=None, **kwargs) -> Text:
         # pylint: disable=unused-argument
         return "NO VCS"
 
@@ -308,8 +332,9 @@ class _Base:
     def revision(self) -> Text:
         return self._operate(self.get_revision)
 
-    def make_run_copy(self, destination: Text, revision: Text):
+    def make_run_copy(self, destination: Text, revision: Text) -> str:
         shutil.copytree(self.proj.path, destination)
+        return self.get_revision()
 
 
 class _ArchiveRepo(_Base):
@@ -346,12 +371,13 @@ class _ArchiveRepo(_Base):
     def _extract(self, archive, path, options):
         raise NotImplementedError  # nocv
 
-    def make_run_copy(self, destination: Text, revision: Text):
+    def make_run_copy(self, destination: Text, revision: Text) -> str:
         if self.proj.repo_sync_on_run:
-            return self.make_clone({
+            self.make_clone({
                 'destination': destination,
                 'revision': revision,
                 'no_update': True,
                 'timeout': self.proj.repo_sync_timeout,
             })
+            return self.get_revision()
         return super().make_run_copy(destination, revision)

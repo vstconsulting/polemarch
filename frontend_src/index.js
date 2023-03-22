@@ -2,12 +2,10 @@ import { ref, computed } from 'vue';
 import './style.scss';
 import './layout';
 import './hooks';
-import './periodic_task';
 import './users';
 import * as inventory from './inventory';
 import './project';
 import * as history from './history';
-import './templates';
 
 import Home from './Home.vue';
 import { UserObjectField } from './fields/UserObjectField';
@@ -35,12 +33,11 @@ spa.signals.once('allViews.created', ({ views }) => {
         let statsData = ref(null);
         let period = ref(14);
         let smallBoxes = ref([
-            { key: 'templates', label: 'Templates', icon: 'fa fa-cog' },
             { key: 'projects', label: 'Projects', href: '#/project', icon: 'fa fa-cog' },
-            { key: 'inventories', label: 'Inventories', href: '#/inventory', icon: 'fas fa-cog' },
-            { key: 'groups', label: 'Groups', href: '#/group', icon: 'fa fa-cog' },
-            { key: 'hosts', label: 'Hosts', href: '#/host', icon: 'fa fa-cog' },
             { key: 'users', label: 'Users', href: '#/user', icon: 'fa fa-cog' },
+            { key: 'inventories', label: 'Inventories', href: '#/inventory', icon: 'fas fa-cog' },
+            { key: 'inventory_plugins', label: 'Inventory plugins', icon: 'fas fa-cog' },
+            { key: 'execution_plugins', label: 'Execution plugins', icon: 'fas fa-cog' },
         ]);
         const additionalSections = computed(() => []);
 
