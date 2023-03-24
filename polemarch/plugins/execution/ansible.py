@@ -32,6 +32,8 @@ class BaseAnsiblePlugin(BasePlugin):
         -15: HistoryStatus.INTERRUPTED,
     }
 
+    arg_shown_on_history_as_inventory = 'inventory'
+
     def __init__(self, options=None, output_handler=None):
         super().__init__(options, output_handler)
         self.inventory = None
@@ -160,7 +162,11 @@ class AnsiblePlaybook(BaseAnsiblePlugin):
     reference = ANSIBLE_REFERENCE.raw_dict['playbook']
     arg_shown_on_history_as_mode = 'playbook'
     serializer_fields = {
-        'playbook': AutoCompletionField(autocomplete='AnsiblePlaybook', autocomplete_property='playbook')
+        'playbook': AutoCompletionField(
+            autocomplete='AnsiblePlaybook',
+            autocomplete_property='playbook',
+            autocomplete_represent='playbook',
+        )
     }
 
     @property

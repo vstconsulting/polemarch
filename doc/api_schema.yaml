@@ -70,7 +70,7 @@ info:
     application: 3.0.0
     library: 3.0.0
     vstutils: 5.4.0
-    django: 4.1.6
+    django: 4.1.7
     djangorestframework: 3.14.0
     drf_yasg: 1.21.5
     ansible: 2.9.27
@@ -13766,7 +13766,7 @@ definitions:
                     model:
                       $ref: '#/definitions/AnsiblePlaybook'
                     value_field: playbook
-                    view_field: name
+                    view_field: playbook
                     usePrefetch: true
                 args:
                   title: Args
@@ -15274,7 +15274,7 @@ definitions:
           model:
             $ref: '#/definitions/AnsiblePlaybook'
           value_field: playbook
-          view_field: name
+          view_field: playbook
           usePrefetch: true
       args:
         title: Args
@@ -15513,7 +15513,7 @@ definitions:
                     model:
                       $ref: '#/definitions/AnsiblePlaybook'
                     value_field: playbook
-                    view_field: name
+                    view_field: playbook
                     usePrefetch: true
                 args:
                   title: Args
@@ -16032,7 +16032,7 @@ definitions:
                     model:
                       $ref: '#/definitions/AnsiblePlaybook'
                     value_field: playbook
-                    view_field: name
+                    view_field: playbook
                     usePrefetch: true
                 args:
                   title: Args

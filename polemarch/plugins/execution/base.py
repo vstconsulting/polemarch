@@ -43,6 +43,11 @@ class BasePlugin:
     ``[<plugin name> plugin]`` string.
     """
 
+    arg_shown_on_history_as_inventory: Optional[str] = None  # pylint: disable=invalid-name
+    """
+    Name of argument presented in generated serializer which will be shown on list history page as *Inventory*.
+    """
+
     error_codes: Mapping[int, str] = {}
     """
     This mapping will be looked up to choose an appropriate error message for history output if execution finished with
