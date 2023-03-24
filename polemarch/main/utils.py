@@ -348,16 +348,10 @@ class ExecutionHandlers(ObjectHandlers):
         validate_inventory_arguments(plugin, execute_args, project)
 
         task_class = project.task_handlers.backend('EXECUTION')
-        plugin_class = self.backend(plugin)
-
-        mode = f'[{plugin} plugin]'
-        if plugin_class.arg_shown_on_history_as_mode is not None:
-            mode = execute_args.get(plugin_class.arg_shown_on_history_as_mode, mode)
 
         history = self.create_history(
             project,
             plugin,
-            mode,
             execute_args=execute_args,
             initiator=kwargs.pop('initiator', 0),
             initiator_type=kwargs.pop('initiator_type', 'project'),
@@ -383,17 +377,25 @@ class ExecutionHandlers(ObjectHandlers):
 
         return history
 
-    def create_history(self, project, kind, mode, execute_args, **kwargs):
+    def create_history(self, project, plugin, execute_args, **kwargs):
         if not kwargs['save_result']:
             return None
 
-        history_execute_args = {**execute_args}
-        inventory = history_execute_args.get('inventory', None)
-        if isinstance(inventory, str):
-            history_execute_args['inventory'] = inventory
-            inventory = None
-        elif isinstance(inventory, int):
-            inventory = project.inventories.get(id=inventory)
+        plugin_class = self.backend(plugin)
+
+        mode = f'[{plugin} plugin]'
+        if plugin_class.arg_shown_on_history_as_mode is not None:
+            mode = execute_args.get(plugin_class.arg_shown_on_history_as_mode, mode)
+
+        inventory = None
+        if plugin_class.arg_shown_on_history_as_inventory is not None:
+            inventory_field_name = plugin_class.arg_shown_on_history_as_inventory
+            inventory = execute_args.get(inventory_field_name, None)
+            if isinstance(inventory, str):
+                execute_args['inventory'] = inventory
+                inventory = None
+            elif isinstance(inventory, int):
+                inventory = project.inventories.get(id=inventory)
 
         return project.history.create(
             status='DELAY',
@@ -401,9 +403,9 @@ class ExecutionHandlers(ObjectHandlers):
             start_time=timezone.now(),
             inventory=inventory,
             project=project,
-            kind=kind,
+            kind=plugin,
             raw_stdout='',
-            execute_args=history_execute_args,
+            execute_args=execute_args,
             initiator=kwargs['initiator'],
             initiator_type=kwargs['initiator_type'],
             executor=kwargs['executor'],

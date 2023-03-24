@@ -4893,6 +4893,34 @@ class ExecutionTemplateDirectMigrationTestCase(BaseMigrationTestCase):
         Variable = self.old_state.apps.get_model('main', 'Variable')
         History = self.old_state.apps.get_model('main', 'History')
 
+        # create and delete unused template so all other templates' ids will start from 2
+        unused_template = Template.objects.create(
+            name='unused',
+            kind='Module',
+            template_data='{}',
+            project=self.project,
+            owner=self.project.owner,
+        )
+        Template.objects.filter(id=unused_template.id).delete()
+
+        # same for periodic tasks
+        unused_pt = PeriodicTask.objects.create(
+            name='unused',
+            mode='shell',
+            kind='MODULE',
+            inventory_file=None,
+            type='CRONTAB',
+            schedule='57 22 * * 0',
+            save_result=True,
+            enabled=False,
+            template_opt=None,
+            _inventory=self.inventory,
+            project=self.project,
+            owner=self.project.owner,
+            template=None,
+        )
+        PeriodicTask.objects.filter(id=unused_pt.id).delete()
+
         # create template with kind=Module
         module_template = Template.objects.create(
             name='module template',
@@ -4952,7 +4980,7 @@ class ExecutionTemplateDirectMigrationTestCase(BaseMigrationTestCase):
         )
 
         # create periodic task using template without option
-        PeriodicTask.objects.create(
+        pt1 = PeriodicTask.objects.create(
             name='pt1',
             mode='',
             notes='some notes',
@@ -4970,7 +4998,7 @@ class ExecutionTemplateDirectMigrationTestCase(BaseMigrationTestCase):
         )
 
         # create periodic task using template and option
-        PeriodicTask.objects.create(
+        pt2 = PeriodicTask.objects.create(
             name='pt2',
             mode='',
             notes='',
@@ -5075,6 +5103,78 @@ class ExecutionTemplateDirectMigrationTestCase(BaseMigrationTestCase):
             executor=None,
         )
         self.history2_id = history2.id
+
+        # create history with template initiator (no option)
+        history3 = History.objects.create(
+            status='OK',
+            mode='ping',
+            inventory=self.inventory,
+            project=self.project,
+            kind='ANSIBLE_MODULE',
+            json_args=json.dumps({'module': 'ping'}),
+            initiator=module_template.id,
+            initiator_type='template',
+            executor=None,
+        )
+        self.history3_id = history3.id
+
+        # create history with template initiator (with option)
+        history4 = History.objects.create(
+            status='OK',
+            mode='ping',
+            inventory=self.inventory,
+            project=self.project,
+            kind='ANSIBLE_MODULE',
+            json_args=json.dumps({'module': 'ping'}),
+            json_options=json.dumps({'template_option': 'cleanup'}),
+            initiator=module_template.id,
+            initiator_type='template',
+            executor=None,
+        )
+        self.history4_id = history4.id
+
+        # create history with scheduler initiator
+        history5 = History.objects.create(
+            status='OK',
+            mode='ping',
+            inventory=self.inventory,
+            project=self.project,
+            kind='ANSIBLE_MODULE',
+            json_args=json.dumps({'module': 'ping'}),
+            json_options='{}',
+            initiator=pt1.id,
+            initiator_type='scheduler',
+            executor=None,
+        )
+        self.history5_id = history5.id
+
+        history6 = History.objects.create(
+            status='OK',
+            mode='ping',
+            inventory=self.inventory,
+            project=self.project,
+            kind='ANSIBLE_MODULE',
+            json_args=json.dumps({'module': 'ping'}),
+            json_options=json.dumps({'template_option': 'cleanup'}),
+            initiator=pt2.id,
+            initiator_type='scheduler',
+            executor=None,
+        )
+        self.history6_id = history6.id
+
+        history7 = History.objects.create(
+            status='OK',
+            mode='ping',
+            inventory=self.inventory,
+            project=self.project,
+            kind='ANSIBLE_MODULE',
+            json_args=json.dumps({'module': 'ping'}),
+            json_options='{}',
+            initiator=pt3.id,
+            initiator_type='scheduler',
+            executor=None,
+        )
+        self.history7_id = history7.id
 
     def test_migrations(self):
         self.check_model_not_exists(self.new_state, 'main', 'Template')
@@ -5250,6 +5350,44 @@ class ExecutionTemplateDirectMigrationTestCase(BaseMigrationTestCase):
             'module': 'invalid',
         })
 
+        history3 = History.objects.get(id=self.history3_id)
+        self.assertEqual(history3.initiator_type, 'template')
+        self.assertEqual(history3.initiator, template1.id)
+        self.assertDictEqual(json.loads(history3.json_options), {
+            'template_option': str(option1.id),
+        })
+
+        history4 = History.objects.get(id=self.history4_id)
+        self.assertEqual(history4.initiator_type, 'template')
+        self.assertEqual(history4.initiator, template1.id)
+        self.assertDictEqual(json.loads(history4.json_options), {
+            'template_option': str(option3.id),
+        })
+
+        history5 = History.objects.get(id=self.history5_id)
+        self.assertEqual(history5.initiator_type, 'scheduler')
+        self.assertEqual(history5.initiator, pt1.id)
+        self.assertDictEqual(json.loads(history5.json_options), {
+            'template_option': str(pt1.template_option.id),
+            'template': pt1.template_option.template.id,
+        })
+
+        history6 = History.objects.get(id=self.history6_id)
+        self.assertEqual(history6.initiator_type, 'scheduler')
+        self.assertEqual(history6.initiator, pt2.id)
+        self.assertDictEqual(json.loads(history6.json_options), {
+            'template_option': str(pt2.template_option.id),
+            'template': pt2.template_option.template.id,
+        })
+
+        history7 = History.objects.get(id=self.history7_id)
+        self.assertEqual(history7.initiator_type, 'scheduler')
+        self.assertEqual(history7.initiator, pt3.id)
+        self.assertDictEqual(json.loads(history7.json_options), {
+            'template_option': str(pt3.template_option.id),
+            'template': pt3.template_option.template.id,
+        })
+
 
 class ExecutionTemplateBackwardsMigrationTestCase(BaseMigrationTestCase):
     migrate_from = ('main', '0004_v3_delete_old_models')
@@ -5263,6 +5401,27 @@ class ExecutionTemplateBackwardsMigrationTestCase(BaseMigrationTestCase):
         TemplatePeriodicTask = self.old_state.apps.get_model('main', 'TemplatePeriodicTask')
 
         History = self.old_state.apps.get_model('main', 'History')
+
+        unused_template = ExecutionTemplate.objects.create(
+            name='unused',
+            notes='some notes',
+            plugin='ANSIBLE_MODULE',
+            project=self.project,
+        )
+        unused_option = ExecutionTemplateOption.objects.create(
+            name='unused',
+            template=unused_template,
+            arguments={},
+        )
+        TemplatePeriodicTask.objects.create(
+            name='unused',
+            template_option=unused_option,
+            type='CRONTAB',
+            schedule='12 20 * * *',
+            enabled=False,
+            save_result=True,
+        )
+        ExecutionTemplate.objects.filter(id=unused_template.id).delete()
 
         # create template with module plugin
         template1 = ExecutionTemplate.objects.create(
@@ -5332,7 +5491,7 @@ class ExecutionTemplateBackwardsMigrationTestCase(BaseMigrationTestCase):
         )
 
         # create periodic task for default option
-        TemplatePeriodicTask.objects.create(
+        pt1 = TemplatePeriodicTask.objects.create(
             name='pt1',
             template_option=option1,
             type='CRONTAB',
@@ -5342,7 +5501,7 @@ class ExecutionTemplateBackwardsMigrationTestCase(BaseMigrationTestCase):
         )
 
         # create periodic task for another option
-        TemplatePeriodicTask.objects.create(
+        pt2 = TemplatePeriodicTask.objects.create(
             name='pt2',
             template_option=option2,
             type='INTERVAL',
@@ -5378,6 +5537,72 @@ class ExecutionTemplateBackwardsMigrationTestCase(BaseMigrationTestCase):
             executor=None,
         )
         self.history2_id = history2.id
+
+        # create history with template initiator (default option)
+        history3 = History.objects.create(
+            status='OK',
+            mode='invalid',
+            inventory=self.inventory,
+            project=self.project,
+            kind='ANSIBLE_MODULE',
+            json_args=json.dumps({'module': 'invalid'}),
+            initiator=template1.id,
+            initiator_type='template',
+            executor=None,
+            json_options=json.dumps({'template_option': str(option1.id)})
+        )
+        self.history3_id = history3.id
+
+        # create history with template initiator (default option)
+        history4 = History.objects.create(
+            status='OK',
+            mode='invalid',
+            inventory=self.inventory,
+            project=self.project,
+            kind='ANSIBLE_MODULE',
+            json_args=json.dumps({'module': 'invalid'}),
+            initiator=template1.id,
+            initiator_type='template',
+            executor=None,
+            json_options=json.dumps({'template_option': str(option2.id)})
+        )
+        self.history4_id = history4.id
+
+        # create history with scheduler initiator
+        history5 = History.objects.create(
+            status='OK',
+            mode='invalid',
+            inventory=self.inventory,
+            project=self.project,
+            kind='ANSIBLE_MODULE',
+            json_args=json.dumps({'module': 'invalid'}),
+            initiator=pt1.id,
+            initiator_type='scheduler',
+            executor=None,
+            json_options=json.dumps({
+                'template_option': str(pt1.template_option.id),
+                'template': pt1.template_option.template.id,
+            }),
+        )
+        self.history5_id = history5.id
+
+        # create history with scheduler initiator
+        history6 = History.objects.create(
+            status='OK',
+            mode='invalid',
+            inventory=self.inventory,
+            project=self.project,
+            kind='ANSIBLE_MODULE',
+            json_args=json.dumps({'module': 'invalid'}),
+            initiator=pt2.id,
+            initiator_type='scheduler',
+            executor=None,
+            json_options=json.dumps({
+                'template_option': str(pt2.template_option.id),
+                'template': pt2.template_option.template.id,
+            }),
+        )
+        self.history6_id = history6.id
 
     def test_migrations(self):
         self.check_model_not_exists(self.new_state, 'main', 'ExecutionTemplate')
@@ -5476,6 +5701,30 @@ class ExecutionTemplateBackwardsMigrationTestCase(BaseMigrationTestCase):
         self.assertEqual(history2.mode, 'invalid')
         self.assertDictEqual(json.loads(history2.json_args), {
             'module': 'invalid',
+        })
+
+        history3 = History.objects.get(id=self.history3_id)
+        self.assertEqual(history3.initiator_type, 'template')
+        self.assertEqual(history3.initiator, template1.id)
+        self.assertDictEqual(json.loads(history3.json_options), {})
+
+        history4 = History.objects.get(id=self.history4_id)
+        self.assertEqual(history4.initiator_type, 'template')
+        self.assertEqual(history3.initiator, template1.id)
+        self.assertDictEqual(json.loads(history4.json_options), {
+            'template_option': 'option2',
+        })
+
+        history5 = History.objects.get(id=self.history5_id)
+        self.assertEqual(history5.initiator_type, 'scheduler')
+        self.assertEqual(history5.initiator, pt1.id)
+        self.assertDictEqual(json.loads(history5.json_options), {})
+
+        history6 = History.objects.get(id=self.history6_id)
+        self.assertEqual(history6.initiator_type, 'scheduler')
+        self.assertEqual(history6.initiator, pt2.id)
+        self.assertDictEqual(json.loads(history6.json_options), {
+            'template_option': 'option2',
         })
 
 
