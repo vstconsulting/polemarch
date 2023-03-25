@@ -91,7 +91,7 @@ def to_template_data(option):
 
 def to_options_data(options_qs):
     return {
-        option.name: to_template_data(option)
+        slugify(option.name): to_template_data(option)
         for option in options_qs
     }
 
@@ -99,12 +99,14 @@ def to_options_data(options_qs):
 def migrate_templates_data_direct(apps, schema_editor):
     Template = apps.get_model('main', 'Template')
     PeriodicTask = apps.get_model('main', 'PeriodicTask')
+    History = apps.get_model('main', 'History')
 
     ExecutionTemplate = apps.get_model('main', 'ExecutionTemplate')
     ExecutionTemplateOption = apps.get_model('main', 'ExecutionTemplateOption')
     TemplatePeriodicTask = apps.get_model('main', 'TemplatePeriodicTask')
 
     db_alias = schema_editor.connection.alias
+    history_to_update = []
 
     for old_template in Template.objects.all():
         new_template = ExecutionTemplate.objects.using(db_alias).create(
@@ -129,24 +131,55 @@ def migrate_templates_data_direct(apps, schema_editor):
             for old_option_key, old_option_value in json.loads(old_template.options_data or '{}').items()
         ]
 
-        ExecutionTemplateOption.objects.using(db_alias).bulk_create([default_option, *other_options])
+        other_options_created = ExecutionTemplateOption.objects.using(db_alias).bulk_create(
+            [default_option, *other_options]
+        )
 
-        if old_template.periodic_task.exists():
-            TemplatePeriodicTask.objects.using(db_alias).bulk_create([
-                TemplatePeriodicTask(
-                    name=old_periodic_task.name,
-                    template_option=default_option if not old_periodic_task.template_opt else [
-                        option for option in other_options
-                        if slugify(option.name) == old_periodic_task.template_opt
-                    ][0],
-                    notes=old_periodic_task.notes,
-                    type=old_periodic_task.type,
-                    schedule=old_periodic_task.schedule,
-                    enabled=old_periodic_task.enabled,
-                    save_result=old_periodic_task.save_result,
-                )
-                for old_periodic_task in old_template.periodic_task.all()
-            ])
+        history_to_update_qs = History.objects \
+            .using(db_alias) \
+            .filter(initiator_type='template', initiator=old_template.id)
+        for history in history_to_update_qs:
+            history.initiator = new_template.id
+            options = json.loads(history.json_options)
+            old_template_option = options.get('template_option')
+            if old_template_option is None:
+                options['template_option'] = str(default_option.id)
+            else:
+                try:
+                    new_option = [
+                        option for option in other_options_created
+                        if slugify(option.name) == old_template_option
+                    ][0]
+                    options['template_option'] = str(new_option.id)
+                except IndexError:
+                    pass
+            history.json_options = json.dumps(options)
+            history_to_update.append(history)
+
+        for old_periodic_task in old_template.periodic_task.all():
+            new_periodic_task = TemplatePeriodicTask.objects.using(db_alias).create(
+                name=old_periodic_task.name,
+                template_option=default_option if not old_periodic_task.template_opt else [
+                    option for option in other_options
+                    if slugify(option.name) == old_periodic_task.template_opt
+                ][0],
+                notes=old_periodic_task.notes,
+                type=old_periodic_task.type,
+                schedule=old_periodic_task.schedule,
+                enabled=old_periodic_task.enabled,
+                save_result=old_periodic_task.save_result,
+            )
+
+            history_to_update_qs = History.objects \
+                .using(db_alias) \
+                .filter(initiator_type='scheduler', initiator=old_periodic_task.id)
+            for history in history_to_update_qs:
+                history.initiator = new_periodic_task.id
+                history.json_options = json.dumps({
+                    'template': new_periodic_task.template_option.template.id,
+                    'template_option': str(new_periodic_task.template_option.id),
+                })
+                history_to_update.append(history)
 
     for old_periodic_task in PeriodicTask.objects.filter(template_id=None):
         variables = {}
@@ -177,7 +210,7 @@ def migrate_templates_data_direct(apps, schema_editor):
                 inventory=old_periodic_task._inventory_id or old_periodic_task.inventory_file),
             template=new_template,
         )
-        TemplatePeriodicTask.objects.using(db_alias).create(
+        new_periodic_task = TemplatePeriodicTask.objects.using(db_alias).create(
             name=old_periodic_task.name,
             template_option=default_option,
             notes='',
@@ -187,10 +220,24 @@ def migrate_templates_data_direct(apps, schema_editor):
             save_result=old_periodic_task.save_result,
         )
 
+        history_to_update_qs = History.objects \
+            .using(db_alias) \
+            .filter(initiator_type='scheduler', initiator=old_periodic_task.id)
+        for history in history_to_update_qs:
+            history.initiator = new_periodic_task.id
+            history.json_options = json.dumps({
+                'template': new_periodic_task.template_option.template.id,
+                'template_option': str(new_periodic_task.template_option.id),
+            })
+            history_to_update.append(history)
+
+    History.objects.using(db_alias).bulk_update(history_to_update, fields=['initiator', 'json_options'])
+
 
 def migrate_templates_data_backwards(apps, schema_editor):
     Template = apps.get_model('main', 'Template')
     PeriodicTask = apps.get_model('main', 'PeriodicTask')
+    History = apps.get_model('main', 'History')
 
     ExecutionTemplate = apps.get_model('main', 'ExecutionTemplate')
     ExecutionTemplateOption = apps.get_model('main', 'ExecutionTemplateOption')
@@ -216,8 +263,26 @@ def migrate_templates_data_backwards(apps, schema_editor):
             new_template_id=new_template.id,
         )
 
-        PeriodicTask.objects.using(db_alias).bulk_create([
-            PeriodicTask(
+        history_to_update = []
+
+        history_to_update_qs = History.objects \
+            .using(db_alias) \
+            .filter(initiator_type='template', initiator=new_template.id)
+        for history in history_to_update_qs:
+            history.initiator = old_template.id
+            options = json.loads(history.json_options)
+            template_option_id = options.get('template_option')
+            if str(default_option.id) == template_option_id:
+                del options['template_option']
+            elif template_option_id is not None:
+                option = other_options.filter(id=template_option_id).first()
+                if option:
+                    options['template_option'] = option.name
+            history.json_options = json.dumps(options)
+            history_to_update.append(history)
+
+        for periodic_task in default_option.periodic_tasks.all():
+            old_periodic_task = PeriodicTask.objects.create(
                 name=periodic_task.name,
                 notes=periodic_task.notes,
                 mode='',
@@ -233,11 +298,21 @@ def migrate_templates_data_backwards(apps, schema_editor):
                 project=new_template.project,
                 template=old_template,
             )
-            for periodic_task in default_option.periodic_tasks.all()
-        ])
+            history_to_update_qs = History.objects \
+                .using(db_alias) \
+                .filter(initiator_type='scheduler', initiator=periodic_task.id)
+            for history in history_to_update_qs:
+                history.initiator = old_periodic_task.id
+                options = json.loads(history.json_options)
+                if 'template' in options:
+                    del options['template']
+                if 'template_option' in options:
+                    del options['template_option']
+                history.json_options = json.dumps(options)
+                history_to_update.append(history)
 
-        PeriodicTask.objects.using(db_alias).bulk_create([
-            PeriodicTask(
+        for periodic_task in TemplatePeriodicTask.objects.filter(template_option__in=other_options):
+            old_periodic_task = PeriodicTask.objects.create(
                 name=periodic_task.name,
                 notes=periodic_task.notes,
                 mode='',
@@ -253,9 +328,19 @@ def migrate_templates_data_backwards(apps, schema_editor):
                 project=new_template.project,
                 template=old_template,
             )
-            for periodic_task in TemplatePeriodicTask.objects.filter(template_option__in=other_options)
-        ])
+            history_to_update_qs = History.objects \
+                .using(db_alias) \
+                .filter(initiator_type='scheduler', initiator=periodic_task.id)
+            for history in history_to_update_qs:
+                history.initiator = old_periodic_task.id
+                options = json.loads(history.json_options)
+                if 'template' in options:
+                    del options['template']
+                options['template_option'] = old_periodic_task.template_opt
+                history.json_options = json.dumps(options)
+                history_to_update.append(history)
 
+        History.objects.using(db_alias).bulk_update(history_to_update, fields=['initiator', 'json_options'])
 
 def migrate_history_data_direct(apps, schema_editor):
     History = apps.get_model('main', 'History')
