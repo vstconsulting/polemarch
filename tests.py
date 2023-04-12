@@ -928,31 +928,31 @@ class InventoryTestCase(BaseProjectTestCase):
         self.assertDictEqual(results[1]['data']['data'], {
             'extension': 'json',
             'executable': False,
-            'filename': '',
+            'filename': '1',
             'body': '{"json": true}',
         })
         self.assertDictEqual(results[3]['data']['data'], {
             'extension': 'yml',
             'executable': False,
-            'filename': '',
+            'filename': '2',
             'body': '---\nyml:\n  true',
         })
         self.assertDictEqual(results[5]['data']['data'], {
             'extension': 'ini',
             'executable': False,
-            'filename': '',
+            'filename': '3',
             'body': '[example]\nini = true',
         })
         self.assertDictEqual(results[7]['data']['data'], {
             'extension': 'sh',
             'executable': True,
-            'filename': '',
+            'filename': '4',
             'body': '#!/bin/sh\necho example',
         })
         self.assertDictEqual(results[9]['data']['data'], {
             'extension': '',
             'executable': False,
-            'filename': '',
+            'filename': 'unknown',
             'body': '',
         })
 

@@ -220,14 +220,12 @@ class AnsibleString(BaseAnsiblePlugin):
     def import_inventory(cls, instance, data):
         loaded = orjson.loads(data['file'])  # pylint: disable=no-member
         media_type = loaded['mediaType'] or ''
-        extension = mimetypes.guess_extension(media_type, strict=False) or ''
-        if extension != '':
-            extension = extension.replace('.', '', 1)
-        elif '.' in loaded['name']:
-            extension = loaded['name'].rsplit('.', maxsplit=1)[-1]
+        path_name = Path(loaded['name'])
+        extension = (mimetypes.guess_extension(media_type, strict=False) or path_name.suffix)[1:]
         body = base64.b64decode(loaded['content']).decode('utf-8')
         instance.update_inventory_state(data={
             'body': body,
+            'filename': path_name.stem,
             'extension': extension,
             'executable': body.startswith('#!/'),
         })
