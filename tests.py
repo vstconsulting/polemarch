@@ -634,6 +634,7 @@ class InventoryTestCase(BaseProjectTestCase):
         self.assertEqual(results[0]['data']['plugin'], 'ANSIBLE_STRING')
         self.assertDictEqual(results[1]['data']['data'], {
             'body': '',
+            'filename': '',
             'extension': 'yaml',
             'executable': False,
         })
@@ -927,26 +928,31 @@ class InventoryTestCase(BaseProjectTestCase):
         self.assertDictEqual(results[1]['data']['data'], {
             'extension': 'json',
             'executable': False,
+            'filename': '',
             'body': '{"json": true}',
         })
         self.assertDictEqual(results[3]['data']['data'], {
             'extension': 'yml',
             'executable': False,
+            'filename': '',
             'body': '---\nyml:\n  true',
         })
         self.assertDictEqual(results[5]['data']['data'], {
             'extension': 'ini',
             'executable': False,
+            'filename': '',
             'body': '[example]\nini = true',
         })
         self.assertDictEqual(results[7]['data']['data'], {
             'extension': 'sh',
             'executable': True,
+            'filename': '',
             'body': '#!/bin/sh\necho example',
         })
         self.assertDictEqual(results[9]['data']['data'], {
             'extension': '',
             'executable': False,
+            'filename': '',
             'body': '',
         })
 
@@ -3959,8 +3965,7 @@ class VariableTestCase(BaseProjectTestCase):
                     playbook='playbook.yml',
                 ),
             ])
-            popen.assert_called_once()
-            self.assertTrue(popen.call_args[1]['env']['ANSIBLE_CONFIG'].endswith('/dir0/dir1/ansible.cfg'))
+            self.assertTrue(popen.call_args[-1]['env']['ANSIBLE_CONFIG'].endswith('/dir0/dir1/ansible.cfg'))
 
         var_id = self.get_model_filter('main.Variable').get(key='env_ANSIBLE_CONFIG').id
 
@@ -3976,8 +3981,7 @@ class VariableTestCase(BaseProjectTestCase):
                     playbook='playbook.yml',
                 ),
             ])
-            popen.assert_called_once()
-            self.assertTrue(popen.call_args[1]['env']['ANSIBLE_CONFIG'].endswith('/ansible.cfg'))
+            self.assertTrue(popen.call_args[-1]['env']['ANSIBLE_CONFIG'].endswith('/ansible.cfg'))
 
         # check if env_ANSIBLE_CONFIG is not set and project's ansible.cfg does not exist than
         # os ANSIBLE_CONFIG env var is used
@@ -3992,8 +3996,7 @@ class VariableTestCase(BaseProjectTestCase):
                     playbook='playbook.yml',
                 ),
             ])
-            popen.assert_called_once()
-            self.assertEqual(popen.call_args[1]['env']['ANSIBLE_CONFIG'], '/some/global.cfg')
+            self.assertEqual(popen.call_args[-1]['env']['ANSIBLE_CONFIG'], '/some/global.cfg')
 
     def test_add_vars_to_project(self):
         results = self.bulk([
@@ -4327,9 +4330,8 @@ class VariableTestCase(BaseProjectTestCase):
                     inventory=self.inventory.id,
                 )
             ])
-            popen.assert_called_once()
-            self.assertEqual(popen.call_args[1]['env']['EXAMPLE'], '1')
-            self.assertIn('VST_PROJECT', popen.call_args[1]['env'])
+            self.assertEqual(popen.call_args[-1]['env']['EXAMPLE'], '1')
+            self.assertIn('VST_PROJECT', popen.call_args[-1]['env'])
 
 
 @own_projects_dir

@@ -14,11 +14,16 @@ except ImportError:  # nocv
 from django.db import transaction
 from rest_framework import fields as drffields
 from vstutils.api import fields as vstfields
+from vstutils.api.validators import RegularExpressionValidator
 from .base import BasePlugin
 from ...main.constants import HiddenVariablesEnum, CYPHER
 from ...main.utils import AnsibleInventoryParser
 from ...main.models.hosts import Host, Group
 from ...main.models.vars import AbstractVarsQuerySet
+
+
+class FilenameValidator(RegularExpressionValidator):
+    regexp = re.compile(r"^([\d\w\-_\.])*$", re.MULTILINE)
 
 
 class InventoryDumper(Dumper):
@@ -183,6 +188,7 @@ class AnsibleString(BaseAnsiblePlugin):
 
     serializer_fields = {
         'body': vstfields.FileInStringField(),
+        'filename': vstfields.CharField(required=False, allow_blank=True, default='', validators=[FilenameValidator]),
         'extension': vstfields.AutoCompletionField(autocomplete=('yaml', 'ini', 'json'), default='yaml'),
         'executable': drffields.BooleanField(default=False),
     }
@@ -191,13 +197,14 @@ class AnsibleString(BaseAnsiblePlugin):
     }
     defaults = {
         'body': '',
+        'filename': '',
         'extension': 'yaml',
         'executable': False,
     }
 
     def render_inventory(self, instance, execution_dir) -> Tuple[Path, list]:
         state_data = instance.inventory_state.data
-        filename = f'inventory_{uuid1()}'
+        filename = state_data.get('filename') or f'inventory_{uuid1()}'
 
         if state_data['extension']:
             filename += f'.{state_data["extension"]}'
