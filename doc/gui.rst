@@ -662,7 +662,7 @@ As you can see, compared to `POLEMARCH_DB` inventory, this one is state managed.
 
 .. image:: new_screenshots/inventory_state_ansible_string.png
 
-These types of inventory stores an extension of file, its body and specifies either file should be executable or not.
+These types of inventory stores an extension of file, its body, filename and specifies either file should be executable or not.
 Let's edit the state. Click :guilabel:`Edit` button:
 
 .. image:: new_screenshots/inventory_state_edit_ansible_string.png
@@ -671,7 +671,10 @@ After saving:
 
 .. image:: new_screenshots/inventory_state_ansible_string_2.png
 
-Now inventory is ready for using..
+Now inventory is ready for using.
+
+This type of inventory is used to store the completed file in the project directory at the time the task is run.
+It is helpful when you need to use one of the dynamic ansible inventory plugins.
 
 
 ANSIBLE_FILE inventory
@@ -695,6 +698,14 @@ executed.
 .. image:: new_screenshots/inventory_state_ansible_file_saved.png
 
 Done. Inventory is ready for use.
+
+This type of inventory is used to use file from the project directory at the time the task is run.
+It is helpful when you have GitOps infrastructure where project files is single store of truth.
+
+.. note::
+    The use of strings when specifying an inventory path to describe a launch will be deprecated in future releases
+    and removed from the interface.
+    This inventory type is a direct string replacement.
 
 
 Import inventory
