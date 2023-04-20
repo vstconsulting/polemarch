@@ -52,18 +52,22 @@ def send_hook(when: Text, target: Any) -> None:
 @raise_context()
 def send_user_hook(when: Text, instance: Any) -> None:
     send_hook(
-        when, OrderedDict(
-            user_id=instance.id,
-            username=instance.username,
-            admin=instance.is_staff
-        )
+        when, {
+            'user_id': instance.id,
+            'username': instance.username,
+            'admin': instance.is_staff,
+        }
     )
 
 
 @raise_context()
 def send_polemarch_models(when: Text, instance: Any, **kwargs) -> None:
-    target = OrderedDict(id=instance.id, name=instance.name, **kwargs)
-    send_hook(when, target)
+    send_hook(when, {
+        'id': instance.id,
+        'name': instance.name,
+        'object_name': instance._meta.verbose_name,  # pylint: disable=protected-access
+        **kwargs,
+    })
 
 
 def raise_linked_error(exception_class=ValidationError, **kwargs):
