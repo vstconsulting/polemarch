@@ -4334,18 +4334,7 @@ class VariableTestCase(BaseProjectTestCase):
             self.assertIn('VST_PROJECT', popen.call_args[-1]['env'])
 
 
-@own_projects_dir
-class HookTestCase(BaseProjectTestCase):
-    def setUp(self):
-        super().setUp()
-        shutil.copy(f'{TEST_DATA_DIR}/script_hook.sh', f'{settings.HOOKS_DIR}/script_hook.sh')
-        self.script_hook = self.get_model_filter('main.Hook').create(type='SCRIPT', recipients='script_hook.sh')
-        self.http_hook = self.get_model_filter('main.Hook').create(type='HTTP', recipients='https://example.com')
-
-    def tearDown(self):
-        super().tearDown()
-        os.remove(f'{settings.HOOKS_DIR}/script_hook.sh')
-
+class BaseHookTestCase(BaseProjectTestCase):
     @staticmethod
     def create_hook_bulk_data(type, recipients, when):
         return {
@@ -4358,6 +4347,19 @@ class HookTestCase(BaseProjectTestCase):
                 'when': when
             }
         }
+
+
+@own_projects_dir
+class HookTestCase(BaseHookTestCase):
+    def setUp(self):
+        super().setUp()
+        shutil.copy(f'{TEST_DATA_DIR}/script_hook.sh', f'{settings.HOOKS_DIR}/script_hook.sh')
+        self.script_hook = self.get_model_filter('main.Hook').create(type='SCRIPT', recipients='script_hook.sh')
+        self.http_hook = self.get_model_filter('main.Hook').create(type='HTTP', recipients='https://example.com')
+
+    def tearDown(self):
+        super().tearDown()
+        os.remove(f'{settings.HOOKS_DIR}/script_hook.sh')
 
     def test_create_hook(self):
         results = self.bulk([

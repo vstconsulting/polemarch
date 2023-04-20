@@ -3,6 +3,13 @@ from django.conf import settings
 
 
 class BaseHook:
+    __slots__ = (
+        'when_types',
+        'hook_object',
+        'when',
+        'conf',
+    )
+
     def __init__(self, hook_object, when_types=None, **kwargs):
         self.when_types = when_types or []
         self.hook_object = hook_object
@@ -31,13 +38,16 @@ class BaseHook:
     def execute(self, recipient, when, message):  # nocv
         raise NotImplementedError
 
+    def execute_many(self, recipients, when, message) -> str:
+        return '\n'.join(map(lambda r: self.execute(r, when, message), recipients))
+
     def send(self, message, when: str) -> str:
         self.when = when
-        filtered = filter(lambda r: r, self.conf['recipients'])
-        execute = self.execute
-        message = self.modify_message(message)
-        mapping = map(lambda r: execute(r, when, message), filtered)
-        return '\n'.join(mapping)
+        return self.execute_many(
+            recipients=filter(lambda r: r, self.conf['recipients']),
+            when=when,
+            message=self.modify_message(message),
+        )
 
     def on_execution(self, message):
         return self.send(message, when='on_execution')
