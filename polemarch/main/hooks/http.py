@@ -9,6 +9,8 @@ logger = logging.getLogger("polemarch")
 
 
 class Backend(BaseHook):
+    __slots__ = ()
+
     def execute(self, url, when, message) -> str:  # pylint: disable=arguments-renamed
         data = dict(type=when, payload=message)
         try:

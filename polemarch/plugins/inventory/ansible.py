@@ -14,11 +14,16 @@ except ImportError:  # nocv
 from django.db import transaction
 from rest_framework import fields as drffields
 from vstutils.api import fields as vstfields
+from vstutils.api.validators import RegularExpressionValidator
 from .base import BasePlugin
 from ...main.constants import HiddenVariablesEnum, CYPHER
 from ...main.utils import AnsibleInventoryParser
 from ...main.models.hosts import Host, Group
 from ...main.models.vars import AbstractVarsQuerySet
+
+
+class FilenameValidator(RegularExpressionValidator):
+    regexp = re.compile(r"^([\d\w\-_\.])*$", re.MULTILINE)
 
 
 class InventoryDumper(Dumper):
@@ -183,6 +188,7 @@ class AnsibleString(BaseAnsiblePlugin):
 
     serializer_fields = {
         'body': vstfields.FileInStringField(),
+        'filename': vstfields.CharField(required=False, allow_blank=True, default='', validators=[FilenameValidator]),
         'extension': vstfields.AutoCompletionField(autocomplete=('yaml', 'ini', 'json'), default='yaml'),
         'executable': drffields.BooleanField(default=False),
     }
@@ -191,13 +197,14 @@ class AnsibleString(BaseAnsiblePlugin):
     }
     defaults = {
         'body': '',
+        'filename': '',
         'extension': 'yaml',
         'executable': False,
     }
 
     def render_inventory(self, instance, execution_dir) -> Tuple[Path, list]:
         state_data = instance.inventory_state.data
-        filename = f'inventory_{uuid1()}'
+        filename = state_data.get('filename') or f'inventory_{uuid1()}'
 
         if state_data['extension']:
             filename += f'.{state_data["extension"]}'
@@ -213,14 +220,12 @@ class AnsibleString(BaseAnsiblePlugin):
     def import_inventory(cls, instance, data):
         loaded = orjson.loads(data['file'])  # pylint: disable=no-member
         media_type = loaded['mediaType'] or ''
-        extension = mimetypes.guess_extension(media_type, strict=False) or ''
-        if extension != '':
-            extension = extension.replace('.', '', 1)
-        elif '.' in loaded['name']:
-            extension = loaded['name'].rsplit('.', maxsplit=1)[-1]
+        path_name = Path(loaded['name'])
+        extension = (mimetypes.guess_extension(media_type, strict=False) or path_name.suffix)[1:]
         body = base64.b64decode(loaded['content']).decode('utf-8')
         instance.update_inventory_state(data={
             'body': body,
+            'filename': path_name.stem,
             'extension': extension,
             'executable': body.startswith('#!/'),
         })

@@ -12,6 +12,7 @@ logger = logging.getLogger("polemarch")
 
 
 class Backend(BaseHook):
+    __slots__ = ()
 
     def execute(self, script, when, file) -> str:  # pylint: disable=arguments-renamed
         try:

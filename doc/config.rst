@@ -20,6 +20,35 @@ Polemarch nodes to maintain reliability or speedup things. It will give you
 understanding of services, which are included into Polemarch and how to distribute them
 between the nodes to reach your goal.
 
+Project architecture
+--------------------
+
+Polemarch was created to adapt to any work environment. Almost every service can be easily replaced by another
+without losing any functionality. The application architecture consists of the following elements:
+
+- **Database** supports all types and versions that django can. The code was written to be vendor agnostic
+  to support as many backends as possible. Database contains information about projects settings, schedule and templates
+  of tasks, execution history, authorisation data, etc. Database performance is a key performance limitation of the entire Polemarch.
+
+- **Cache** services is used for store session data, services locks, etc. Also, PM support all of Django can.
+  Mostly, we recommend to use Redis in small and medium clusters.
+
+- **MQ** or rpc engine is required for notifying celery worker about new task execution request.
+  Redis in most cases can process up to 1000 executions/min. For more complex and high-load implementations,
+  it is recommended to use a distributed RabbitMQ cluster. If technically possible,
+  AWS SQS and its compatible counterparts from other cloud providers are also supported.
+
+- **Centrifugo** (optional) is used for active user interaction. At this point,
+  the service notifies the user of an update or change to the data structure that the user is viewing to complete
+  a data update request. This reduces the load on the database, because without this service,
+  the interface makes periodic requests on a timer.
+
+- **Project storage** at now is directory in filesystem where PM clone or unarchive project files for further executions.
+  Storage must be readable for web-server and writeable for celery worker. It can be mounted dir from shared storage.
+
+Understanding what services the Polemarch application consists of, you can build any architecture of services
+suitable for the circumstances and infrastructure.
+
 .. _cluster:
 
 Polemarch clustering overview
@@ -151,7 +180,7 @@ If you want to use LDAP protocol, you should create next settings in section ``[
 ldap-default-domain is an optional argument, that is aimed to make user authorization easier
 (without input of domain name).
 
-ldap-auth_format is an optional argument, that is aimed to customize LDAP authorization.
+ldap-auth_format is an optional argument, that is aimed to customize LDAP authorization request.
 Default value: cn=<username>,<domain>
 
 So in this case authorization logic will be the following:
@@ -334,7 +363,6 @@ session_timeout, static_files_url or pagination limit.
 
 * **session_timeout** - Session life-cycle time. ``Default: 2w`` (two weeks).
 * **rest_page_limit** - Default limit of objects in API list. ``Default: 1000``.
-* **public_openapi** - Allow to have access to OpenAPI schema from public. ``Default: false``.
 * **history_metrics_window** - Timeframe in seconds of collecting execution history statuses. ``Default: 1min``.
 
 .. note:: You can find more Web options in :ref:`vstutils:web`.
@@ -353,7 +381,8 @@ When user change some data, other clients get notification on ``subscriptions_up
 with model label and primary key. Without the service all GUI-clients get page data
 every 5 seconds (by default). Centrifugo server v3 is supported.
 
-* **address** - Centrifugo server address.
+* **address** - Centrifugo api address. For example, ``http://localhost:8000/api``.
+* **public_address** - Centrifugo server address. By default used **address** without ``/api`` prefix (http -> ws, https -> wss). Also, can be used relative path, like ``/centrifugo``.
 * **api_key** - API key for clients.
 * **token_hmac_secret_key** - API key for jwt-token generation.
 * **timeout** - Connection timeout.
@@ -363,6 +392,10 @@ every 5 seconds (by default). Centrifugo server v3 is supported.
     These settings also add parameters to the OpenApi schema and change how the auto-update system works in the GUI.
     ``token_hmac_secret_key`` is used for jwt-token generation (based on
     session expiration time). Token will be used for Centrifugo-JS client.
+
+.. note::
+    ``api_key`` and ``token_hmac_secret_key`` come from ``config.json`` for Centrifugo.
+    Read more in `Official Centrifugo documentation <https://centrifugal.dev/docs/3/getting-started/quickstart>`_
 
 
 .. _git:

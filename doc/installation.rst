@@ -284,67 +284,36 @@ Settings
 Main section
 ~~~~~~~~~~~~
 
-* **POLEMARCH_DEBUG** - status of debug mode. Default value: `false`.
+* **DEBUG** - status of debug mode. Default value: `false`.
 
-* **POLEMARCH_LOG_LEVEL** - log level. Default value: `WARNING`.
+* **DJANGO_LOG_LEVEL** - log level. Default value: `WARNING`.
 
 * **TIMEZONE** - timezone. Default value: `UTC`.
 
 Database section
 ~~~~~~~~~~~~~~~~
 
-You can set Database environment variables in two ways:
+Setup database connection via ``django-environ``: :ref:`environ:environ-env-db-url`.
 
-1. Using ``django-environ``: :ref:`environ:environ-env-db-url`.
-
-   For example for mysql, **DATABASE_URL** = ``'mysql://user:password@host:port/dbname'``.
-   Read more about ``django-environ`` in the :doc:`official django-environ documentation <environ:types>`.
-
-2. Or you can specify every variable, but this way is deprecated and we won't support it in the next release.
-
-   If you not set **POLEMARCH_DB_HOST**, default database would be SQLite3, path to database file: `/db.sqlite3`.
-   If you set **POLEMARCH_DB_HOST**, Polemarch would be use MYSQL with next variables:
-
-   * **POLEMARCH_DB_TYPE** - name of database type. Support: `mysql` and `postgres` database. Needed only with **POLEMARCH_DB_HOST** option.
-
-   * **POLEMARCH_DB_NAME** - name of database.
-
-   * **POLEMARCH_DB_USER** - user connected to database.
-
-   * **POLEMARCH_DB_PASSWORD** - password for connection to database.
-
-   * **POLEMARCH_DB_HOST** - host for connection to database.
-
-   * **POLEMARCH_DB_PORT** - port for connection to database.
-
-Database. Options section
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. note:: If you use :ref:`environ:environ-env-db-url`, you can't use **DB_INIT_CMD**.
-
-* **DB_INIT_CMD** - command to start your database
+For example for mysql, **DATABASE_URL** = ``'mysql://user:password@host:port/dbname'``.
+Read more about ``django-environ`` in the :doc:`official django-environ documentation <environ:types>`.
 
 Cache
 ~~~~~
 
 For cache environment variables you can also use ``django-environ`` - :ref:`environ:environ-env-cache-url`.
-
 For example for redis, **CACHE_URL** = ``redis://host:port/dbname``.
-
-Or you can specify variable **CACHE_LOCATION**, but this way is deprecated and we won't support it in the next release.
-
-* **CACHE_LOCATION** - path to cache, if you use `/tmp/polemarch_django_cache` path, then cache engine would be `FileBasedCache`,
-  else `MemcacheCache`. Default value: ``/tmp/polemarch_django_cache``.
-
 
 RPC section
 ~~~~~~~~~~~
 
-* **RPC_ENGINE** - connection to rpc service. If not set, not used.
+* **POLEMARCH_RPC_ENGINE** - connection to rpc service. If not set used as tmp-dir.
 
-* **RPC_HEARTBEAT** - Timeout for RPC. Default value: `5`.
+* **POLEMARCH_RPC_RESULT_BACKEND** - connection to rpc results service. Default as engine.
 
-* **RPC_CONCURRENCY** - Number of concurrently tasks. Default value: `4`.
+* **POLEMARCH_RPC_HEARTBEAT** - Timeout for RPC. Default value: `5`.
+
+* **POLEMARCH_RPC_CONCURRENCY** - Number of concurrently tasks. Default value: `4`.
 
 Web section
 ~~~~~~~~~~~
@@ -376,7 +345,7 @@ Run Polemarch with Memcache and RabbitMQ and SQLite3. Polemarch log-level=INFO, 
 
     .. sourcecode:: bash
 
-       docker run -d --name polemarch --restart always -v /opt/polemarch/projects:/projects -v /opt/polemarch/hooks:/hooks --env RPC_ENGINE=amqp://polemarch:polemarch@rabbitmq-server:5672/polemarch --env CACHE_URL=memcache://memcached-server:11211/ --env POLEMARCH_LOG_LEVEL=INFO --env SECRET_KEY=mysecretkey -p 8080:8080 vstconsulting/polemarch
+       docker run -d --name polemarch --restart always -v /opt/polemarch/projects:/projects -v /opt/polemarch/hooks:/hooks --env POLEMARCH_RPC_ENGINE=amqp://polemarch:polemarch@rabbitmq-server:5672/polemarch --env CACHE_URL=memcache://memcached-server:11211/ --env POLEMARCH_LOG_LEVEL=INFO --env SECRET_KEY=mysecretkey -p 8080:8080 vstconsulting/polemarch
 
 
 Also you can use `.env` file with all variable you want use on run docker:
