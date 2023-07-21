@@ -2,6 +2,7 @@ import re
 import contextlib
 
 import orjson
+from asgiref.sync import async_to_sync
 
 from ...main.models import History
 
@@ -16,11 +17,14 @@ class BasePlugin:
         self.history = history
         self.options = options
 
-    def write_line(self, line: str, number: int, endl: str = ''):
+    async def awrite_line(self, line: str, number: int, endl: str = ''):
         with contextlib.suppress(Exception):
-            self._write_line(line, number, endl)
+            await self._write_line(line, number, endl)
 
-    def _write_line(self, line: str, number: int, endl: str = ''):
+    def write_line(self, line: str, number: int, endl: str = ''):
+        async_to_sync(self.awrite_line)(line, number, endl)
+
+    async def _write_line(self, line: str, number: int, endl: str = ''):
         raise NotImplementedError  # nocv
 
     def get_lines(self, **filters):

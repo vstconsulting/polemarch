@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import asyncio
 import contextlib
 import threading
 from typing import Any, Iterable, Type, Union, Optional
@@ -12,7 +13,8 @@ import traceback
 import signal
 from pathlib import Path
 from collections import OrderedDict
-from subprocess import Popen
+
+from asgiref.sync import async_to_sync
 from django.apps import apps
 from django.utils import timezone
 from django.conf import settings
@@ -116,7 +118,7 @@ class DummyHistory:
         # pylint: disable=unused-argument
         logger.info(value)
 
-    def save(self) -> None:
+    def save(self, *_, **__) -> None:
         pass
 
 
@@ -141,8 +143,11 @@ class Executor(CmdExecutor):
         else:
             notificator_class = apps.get_app_config('vstutils_api').module.notificator_class
             self.notificator = notificator_class([], label='history_lines')
-            self.notificator_lock = threading.Lock()
-            self.notification_last_time = 0
+            if self.notificator.is_usable():
+                self.notificator_lock = threading.Lock()
+                self.notification_last_time = 0
+            else:
+                self.notificator = None
 
         self.must_die = False
         signal.signal(signal.SIGTERM, self.signal_handler)
@@ -150,44 +155,37 @@ class Executor(CmdExecutor):
     def signal_handler(self, signum, frame):
         self.must_die = True  # nocv
 
-    @property
-    def output(self) -> str:
-        # Optimize for better performance.
-        return ''
-
-    @output.setter
-    def output(self, value) -> None:
-        pass  # nocv
-
-    def working_handler(self, proc: Popen):
-        if proc.poll() is None and self.must_die:  # nocv
+    async def working_handler(self, proc: asyncio.subprocess.Process):
+        if not proc.stdout.at_eof() and self.must_die:  # nocv
             proc.terminate()
-            proc.wait()
+            await proc.wait()
         if self.notificator and time.time() - self.notification_last_time > 1:
             with self.notificator_lock:
                 if self.notificator.queue:
                     self.notification_last_time = time.time()
                     self.notificator.send()
 
-    def write_output(self, line: str):
+    async def write_output(self, line: str):
+        # pylint: disable=invalid-overridden-method
         self.counter += 1
-        for writer in self.writers:
-            writer.write_line(line, self.counter, '\n')
+        await asyncio.gather(*(
+            writer.awrite_line(line, self.counter, '\n' if line[-1] != '\n' else '')
+            for writer in self.writers
+        ))
         if self.notificator:
             with self.notificator_lock:
                 self.notificator.create_notification_from_instance(self.history)
 
-    def execute(self, cmd: Iterable[str], cwd: str, env_vars: dict):
-        self.env = env_vars
+    async def aexecute(self, cmd: Iterable[str], cwd: Union[str, Path], env: dict = None):
+        self.env = env if env is not None else {}
         pm_ansible_path = ' '.join(self.pm_ansible())
         plain_command = ' '.join(cmd).replace(pm_ansible_path, '').lstrip()
         if not self.history.raw_args:
             self.history.raw_args = plain_command
         else:
             self.history.raw_args += f' && {plain_command}'
-        ret = super().execute(cmd, cwd)
+        ret = await super().aexecute(cmd, cwd)
         if self.notificator:
-            self.notificator.disconnect_all()
             with self.notificator_lock:
                 if self.notificator.queue:
                     self.notificator.send()
@@ -284,7 +282,7 @@ class PluginExecutor:
 
         finally:
             self.history.stop_time = timezone.now()
-            self.history.save()
+            self.history.save(update_fields={'status', 'stop_time', 'raw_args'})
             for writer in self.writers:
                 with contextlib.suppress(Exception):
                     writer.finalize_output()
@@ -333,11 +331,12 @@ class PluginExecutor:
             return self.project.branch
         return self.project.vars.get('repo_branch', '')
 
-    def verbose_output(self, message: str, level: int = 3) -> None:
+    @async_to_sync
+    async def verbose_output(self, message: str, level: int = 3) -> None:
         if self.verbose_level >= level:
             executor = getattr(self, 'executor', None)
             if executor is not None:
-                executor.write_output(message)
+                await executor.write_output(message)
             logger.debug(message)
 
     def __del__(self):

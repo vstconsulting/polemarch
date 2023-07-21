@@ -1,3 +1,5 @@
+import os
+
 from vstutils.settings import *
 
 WEBSERVER_COMMAND = 'webserver'
@@ -84,6 +86,11 @@ OPENAPI_HOOKS = [
 
 SWAGGER_SETTINGS['DEFAULT_INFO'] = '{}.api.swagger.api_info'.format(VST_PROJECT_LIB_NAME)
 SWAGGER_SETTINGS['DEFAULT_AUTO_SCHEMA_CLASS'] = '{}.api.schema.PolemarchAutoSchema'.format(VST_PROJECT_LIB_NAME)
+
+REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += (
+    'rest_framework.authentication.TokenAuthentication',
+    'rest_framework.authentication.BasicAuthentication',
+)
 
 OPENAPI_EXTRA_LINKS = dict()
 OPENAPI_EXTRA_LINKS['Request'] = [
@@ -369,6 +376,7 @@ SPA_STATIC += [
 
 # TEST settings
 if "test" in sys.argv:
+    os.environ['DJANGO_ALLOW_ASYNC_UNSAFE'] = 'true'
     REPO_BACKENDS['GIT']['OPTIONS']['CLONE_KWARGS']['local'] = True
     CLONE_RETRY = 0
     PROJECTS_DIR = '/tmp/polemarch_projects' + str(KWARGS['PY_VER'])

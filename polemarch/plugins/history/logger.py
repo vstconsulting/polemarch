@@ -18,5 +18,5 @@ class Plugin(BasePlugin):
             "PROJECT_ID": self.history.project_id,
         }
 
-    def _write_line(self, line: str, number: int, endl: str = ''):
+    async def _write_line(self, line: str, number: int, endl: str = ''):
         logger.info(f"{line}", extra=self.extra)
