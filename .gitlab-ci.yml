@@ -1,6 +1,6 @@
 # set to local images because too long execution
 default:
-  image: registry.gitlab.com/vstconsulting/images:build
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v2
 
 variables:
   GET_SOURCES_ATTEMPTS: 3
@@ -34,18 +34,24 @@ stages:
 ###########################################
 .branch_tests_template: &branch_tests
   stage: test
-  image: registry.gitlab.com/vstconsulting/images:tox
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v2
   coverage: '/\d+\%\s*$/'
   variables:
     TOX_ENVS: ""
+    YARN_CACHE_FOLDER: "${CI_PROJECT_DIR}/yarn"
   before_script:
-    - if [ "${CI_BUILD_REF_NAME}" != "master" -a "${CI_BUILD_REF_NAME}" != "developer" ]; then export TOX_ARGS="--workdir /tmp/.tox_polemarchplus_${CI_BUILD_REF_NAME}"; fi
+    - >
+      if [ "${CI_COMMIT_REF_NAME}" != "master" -a "${CI_COMMIT_REF_NAME}" != "developer" ]; then
+        export TOX_ARGS="--workdir /tmp/.tox_polemarch_${CI_COMMIT_REF_NAME}";
+        unset BUILD_OPTIMIZATION;
+      fi
+    - if [ "${TOX_ENVS}" ]; then export TOX_ARGS="${TOX_ARGS} -e ${TOX_ENVS}"; fi
   script:
-   - tox -e $TOX_ENVS $TOX_ARGS
+   - tox $TOX_ARGS
   rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^release_/'
       when: on_success
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "external_pull_request_event"'
+    - if: '($CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH !~ /^release_/) && ($CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "external_pull_request_event")'
       when: on_success
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_TAG == null'
       when: on_success
@@ -54,7 +60,7 @@ stages:
 
 .js_tests_template: &branch_js_tests
   <<: *branch_tests
-  image: registry.gitlab.com/vstconsulting/images:node-tests
+  image: registry.gitlab.com/vstconsulting/images:node18-tests
   before_script:
     - yarn install --pure-lockfile --mutex network
   script:
@@ -66,8 +72,11 @@ stages:
 code_style:
   <<: *branch_tests
   stage: code_standarts
-  variables:
-    TOX_ENVS: "flake,pylint"
+  parallel:
+    matrix:
+      - TOX_ENVS:
+          - flake
+          - pylint
 
 js_style:
   <<: *branch_js_tests
@@ -75,53 +84,21 @@ js_style:
   script:
     - yarn lint
 
-py311-coverage:
-  <<: *branch_tests
-  variables:
-    TOX_ENVS: "$CI_BUILD_NAME"
 
-py38-install:
+functional_test:
   <<: *branch_tests
-  variables:
-    TOX_ENVS: "$CI_BUILD_NAME"
+  parallel:
+    matrix:
+      - TOX_ENVS:
+          - py38-install
+      - TOX_ENVS:
+          - py311-coverage
 
 # Realese
 ###########################################
-#deploy_environment:
-#  stage: release
-#  image: registry.gitlab.com/vstconsulting/images:tox
-#  services:
-#    - name: "docker:19.03-dind"
-#      alias: "docker_service_host"
-#  script:
-#    - tox -e deploy_env
-#  environment:
-#    name: review/$CI_COMMIT_REF_NAME
-#    on_stop: delete_environment
-#    url: http://polemarch-$KUBE_NAMESPACE.$KUBE_INGRESS_BASE_DOMAIN
-#  only:
-#    kubernetes: active
-#    refs:
-#      - branches
-#  when: manual
-#
-#delete_environment:
-#  stage: release
-#  image: registry.gitlab.com/vstconsulting/images:tox
-#  script:
-#    - tox -e destroy_env
-#  environment:
-#    name: review/$CI_COMMIT_REF_NAME
-#    action: stop
-#  only:
-#    kubernetes: active
-#    refs:
-#      - branches
-#  when: manual
-
 release:
   stage: release
-  image: registry.gitlab.com/vstconsulting/images:tox
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v2
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $GIT_ACCESS_USER && $GIT_ACCESS_PASSWORD'
       when: on_success
@@ -185,7 +162,7 @@ publish_docker:
 
 publish_release:
   stage: publish
-  image: registry.gitlab.com/vstconsulting/images:tox
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v2
   allow_failure: true
   needs: ["release_pypi"]
   rules:

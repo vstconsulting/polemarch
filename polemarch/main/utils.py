@@ -28,7 +28,6 @@ from vstutils.utils import (
     ON_POSIX,
     translate as _
 )
-from vstutils.models.cent_notify import Notificator
 from vstutils.utils import ObjectHandlers
 from vstutils.utils import raise_context
 
@@ -327,14 +326,6 @@ class AnsibleInventoryParser(PMAnsible):
 
 class AnsibleConfigParser(PMAnsible):
     ref_name = 'config'
-
-
-class PolemarchNotificator(Notificator):
-    def create_notification_from_instance(self, instance):
-        super().create_notification_from_instance(instance)
-        # pylint: disable=protected-access
-        if instance.__class__._meta.label in settings.NOTIFY_WITHOUT_QUEUE_MODELS and self.label != 'history_lines':
-            self.send()
 
 
 class ExecutionHandlers(ObjectHandlers):

@@ -8,8 +8,8 @@ class Plugin(BasePlugin):
     writeable = True
     readable = True
 
-    def _write_line(self, line: str, number: int, endl: str = ''):
-        HistoryLines.objects.bulk_create([
+    async def _write_line(self, line: str, number: int, endl: str = ''):
+        await HistoryLines.objects.abulk_create([
             HistoryLines(line_gnumber=number, line_number=1, line=line + endl, history=self.history)
         ])
 

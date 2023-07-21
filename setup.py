@@ -412,8 +412,8 @@ kwargs = dict(
             for i in install_requirements
             if isinstance(i, str) and 'vstutils' in i
         ],
-        'mysql': ['mysqlclient'],
-        'postgresql': ['psycopg2'],
+        'mysql': ['mysqlclient<2.2'],
+        'postgresql': ['psycopg[pool,c]'],
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt', os.getcwd()),

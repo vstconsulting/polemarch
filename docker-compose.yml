@@ -23,8 +23,12 @@ services:
     build: .
     restart: unless-stopped
     depends_on:
-      - redis
-      - database
+      redis:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+      centrifugo:
+        condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/api/health/" ]
       interval: 3s
@@ -38,6 +42,12 @@ services:
   redis:
     image: "redis:6"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 3
+
 
   database:
     image: mysql:8.0
