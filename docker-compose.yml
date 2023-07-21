@@ -20,7 +20,10 @@ services:
 
   polemarch:
     image: ${WERF_MAIN_DOCKER_IMAGE_NAME:-polemarch}
-    build: .
+    build:
+      context: .
+      args:
+        PACKAGE_NAME: ${PACKAGE_NAME:-polemarch}
     restart: unless-stopped
     depends_on:
       redis:
