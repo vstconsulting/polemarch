@@ -32,10 +32,11 @@ except ImportError:
     has_sphinx = False
 
 
+PY_MAJOR, PY_MINOR = sys.version_info[0:2]
 ignored_keys = ['-h', '--help', '--version']
 is_help = any([a for a in ignored_keys if a in sys.argv])
 is_develop = 'develop' in sys.argv
-is_build = (any([a for a in ['compile', 'bdist_wheel', 'bdist'] if a in sys.argv]) or is_develop) and not is_help
+is_build = (any([a for a in ['compile', 'bdist_wheel', 'bdist', 'sdist'] if a in sys.argv]) or is_develop) and not is_help
 
 
 def get_discription(file_path='README.rst', folder=os.getcwd()):
@@ -120,9 +121,12 @@ def make_extensions(extensions_list, packages):
     extra_compile_args = [
         '-g0', '-ggdb1',
         "-fno-strict-aliasing",
-        "-fno-var-tracking-assignments",
-        "-pipe", "-std=c99", '-Werror=sign-compare'
+        "-fno-var-tracking-assignments" if PY_MINOR != 6 else "",
+        "-pipe", "-std=c99", '-Werror=sign-compare',
     ]
+    if 'compile' in sys.argv:
+        extra_compile_args.append("-DBUILD_FROM_SOURCE")
+    extra_compile_args = list(filter(bool, extra_compile_args))
     ext_modules = list(
         make_extention(m, f, extra_compile_args)
         for m, f in extensions_dict.items()
@@ -186,10 +190,11 @@ def minify_static_files(base_dir, files, exclude=None):
                     with codecs.open(fext_file, 'w', encoding='utf-8') as static_file_fd:
                         static_file_fd.write(minified)
                     print('Minfied file {fext_file}.'.format(fext_file=fext_file))
-                with open(fext_file, 'rb') as f_in:
-                    with gzip.open("{}.gz".format(fext_file), 'wb') as f_out:
-                        shutil.copyfileobj(f_in, f_out)
-                print('Compressed file {fext_file}.'.format(fext_file=fext_file))
+                if not os.environ.get('NOT_COMPRESS', False):
+                    with open(fext_file, 'rb') as f_in:
+                        with gzip.open("{}.gz".format(fext_file), 'wb') as f_out:
+                            shutil.copyfileobj(f_in, f_out)
+                    print('Compressed file {fext_file}.'.format(fext_file=fext_file))
 
 
 def compile_py_func(fullname, compile_file_func):
@@ -372,11 +377,7 @@ def make_setup(**opts):
     webpack_path = os.path.join(os.getcwd(), 'webpack.config.js')
     if os.path.exists(webpack_path) and is_build and os.environ.get('DONT_YARN', "") != 'true':
         try:
-            subprocess.check_call(
-                ['yarn', 'install', '--pure-lockfile', '--mutex network'],
-                stdout=sys.stdout,
-                stderr=sys.stderr
-            )
+            subprocess.check_call(['yarn', 'install', '--pure-lockfile', '--mutex network'], stdout=sys.stdout, stderr=sys.stderr)
             subprocess.check_call(['yarn', 'devBuild' if is_develop else 'build'], stdout=sys.stdout, stderr=sys.stderr)
         except Exception as err:
             raise errors.CompileError(str(err))
@@ -385,6 +386,8 @@ def make_setup(**opts):
 
 ########################################################################################
 # end block
+
+os.environ.setdefault('NOT_COMPRESS', 'true')
 
 ext_list = []
 
