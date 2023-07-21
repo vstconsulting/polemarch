@@ -8,6 +8,8 @@ gitdb2~=4.0.2
 
 # Hooks
 requests~=2.31.0
+# support for CentOS/RH/Oracle 7
+urllib3~=1.26.16
 
 # Ansible required packages
 polemarch-ansible~=2.2.0

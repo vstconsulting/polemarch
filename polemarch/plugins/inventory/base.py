@@ -1,9 +1,12 @@
 import typing as _t
 from pathlib import Path
+from django.conf import settings
 from rest_framework.fields import Field
 from vstutils.api.serializers import BaseSerializer
 from ...main.exceptions import NotSupported
-from ...main.models.hosts import Inventory
+
+
+InventoryType = f"{settings.VST_PROJECT_LIB_NAME}.main.models.hosts.Inventory"
 
 
 class BasePlugin:
@@ -48,7 +51,7 @@ class BasePlugin:
     def __init__(self, options):
         self.options = options
 
-    def render_inventory(self, instance: Inventory, execution_dir: Path) -> _t.Tuple[Path, list]:
+    def render_inventory(self, instance: InventoryType, execution_dir: Path) -> _t.Tuple[Path, list]:
         """
         Renders inventory into text file and puts it into ``execution_dir`` directory. Additional files may be returned
         by second argument as list (or empty list, if no any).
@@ -70,7 +73,7 @@ class BasePlugin:
         return ''  # nocv
 
     @classmethod
-    def import_inventory(cls, instance: Inventory, data: dict):
+    def import_inventory(cls, instance: InventoryType, data: dict):
         """
         Method which implements importing inventory from external source. Must be implemented if ``supports_import``
         is ``True``.
