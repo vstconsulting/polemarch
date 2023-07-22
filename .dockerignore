@@ -270,11 +270,25 @@ test_data
 test_data_ce
 tests.py
 tests_ce.py
+ce/.tox
+ce/helm
+ce/dist
+ce/build
+ce/env
+ce/venv
+ce/node_modules
+
+node_modules
+.coverage
+.cache
+.ruff_cache
+env
+dist
+.tox
 
 !Dockerfile
 !.dockerignore
 !ce/Dockerfile
-ce
 !ce/polemarch
 !ce/setup.py
 !ce/doc

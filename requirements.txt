@@ -1,14 +1,20 @@
 # Main
-vstutils[rpc,prod]~=5.4.2
-markdown2~=2.4.8
+vstutils[rpc,prod]~=5.6.4
+markdown2~=2.4.9
 
 # Repo types
-gitpython~=3.1.30
+gitpython~=3.1.32
 gitdb2~=4.0.2
 
 # Hooks
-requests~=2.27.1
+requests~=2.31.0
+# support for CentOS/RH/Oracle 7
+urllib3~=1.26.16
 
 # Ansible required packages
 polemarch-ansible~=2.2.0
 netaddr
+
+# Deprecated libs
+coreapi~=2.3.3
+coreschema~=0.0.4

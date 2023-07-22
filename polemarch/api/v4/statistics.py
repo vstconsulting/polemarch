@@ -1,5 +1,7 @@
 from django.contrib.auth import get_user_model
+from django.utils.decorators import method_decorator
 from rest_framework import fields as drffields
+from drf_yasg.utils import swagger_auto_schema
 from vstutils.api.base import NonModelsViewSet
 from vstutils.api.serializers import BaseSerializer
 from vstutils.api.responses import HTTP_200_OK
@@ -46,10 +48,16 @@ class StatsSerializer(BaseSerializer):
     inventory_plugins = drffields.IntegerField()
     jobs = StatsJobsSerializer()
 
+    class Meta:
+        ref_name = 'Stats'
 
+
+@method_decorator(name='list', decorator=swagger_auto_schema(responses={200: StatsSerializer()}))
 class StatsViewSet(NonModelsViewSet):
     base_name = 'stats'
     serializer_class = StatsSerializer
+    pagination_class = None
+    filter_backends = ()
 
     def _get_projects_count(self):
         return Project.objects.count()

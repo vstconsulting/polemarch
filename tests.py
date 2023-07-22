@@ -686,7 +686,7 @@ class InventoryTestCase(BaseProjectTestCase):
             {
                 'method': 'delete',
                 'path': ['project', self.project.id, 'inventory', inventory_id],
-                'headers': {'HTTP_X_Purge_Nested': 'true'}
+                'headers': {'X-Purge-Nested': 'true'}
             },
         ])
         self.assertFalse(self.get_model_filter('main.Inventory').filter(id=inventory_id).exists())
@@ -771,7 +771,7 @@ class InventoryTestCase(BaseProjectTestCase):
             {
                 'method': 'delete',
                 'path': ['project', project_id, 'inventory', inventory_id],
-                'headers': {'HTTP_X_Purge_Nested': 'true'}
+                'headers': {'X-Purge-Nested': 'true'}
             },
         ])
         self.assertFalse(self.get_model_filter('main.Inventory').filter(id=inventory_id).exists())
@@ -1034,7 +1034,7 @@ class InventoryTestCase(BaseProjectTestCase):
             {
                 'method': 'delete',
                 'path': ['project', self.project.id, 'inventory', self.inventory.id],
-                'headers': {'HTTP_X_Purge_Nested': 'true'},
+                'headers': {'X-Purge-Nested': 'true'},
             }
         ])
         self.assertFalse(self.get_model_filter('main.ExecutionTemplateOption').filter(id=option_id).exists())
@@ -1342,12 +1342,12 @@ class InventoryTestCase(BaseProjectTestCase):
             {  # [10] delete non-children group
                 'method': 'delete',
                 'path': ['group', second_to_last_group_id, 'groups', '<<0[data][id]>>'],
-                'headers': {'HTTP_X_Purge_Nested': 'true'}
+                'headers': {'X-Purge-Nested': 'true'}
             },
             {  # [11] delete children group
                 'method': 'delete',
                 'path': ['group', second_to_last_group_id, 'groups', last_children_group_id],
-                'headers': {'HTTP_X_Purge_Nested': 'true'}
+                'headers': {'X-Purge-Nested': 'true'}
             },
         ])
         self.assertEqual(results[8]['data']['name'], 'non_children_group')
@@ -3746,22 +3746,26 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
                 pass
 
         with self.patch(
-            f'{settings.VST_PROJECT_LIB_NAME}.main.utils.PolemarchNotificator.get_client',
+            f'{settings.VST_PROJECT_LIB_NAME}.notificator.PolemarchNotificator.get_client',
             return_value=DummyClient()
         ) as client_getter:
-            self.assertEqual(client_getter.call_count, 0)
-            self.bulk_transactional([self.sync_project_bulk_data()])
-            client_getter.assert_any_call()
-            client_getter.reset_mock()
-            client_getter.assert_not_called()
-            self.bulk_transactional([
-                self.execute_plugin_bulk_data(
-                    plugin='ANSIBLE_MODULE',
-                    module='system.ping',
-                    inventory=self.inventory.id,
-                )
-            ])
-            client_getter.assert_any_call()
+            with self.patch(
+                    f'{settings.VST_PROJECT_LIB_NAME}.notificator.PolemarchNotificator.is_usable',
+                    return_value=True
+            ):
+                self.assertEqual(client_getter.call_count, 0)
+                self.bulk_transactional([self.sync_project_bulk_data()])
+                client_getter.assert_any_call()
+                client_getter.reset_mock()
+                client_getter.assert_not_called()
+                self.bulk_transactional([
+                    self.execute_plugin_bulk_data(
+                        plugin='ANSIBLE_MODULE',
+                        module='system.ping',
+                        inventory=self.inventory.id,
+                    )
+                ])
+                client_getter.assert_any_call()
 
     def test_execute_test_module(self):
         results = self.bulk_transactional([
