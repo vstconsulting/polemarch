@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-CURRENT_VERSION=$(python3 setup.py --version | tr -d '\n')
+CURRENT_VERSION=$(python3.8 setup.py --version | tr -d '\n')
 TAG=$(git tag -l $CURRENT_VERSION)
 
 if [ -z "${TAG}" ]; then
