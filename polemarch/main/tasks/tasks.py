@@ -1,12 +1,14 @@
 # pylint: disable=broad-except,no-member,redefined-outer-name
 import logging
 import traceback
+
 from django.conf import settings
 from vstutils.utils import import_class
-from ..utils import task, BaseTask, TaskClass
+
 from .exceptions import TaskError
-from ..models import TemplatePeriodicTask, Project, History, Inventory
 from ..executions import PLUGIN_HANDLERS
+from ..models import TemplatePeriodicTask, Project, History, Inventory
+from ..utils import task, BaseTask, TaskClass
 
 logger = logging.getLogger("polemarch")
 clone_retry = getattr(settings, 'CLONE_RETRY', 5)

@@ -1,17 +1,19 @@
+import contextlib
 import os
 import re
-import contextlib
-from uuid import uuid1
 from functools import lru_cache
 from typing import Type, Mapping, Optional
+from uuid import uuid1
+
 from django.conf import settings
 from rest_framework import fields
-from vstutils.api.serializers import BaseSerializer
 from vstutils.api.fields import VSTCharField, SecretFileInString, AutoCompletionField
+from vstutils.api.serializers import BaseSerializer
+
+from .base import BasePlugin
+from ...api.fields import InventoryAutoCompletionField
 from ...main.constants import ANSIBLE_REFERENCE, HiddenArgumentsEnum, HiddenVariablesEnum, HistoryStatus
 from ...main.models import Inventory
-from ...api.fields import InventoryAutoCompletionField
-from .base import BasePlugin
 from ...plugins.inventory.ansible import BaseAnsiblePlugin as BaseAnsibleInventoryPlugin
 
 

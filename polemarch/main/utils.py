@@ -1,24 +1,22 @@
 # pylint: disable=invalid-name,ungrouped-imports
 from __future__ import unicode_literals
-from functools import partial
 
+import json
 import logging
 import os
-import subprocess
-
-import sys
 import re
-import json
+import subprocess
+import sys
+from functools import partial
 from os.path import dirname
-from django.conf import settings
-from django.utils import timezone
-from django.db import transaction
 
 try:
     from yaml import CLoader as Loader, CDumper as Dumper, load, dump
 except ImportError:  # nocv
     from yaml import Loader, Dumper, load, dump
-
+from django.conf import settings
+from django.db import transaction
+from django.utils import timezone
 from vstutils.tasks import TaskClass
 from vstutils.utils import (
     tmp_file_context,
@@ -167,7 +165,7 @@ class AnsibleCache(SubCacheInterface):
 
 
 class PMAnsible(PMObject):
-    __slots__ = ('execute_path', 'cache',)
+    __slots__ = ('execute_path', 'cache')
     # Json regex
     _regex = re.compile(r"([\{\[\"]{1}.*[\}\]\"]{1})", re.MULTILINE | re.DOTALL)
     ref_name = 'object'

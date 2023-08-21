@@ -5,6 +5,7 @@ from drf_yasg.utils import swagger_auto_schema
 from vstutils.api.base import NonModelsViewSet
 from vstutils.api.serializers import BaseSerializer
 from vstutils.api.responses import HTTP_200_OK
+
 from ...main.models import (
     Project,
     Inventory,

@@ -1,4 +1,5 @@
 import re
+
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.exceptions import ParseError
 from rest_framework import fields as drffields
@@ -13,6 +14,7 @@ from vstutils.api import fields as vstfields
 from vstutils.api.base import CopyMixin
 from vstutils.api.actions import SimpleAction
 from vstutils.api.serializers import BaseSerializer
+
 from ..permissions import CreateUsersPermission, SetOwnerPermission
 
 

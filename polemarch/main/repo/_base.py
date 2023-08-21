@@ -1,21 +1,24 @@
 # pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
+
 import io
-from typing import Any, Text, Dict, List, Tuple, Union, Iterable, Callable, TypeVar
-import os
-import shutil
-import pathlib
 import logging
+import os
+import pathlib
+import shutil
 import traceback
 from itertools import chain
+from typing import Any, Text, Dict, List, Tuple, Union, Iterable, Callable, TypeVar
+
 import requests
-from django.db import transaction
 from django.conf import settings
+from django.db import transaction
 from vstutils.utils import raise_context, import_class
-from ..utils import AnsibleModules
+
 from ..models.projects import Project
-from ...main.exceptions import MaxContentLengthExceeded, SyncOnRunTimeout
+from ..utils import AnsibleModules
 from ...main.constants import TEMPLATE_KIND_PLUGIN_MAP
+from ...main.exceptions import MaxContentLengthExceeded, SyncOnRunTimeout
 
 logger = logging.getLogger("polemarch")
 FILENAME = TypeVar('FILENAME', Text, str)
@@ -59,15 +62,16 @@ class _Base:
         )
 
     def pm_handle_sync_on_run(self, feature: Text, data: bool) -> None:
-        '''
+        """
         Set sync_on_run if it is setted in `.polemarch.yaml`.
 
         :param feature: feature name
         :param data: all data from file
-        '''
+        """
         value = str(data[feature])
         _, created = self.proj.variables.update_or_create(
-            key='repo_sync_on_run', defaults=dict(value=value)
+            key='repo_sync_on_run',
+            defaults={'value': value},
         )
         self.message(
             '{} repo_sync_on_run to {}'.format('Set' if created else 'Update', value)
@@ -166,7 +170,7 @@ class _Base:
         Loads and returns data from `.polemarch.yaml` file
         """
         for feature in data.keys():
-            if feature in ['templates_rewrite', ]:
+            if feature in ['templates_rewrite']:
                 continue
             self.message('Set settings from ".polemarch.yaml" - {}.'.format(feature))
             feature_name = 'pm_handle_{}'.format(feature)
@@ -227,7 +231,7 @@ class _Base:
     def search_files(self, repo: Any = None, pattern: Text = '**/*') -> Iterable[pathlib.Path]:
         # pylint: disable=unused-argument
         path = pathlib.Path(self.path)
-        return map(lambda x: x.relative_to(self.path), path.glob(pattern))
+        return (x.relative_to(self.path) for x in path.glob(pattern))
 
     def _operate(self, operation: Callable, **kwargs) -> Any:
         return operation(kwargs)

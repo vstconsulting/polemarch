@@ -1,12 +1,13 @@
 from __future__ import unicode_literals
-from typing import Dict
-import os
-import json
-import traceback
-import logging
-import subprocess
-from .base import BaseHook
 
+import json
+import logging
+import os
+import subprocess
+import traceback
+from typing import Dict
+
+from .base import BaseHook
 
 logger = logging.getLogger("polemarch")
 

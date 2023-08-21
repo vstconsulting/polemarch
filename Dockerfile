@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM registry.gitlab.com/vstconsulting/images:ubuntu AS build
+FROM registry.gitlab.com/vstconsulting/images:ubuntu-v2 AS build
 
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 WORKDIR /usr/local/polemarch

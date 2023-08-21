@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
-from typing import AnyStr
+
 import re
+from typing import AnyStr
+
 from django.core.validators import (
     RegexValidator,
     URLValidator as OldURLValidator

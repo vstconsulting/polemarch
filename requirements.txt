@@ -1,6 +1,6 @@
 # Main
-vstutils[rpc,prod]~=5.6.4
-markdown2~=2.4.9
+vstutils[rpc,prod]~=5.7.2
+markdown2~=2.4.10
 
 # Repo types
 gitpython~=3.1.32

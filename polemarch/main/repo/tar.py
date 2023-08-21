@@ -1,9 +1,11 @@
 # pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
+
 import io
-from typing import Text, Tuple
 import tarfile
 from pathlib import Path
+from typing import Text, Tuple
+
 from ._base import _ArchiveRepo, shutil
 
 

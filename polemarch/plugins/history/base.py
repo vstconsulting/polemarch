@@ -56,8 +56,8 @@ class BasePlugin:
             r" \{\s([^\r]*?\"[\w]{1,}\"\: .*?\s)\}\s{0,1}"
         )
         subst = '"\\1": {\n\t"status": "\\2", \n\\3},'
-        result = re.sub(regex, subst, data, 0, re.MULTILINE)
-        result = re.findall(r'^".*":[\s\S]*$', result, re.MULTILINE)[0]
+        result = re.sub(regex, subst, data, count=0, flags=re.MULTILINE)
+        result = re.findall(r'^".*":[\s\S]*$', result, flags=re.MULTILINE)[0]
         result = "{" + result[:-1] + "\n}"
         return orjson.loads(result)  # pylint: disable=no-member
 

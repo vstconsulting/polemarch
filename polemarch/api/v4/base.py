@@ -3,6 +3,7 @@ from rest_framework import fields as drffields
 from vstutils.api import fields as vstfields
 from vstutils.api.serializers import BaseSerializer, VSTSerializer
 from vstutils.api.base import CopyMixin, ModelViewSet
+
 from ...main.models import Variable
 from ...main.constants import HiddenVariablesEnum, CYPHER
 from ..filters import VariableFilter
