@@ -1,4 +1,5 @@
 from typing import Dict
+
 from django.conf import settings
 
 
@@ -39,7 +40,7 @@ class BaseHook:
         raise NotImplementedError
 
     def execute_many(self, recipients, when, message) -> str:
-        return '\n'.join(map(lambda r: self.execute(r, when, message), recipients))
+        return '\n'.join(self.execute(r, when, message) for r in recipients)
 
     def send(self, message, when: str) -> str:
         self.when = when

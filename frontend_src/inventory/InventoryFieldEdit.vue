@@ -34,7 +34,7 @@
             </div>
         </div>
         <component
-            :is="$parent.fkField.component"
+            :is="$parent.fkField.getComponent()"
             v-if="type === 'fk'"
             hide-title
             :field="$parent.fkField"

@@ -3,7 +3,7 @@
         {{ strValue }}
     </p>
     <component
-        :is="$parent.fkField.component"
+        :is="$parent.fkField.getComponent()"
         v-else
         :field="$parent.fkField"
         hide-title

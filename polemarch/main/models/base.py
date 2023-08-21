@@ -1,10 +1,11 @@
 # pylint: disable=no-name-in-module
 from __future__ import unicode_literals
-from typing import Any
-from django.db import models
-from django.contrib.auth import get_user_model
-from vstutils.models import BModel
 
+from typing import Any
+
+from django.contrib.auth import get_user_model
+from django.db import models
+from vstutils.models import BModel
 
 User = get_user_model()
 

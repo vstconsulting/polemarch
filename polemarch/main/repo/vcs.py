@@ -1,13 +1,16 @@
 # pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
-from typing import Tuple, Dict, Text, Union, Any, Iterable
+
 import warnings
+from typing import Tuple, Dict, Text, Union, Any, Iterable
+
 from vstutils.utils import tmp_file_context, raise_context
-from ...main.exceptions import SyncOnRunTimeout
 try:
     import git
 except:  # nocv
-    warnings.warn("Git is not installed or have problems.")
+    warnings.warn("Git is not installed or have problems.")  # noqa: B028
+
+from ...main.exceptions import SyncOnRunTimeout
 from ._base import _Base, os, logger, pathlib
 
 ENV_VARS_TYPE =  Dict[Text, Union[Text, bool]]  # pylint: disable=invalid-name
@@ -135,7 +138,7 @@ class Git(_VCS):
         if not no_update:
             with raise_context():
                 self.proj.variables.update_or_create(
-                    key='repo_branch', defaults=dict(value=repo.active_branch.name)
+                    key='repo_branch', defaults={'value': repo.active_branch.name}
                 )
         return repo, None
 

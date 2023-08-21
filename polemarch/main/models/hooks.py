@@ -1,12 +1,13 @@
 from __future__ import unicode_literals
-from typing import Text, Any, List
-import logging
-import collections
-import uuid
-from django.db import models
-from vstutils.utils import raise_context, ModelHandlers
-from vstutils.models import BModel, BQuerySet
 
+import collections
+import logging
+import uuid
+from typing import Text, Any, List
+
+from django.db import models
+from vstutils.models import BModel, BQuerySet
+from vstutils.utils import raise_context, ModelHandlers
 
 logger = logging.getLogger('polemarch')
 

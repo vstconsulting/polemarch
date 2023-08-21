@@ -9,6 +9,7 @@ from vstutils.api.actions import Action, SimpleAction
 from vstutils.api import fields as vstfields
 from vstutils.api.serializers import VSTSerializer, BaseSerializer
 from vstutils.utils import translate as _, lazy_translate as __
+
 from ...main.models import Host, Group, Inventory, InventoryState
 from .base import (
     VariablesCopyViewMixin,

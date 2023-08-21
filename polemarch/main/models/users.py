@@ -1,15 +1,16 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
-from typing import Text
-import logging
 
-from django.contrib.auth.models import Group as BaseGroup
+import logging
+from typing import Text
+
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group as BaseGroup
 from django.db import models
 from vstutils.models import BModel, BQuerySet
+
 from .base import ACLModel
 from ..constants import MemberType
-
 
 logger = logging.getLogger("polemarch")
 

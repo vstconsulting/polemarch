@@ -1,4 +1,7 @@
 from uuid import uuid4
+
+from celery.schedules import crontab
+from django.contrib.auth import get_user_model
 from django.db.models import (
     JSONField,
     CharField,
@@ -9,14 +12,12 @@ from django.db.models import (
     AutoField,
     CASCADE,
 )
-from django.contrib.auth import get_user_model
-from celery.schedules import crontab
-from vstutils.models.model import BaseModel
 from vstutils.models.fields import FkModelField
+from vstutils.models.model import BaseModel
+
 from .projects import Project
 from ..constants import CrontabTimeType, PeriodicTaskScheduleType, HistoryInitiatorType
 from ..executions import PLUGIN_HANDLERS
-
 
 User = get_user_model()
 

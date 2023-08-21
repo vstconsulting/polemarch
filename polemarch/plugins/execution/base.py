@@ -1,5 +1,6 @@
-from typing import Callable, Mapping, List, Tuple, Type, Optional, Any
 from pathlib import Path
+from typing import Callable, Mapping, List, Tuple, Type, Optional, Any
+
 from rest_framework.fields import Field
 from vstutils.api.serializers import BaseSerializer
 

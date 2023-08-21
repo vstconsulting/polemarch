@@ -1,21 +1,22 @@
 # pylint: disable=protected-access,no-member,unused-argument
 from __future__ import unicode_literals
 
-from typing import Any, Dict, List, Tuple, Iterable
-import os
 import logging
+import os
 import traceback
 import uuid
+from typing import Any, Dict, List, Tuple, Iterable
+
 import requests
+from django.conf import settings
+from django.core.cache import caches
+from django.db.models import Q
 from docutils.core import publish_parts as rst_gen
 from markdown2 import Markdown
-from django.conf import settings
-from django.db.models import Q
-from django.core.cache import caches
-from vstutils.utils import ModelHandlers, raise_context_decorator_with_default, classproperty, raise_context
+from vstutils.models import BQuerySet, BModel
 # pylint: disable=no-name-in-module
 from vstutils.models import custom_model
-from vstutils.models import BQuerySet, BModel
+from vstutils.utils import ModelHandlers, raise_context_decorator_with_default, classproperty, raise_context
 from yaml import load
 
 try:
@@ -124,7 +125,7 @@ class Project(AbstractModel):
     @classproperty
     def PROJECTS_DIR(cls) -> str:
         # pylint: disable=invalid-name
-        return getattr(settings, 'PROJECTS_DIR')
+        return settings.PROJECTS_DIR
 
     def __unicode__(self):
         return str(self.name)  # pragma: no cover
@@ -181,10 +182,10 @@ class Project(AbstractModel):
         parsed_data = {'fields': {}, 'playbooks': {}}
         # Parse fields
         for fieldname, field_data in data['fields'].items():
-            parsed_data['fields'][fieldname] = dict(
-                title=field_data.get('title', fieldname.upper()),
-                help=field_data.get('help', ''),
-            )
+            parsed_data['fields'][fieldname] = {
+                'title': field_data.get('title', fieldname.upper()),
+                'help': field_data.get('help', ''),
+            }
             field_format = field_data.get('format', 'string')
             if field_format not in valid_formats.keys():
                 field_format = 'unknown'
@@ -200,10 +201,10 @@ class Project(AbstractModel):
                 del parsed_data['fields'][fieldname]['format']
         # Parse playbooks for execution
         for playbook, pb_data in data['playbooks'].items():
-            parsed_data['playbooks'][playbook] = dict(
-                title=pb_data.get('title', playbook.replace('.yml', '')),
-                help=pb_data.get('help', ''),
-            )
+            parsed_data['playbooks'][playbook] = {
+                'title': pb_data.get('title', playbook.replace('.yml', '')),
+                'help': pb_data.get('help', ''),
+            }
         return parsed_data
 
     @property

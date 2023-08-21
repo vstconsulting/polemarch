@@ -1,33 +1,35 @@
-import json
 import base64
 import io
+import json
+import logging
 import os
 import re
-import sys
-import time
 import shutil
-import logging
+import sys
 import threading
-from unittest import skipIf
+import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from django.forms import ValidationError
-from django.test import override_settings
-from django_test_migrations.contrib.unittest_case import MigratorTestCase
-from django.core.exceptions import FieldDoesNotExist
-from rest_framework import fields as drffields
-from django.conf import settings
+from pathlib import Path
+from tempfile import mkdtemp
+from unittest import skipIf
+from uuid import uuid1
+
 import git
 import yaml
-from uuid import uuid1
-from tempfile import mkdtemp
-from pathlib import Path
-from requests import Response
-from django.core.management import call_command
-from django.utils import timezone
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
-from vstutils.tests import BaseTestCase as VSTBaseTestCase
+from django.core.exceptions import FieldDoesNotExist
+from django.core.management import call_command
+from django.forms import ValidationError
+from django.test import override_settings
+from django.utils import timezone
+from django_test_migrations.contrib.unittest_case import MigratorTestCase
+from requests import Response
+from rest_framework import fields as drffields
 from vstutils.api import fields as vstfields
+from vstutils.tests import BaseTestCase as VSTBaseTestCase
+
 try:
     from polemarch.main.openapi import PROJECT_MENU
     from polemarch.main.tasks import ScheduledTask
@@ -82,7 +84,7 @@ def use_temp_dir(func):
             result = func(*args, temp_dir=temp_dir, **kwargs)
             shutil.rmtree(temp_dir)
             return result
-        except:
+        except BaseException:
             shutil.rmtree(temp_dir)
             raise
 
@@ -107,7 +109,7 @@ class MockServer:
     Stops server after leaving context.
     """
 
-    __slots__ = ('handler', 'httpd',)
+    __slots__ = ('handler', 'httpd')
 
     def __init__(self, handler: BaseHTTPRequestHandler):
         self.handler = handler
@@ -238,7 +240,7 @@ class BaseTestCase(VSTBaseTestCase):
             key='ansible_connection',
             value='local',
             object_id=self.inventory.id,
-            content_type=host_type
+            content_type=host_type,
         )
         super().setUp()
 
@@ -262,7 +264,7 @@ class BaseProjectTestCase(BaseTestCase):
         shutil.copy(f'{TEST_DATA_DIR}/playbook.yml', f'{settings.PROJECTS_DIR}/{self.project.id}/playbook.yml')
         shutil.copy(
             f'{TEST_DATA_DIR}/localhost-inventory.yml',
-            f'{settings.PROJECTS_DIR}/{self.project.id}/localhost-inventory.yml'
+            f'{settings.PROJECTS_DIR}/{self.project.id}/localhost-inventory.yml',
         )
         self.project.start_repo_task('sync')
         self.inventory_path = 'localhost-inventory.yml'
@@ -280,7 +282,7 @@ class BaseProjectTestCase(BaseTestCase):
                 'connection': 'local',
                 'inventory': 'localhost,',
                 'group': 'all',
-            }
+            },
         )
 
     def tearDown(self):
@@ -296,7 +298,7 @@ class BaseProjectTestCase(BaseTestCase):
                 'name': 'test-inventory',
                 'plugin': plugin,
                 **kwargs,
-            }
+            },
         }
 
     def update_inventory_state_bulk_data(self, inventory_id, project_id=None, **kwargs):
@@ -319,7 +321,7 @@ class BaseProjectTestCase(BaseTestCase):
                 'name': name,
                 'plugin': plugin,
                 'data': data,
-            }
+            },
         }
 
     def get_inventory_state_bulk_data(self, inventory_id, project_id=None):
@@ -347,7 +349,7 @@ class BaseProjectTestCase(BaseTestCase):
             'data': {
                 'name': str(uuid1()),
                 'type': type,
-                **kwargs
+                **kwargs,
             }
         }
 
@@ -361,7 +363,7 @@ class BaseProjectTestCase(BaseTestCase):
         return {
             'method': 'post',
             'path': ['project', project_id or self.project.id, 'variables'],
-            'data': {'key': key, 'value': value}
+            'data': {'key': key, 'value': value},
         }
 
     def get_project_bulk_data(self, project_id=None):
@@ -374,7 +376,7 @@ class BaseProjectTestCase(BaseTestCase):
         path_prefix = path_prefix or []
         return {
             'method': 'get',
-            'path': [*path_prefix, 'history', history_id]
+            'path': [*path_prefix, 'history', history_id],
         }
 
     def get_raw_history_bulk_data(self, history_id, path_prefix=None):
@@ -396,7 +398,7 @@ class BaseProjectTestCase(BaseTestCase):
         template_id=None,
         option_id=None,
         project_id=None,
-        **kwargs
+        **kwargs,
     ):
         option_id = option_id or self.template_option.id
         return {
@@ -418,7 +420,7 @@ class BaseProjectTestCase(BaseTestCase):
                 'save_result': True,
                 'notes': 'some notes',
                 **kwargs,
-            }
+            },
         }
 
     def get_default_template_option(self, template_id):
@@ -430,7 +432,7 @@ class BaseProjectTestCase(BaseTestCase):
         project_id=None,
         plugin='ANSIBLE_MODULE',
         arguments=None,
-        **kwargs
+        **kwargs,
     ):
         return {
             'method': 'post',
@@ -446,7 +448,7 @@ class BaseProjectTestCase(BaseTestCase):
                     'verbose': 2,
                 },
                 **kwargs,
-            }
+            },
         }
 
     def create_template_option_bulk_data(
@@ -470,7 +472,7 @@ class BaseProjectTestCase(BaseTestCase):
                 'notes': 'some notes',
                 'arguments': arguments,
                 **kwargs,
-            }
+            },
         }
 
     def execute_template_bulk_data(
@@ -1234,16 +1236,14 @@ class InventoryTestCase(BaseProjectTestCase):
     def test_path_validator(self):
         try:
             from polemarch.main.validators import path_validator
-        except:
+        except BaseException:
             from pmlib.main.validators import path_validator
 
         valid_paths = {
             './.lol',
             './lol/kek.7z',
             './_l-o+l=',
-            'lol/kek.7z',
             'lol.yaml/',
-            'lol/kek.7z',
             'lol-kek_lol/_lol',
             '哈哈/chinese',
             '.lol',
@@ -1447,7 +1447,7 @@ class InventoryTestCase(BaseProjectTestCase):
                 try:
                     template_id = check_create(inventory)
                     check_update(inventory2, template_id)
-                except:
+                except BaseException:
                     print(f'Failed with create {inventory}, update {inventory2}.')
                     raise
 
@@ -1685,7 +1685,7 @@ class SyncTestCase(BaseProjectTestCase):
             **results[2]['data'],
             'status': 'ERROR',
             'revision': 'ERROR',
-            'branch': 'waiting...'
+            'branch': 'waiting...',
         })
 
         def password_and_key_checker(operation, **kwargs):
@@ -1764,7 +1764,7 @@ class SyncTestCase(BaseProjectTestCase):
         'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
             'LOCATION': 'test_sync_after_repo_change',
-        }
+        },
     })
     @use_temp_dir
     def test_sync_after_repo_change(self, temp_dir):
@@ -3884,7 +3884,7 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
                         'n': True,
                         'e': False,
                     },
-                }
+                },
             },
             # [1]
             {
@@ -3900,7 +3900,7 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
                     'execution_templates',
                     '<<0[data][id]>>',
                     'options',
-                    '<<1[data][results][0][id]>>'
+                    '<<1[data][results][0][id]>>',
                 ],
             },
             # [3]
@@ -3912,7 +3912,7 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
                     'execution_templates',
                     '<<0[data][id]>>',
                     'options',
-                    '<<1[data][results][0][id]>>'
+                    '<<1[data][results][0][id]>>',
                 ],
                 'data': {
                     'arguments': {
@@ -4065,18 +4065,18 @@ class VariableTestCase(BaseProjectTestCase):
             {
                 'method': 'post',
                 'path': ['project', self.project.id, 'variables'],
-                'data': {'key': 'playbook_path', 'value': '../kek.yaml'}
+                'data': {'key': 'playbook_path', 'value': '../kek.yaml'},
             },
             {
                 'method': 'post',
                 'path': ['project', self.project.id, 'variables'],
-                'data': {'key': 'playbook_path', 'value': './lol/kek.yaml'}
+                'data': {'key': 'playbook_path', 'value': './lol/kek.yaml'},
             },
         ])
         self.assertEqual(results[0]['status'], 400)
         self.assertIn(
             'Invalid path. Path must not contain "..", "~" or any other special characters and must be relative.',
-            results[0]['data']['detail']['other_errors'][0]
+            results[0]['data']['detail']['other_errors'][0],
         )
         self.assertEqual(results[1]['status'], 201)
 
@@ -4088,7 +4088,7 @@ class VariableTestCase(BaseProjectTestCase):
                 'data': {
                     'key': 'ansible_host',
                     'value': value,
-                }
+                },
             }
 
         self.get_model_class('main.Variable').objects.all().delete()
@@ -4118,13 +4118,13 @@ class VariableTestCase(BaseProjectTestCase):
             {
                 'method': 'post',
                 'path': ['host', self.host.id, 'variables'],
-                'data': {'key': 'ansible_host', 'value': '1'}
+                'data': {'key': 'ansible_host', 'value': '1'},
             },
             {
                 'method': 'post',
                 'path': ['host', self.host.id, 'variables'],
-                'data': {'key': 'ansible_host', 'value': '2'}
-            }
+                'data': {'key': 'ansible_host', 'value': '2'},
+            },
         ])
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[1]['status'], 201)
@@ -4198,13 +4198,13 @@ class VariableTestCase(BaseProjectTestCase):
             key='lol',
             value='kek',
             content_type=group_type,
-            object_id=self.group.id
+            object_id=self.group.id,
         )
         self.get_model_class('main.Variable').objects.create(
             key='kek',
             value='lol',
             content_type=group_type,
-            object_id=another_group.id
+            object_id=another_group.id,
         )
 
         results = self.bulk([
@@ -4215,17 +4215,17 @@ class VariableTestCase(BaseProjectTestCase):
             {  # [1] should find 1
                 'method': 'get',
                 'path': 'group',
-                'query': 'variables=lol:kek'
+                'query': 'variables=lol:kek',
             },
             {  # [2] should find 0
                 'method': 'get',
                 'path': 'group',
-                'query': 'variables=unknown:unknown'
+                'query': 'variables=unknown:unknown',
             },
             {  # [3] should raise list index out of range (FIXME: really ??)
                 'method': 'get',
                 'path': 'group',
-                'query': 'variables=kek'
+                'query': 'variables=kek',
             },
         ])
         self.assertEqual(results[0]['status'], 200)
@@ -4248,7 +4248,7 @@ class VariableTestCase(BaseProjectTestCase):
                     'module': 'system.ping',
                     'private_key': 'key',
                     'vault_password_file': 'file',
-                }
+                },
             ),
             self.create_template_bulk_data(
                 plugin='ANSIBLE_PLAYBOOK',
@@ -4256,7 +4256,7 @@ class VariableTestCase(BaseProjectTestCase):
                     'playbook': 'playbook.yml',
                     'private_key': 'key',
                     'vault_password_file': 'file',
-                }
+                },
             ),
         ])
         module_template_id = results[0]['data']['id']
@@ -4297,7 +4297,7 @@ class VariableTestCase(BaseProjectTestCase):
             {
                 'method': 'post',
                 'path': ['inventory', self.inventory.id, 'variables'],
-                'data': {'key': 'ansible_ssh_pass', 'value': 'lol-pass'}
+                'data': {'key': 'ansible_ssh_pass', 'value': 'lol-pass'},
             },
             self.execute_plugin_bulk_data(
                 plugin='ANSIBLE_MODULE',
@@ -4315,12 +4315,12 @@ class VariableTestCase(BaseProjectTestCase):
         self.project.vars = {
             'repo_branch': 'slave',
             'repo_password': CYPHER,
-            'repo_sync_on_run': True
+            'repo_sync_on_run': True,
         }
         self.assertDictEqual(self.project.vars, {
             'repo_branch': 'slave',
             'repo_password': CYPHER,
-            'repo_sync_on_run': True
+            'repo_sync_on_run': True,
         })
 
     def test_env_vars_on_execution(self):
@@ -4332,7 +4332,7 @@ class VariableTestCase(BaseProjectTestCase):
                     plugin='ANSIBLE_MODULE',
                     module='system.ping',
                     inventory=self.inventory.id,
-                )
+                ),
             ])
             self.assertEqual(popen.call_args[-1]['env']['EXAMPLE'], '1')
             self.assertIn('VST_PROJECT', popen.call_args[-1]['env'])
@@ -4348,8 +4348,8 @@ class BaseHookTestCase(BaseProjectTestCase):
                 'enable': True,
                 'recipients': recipients,
                 'type': type,
-                'when': when
-            }
+                'when': when,
+            },
         }
 
 
@@ -4406,26 +4406,26 @@ class HookTestCase(BaseHookTestCase):
         # *_execution
         check_hook(
             when='on_execution',
-            bulk_data=[self.execute_plugin_bulk_data(plugin='ANSIBLE_MODULE', module='system.ping')]
+            bulk_data=[self.execute_plugin_bulk_data(plugin='ANSIBLE_MODULE', module='system.ping')],
         )
         check_hook(
             when='after_execution',
-            bulk_data=[self.execute_plugin_bulk_data(plugin='ANSIBLE_MODULE', module='system.ping')]
+            bulk_data=[self.execute_plugin_bulk_data(plugin='ANSIBLE_MODULE', module='system.ping')],
         )
 
         # on_object_*
         check_hook(
             when='on_object_add',
-            bulk_data=[{'method': 'post', 'path': 'host'}]
+            bulk_data=[{'method': 'post', 'path': 'host'}],
         )
         host = self.get_model_filter('main.Host').first()
         check_hook(
             when='on_object_upd',
-            bulk_data=[{'method': 'patch', 'path': ['host', host.id], 'data': {'name': 'somename'}}]
+            bulk_data=[{'method': 'patch', 'path': ['host', host.id], 'data': {'name': 'somename'}}],
         )
         check_hook(
             when='on_object_del',
-            bulk_data=[{'method': 'delete', 'path': ['host', host.id]}]
+            bulk_data=[{'method': 'delete', 'path': ['host', host.id]}],
         )
 
         # on_object_add
@@ -4454,9 +4454,9 @@ class HookTestCase(BaseHookTestCase):
                         'username': 'username',
                         'password': 'password',
                         'password2': 'password',
-                    }
-                }
-            ]
+                    },
+                },
+            ],
         )
         user = User.objects.get(username='username')
         check_hook(
@@ -4465,7 +4465,7 @@ class HookTestCase(BaseHookTestCase):
         )
         check_hook(
             when='on_user_del',
-            bulk_data=[{'method': 'delete', 'path': ['user', user.id]}]
+            bulk_data=[{'method': 'delete', 'path': ['user', user.id]}],
         )
 
         # check successful change password triggers on_user_upd
@@ -4479,9 +4479,9 @@ class HookTestCase(BaseHookTestCase):
                         'old_password': self.user.data['password'],
                         'password': 'same',
                         'password2': 'same',
-                    }
-                }
-            ]
+                    },
+                },
+            ],
         )
         # check unsuccessful attempt to change password not triggers on_user_upd
         check_hook(
@@ -4494,11 +4494,11 @@ class HookTestCase(BaseHookTestCase):
                         'old_password': self.user.data['password'],
                         'password': 'password',
                         'password2': 'password2',
-                    }
-                }
+                    },
+                },
             ],
             status=403,
-            call_count=0
+            call_count=0,
         )
 
     def check_output_run_script(self, check_data, *args, **kwargs):
@@ -4578,7 +4578,7 @@ class CommandTestCase(VSTBaseTestCase):
         call_command('update_ansible_modules', interactive=False, stdout=out)
         self.assertEqual(
             'The modules have been successfully updated.\n',
-            out.getvalue().replace('\x1b[32;1m', '').replace('\x1b[0m', '')
+            out.getvalue().replace('\x1b[32;1m', '').replace('\x1b[0m', ''),
         )
 
 
@@ -4596,8 +4596,8 @@ class UserTestCase(VSTBaseTestCase):
                 'last_name': 'Msh',
                 'username': 'msh',
                 'password': '1q2w3e',
-                'password2': '1q2w3e'
-            }}
+                'password2': '1q2w3e',
+            }},
         ])
 
         self.assertEqual(results[0]['status'], 201)
@@ -4612,8 +4612,8 @@ class UserTestCase(VSTBaseTestCase):
                     'last_name': 'User',
                     'username': 'user',
                     'password': 'user',
-                    'password2': 'user'
-                }}
+                    'password2': 'user',
+                }},
             ])
 
         self.assertEqual(results[0]['status'], 201)
@@ -4628,8 +4628,8 @@ class UserTestCase(VSTBaseTestCase):
                     'last_name': 'User1',
                     'username': 'user1',
                     'password': 'user1',
-                    'password2': 'user1'
-                }}
+                    'password2': 'user1',
+                }},
             ])
 
         self.assertEqual(results[0]['status'], 403)
@@ -4637,7 +4637,7 @@ class UserTestCase(VSTBaseTestCase):
     def test_update(self):
         results = self.bulk([
             {'method': 'patch', 'path': ['user', self.user.id], 'data': {'username': 'new_username'}},
-            {'method': 'get', 'path': ['user', self.user.id]}
+            {'method': 'get', 'path': ['user', self.user.id]},
         ])
         self.assertEqual(results[0]['status'], 200)
         self.assertEqual(results[0]['data']['username'], 'new_username')
@@ -4651,12 +4651,12 @@ class UserTestCase(VSTBaseTestCase):
         result = self.result(
             self.client.post,
             self.get_url('token'),
-            data={'username': self.user.username, 'password': self.user.username.upper()}
+            data={'username': self.user.username, 'password': self.user.username.upper()},
         )
         response = self.client.delete(
             self.get_url('token'),
             HTTP_AUTHORIZATION=f'Token {result["token"]}',
-            content_type='application/json'
+            content_type='application/json',
         )
         self.assertEqual(response.status_code, 204)
 
@@ -4671,7 +4671,7 @@ class BaseOpenAPITestCase(VSTBaseTestCase):
     system_tab = {
         'name': 'System',
         'span_class': 'fa fa-cog',
-        'sublinks': []
+        'sublinks': [],
     }
     users_sublink = {
         'name': 'Users',
@@ -4681,7 +4681,7 @@ class BaseOpenAPITestCase(VSTBaseTestCase):
     hooks_sublink = {
         'name': 'Hooks',
         'url': '/hook',
-        'span_class': 'fa fa-plug'
+        'span_class': 'fa fa-plug',
     }
 
     @classmethod
@@ -4701,15 +4701,17 @@ class BaseOpenAPITestCase(VSTBaseTestCase):
         self.assertSetEqual(
             set(values),
             self.builtin_execution_plugins,
-            'External execution plugins are not allowed in generated YML schema.'
+            'External execution plugins are not allowed in generated YML schema.',
         )
 
-    def check_inventory_plugins(self, values, exclude=set()):
+    def check_inventory_plugins(self, values, exclude=None):
+        if exclude is None:
+            exclude = set()
         self.assertSetEqual(
             set(values),
             self.builtin_inventory_plugins - exclude,
             'plugin is either not excluded or external. '
-            'External inventory plugins are not allowed in generated YML schema.'
+            'External inventory plugins are not allowed in generated YML schema.',
         )
 
     def get_schemas_for_test(self):
@@ -4747,7 +4749,7 @@ class BaseOpenAPITestCase(VSTBaseTestCase):
             endpoint_schema['definitions'][key]['properties']['arguments']['x-options']['types'] = yml_types
 
         for idx, query_def in enumerate(
-            endpoint_schema['paths']['/project/{id}/execution_templates/']['get']['parameters']
+            endpoint_schema['paths']['/project/{id}/execution_templates/']['get']['parameters'],
         ):
             if query_def['name'] == 'plugin':
                 yml_schema['paths']['/project/{id}/execution_templates/']['get']['parameters'][idx] = query_def
@@ -4839,10 +4841,10 @@ class MetricsTestCase(VSTBaseTestCase):
         }
 
         for status, count in self.history_status_count_map.items():
-            for i in range(count):
+            for _ in range(count):
                 History.objects.create(status=status)
 
-        Project.objects.create(name=f'test_metrics_{i}')
+        Project.objects.create(name='test_metrics_0')
         for i in range(3):
             Project.objects.create(name=f'test_metrics_{i}', status='OK')
         for i in range(4):
@@ -4853,7 +4855,7 @@ class MetricsTestCase(VSTBaseTestCase):
         expected = (Path(__file__).parent / 'test_data' / 'metrics.txt').read_text('utf-8')
         expected = expected.replace(
             '$VERSION',
-            f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}'
+            f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}',
         )
         self.assertEqual(result, expected)
 
@@ -5043,7 +5045,7 @@ class ExecutionTemplateDirectMigrationTestCase(BaseMigrationTestCase):
 
         content_type = self.old_state.apps.get_model(
             'contenttypes',
-            'ContentType'
+            'ContentType',
         ).objects.create(app_label='main', model='periodictask')
 
         Variable.objects.create(
@@ -5557,7 +5559,7 @@ class ExecutionTemplateBackwardsMigrationTestCase(BaseMigrationTestCase):
             initiator=template1.id,
             initiator_type='template',
             executor=None,
-            json_options=json.dumps({'template_option': str(option1.id)})
+            json_options=json.dumps({'template_option': str(option1.id)}),
         )
         self.history3_id = history3.id
 
@@ -5572,7 +5574,7 @@ class ExecutionTemplateBackwardsMigrationTestCase(BaseMigrationTestCase):
             initiator=template1.id,
             initiator_type='template',
             executor=None,
-            json_options=json.dumps({'template_option': str(option2.id)})
+            json_options=json.dumps({'template_option': str(option2.id)}),
         )
         self.history4_id = history4.id
 
@@ -5631,7 +5633,7 @@ class ExecutionTemplateBackwardsMigrationTestCase(BaseMigrationTestCase):
             'module': 'ping',
             'args': 'some args',
             'group': 'all',
-            'vars': {'check': True}
+            'vars': {'check': True},
         })
         self.assertDictEqual(json.loads(template1.options_data), {
             'option2': {
@@ -5641,8 +5643,8 @@ class ExecutionTemplateBackwardsMigrationTestCase(BaseMigrationTestCase):
                 'vars': {
                     'check': False,
                     'become': True,
-                }
-            }
+                },
+            },
         })
 
         template2 = Template.objects.get(name='template2')
@@ -5655,7 +5657,7 @@ class ExecutionTemplateBackwardsMigrationTestCase(BaseMigrationTestCase):
             'vars': {
                 'check': True,
                 'private_key': example_key,
-            }
+            },
         })
         self.assertEqual(template2.options_data, '{}')
 
@@ -5752,7 +5754,7 @@ class BaseExecutionPluginUnitTestCase(VSTBaseTestCase):
     def get_plugin_instance(self, options=None, execution_dir=None) -> BasePlugin:
         instance = self.plugin_class(
             options=options or {},
-            output_handler=self.dummy_output_handler
+            output_handler=self.dummy_output_handler,
         )
         instance.execution_dir = execution_dir or self.dummy_execution_dir
         return instance
@@ -6002,7 +6004,7 @@ class AnsibleModuleExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase):
     )
     file_args = (
         'private_key',
-        'vault_password_file'
+        'vault_password_file',
     )
 
     def test_process_arg(self):

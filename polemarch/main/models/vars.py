@@ -1,18 +1,20 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
-from typing import Any, Tuple, Dict, List, Text, Union
+
 import logging
 import uuid
-
-from functools import reduce
 from collections import OrderedDict
+from functools import reduce
+from typing import Any, Tuple, Dict, List, Text, Union
+
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 from django.db import transaction, models
 from django.db.models import Case, When, Value
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
-from vstutils.utils import tmp_file
-from vstutils.models import BQuerySet, BModel
 from vstutils.api.decorators import cache_method_result
+from vstutils.models import BQuerySet, BModel
+from vstutils.utils import tmp_file
+
 from .base import ACLModel
 from ..constants import CYPHER, InventoryVariablesEnum
 
