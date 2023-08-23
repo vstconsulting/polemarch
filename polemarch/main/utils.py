@@ -15,7 +15,7 @@ try:
 except ImportError:  # nocv
     from yaml import Loader, Dumper, load, dump
 from django.conf import settings
-from django.db import transaction
+from django.db import transaction, models
 from django.utils import timezone
 from vstutils.tasks import TaskClass
 from vstutils.utils import (
@@ -338,6 +338,13 @@ class ExecutionHandlers(ObjectHandlers):
 
         task_class = project.task_handlers.backend('EXECUTION')
 
+        if execute_args:
+            for key, value in execute_args.items():
+                if isinstance(value, models.Model):
+                    with raise_context():  # nocv
+                        # Cannot be covered because persist only on production build
+                        execute_args[key] = value.pk
+
         history = self.create_history(
             project,
             plugin,
@@ -348,9 +355,6 @@ class ExecutionHandlers(ObjectHandlers):
             save_result=kwargs.pop('save_result', True),
             options=kwargs.pop('options', {}),
         )
-
-        with raise_context():
-            execute_args['inventory'] = execute_args['inventory'].id
 
         task_kwargs = {
             'plugin': plugin,
