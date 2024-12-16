@@ -18,7 +18,7 @@ class Backend(BaseHook):
     def execute(self, script, when, file) -> str:  # pylint: disable=arguments-renamed
         try:
             work_dir = self.conf['HOOKS_DIR']
-            script = '{}/{}'.format(work_dir, script)
+            script = f'{work_dir}/{script}'
             return subprocess.check_output(
                 [script, when],
                 cwd=work_dir, universal_newlines=True, input=file

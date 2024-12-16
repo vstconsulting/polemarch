@@ -36,28 +36,28 @@ export class InventoryField extends spa.fields.base.BaseField {
         return [InventoryFieldMixin];
     }
     toInner(data) {
-        data = super.toInner(data);
-        if (data && typeof data === 'object' && data.value) {
-            if (data.type === 'fk') {
-                if (typeof data.value === 'number') {
-                    return data.value;
+        const value = super.toInner(data);
+        if (value && typeof value === 'object' && value.value) {
+            if (value.type === 'fk') {
+                if (typeof value.value === 'number') {
+                    return value.value;
                 }
-                if (data.value.getPkValue) {
-                    return data.value.getPkValue();
+                if (value.value.getPkValue) {
+                    return value.value.getPkValue();
                 }
                 return null;
             }
-            if (data.type === 'hosts') {
-                let str = data.value;
-                if (Array.isArray(data.value)) {
-                    str = data.value.join(',');
+            if (value.type === 'hosts') {
+                let str = value.value;
+                if (Array.isArray(value.value)) {
+                    str = value.value.join(',');
                 }
                 if (str) {
-                    str = str + ',';
+                    str = `${str},`;
                 }
                 return str;
             }
-            return data.value;
+            return value.value;
         }
         return;
     }
@@ -102,7 +102,7 @@ function filterSublinks({ path, detail }) {
                     !['all_groups', 'all_hosts', 'group', 'hosts', 'variables'].includes(sublink.name),
             );
         } else {
-            obj.sublinks = obj.sublinks.filter((sublink) => sublink.name != 'state');
+            obj.sublinks = obj.sublinks.filter((sublink) => sublink.name !== 'state');
         }
     });
 }

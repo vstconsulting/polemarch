@@ -1,4 +1,3 @@
-/* eslint-disable vue/one-component-per-file */
 import { computed } from 'vue';
 import OutputLines from './OutputLines.vue';
 import { RawInventoryField } from './raw-inventory.js';
@@ -64,6 +63,9 @@ export const modeModuleField = ({ project }) => ({
     },
 });
 
+/**
+ * @type {Record<string, any>}
+ */
 export const initiatorField = {
     template: ({ project }) => ({
         format: ProjectBasedFkField.format,
@@ -130,7 +132,8 @@ export function setupModel(modelName) {
                 callback: ({ kind, project = app.rootVm.$route.params.id }) => {
                     if (kind === 'ANSIBLE_PLAYBOOK') {
                         return modePlaybookField({ project });
-                    } else if (kind === 'ANSIBLE_MODULE') {
+                    }
+                    if (kind === 'ANSIBLE_MODULE') {
                         return modeModuleField({ project });
                     }
                 },

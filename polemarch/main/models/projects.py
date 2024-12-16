@@ -76,7 +76,7 @@ class ReadMe:
                 break
         if self.ext is not None:
             with open(self.file_name, encoding='utf-8') as fd:
-                return getattr(self, '_make_{}'.format(str(self.ext)[1:]), str)(fd)
+                return getattr(self, f'_make_{str(self.ext)[1:]}', str)(fd)
 
 
 class ProjectQuerySet(AbstractVarsQuerySet):
@@ -127,9 +127,6 @@ class Project(AbstractModel):
         # pylint: disable=invalid-name
         return settings.PROJECTS_DIR
 
-    def __unicode__(self):
-        return str(self.name)  # pragma: no cover
-
     def get_hook_data(self, when: str) -> dict:
         data = super().get_hook_data(when)
         data['type'] = self.type
@@ -143,7 +140,7 @@ class Project(AbstractModel):
             if not self.hidden
             else getattr(settings, 'SELFCARE', self.PROJECTS_DIR)
         )
-        return "{dir}/{id}".format(id=self.id, dir=project_dir)
+        return f"{project_dir}/{self.id}"
 
     @property
     def repo_class(self):
@@ -187,7 +184,7 @@ class Project(AbstractModel):
                 'help': field_data.get('help', ''),
             }
             field_format = field_data.get('format', 'string')
-            if field_format not in valid_formats.keys():
+            if field_format not in valid_formats:
                 field_format = 'unknown'
             if field_format != 'unknown':
                 parsed_data['fields'][fieldname]['type'] = field_format
@@ -326,9 +323,6 @@ class AnsiblePlaybook(BModel):
     class Meta:
         default_related_name = 'ansible_playbooks'
 
-    def __unicode__(self):
-        return str(self.name)  # nocv
-
 
 class ModulesQuerySet(BQuerySet):
     use_for_related_fields = True
@@ -399,11 +393,11 @@ class ProjectCommunityTemplate(custom_model.FileModel):
         cache_key = 'community_projects_data'
         data = cache.get(cache_key) or []
         if not data:
-            response = requests.get(getattr(settings, 'COMMUNITY_REPOS_URL', ''))
+            response = requests.get(
+                getattr(settings, 'COMMUNITY_REPOS_URL', ''),
+                timeout=settings.COMMUNITY_REPOS_FETCHING_TIMEOUT,
+            )
             if response.status_code == 200:
                 data = response.text
                 data = cache.get_or_set(cache_key, data)
         return data
-
-    def __unicode__(self):  # nocv
-        return str('{} [{}]'.format(self.name, self.repository))

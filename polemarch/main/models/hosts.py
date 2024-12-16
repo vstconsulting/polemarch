@@ -47,9 +47,6 @@ class Host(AbstractModel):
     class Meta:
         default_related_name = "hosts"
 
-    def __unicode__(self):
-        return "{}".format(self.name)  # nocv
-
 
 class Group(AbstractModel):
     """
@@ -105,9 +102,6 @@ class Inventory(AbstractModel):
 
     class Meta:
         default_related_name = "inventories"
-
-    def __unicode__(self):
-        return str(self.id)  # pragma: no cover
 
     @cached_property
     def plugin_object(self):

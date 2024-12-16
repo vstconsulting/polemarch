@@ -1,0 +1,13 @@
+{
+    "$schema": "../node_modules/@biomejs/biome/configuration_schema.json",
+    "formatter": {
+        "lineWidth": 110,
+        "indentStyle": "space",
+        "indentWidth": 4
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single"
+        }
+    }
+}

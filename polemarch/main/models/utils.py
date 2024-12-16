@@ -2,9 +2,9 @@
 from __future__ import unicode_literals
 
 import asyncio
+from collections import OrderedDict
 import contextlib
-import threading
-from typing import Any, Iterable, Type, Union, Optional
+from typing import Any, Iterable, Type, Union, Optional, TYPE_CHECKING
 import time
 import shutil
 import logging
@@ -12,7 +12,6 @@ import tempfile
 import traceback
 import signal
 from pathlib import Path
-from collections import OrderedDict
 
 from asgiref.sync import async_to_sync
 from django.apps import apps
@@ -23,13 +22,16 @@ from vstutils.utils import ObjectHandlers, translate as _
 from vstutils.api import fields as vstfields
 
 from .hosts import Inventory
-from .history import History, Project
 from ...main.utils import CmdExecutor
 from ...plugins.history.base import BasePlugin as BaseHistoryPlugin
 from ...plugins.execution.base import BasePlugin
 from ..executions import PLUGIN_HANDLERS
 from ..exceptions import IncompatibleError
 from ...api.fields import InventoryAutoCompletionField
+
+
+if TYPE_CHECKING:  # nocv
+    from .history import History, Project
 
 
 logger = logging.getLogger("polemarch")
@@ -77,7 +79,7 @@ class HistoryPluginHandler(ObjectHandlers):
     def __init__(self):
         super().__init__('HISTORY_PLUGIN_SETTINGS')
 
-    def get_writers(self, history: History) -> Iterable[BaseHistoryPlugin]:
+    def get_writers(self, history: "History") -> Iterable[BaseHistoryPlugin]:
         for name in self.list():
             if name not in settings.HISTORY_OUTPUT_PLUGINS:
                 continue  # nocv
@@ -85,7 +87,7 @@ class HistoryPluginHandler(ObjectHandlers):
             if backend.writeable:
                 yield backend(history, **self.opts(name))
 
-    def get_reader(self, history: History) -> Optional[BaseHistoryPlugin]:
+    def get_reader(self, history: "History") -> Optional[BaseHistoryPlugin]:
         backend = self[settings.HISTORY_READ_PLUGIN]
         if backend.readable:
             return backend(history, **self.opts(settings.HISTORY_READ_PLUGIN))
@@ -133,7 +135,7 @@ class Executor(CmdExecutor):
         'writers',
     )
 
-    def __init__(self, history: Union[History, DummyHistory], writers: tuple = ()):
+    def __init__(self, history: Union["History", DummyHistory], writers: tuple = ()):
         super().__init__()
         self.history = history
         self.counter = 0
@@ -144,7 +146,7 @@ class Executor(CmdExecutor):
             notificator_class = apps.get_app_config('vstutils_api').module.notificator_class
             self.notificator = notificator_class([], label='history_lines')
             if self.notificator.is_usable():
-                self.notificator_lock = threading.Lock()
+                self.notificator_lock = asyncio.Lock()
                 self.notification_last_time = 0
             else:
                 self.notificator = None
@@ -160,10 +162,10 @@ class Executor(CmdExecutor):
             proc.terminate()
             await proc.wait()
         if self.notificator and time.time() - self.notification_last_time > 1:
-            with self.notificator_lock:
+            async with self.notificator_lock:
                 if self.notificator.queue:
                     self.notification_last_time = time.time()
-                    self.notificator.send()
+                    await self.notificator.asend()
 
     async def write_output(self, line: str):
         # pylint: disable=invalid-overridden-method
@@ -173,7 +175,7 @@ class Executor(CmdExecutor):
             for writer in self.writers
         ))
         if self.notificator:
-            with self.notificator_lock:
+            async with self.notificator_lock:
                 self.notificator.create_notification_from_instance(self.history)
 
     async def aexecute(self, cmd: Iterable[str], cwd: Union[str, Path], env: dict = None):
@@ -186,9 +188,9 @@ class Executor(CmdExecutor):
             self.history.raw_args += f' && {plain_command}'
         ret = await super().aexecute(cmd, cwd)
         if self.notificator:
-            with self.notificator_lock:
+            async with self.notificator_lock:
                 if self.notificator.queue:
-                    self.notificator.send()
+                    await self.notificator.asend()
         return ret
 
 
@@ -207,7 +209,7 @@ class ProjectProxy:
         'repo_sync_timeout',
     )
 
-    def __init__(self, project: Project):
+    def __init__(self, project: "Project"):
         self.__project__ = project
 
     def __getattr__(self, name: str):
@@ -232,16 +234,15 @@ class PluginExecutor:
     executor_class = Executor
     history_plugins = HistoryPluginHandler()
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-positional-arguments,too-many-arguments
         self,
         plugin_name: str,
         plugin_class: Type[BasePlugin],
         plugin_options: dict,
-        project: Project,
-        history: Optional[History],
+        project: "Project",
+        history: Optional["History"],
         exec_args,
     ):
-        # pylint: disable=too-many-arguments
         self.project = project
         self.history = history or DummyHistory()
         self.raw_exec_args = exec_args
@@ -287,7 +288,7 @@ class PluginExecutor:
                 with contextlib.suppress(Exception):
                     writer.finalize_output()
             self.send_hook('after_execution')
-            self.__del__()
+            self.__del__()  # pylint: disable=unnecessary-dunder-call
 
     def handle_error(self, exception: BaseException) -> None:
         default_status = 'ERROR'

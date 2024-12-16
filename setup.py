@@ -20,9 +20,6 @@ install_requirements = [
 kwargs = dict(
     name='polemarch',
     ext_modules_list=ext_list,
-    static_exclude_min=[
-        'polemarch/templates/gui/service-worker.js',
-    ],
     install_requires=[
     ] + install_requirements,
     extras_require={
@@ -36,9 +33,6 @@ kwargs = dict(
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt', os.getcwd()),
-    entry_points={
-        'console_scripts': ['polemarchctl=polemarch:cmd_execution']
-    },
 )
 
 if __name__ == '__main__':

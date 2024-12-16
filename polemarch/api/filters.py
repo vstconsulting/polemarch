@@ -17,7 +17,7 @@ def filter_name_endswith(queryset, field, value):
     # pylint: disable=unused-argument
     return queryset.filter(
         reduce(or_, (
-            Q(path__endswith='.{}'.format(v))
+            Q(path__endswith=f'.{v}')
             for v in value.split(',')
         ))
     )

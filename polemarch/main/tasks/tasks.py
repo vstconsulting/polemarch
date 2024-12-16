@@ -3,7 +3,7 @@ import logging
 import traceback
 
 from django.conf import settings
-from vstutils.utils import import_class
+from django.utils.module_loading import import_string
 
 from .exceptions import TaskError
 from ..executions import PLUGIN_HANDLERS
@@ -12,7 +12,7 @@ from ..utils import task, BaseTask, TaskClass
 
 logger = logging.getLogger("polemarch")
 clone_retry = getattr(settings, 'CLONE_RETRY', 5)
-app = import_class(f'{settings.VST_PROJECT}.wapp.app')
+app = import_string(f'{settings.VST_PROJECT}.wapp.app')
 
 
 @task(app, ignore_result=True, default_retry_delay=1, max_retries=clone_retry, bind=True)
@@ -73,7 +73,12 @@ class PluginTask(TaskClass):
             execute_args['inventory'] = Inventory.objects.get(id=execute_args['inventory'])
 
         try:
-            PLUGIN_HANDLERS.get_object(plugin, project, history, **execute_args).execute()
+            PLUGIN_HANDLERS.get_object(
+                plugin,
+                project,
+                history,
+                **execute_args,
+            ).execute()
         except:
             logger.error(traceback.format_exc())
             raise

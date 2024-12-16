@@ -6,7 +6,7 @@ from vstutils.utils import create_view, lazy_translate as __
 from vstutils.api import fields as vstfields
 from vstutils.api.serializers import BaseSerializer, VSTSerializer
 from vstutils.api.base import HistoryModelViewSet
-from vstutils.api.actions import SimpleAction, EmptyAction
+from vstutils.api.actions import SimpleAction, EmptyAction, Action
 from vstutils.api.decorators import subaction
 
 from ...main.models import History, HistoryLines
@@ -42,7 +42,7 @@ class HistoryViewMixin(HistoryModelViewSet):
         """
         instance = self.get_object()
         if instance.status in HistoryStatus.get_stopped_statuses():
-            raise Exception('Task is already stopped.')
+            raise Exception('Task is already stopped.')  # pylint: disable=broad-exception-raised
         instance.cancel()
         return {'detail': f'Task {instance.id} canceled.'}
 
@@ -75,16 +75,12 @@ class HistoryViewMixin(HistoryModelViewSet):
             raise history.NoFactsAvailableException()
         return {'facts': self.plugin_handler.get_reader(history).get_facts()}
 
-    @SimpleAction(methods=['delete'])
-    def clear(self, request, *args, **kwargs):
+    @Action(methods=['delete'])
+    def clear(self, request, *_, **__):
         """
         Clear execution output.
         """
-        return {'detail': 'Output truncated.\n'}
-
-    @clear.deleter
-    def clear(self, instance, *_, **__):
-        msg = instance['detail']
+        msg = 'Output truncated.\n'
         obj = self.get_object()
         reader_plugin = self.plugin_handler.get_reader(obj)
         if obj.status in HistoryStatus.get_working_statuses() or reader_plugin.get_lines().last().line == msg:

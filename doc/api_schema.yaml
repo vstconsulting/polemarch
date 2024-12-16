@@ -63,18 +63,16 @@ info:
     static_path: /static/
     enable_gravatar: true
     time_zone: UTC
-    logout_url: /account/logout/
-    login_url: /account/login/
   x-subscriptions-prefix: polemarch.update
   x-versions:
     application: 3.0.3
     library: 3.0.3
-    vstutils: 5.6.4
-    django: 4.2.3
-    djangorestframework: 3.14.0
-    drf_yasg: 1.21.7
-    fastapi: 0.100.0
-    celery: 5.3.1
+    vstutils: 5.11.13
+    django: 5.1.3
+    djangorestframework: 3.15.2
+    drf_yasg: 1.21.8
+    fastapi: 0.115.5
+    celery: 5.4.0
     ansible: 2.9.27
   version: v4
 host: localhost:8080
@@ -88,10 +86,18 @@ produces:
 - application/json
 - application/msgpack
 securityDefinitions:
+  oauth2:
+    type: oauth2
+    flow: password
+    tokenUrl: http://testserver/api/oauth2/token/
+    scopes: {}
+    x-clientId: simple-client-id
+  session:
+    type: apiKey
+    name: sessionid
+    in: cookie
   basic:
     type: basic
-security:
-- basic: []
 paths:
   /community_template/:
     get:
@@ -109,11 +115,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: type
         in: query
         description: ''
@@ -134,11 +142,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -193,6 +203,10 @@ paths:
                   $ref: '#/definitions/ProjectCommunityTemplate'
       tags:
       - community_template
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.ProjectCommunityTemplate
       x-list: true
@@ -209,6 +223,10 @@ paths:
             $ref: '#/definitions/OneProjectCommunityTemplate'
       tags:
       - community_template
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.ProjectCommunityTemplate
       x-list: false
@@ -235,6 +253,10 @@ paths:
             $ref: '#/definitions/ProjectCommunityTemplateUseIt'
       tags:
       - community_template
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Use it
       x-multiaction: false
     parameters:
@@ -263,11 +285,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: variables
         in: query
         description: List of variables to filter. Comma separated "key:value" list.
@@ -284,11 +308,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -345,6 +371,10 @@ paths:
                   $ref: '#/definitions/Group'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -365,6 +395,10 @@ paths:
             $ref: '#/definitions/CreateGroup'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters: []
   /group/{id}/:
     get:
@@ -378,6 +412,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -398,6 +436,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: group_edit
       description: Update one or more fields on an existing group.
@@ -414,6 +456,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: group_remove
       description: Remove an existing group.
@@ -423,6 +469,10 @@ paths:
           description: NO CONTENT
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -446,6 +496,10 @@ paths:
             $ref: '#/definitions/Copy'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -472,11 +526,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: variables
         in: query
         description: List of variables to filter. Comma separated "key:value" list.
@@ -493,11 +549,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -554,6 +612,10 @@ paths:
                   $ref: '#/definitions/Group'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Group
       x-list: true
@@ -573,6 +635,10 @@ paths:
             $ref: '#/definitions/CreateGroup'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: true
     parameters:
     - name: id
@@ -592,6 +658,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Group
       x-list: false
@@ -611,6 +681,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: group_groups_edit
       description: Update one or more fields on an existing group.
@@ -627,6 +701,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: group_groups_remove
       description: Remove an existing group.
@@ -636,6 +714,10 @@ paths:
           description: NO CONTENT
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -664,6 +746,10 @@ paths:
             $ref: '#/definitions/Copy'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -691,11 +777,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: type
         in: query
         description: Instance type.
@@ -721,11 +809,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -782,6 +872,10 @@ paths:
                   $ref: '#/definitions/Host'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -801,6 +895,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: true
     parameters:
     - name: id
@@ -825,6 +923,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -844,6 +946,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: group_groups_hosts_edit
       description: Update one or more fields on an existing host.
@@ -860,6 +966,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: group_groups_hosts_remove
       description: Remove an existing host.
@@ -869,6 +979,10 @@ paths:
           description: NO CONTENT
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -902,6 +1016,10 @@ paths:
             $ref: '#/definitions/Copy'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -935,6 +1053,10 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -969,6 +1091,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: key
         in: query
         description: A key name string value (or comma separated list) of instance.
@@ -990,6 +1113,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -1046,6 +1170,10 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -1065,6 +1193,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -1094,6 +1226,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -1113,6 +1249,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: group_groups_hosts_variables_edit
       description: Update one or more fields on an existing variable.
@@ -1129,6 +1269,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: group_groups_hosts_variables_remove
       description: Remove an existing variable.
@@ -1138,6 +1282,10 @@ paths:
           description: NO CONTENT
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -1176,6 +1324,10 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -1205,6 +1357,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: key
         in: query
         description: A key name string value (or comma separated list) of instance.
@@ -1226,6 +1379,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -1282,6 +1436,10 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -1301,6 +1459,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -1325,6 +1487,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -1344,6 +1510,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: group_groups_variables_edit
       description: Update one or more fields on an existing variable.
@@ -1360,6 +1530,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: group_groups_variables_remove
       description: Remove an existing variable.
@@ -1369,6 +1543,10 @@ paths:
           description: NO CONTENT
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -1419,11 +1597,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: type
         in: query
         description: Instance type.
@@ -1449,11 +1629,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -1510,6 +1692,10 @@ paths:
                   $ref: '#/definitions/Host'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -1547,6 +1733,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: true
     parameters:
     - name: id
@@ -1584,6 +1774,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -1621,6 +1815,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: group_hosts_edit
       summary: Manage inventory hosts.
@@ -1655,6 +1853,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: group_hosts_remove
       summary: Manage inventory hosts.
@@ -1682,6 +1884,10 @@ paths:
           description: NO CONTENT
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -1728,6 +1934,10 @@ paths:
             $ref: '#/definitions/Copy'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -1756,6 +1966,10 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -1803,6 +2017,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: key
         in: query
         description: A key name string value (or comma separated list) of instance.
@@ -1824,6 +2039,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -1880,6 +2096,10 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -1917,6 +2137,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -1959,6 +2183,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -1996,6 +2224,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: group_hosts_variables_edit
       summary: Manage inventory hosts.
@@ -2030,6 +2262,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: group_hosts_variables_remove
       summary: Manage inventory hosts.
@@ -2057,6 +2293,10 @@ paths:
           description: NO CONTENT
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -2090,6 +2330,10 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -2132,6 +2376,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: key
         in: query
         description: A key name string value (or comma separated list) of instance.
@@ -2153,6 +2398,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -2209,6 +2455,10 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -2246,6 +2496,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -2283,6 +2537,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -2320,6 +2578,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: group_variables_edit
       summary: Inventory hosts variables.
@@ -2354,6 +2616,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: group_variables_remove
       summary: Inventory hosts variables.
@@ -2381,6 +2647,10 @@ paths:
           description: NO CONTENT
       tags:
       - group
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -2408,6 +2678,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: status
         in: query
         description: Status of execution.
@@ -2452,6 +2723,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -2524,6 +2796,10 @@ paths:
                   $ref: '#/definitions/History'
       tags:
       - history
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.History
       x-list: true
@@ -2540,6 +2816,10 @@ paths:
             $ref: '#/definitions/OneHistory'
       tags:
       - history
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.History
       x-list: false
@@ -2552,6 +2832,10 @@ paths:
           description: NO CONTENT
       tags:
       - history
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -2575,6 +2859,10 @@ paths:
             $ref: '#/definitions/Response'
       tags:
       - history
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Cancel
       x-multiaction: false
     parameters:
@@ -2593,6 +2881,10 @@ paths:
           description: NO CONTENT
       tags:
       - history
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Clear
       x-multiaction: false
     parameters:
@@ -2613,6 +2905,10 @@ paths:
             $ref: '#/definitions/FactsResponse'
       tags:
       - history
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.History
       x-list: false
@@ -2638,11 +2934,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: when
         in: query
         description: ''
@@ -2678,11 +2976,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -2745,6 +3045,10 @@ paths:
                   $ref: '#/definitions/Hook'
       tags:
       - hook
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Hook
       x-list: true
@@ -2764,6 +3068,10 @@ paths:
             $ref: '#/definitions/OneHook'
       tags:
       - hook
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters: []
   /hook/{id}/:
     get:
@@ -2777,6 +3085,10 @@ paths:
             $ref: '#/definitions/OneHook'
       tags:
       - hook
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Hook
       x-list: false
@@ -2796,6 +3108,10 @@ paths:
             $ref: '#/definitions/OneHook'
       tags:
       - hook
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: hook_edit
       description: Update one or more fields on an existing hook.
@@ -2812,6 +3128,10 @@ paths:
             $ref: '#/definitions/OneHook'
       tags:
       - hook
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: hook_remove
       description: Remove an existing hook.
@@ -2821,6 +3141,10 @@ paths:
           description: NO CONTENT
       tags:
       - hook
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -2843,11 +3167,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: type
         in: query
         description: Instance type.
@@ -2873,11 +3199,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -2934,6 +3262,10 @@ paths:
                   $ref: '#/definitions/Host'
       tags:
       - host
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -2953,6 +3285,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - host
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters: []
   /host/{id}/:
     get:
@@ -2966,6 +3302,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - host
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -2985,6 +3325,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - host
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: host_edit
       description: Update one or more fields on an existing host.
@@ -3001,6 +3345,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - host
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: host_remove
       description: Remove an existing host.
@@ -3010,6 +3358,10 @@ paths:
           description: NO CONTENT
       tags:
       - host
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -3033,6 +3385,10 @@ paths:
             $ref: '#/definitions/Copy'
       tags:
       - host
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -3056,6 +3412,10 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
       - host
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -3098,6 +3458,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: key
         in: query
         description: A key name string value (or comma separated list) of instance.
@@ -3119,6 +3480,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -3175,6 +3537,10 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
       - host
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -3212,6 +3578,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - host
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -3249,6 +3619,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - host
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -3286,6 +3660,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - host
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: host_variables_edit
       summary: Inventory hosts variables.
@@ -3320,6 +3698,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - host
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: host_variables_remove
       summary: Inventory hosts variables.
@@ -3347,6 +3729,10 @@ paths:
           description: NO CONTENT
       tags:
       - host
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -3374,11 +3760,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: variables
         in: query
         description: List of variables to filter. Comma separated "key:value" list.
@@ -3405,11 +3793,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -3466,6 +3856,10 @@ paths:
                   $ref: '#/definitions/Inventory'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Inventory
       x-list: true
@@ -3485,6 +3879,10 @@ paths:
             $ref: '#/definitions/CreateInventory'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters: []
   /inventory/import_inventory/:
     post:
@@ -3503,6 +3901,10 @@ paths:
             $ref: '#/definitions/ImportInventory'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Import inventory
       x-multiaction: false
     parameters: []
@@ -3518,6 +3920,10 @@ paths:
             $ref: '#/definitions/OneInventory'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Inventory
       x-list: false
@@ -3537,6 +3943,10 @@ paths:
             $ref: '#/definitions/OneInventory'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: inventory_edit
       description: Update one or more fields on an existing inventory.
@@ -3553,6 +3963,10 @@ paths:
             $ref: '#/definitions/OneInventory'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: inventory_remove
       description: Remove an existing inventory.
@@ -3562,6 +3976,10 @@ paths:
           description: NO CONTENT
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -3588,11 +4006,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: variables
         in: query
         description: List of variables to filter. Comma separated "key:value" list.
@@ -3609,11 +4029,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -3670,6 +4092,10 @@ paths:
                   $ref: '#/definitions/Group'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -3692,6 +4118,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -3740,11 +4170,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: type
         in: query
         description: Instance type.
@@ -3770,11 +4202,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -3831,6 +4265,10 @@ paths:
                   $ref: '#/definitions/Host'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -3870,6 +4308,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -3900,6 +4342,10 @@ paths:
             $ref: '#/definitions/Copy'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -3926,11 +4372,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: variables
         in: query
         description: List of variables to filter. Comma separated "key:value" list.
@@ -3947,11 +4395,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -4008,6 +4458,10 @@ paths:
                   $ref: '#/definitions/Group'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -4028,6 +4482,10 @@ paths:
             $ref: '#/definitions/CreateGroup'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: true
     parameters:
     - name: id
@@ -4047,6 +4505,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -4067,6 +4529,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: inventory_group_edit
       description: Update one or more fields on an existing group.
@@ -4083,6 +4549,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: inventory_group_remove
       description: Remove an existing group.
@@ -4092,6 +4562,10 @@ paths:
           description: NO CONTENT
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -4119,6 +4593,10 @@ paths:
             $ref: '#/definitions/Copy'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -4149,11 +4627,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: variables
         in: query
         description: List of variables to filter. Comma separated "key:value" list.
@@ -4170,11 +4650,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -4231,6 +4713,10 @@ paths:
                   $ref: '#/definitions/Group'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Group
       x-list: true
@@ -4250,6 +4736,10 @@ paths:
             $ref: '#/definitions/CreateGroup'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: true
     parameters:
     - name: id
@@ -4273,6 +4763,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Group
       x-list: false
@@ -4292,6 +4786,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: inventory_group_groups_edit
       description: Update one or more fields on an existing group.
@@ -4308,6 +4806,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: inventory_group_groups_remove
       description: Remove an existing group.
@@ -4317,6 +4819,10 @@ paths:
           description: NO CONTENT
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -4349,6 +4855,10 @@ paths:
             $ref: '#/definitions/Copy'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -4380,11 +4890,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: type
         in: query
         description: Instance type.
@@ -4410,11 +4922,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -4471,6 +4985,10 @@ paths:
                   $ref: '#/definitions/Host'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -4490,6 +5008,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: true
     parameters:
     - name: id
@@ -4518,6 +5040,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -4537,6 +5063,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: inventory_group_groups_hosts_edit
       description: Update one or more fields on an existing host.
@@ -4553,6 +5083,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: inventory_group_groups_hosts_remove
       description: Remove an existing host.
@@ -4562,6 +5096,10 @@ paths:
           description: NO CONTENT
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -4599,6 +5137,10 @@ paths:
             $ref: '#/definitions/Copy'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -4636,6 +5178,10 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -4674,6 +5220,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: key
         in: query
         description: A key name string value (or comma separated list) of instance.
@@ -4695,6 +5242,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -4751,6 +5299,10 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -4770,6 +5322,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -4803,6 +5359,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -4822,6 +5382,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: inventory_group_groups_hosts_variables_edit
       description: Update one or more fields on an existing variable.
@@ -4838,6 +5402,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: inventory_group_groups_hosts_variables_remove
       description: Remove an existing variable.
@@ -4847,6 +5415,10 @@ paths:
           description: NO CONTENT
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -4889,6 +5461,10 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -4922,6 +5498,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: key
         in: query
         description: A key name string value (or comma separated list) of instance.
@@ -4943,6 +5520,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -4999,6 +5577,10 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -5018,6 +5600,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -5046,6 +5632,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -5065,6 +5655,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: inventory_group_groups_variables_edit
       description: Update one or more fields on an existing variable.
@@ -5081,6 +5675,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: inventory_group_groups_variables_remove
       description: Remove an existing variable.
@@ -5090,6 +5688,10 @@ paths:
           description: NO CONTENT
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -5126,11 +5728,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: type
         in: query
         description: Instance type.
@@ -5156,11 +5760,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -5217,6 +5823,10 @@ paths:
                   $ref: '#/definitions/Host'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -5236,6 +5846,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: true
     parameters:
     - name: id
@@ -5259,6 +5873,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -5278,6 +5896,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: inventory_group_hosts_edit
       description: Update one or more fields on an existing host.
@@ -5294,6 +5916,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: inventory_group_hosts_remove
       description: Remove an existing host.
@@ -5303,6 +5929,10 @@ paths:
           description: NO CONTENT
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -5335,6 +5965,10 @@ paths:
             $ref: '#/definitions/Copy'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -5367,6 +6001,10 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -5400,6 +6038,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: key
         in: query
         description: A key name string value (or comma separated list) of instance.
@@ -5421,6 +6060,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -5477,6 +6117,10 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -5496,6 +6140,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -5524,6 +6172,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -5543,6 +6195,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: inventory_group_hosts_variables_edit
       description: Update one or more fields on an existing variable.
@@ -5559,6 +6215,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: inventory_group_hosts_variables_remove
       description: Remove an existing variable.
@@ -5568,6 +6228,10 @@ paths:
           description: NO CONTENT
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -5605,6 +6269,10 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -5633,6 +6301,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: key
         in: query
         description: A key name string value (or comma separated list) of instance.
@@ -5654,6 +6323,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -5710,6 +6380,10 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -5729,6 +6403,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -5752,6 +6430,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -5771,6 +6453,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: inventory_group_variables_edit
       description: Update one or more fields on an existing variable.
@@ -5787,6 +6473,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: inventory_group_variables_remove
       description: Remove an existing variable.
@@ -5796,6 +6486,10 @@ paths:
           description: NO CONTENT
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -5845,11 +6539,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: type
         in: query
         description: Instance type.
@@ -5875,11 +6571,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -5936,6 +6634,10 @@ paths:
                   $ref: '#/definitions/Host'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -5973,6 +6675,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: true
     parameters:
     - name: id
@@ -6010,6 +6716,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -6047,6 +6757,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: inventory_hosts_edit
       summary: Manage inventory hosts.
@@ -6081,6 +6795,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: inventory_hosts_remove
       summary: Manage inventory hosts.
@@ -6108,6 +6826,10 @@ paths:
           description: NO CONTENT
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -6154,6 +6876,10 @@ paths:
             $ref: '#/definitions/Copy'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -6182,6 +6908,10 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -6229,6 +6959,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: key
         in: query
         description: A key name string value (or comma separated list) of instance.
@@ -6250,6 +6981,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -6306,6 +7038,10 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -6343,6 +7079,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -6385,6 +7125,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -6422,6 +7166,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: inventory_hosts_variables_edit
       summary: Manage inventory hosts.
@@ -6456,6 +7204,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: inventory_hosts_variables_remove
       summary: Manage inventory hosts.
@@ -6483,6 +7235,10 @@ paths:
           description: NO CONTENT
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -6516,6 +7272,10 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -6536,6 +7296,10 @@ paths:
             $ref: '#/definitions/InventoryState'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Inventory
       x-list: false
@@ -6555,6 +7319,10 @@ paths:
             $ref: '#/definitions/InventoryState'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-multiaction: false
     parameters:
     - name: id
@@ -6596,6 +7364,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: key
         in: query
         description: A key name string value (or comma separated list) of instance.
@@ -6617,6 +7386,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -6673,6 +7443,10 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -6710,6 +7484,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -6747,6 +7525,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -6784,6 +7566,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: inventory_variables_edit
       summary: Inventory hosts variables.
@@ -6818,6 +7604,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: inventory_variables_remove
       summary: Inventory hosts variables.
@@ -6845,6 +7635,10 @@ paths:
           description: NO CONTENT
       tags:
       - inventory
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -6872,11 +7666,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: status
         in: query
         description: Project sync status.
@@ -6908,11 +7704,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -6969,6 +7767,10 @@ paths:
                   $ref: '#/definitions/Project'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Project
       x-list: true
@@ -6988,6 +7790,10 @@ paths:
             $ref: '#/definitions/CreateProject'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters: []
   /project/{id}/:
     get:
@@ -7001,6 +7807,10 @@ paths:
             $ref: '#/definitions/OneProject'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Project
       x-list: false
@@ -7020,6 +7830,10 @@ paths:
             $ref: '#/definitions/OneProject'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: project_edit
       description: Update one or more fields on an existing project.
@@ -7036,6 +7850,10 @@ paths:
             $ref: '#/definitions/OneProject'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: project_remove
       description: Remove an existing project.
@@ -7045,6 +7863,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -7067,6 +7889,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: template
         in: query
         description: Search by template's primary key or name
@@ -7083,6 +7906,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -7139,6 +7963,10 @@ paths:
                   $ref: '#/definitions/ProjectTemplateOption'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.ExecutionTemplateOption
       x-list: true
@@ -7161,6 +7989,10 @@ paths:
             $ref: '#/definitions/OneProjectTemplateOption'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.ExecutionTemplateOption
       x-list: false
@@ -7205,6 +8037,7 @@ paths:
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -7259,6 +8092,10 @@ paths:
                   $ref: '#/definitions/AnsibleModule'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Module
       x-list: true
@@ -7286,6 +8123,10 @@ paths:
             $ref: '#/definitions/OneAnsibleModule'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Module
       x-list: false
@@ -7383,6 +8224,10 @@ paths:
                   $ref: '#/definitions/AnsiblePlaybook'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.AnsiblePlaybook
       x-list: true
@@ -7410,6 +8255,10 @@ paths:
             $ref: '#/definitions/OneAnsiblePlaybook'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.AnsiblePlaybook
       x-list: false
@@ -7442,6 +8291,10 @@ paths:
             $ref: '#/definitions/Project'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -7465,6 +8318,10 @@ paths:
             $ref: '#/definitions/ProjectExecuteResponse'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Execute ansible module
       x-multiaction: false
     parameters:
@@ -7490,6 +8347,10 @@ paths:
             $ref: '#/definitions/ProjectExecuteResponse'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Execute ansible playbook
       x-multiaction: false
     parameters:
@@ -7532,11 +8393,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: plugin
         in: query
         description: ''
@@ -7557,11 +8420,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -7618,6 +8483,10 @@ paths:
                   $ref: '#/definitions/ExecutionTemplate'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.ExecutionTemplate
       x-list: true
@@ -7655,6 +8524,10 @@ paths:
             $ref: '#/definitions/CreateExecutionTemplate'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -7692,6 +8565,10 @@ paths:
             $ref: '#/definitions/OneExecutionTemplate'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.ExecutionTemplate
       x-list: false
@@ -7729,6 +8606,10 @@ paths:
             $ref: '#/definitions/OneExecutionTemplate'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: project_execution_templates_edit
       summary: Manage execution templates of project.
@@ -7763,6 +8644,10 @@ paths:
             $ref: '#/definitions/OneExecutionTemplate'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: project_execution_templates_remove
       summary: Manage execution templates of project.
@@ -7790,6 +8675,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -7819,6 +8708,10 @@ paths:
             $ref: '#/definitions/ExecuteTemplateResponse'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Execute
       x-multiaction: false
     parameters:
@@ -7867,6 +8760,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: status
         in: query
         description: Status of execution.
@@ -7911,6 +8805,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -7983,6 +8878,10 @@ paths:
                   $ref: '#/definitions/History'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.History
       x-list: true
@@ -8028,6 +8927,10 @@ paths:
             $ref: '#/definitions/OneHistory'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.History
       x-list: false
@@ -8058,6 +8961,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -8092,6 +8999,10 @@ paths:
             $ref: '#/definitions/Response'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Cancel
       x-multiaction: false
     parameters:
@@ -8121,6 +9032,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Clear
       x-multiaction: false
     parameters:
@@ -8152,6 +9067,10 @@ paths:
             $ref: '#/definitions/FactsResponse'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.History
       x-list: false
@@ -8206,11 +9125,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: id__not
         in: query
         description: A unique integer value (or comma separated list) identifying
@@ -8222,11 +9143,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -8281,6 +9204,10 @@ paths:
                   $ref: '#/definitions/ExecutionTemplateOption'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.ExecutionTemplateOption
       x-list: true
@@ -8318,6 +9245,10 @@ paths:
             $ref: '#/definitions/OneExecutionTemplateOption'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -8361,6 +9292,10 @@ paths:
             $ref: '#/definitions/OneExecutionTemplateOption'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.ExecutionTemplateOption
       x-list: false
@@ -8398,6 +9333,10 @@ paths:
             $ref: '#/definitions/OneExecutionTemplateOption'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: project_execution_templates_options_edit
       summary: Manage execution templates of project.
@@ -8432,6 +9371,10 @@ paths:
             $ref: '#/definitions/OneExecutionTemplateOption'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: project_execution_templates_options_remove
       summary: Manage execution templates of project.
@@ -8459,6 +9402,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -8492,6 +9439,10 @@ paths:
             $ref: '#/definitions/ExecuteTemplateResponse'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Execute
       x-multiaction: false
     parameters:
@@ -8544,11 +9495,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: schedule
         in: query
         description: ''
@@ -8575,11 +9528,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -8640,6 +9595,10 @@ paths:
                   $ref: '#/definitions/TemplatePeriodicTask'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.TemplatePeriodicTask
       x-list: true
@@ -8677,6 +9636,10 @@ paths:
             $ref: '#/definitions/OneTemplatePeriodicTask'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -8724,6 +9687,10 @@ paths:
             $ref: '#/definitions/OneTemplatePeriodicTask'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.TemplatePeriodicTask
       x-list: false
@@ -8761,6 +9728,10 @@ paths:
             $ref: '#/definitions/OneTemplatePeriodicTask'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: project_execution_templates_options_periodic_tasks_edit
       summary: Manage execution templates of project.
@@ -8795,6 +9766,10 @@ paths:
             $ref: '#/definitions/OneTemplatePeriodicTask'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: project_execution_templates_options_periodic_tasks_remove
       summary: Manage execution templates of project.
@@ -8822,6 +9797,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -8867,6 +9846,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: status
         in: query
         description: Status of execution.
@@ -8911,6 +9891,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -8983,6 +9964,10 @@ paths:
                   $ref: '#/definitions/History'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.History
       x-list: true
@@ -9013,6 +9998,10 @@ paths:
             $ref: '#/definitions/OneHistory'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.History
       x-list: false
@@ -9034,6 +10023,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -9062,6 +10055,10 @@ paths:
             $ref: '#/definitions/Response'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Cancel
       x-multiaction: false
     parameters:
@@ -9085,6 +10082,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Clear
       x-multiaction: false
     parameters:
@@ -9110,6 +10111,10 @@ paths:
             $ref: '#/definitions/FactsResponse'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.History
       x-list: false
@@ -9140,11 +10145,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: variables
         in: query
         description: List of variables to filter. Comma separated "key:value" list.
@@ -9171,11 +10178,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -9232,6 +10241,10 @@ paths:
                   $ref: '#/definitions/Inventory'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Inventory
       x-list: true
@@ -9251,6 +10264,10 @@ paths:
             $ref: '#/definitions/CreateInventory'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: true
     parameters:
     - name: id
@@ -9275,6 +10292,10 @@ paths:
             $ref: '#/definitions/ProjectImportInventory'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Import inventory
       x-multiaction: false
     parameters:
@@ -9295,6 +10316,10 @@ paths:
             $ref: '#/definitions/OneInventory'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Inventory
       x-list: false
@@ -9314,6 +10339,10 @@ paths:
             $ref: '#/definitions/OneInventory'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: project_inventory_edit
       description: Inventory(id, hidden, notes, owner, name, plugin, _inventory_state)
@@ -9330,6 +10359,10 @@ paths:
             $ref: '#/definitions/OneInventory'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: project_inventory_remove
       description: Inventory(id, hidden, notes, owner, name, plugin, _inventory_state)
@@ -9339,6 +10372,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -9369,11 +10406,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: variables
         in: query
         description: List of variables to filter. Comma separated "key:value" list.
@@ -9390,11 +10429,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -9451,6 +10492,10 @@ paths:
                   $ref: '#/definitions/Group'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -9477,6 +10522,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -9511,11 +10560,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: type
         in: query
         description: Instance type.
@@ -9541,11 +10592,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -9602,6 +10655,10 @@ paths:
                   $ref: '#/definitions/Host'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -9627,6 +10684,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -9661,6 +10722,10 @@ paths:
             $ref: '#/definitions/Copy'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -9691,11 +10756,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: variables
         in: query
         description: List of variables to filter. Comma separated "key:value" list.
@@ -9712,11 +10779,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -9773,6 +10842,10 @@ paths:
                   $ref: '#/definitions/Group'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -9793,6 +10866,10 @@ paths:
             $ref: '#/definitions/CreateGroup'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: true
     parameters:
     - name: id
@@ -9816,6 +10893,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -9836,6 +10917,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: project_inventory_group_edit
       description: Update one or more fields on an existing group.
@@ -9852,6 +10937,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: project_inventory_group_remove
       description: Remove an existing group.
@@ -9861,6 +10950,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -9892,6 +10985,10 @@ paths:
             $ref: '#/definitions/Copy'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -9926,11 +11023,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: variables
         in: query
         description: List of variables to filter. Comma separated "key:value" list.
@@ -9947,11 +11046,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -10008,6 +11109,10 @@ paths:
                   $ref: '#/definitions/Group'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Group
       x-list: true
@@ -10027,6 +11132,10 @@ paths:
             $ref: '#/definitions/CreateGroup'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: true
     parameters:
     - name: id
@@ -10054,6 +11163,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Group
       x-list: false
@@ -10073,6 +11186,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: project_inventory_group_groups_edit
       description: Update one or more fields on an existing group.
@@ -10089,6 +11206,10 @@ paths:
             $ref: '#/definitions/OneGroup'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: project_inventory_group_groups_remove
       description: Remove an existing group.
@@ -10098,6 +11219,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -10134,6 +11259,10 @@ paths:
             $ref: '#/definitions/Copy'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -10169,11 +11298,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: type
         in: query
         description: Instance type.
@@ -10199,11 +11330,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -10260,6 +11393,10 @@ paths:
                   $ref: '#/definitions/Host'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -10279,6 +11416,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: true
     parameters:
     - name: id
@@ -10311,6 +11452,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -10330,6 +11475,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: project_inventory_group_groups_hosts_edit
       description: Update one or more fields on an existing host.
@@ -10346,6 +11495,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: project_inventory_group_groups_hosts_remove
       description: Remove an existing host.
@@ -10355,6 +11508,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -10396,6 +11553,10 @@ paths:
             $ref: '#/definitions/Copy'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -10437,6 +11598,10 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -10479,6 +11644,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: key
         in: query
         description: A key name string value (or comma separated list) of instance.
@@ -10500,6 +11666,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -10556,6 +11723,10 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -10575,6 +11746,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -10612,6 +11787,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -10631,6 +11810,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: project_inventory_group_groups_hosts_variables_edit
       description: Update one or more fields on an existing variable.
@@ -10647,6 +11830,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: project_inventory_group_groups_hosts_variables_remove
       description: Remove an existing variable.
@@ -10656,6 +11843,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -10702,6 +11893,10 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -10739,6 +11934,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: key
         in: query
         description: A key name string value (or comma separated list) of instance.
@@ -10760,6 +11956,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -10816,6 +12013,10 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -10835,6 +12036,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -10867,6 +12072,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -10886,6 +12095,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: project_inventory_group_groups_variables_edit
       description: Update one or more fields on an existing variable.
@@ -10902,6 +12115,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: project_inventory_group_groups_variables_remove
       description: Remove an existing variable.
@@ -10911,6 +12128,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -10951,11 +12172,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: type
         in: query
         description: Instance type.
@@ -10981,11 +12204,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -11042,6 +12267,10 @@ paths:
                   $ref: '#/definitions/Host'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -11061,6 +12290,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: true
     parameters:
     - name: id
@@ -11088,6 +12321,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -11107,6 +12344,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: project_inventory_group_hosts_edit
       description: Update one or more fields on an existing host.
@@ -11123,6 +12364,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: project_inventory_group_hosts_remove
       description: Remove an existing host.
@@ -11132,6 +12377,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -11168,6 +12417,10 @@ paths:
             $ref: '#/definitions/Copy'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -11204,6 +12457,10 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -11241,6 +12498,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: key
         in: query
         description: A key name string value (or comma separated list) of instance.
@@ -11262,6 +12520,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -11318,6 +12577,10 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -11337,6 +12600,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -11369,6 +12636,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -11388,6 +12659,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: project_inventory_group_hosts_variables_edit
       description: Update one or more fields on an existing variable.
@@ -11404,6 +12679,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: project_inventory_group_hosts_variables_remove
       description: Remove an existing variable.
@@ -11413,6 +12692,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -11454,6 +12737,10 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -11486,6 +12773,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: key
         in: query
         description: A key name string value (or comma separated list) of instance.
@@ -11507,6 +12795,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -11563,6 +12852,10 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -11582,6 +12875,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -11609,6 +12906,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -11628,6 +12929,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: project_inventory_group_variables_edit
       description: Update one or more fields on an existing variable.
@@ -11644,6 +12949,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: project_inventory_group_variables_remove
       description: Remove an existing variable.
@@ -11653,6 +12962,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -11688,11 +13001,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: name
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Name
       - name: type
         in: query
         description: Instance type.
@@ -11718,11 +13033,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: name__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Exclude name
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -11779,6 +13096,10 @@ paths:
                   $ref: '#/definitions/Host'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -11798,6 +13119,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: true
     parameters:
     - name: id
@@ -11821,6 +13146,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -11840,6 +13169,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: project_inventory_hosts_edit
       description: Update one or more fields on an existing host.
@@ -11856,6 +13189,10 @@ paths:
             $ref: '#/definitions/OneHost'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: project_inventory_hosts_remove
       description: Remove an existing host.
@@ -11865,6 +13202,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -11897,6 +13238,10 @@ paths:
             $ref: '#/definitions/Copy'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -11929,6 +13274,10 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -11962,6 +13311,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: key
         in: query
         description: A key name string value (or comma separated list) of instance.
@@ -11983,6 +13333,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -12039,6 +13390,10 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -12058,6 +13413,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -12086,6 +13445,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -12105,6 +13468,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: project_inventory_hosts_variables_edit
       description: Update one or more fields on an existing variable.
@@ -12121,6 +13488,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: project_inventory_hosts_variables_remove
       description: Remove an existing variable.
@@ -12130,6 +13501,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -12167,6 +13542,10 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -12191,6 +13570,10 @@ paths:
             $ref: '#/definitions/InventoryState'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Inventory
       x-list: false
@@ -12210,6 +13593,10 @@ paths:
             $ref: '#/definitions/InventoryState'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-multiaction: false
     parameters:
     - name: id
@@ -12237,6 +13624,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: key
         in: query
         description: A key name string value (or comma separated list) of instance.
@@ -12258,6 +13646,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -12314,6 +13703,10 @@ paths:
                   $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -12333,6 +13726,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -12356,6 +13753,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -12375,6 +13776,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: project_inventory_variables_edit
       description: Update one or more fields on an existing variable.
@@ -12391,6 +13796,10 @@ paths:
             $ref: '#/definitions/InventoryVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: project_inventory_variables_remove
       description: Remove an existing variable.
@@ -12400,6 +13809,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -12432,6 +13845,10 @@ paths:
             $ref: '#/definitions/SetOwner'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -12457,6 +13874,10 @@ paths:
             $ref: '#/definitions/Response'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-title: Sync
       x-multiaction: false
     parameters:
@@ -12481,6 +13902,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: key
         in: query
         description: A key name string value (or comma separated list) of instance.
@@ -12502,6 +13924,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -12558,6 +13981,10 @@ paths:
                   $ref: '#/definitions/ProjectVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -12577,6 +14004,10 @@ paths:
             $ref: '#/definitions/ProjectVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-allow-append: false
     parameters:
     - name: id
@@ -12596,6 +14027,10 @@ paths:
             $ref: '#/definitions/ProjectVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -12615,6 +14050,10 @@ paths:
             $ref: '#/definitions/ProjectVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: project_variables_edit
       description: Variable(id, hidden, content_type, object_id, key, value)
@@ -12631,6 +14070,10 @@ paths:
             $ref: '#/definitions/ProjectVariable'
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: project_variables_remove
       description: Variable(id, hidden, content_type, object_id, key, value)
@@ -12640,6 +14083,10 @@ paths:
           description: NO CONTENT
       tags:
       - project
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -12663,6 +14110,10 @@ paths:
             $ref: '#/definitions/Stats'
       tags:
       - stats
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-list: true
     parameters: []
   /user/:
@@ -12681,6 +14132,7 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Primary keys
       - name: username
         in: query
         description: A name string value (or comma separated list) of instance.
@@ -12717,11 +14169,13 @@ paths:
         collectionFormat: csv
         minItems: 1
         uniqueItems: true
+        x-title: Exclude primary keys
       - name: username__not
         in: query
         description: A name string value (or comma separated list) of instance.
         required: false
         type: string
+        x-title: Username not
       - name: ordering
         in: query
         description: Which field to use when ordering the results.
@@ -12780,6 +14234,10 @@ paths:
                   $ref: '#/definitions/User'
       tags:
       - user
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - auth.User
       x-list: true
@@ -12799,6 +14257,10 @@ paths:
             $ref: '#/definitions/CreateUser'
       tags:
       - user
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters: []
   /user/{id}/:
     get:
@@ -12812,6 +14274,10 @@ paths:
             $ref: '#/definitions/OneUser'
       tags:
       - user
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - auth.User
       x-list: false
@@ -12831,6 +14297,10 @@ paths:
             $ref: '#/definitions/OneUser'
       tags:
       - user
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     patch:
       operationId: user_edit
       description: Update one or more fields on an existing user.
@@ -12847,6 +14317,10 @@ paths:
             $ref: '#/definitions/OneUser'
       tags:
       - user
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     delete:
       operationId: user_remove
       description: Remove an existing user.
@@ -12856,6 +14330,10 @@ paths:
           description: NO CONTENT
       tags:
       - user
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -12874,6 +14352,10 @@ paths:
             $ref: '#/definitions/_UserSettings'
       tags:
       - user
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - auth.User
       x-list: false
@@ -12893,6 +14375,10 @@ paths:
             $ref: '#/definitions/_UserSettings'
       tags:
       - user
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -12916,6 +14402,10 @@ paths:
             $ref: '#/definitions/ChangePassword'
       tags:
       - user
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -12939,6 +14429,10 @@ paths:
             $ref: '#/definitions/User'
       tags:
       - user
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -12957,6 +14451,10 @@ paths:
             $ref: '#/definitions/TwoFA'
       tags:
       - user
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
       x-subscribe-labels:
       - auth.User
       x-list: false
@@ -12976,6 +14474,10 @@ paths:
             $ref: '#/definitions/TwoFA'
       tags:
       - user
+      security:
+      - oauth2: []
+      - session: []
+      - basic: []
     parameters:
     - name: id
       in: path
@@ -12992,6 +14494,8 @@ definitions:
       id:
         title: Id
         type: integer
+        maximum: 9223372036854775807
+        minimum: 0
       name:
         title: Name
         type: string
@@ -13020,6 +14524,8 @@ definitions:
       id:
         title: Id
         type: integer
+        maximum: 9223372036854775807
+        minimum: 0
       name:
         title: Name
         type: string
@@ -13322,6 +14828,7 @@ definitions:
         - ansible_ruby_interpreter
         - ansible_perl_interpreter
         - ansible_shell_executable
+        minLength: 1
       value:
         title: Value
         type: string
@@ -13333,15 +14840,19 @@ definitions:
             ansible_password:
               type: string
               format: password
+              minLength: 1
             ansible_ssh_pass:
               type: string
               format: password
+              minLength: 1
             ansible_become_pass:
               type: string
               format: password
+              minLength: 1
             ansible_become_password:
               type: string
               format: password
+              minLength: 1
             ansible_become:
               type: boolean
             ansible_port:
@@ -13350,6 +14861,7 @@ definitions:
             ansible_ssh_private_key_file:
               type: string
               format: secretfile
+              minLength: 1
               x-options:
                 media_types:
                 - '*/*'
@@ -13415,6 +14927,8 @@ definitions:
       initiator:
         title: Initiator
         type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
       initiator_type:
         title: Initiator type
         type: string
@@ -13429,6 +14943,7 @@ definitions:
         type: string
         format: inventory
         readOnly: true
+        minLength: 1
         x-options:
           filters: null
       kind:
@@ -13576,6 +15091,7 @@ definitions:
                   title: Playbook
                   type: string
                   format: fk_autocomplete
+                  minLength: 1
                   x-options:
                     model:
                       $ref: '#/definitions/AnsiblePlaybook'
@@ -13658,6 +15174,7 @@ definitions:
                   description: use this file to authenticate the connection
                   type: string
                   format: secretfile
+                  minLength: 1
                   x-options:
                     media_types:
                     - '*/*'
@@ -13714,6 +15231,7 @@ definitions:
                   description: vault password file
                   type: string
                   format: secretfile
+                  minLength: 1
                   x-options:
                     media_types:
                     - '*/*'
@@ -13767,6 +15285,7 @@ definitions:
                   title: Module
                   type: string
                   format: fk_autocomplete
+                  minLength: 1
                   x-options:
                     model:
                       $ref: '#/definitions/AnsibleModule'
@@ -13851,6 +15370,7 @@ definitions:
                   description: use this file to authenticate the connection
                   type: string
                   format: secretfile
+                  minLength: 1
                   x-options:
                     media_types:
                     - '*/*'
@@ -13894,6 +15414,7 @@ definitions:
                   description: vault password file
                   type: string
                   format: secretfile
+                  minLength: 1
                   x-options:
                     media_types:
                     - '*/*'
@@ -13956,6 +15477,8 @@ definitions:
       initiator:
         title: Initiator
         type: integer
+        maximum: 9223372036854775807
+        minimum: -9223372036854775808
       initiator_type:
         title: Initiator type
         type: string
@@ -14248,6 +15771,7 @@ definitions:
                   title: Body
                   type: string
                   format: file
+                  minLength: 1
                   x-options:
                     media_types:
                     - '*/*'
@@ -14366,6 +15890,7 @@ definitions:
                   title: Body
                   type: string
                   format: file
+                  minLength: 1
                   x-options:
                     media_types:
                     - '*/*'
@@ -14382,6 +15907,7 @@ definitions:
                   - ini
                   - json
                   default: yaml
+                  minLength: 1
                 executable:
                   title: Executable
                   type: boolean
@@ -14438,6 +15964,7 @@ definitions:
                   title: Body
                   type: string
                   format: file
+                  minLength: 1
                   x-options:
                     media_types:
                     - '*/*'
@@ -14454,6 +15981,7 @@ definitions:
                   - ini
                   - json
                   default: yaml
+                  minLength: 1
                 executable:
                   title: Executable
                   type: boolean
@@ -14583,12 +16111,14 @@ definitions:
             KEY:
               type: string
               format: secretfile
+              minLength: 1
               x-options:
                 media_types:
                 - '*/*'
             PASSWORD:
               type: string
               format: password
+              minLength: 1
       branch:
         title: Branch for GIT (branch/tag/SHA) or TAR (subdir)
         type: string
@@ -14695,6 +16225,7 @@ definitions:
         type: string
         format: html
         readOnly: true
+        minLength: 1
       execute_view_data:
         $ref: '#/definitions/Data'
     x-properties-groups:
@@ -14879,6 +16410,7 @@ definitions:
         title: Module
         type: string
         format: fk_autocomplete
+        minLength: 1
         x-options:
           model:
             $ref: '#/definitions/AnsibleModule'
@@ -14961,6 +16493,7 @@ definitions:
         description: use this file to authenticate the connection
         type: string
         format: secretfile
+        minLength: 1
         x-options:
           media_types:
           - '*/*'
@@ -15001,6 +16534,7 @@ definitions:
         description: vault password file
         type: string
         format: secretfile
+        minLength: 1
         x-options:
           media_types:
           - '*/*'
@@ -15094,6 +16628,7 @@ definitions:
         title: Playbook
         type: string
         format: fk_autocomplete
+        minLength: 1
         x-options:
           model:
             $ref: '#/definitions/AnsiblePlaybook'
@@ -15174,6 +16709,7 @@ definitions:
         description: use this file to authenticate the connection
         type: string
         format: secretfile
+        minLength: 1
         x-options:
           media_types:
           - '*/*'
@@ -15226,6 +16762,7 @@ definitions:
         description: vault password file
         type: string
         format: secretfile
+        minLength: 1
         x-options:
           media_types:
           - '*/*'
@@ -15333,6 +16870,7 @@ definitions:
                   title: Playbook
                   type: string
                   format: fk_autocomplete
+                  minLength: 1
                   x-options:
                     model:
                       $ref: '#/definitions/AnsiblePlaybook'
@@ -15415,6 +16953,7 @@ definitions:
                   description: use this file to authenticate the connection
                   type: string
                   format: secretfile
+                  minLength: 1
                   x-options:
                     media_types:
                     - '*/*'
@@ -15471,6 +17010,7 @@ definitions:
                   description: vault password file
                   type: string
                   format: secretfile
+                  minLength: 1
                   x-options:
                     media_types:
                     - '*/*'
@@ -15524,6 +17064,7 @@ definitions:
                   title: Module
                   type: string
                   format: fk_autocomplete
+                  minLength: 1
                   x-options:
                     model:
                       $ref: '#/definitions/AnsibleModule'
@@ -15608,6 +17149,7 @@ definitions:
                   description: use this file to authenticate the connection
                   type: string
                   format: secretfile
+                  minLength: 1
                   x-options:
                     media_types:
                     - '*/*'
@@ -15651,6 +17193,7 @@ definitions:
                   description: vault password file
                   type: string
                   format: secretfile
+                  minLength: 1
                   x-options:
                     media_types:
                     - '*/*'
@@ -15852,6 +17395,7 @@ definitions:
                   title: Playbook
                   type: string
                   format: fk_autocomplete
+                  minLength: 1
                   x-options:
                     model:
                       $ref: '#/definitions/AnsiblePlaybook'
@@ -15934,6 +17478,7 @@ definitions:
                   description: use this file to authenticate the connection
                   type: string
                   format: secretfile
+                  minLength: 1
                   x-options:
                     media_types:
                     - '*/*'
@@ -15990,6 +17535,7 @@ definitions:
                   description: vault password file
                   type: string
                   format: secretfile
+                  minLength: 1
                   x-options:
                     media_types:
                     - '*/*'
@@ -16043,6 +17589,7 @@ definitions:
                   title: Module
                   type: string
                   format: fk_autocomplete
+                  minLength: 1
                   x-options:
                     model:
                       $ref: '#/definitions/AnsibleModule'
@@ -16127,6 +17674,7 @@ definitions:
                   description: use this file to authenticate the connection
                   type: string
                   format: secretfile
+                  minLength: 1
                   x-options:
                     media_types:
                     - '*/*'
@@ -16170,6 +17718,7 @@ definitions:
                   description: vault password file
                   type: string
                   format: secretfile
+                  minLength: 1
                   x-options:
                     media_types:
                     - '*/*'
@@ -16252,6 +17801,7 @@ definitions:
             CRONTAB:
               type: string
               format: crontab
+              minLength: 1
       enabled:
         title: Enabled
         type: boolean
@@ -16302,6 +17852,7 @@ definitions:
             CRONTAB:
               type: string
               format: crontab
+              minLength: 1
       enabled:
         title: Enabled
         type: boolean
@@ -16365,6 +17916,7 @@ definitions:
                   title: Body
                   type: string
                   format: file
+                  minLength: 1
                   x-options:
                     media_types:
                     - '*/*'
@@ -16426,6 +17978,7 @@ definitions:
         - repo_key
         - playbook_path
         - ci_template
+        minLength: 1
       value:
         title: Value
         type: string
@@ -16440,9 +17993,11 @@ definitions:
             repo_password:
               type: string
               format: password
+              minLength: 1
             repo_key:
               type: string
               format: secretfile
+              minLength: 1
               x-options:
                 media_types:
                 - '*/*'
@@ -16571,14 +18126,17 @@ definitions:
     type: object
     properties:
       day:
+        title: Day
         type: array
         items:
           $ref: '#/definitions/DayJob'
       month:
+        title: Month
         type: array
         items:
           $ref: '#/definitions/MonthJob'
       year:
+        title: Year
         type: array
         items:
           $ref: '#/definitions/YearJob'
@@ -16697,10 +18255,12 @@ definitions:
         title: Password
         type: string
         format: password
+        minLength: 1
       password2:
         title: Repeat password
         type: string
         format: password
+        minLength: 1
     x-properties-groups:
       '':
       - id
@@ -16764,10 +18324,14 @@ definitions:
         enum:
         - en
         - ru
+        default: en
       dark_mode:
         title: Dark mode
         type: boolean
         default: false
+    default:
+      language: en
+      dark_mode: false
     x-properties-groups:
       '':
       - language
@@ -16780,9 +18344,9 @@ definitions:
         $ref: '#/definitions/_MainSettings'
       custom:
         title: Custom
-        type: string
-        format: json
+        type: object
         default: {}
+        additionalProperties: true
     x-properties-groups:
       '':
       - main
@@ -16799,14 +18363,17 @@ definitions:
         title: Old password
         type: string
         format: password
+        minLength: 1
       password:
         title: New password
         type: string
         format: password
+        minLength: 1
       password2:
         title: Confirm new password
         type: string
         format: password
+        minLength: 1
     x-properties-groups:
       '':
       - old_password

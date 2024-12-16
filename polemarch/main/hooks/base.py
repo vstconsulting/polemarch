@@ -30,7 +30,7 @@ class BaseHook:
         when = self.hook_object.when
         if when is not None and when not in self.when_types:
             errors['when'] = ("Unknown 'when'. "
-                              "Should be {}".format(self.when_types))
+                              f"Should be {self.when_types}")
         return errors
 
     def modify_message(self, message):

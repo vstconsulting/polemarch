@@ -236,6 +236,7 @@ REPO_BACKENDS = {
 # Custom user repos
 DEFAULT_COMMUNITY_REPOS_URL = 'https://gitlab.com/vstconsulting/polemarch-community-repos/raw/master/projects.yaml'
 COMMUNITY_REPOS_URL = main.get('community_projects_url', fallback=DEFAULT_COMMUNITY_REPOS_URL)
+COMMUNITY_REPOS_FETCHING_TIMEOUT = main.getseconds('community_projects_fetching_timeout', fallback=60)
 
 # Execution plugins
 class ExecutionPluginSection(BaseAppendSection):
@@ -370,13 +371,10 @@ PWA_MANIFEST = {
     ),
 }
 
-SPA_STATIC += [
-    {'priority': 149, 'type': 'js', 'name': 'polemarch/pmlib.js'},
-]
-
 # TEST settings
 if "test" in sys.argv:
     os.environ['DJANGO_ALLOW_ASYNC_UNSAFE'] = 'true'
+    os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
     REPO_BACKENDS['GIT']['OPTIONS']['CLONE_KWARGS']['local'] = True
     CLONE_RETRY = 0
     PROJECTS_DIR = '/tmp/polemarch_projects' + str(KWARGS['PY_VER'])

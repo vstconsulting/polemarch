@@ -27,7 +27,7 @@ class BasePlugin:
         'env_vars',
     )
 
-    base_command: List[str]
+    base_command: List[str] = []
     """
     Base command (usually binary) from which execution command starts, e.g. ``['echo']``. You may also override this
     attribute as a property if more complex logic needs to be performed.

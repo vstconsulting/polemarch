@@ -1,6 +1,6 @@
 # set to local images because too long execution
 default:
-  image: registry.gitlab.com/vstconsulting/images:ubuntu-v2
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v4
 
 variables:
   GET_SOURCES_ATTEMPTS: 3
@@ -34,7 +34,7 @@ stages:
 ###########################################
 .branch_tests_template: &branch_tests
   stage: test
-  image: registry.gitlab.com/vstconsulting/images:ubuntu-v2
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v4
   coverage: '/\d+\%\s*$/'
   variables:
     TOX_ENVS: ""
@@ -60,7 +60,7 @@ stages:
 
 .js_tests_template: &branch_js_tests
   <<: *branch_tests
-  image: registry.gitlab.com/vstconsulting/images:node18-tests
+  image: registry.gitlab.com/vstconsulting/images:node20-tests
   before_script:
     - yarn install --pure-lockfile --mutex network
   script:
@@ -90,7 +90,7 @@ functional_test:
   parallel:
     matrix:
       - TOX_ENVS:
-          - py38-install
+          - py310-install
       - TOX_ENVS:
           - py311-coverage
 
@@ -98,7 +98,7 @@ functional_test:
 ###########################################
 release:
   stage: release
-  image: registry.gitlab.com/vstconsulting/images:ubuntu-v2
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v4
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $GIT_ACCESS_USER && $GIT_ACCESS_PASSWORD'
       when: on_success
@@ -162,7 +162,7 @@ publish_docker:
 
 publish_release:
   stage: publish
-  image: registry.gitlab.com/vstconsulting/images:ubuntu-v2
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v4
   allow_failure: true
   needs: ["release_pypi"]
   rules:
