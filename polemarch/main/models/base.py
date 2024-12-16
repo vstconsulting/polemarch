@@ -26,11 +26,11 @@ class AccessExtendsFieldMixin(object):
     access_to_related = True
 
 
-class ManyToManyFieldACL(models.ManyToManyField, AccessExtendsFieldMixin):
+class ManyToManyFieldACL(models.ManyToManyField, AccessExtendsFieldMixin):  # pylint: disable=abstract-method
     through: Any
 
 
-class ForeignKeyACL(models.ForeignKey, AccessExtendsFieldMixin):
+class ForeignKeyACL(models.ForeignKey, AccessExtendsFieldMixin):  # pylint: disable=abstract-method
     pass
 
 
@@ -38,11 +38,14 @@ class ReverseAccessExtendsFieldMixin(object):
     reverse_access_to_related = True
 
 
-class ManyToManyFieldACLReverse(models.ManyToManyField, ReverseAccessExtendsFieldMixin):
+class ManyToManyFieldACLReverse(
+    models.ManyToManyField,
+    ReverseAccessExtendsFieldMixin,
+):  # pylint: disable=abstract-method
     through: Any
 
 
-class ForeignKeyACLReverse(models.ForeignKey, ReverseAccessExtendsFieldMixin):
+class ForeignKeyACLReverse(models.ForeignKey, ReverseAccessExtendsFieldMixin):  # pylint: disable=abstract-method
     pass
 
 

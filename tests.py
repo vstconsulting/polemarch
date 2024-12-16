@@ -3440,7 +3440,7 @@ class HistoryTestCase(BaseProjectTestCase):
         self.assertIn('"ping": "pong"', results[2]['data']['detail'])
         self.assertIn('"changed": false', results[2]['data']['detail'])
 
-        self.assertEqual(results[3]['data'], {'detail': 'Output truncated.\n'})
+        self.assertEqual(results[3]['data'], None)
 
         history_id = results[0]['data']['history_id']
         results = self.bulk([
@@ -3519,6 +3519,171 @@ class HistoryTestCase(BaseProjectTestCase):
             for idx in range(3):
                 self.assertEqual(results[0]['data']['jobs'][unit][idx]['sum'], 1)
                 self.assertEqual(results[0]['data']['jobs'][unit][idx]['all'], 3)
+
+    def test_execute_module_with_polemarch_db_inventory_from_template(self):
+        # Create project
+        [response] = self.bulk_transactional([
+            self.create_project_bulk_data(),
+        ])
+        project_id = response['data']['id']
+
+        # Sync project
+        self.bulk_transactional([
+            {
+                "method": "patch",
+                "path": ["project", project_id, "sync"],
+                "data": {},
+            },
+        ])
+
+        # Create POLEMARCH_DB inventory
+        [response] = self.bulk_transactional([
+            {
+                "method": "post",
+                "path": ["project", project_id, "inventory"],
+                "data": {
+                    "name": "localhost",
+                    "plugin": "POLEMARCH_DB",
+                },
+            },
+        ])
+        inventory_id = response['data']['id']
+
+        # Create execution template
+        [response] = self.bulk_transactional([
+            {
+                "method": "post",
+                "path": ["project", project_id, "execution_templates"],
+                "data": {
+                    "name": "localhost ping",
+                    "plugin": "ANSIBLE_MODULE",
+                    "arguments": {
+                        "module": "system.ping",
+                        "inventory": inventory_id,
+                    },
+                },
+            },
+        ])
+        execution_template_id = response['data']['id']
+
+        # Get execution template option id
+        [response] = self.bulk_transactional([
+            {
+                "method": "get",
+                "path": ["project", project_id, "execution_templates", execution_template_id, "options"],
+            },
+        ])
+        execution_template_option_id = response['data']['results'][0]['id']
+
+        # Execute template
+        [response] = self.bulk_transactional([
+            {
+                "method": "post",
+                "path": ["project", project_id, "execution_templates", execution_template_id, "execute"],
+                "data": {
+                    "option": execution_template_option_id,
+                },
+            },
+        ])
+        history_id = response['data']['history_id']
+
+        # Get list history
+        [response] = self.bulk([
+            {
+                "method": "get",
+                "path": "history",
+                "query": f"id={history_id}",
+            }
+        ])
+        self.assertEqual(response['status'], 200)
+        self.assertEqual(
+            response['data']['results'][0],
+            {
+                'id': history_id,
+                'status': 'OK',
+                'project': project_id,
+                'executor': self.user.id,
+                'initiator': execution_template_id,
+                'initiator_type': 'template',
+                # Inventory should be id converted to string
+                'inventory': f'{inventory_id}',
+                'kind': 'ANSIBLE_MODULE',
+                'mode': 'system.ping',
+                'options': {'template_option': execution_template_option_id},
+                'start_time': response['data']['results'][0]['start_time'],
+                'stop_time': response['data']['results'][0]['stop_time'],
+            },
+        )
+
+    def test_execute_module_with_polemarch_db_inventory(self):
+        # Create project
+        [response] = self.bulk_transactional([
+            self.create_project_bulk_data(),
+        ])
+        project_id = response['data']['id']
+
+        # Sync project
+        self.bulk_transactional([
+            {
+                "method": "patch",
+                "path": ["project", project_id, "sync"],
+                "data": {},
+            },
+        ])
+
+        # Create POLEMARCH_DB inventory
+        [response] = self.bulk_transactional([
+            {
+                "method": "post",
+                "path": ["project", project_id, "inventory"],
+                "data": {
+                    "name": "localhost",
+                    "plugin": "POLEMARCH_DB",
+                },
+            },
+        ])
+        inventory_id = response['data']['id']
+
+        # Execute module
+        [response] = self.bulk_transactional([
+            {
+                "method": "post",
+                "path": ["project", project_id, "execute_ansible_module"],
+                "data": {
+                    "module": "system.ping",
+                    "inventory": inventory_id,
+                },
+            },
+        ])
+        history_id = response['data']['history_id']
+
+        # Get list history
+        [response] = self.bulk([
+            {
+                "method": "get",
+                "path": "history",
+                "query": f"id={history_id}",
+            }
+        ])
+        self.assertEqual(response['status'], 200)
+        self.assertEqual(
+            response['data']['results'][0],
+            {
+                'id': history_id,
+                'status': 'OK',
+                'project': project_id,
+                'executor': self.user.id,
+                'initiator': project_id,
+                'initiator_type': 'project',
+                # Inventory should be id converted to string
+                'inventory': f'{inventory_id}',
+                'kind': 'ANSIBLE_MODULE',
+                'mode': 'system.ping',
+                'options': {},
+                'start_time': response['data']['results'][0]['start_time'],
+                'stop_time': response['data']['results'][0]['stop_time'],
+            },
+        )
 
 
 @own_projects_dir
@@ -3746,11 +3911,11 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
                 pass
 
         with self.patch(
-            f'{settings.VST_PROJECT_LIB_NAME}.notificator.PolemarchNotificator.get_client',
+            'vstutils.models.cent_notify.Notificator.get_client',
             return_value=DummyClient()
         ) as client_getter:
             with self.patch(
-                    f'{settings.VST_PROJECT_LIB_NAME}.notificator.PolemarchNotificator.is_usable',
+                    'vstutils.models.cent_notify.Notificator.is_usable',
                     return_value=True
             ):
                 self.assertEqual(client_getter.call_count, 0)
@@ -4517,6 +4682,10 @@ class HookTestCase(BaseHookTestCase):
         self.assertEqual(url, self.http_hook.recipients)
         self.assertEqual(json_data.get('type'), 'on_execution')
         self.assertEqual(json_data.get('payload'), {'test': 'test'})
+        self.assertEqual(
+            kwargs['headers'],
+            {'Content-Type': 'application/json'},
+        )
         response = Response()
         response.status_code, response.reason = 200, 'OK'
         return response

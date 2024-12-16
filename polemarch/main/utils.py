@@ -147,7 +147,7 @@ class SubCacheInterface(PMObject):
 
     @property
     def key(self) -> str:
-        return '{}-{}'.format(self.cache_name, self.prefix)
+        return f'{self.cache_name}-{self.prefix}'
 
     def set(self, value):
         self.cache.set(self.key, dump(value, Dumper=Dumper), self.timeout)
@@ -200,7 +200,7 @@ class PMAnsible(PMObject):
     def get_ref(self, cache=False):
         ref = self.ref_name
         if cache:
-            ref += '-python{}'.format(sys.version_info[0])
+            ref += f'-python{sys.version_info[0]}'
         return ref
 
     def get_args(self):
@@ -287,7 +287,7 @@ class AnsibleModules(PMAnsible):
     def get_ref(self, cache=False):
         ref = super().get_ref(cache)
         if cache and self.key:
-            ref += '-{}'.format(self.key)
+            ref += f'-{self.key}'
         if cache and self.detailed:
             ref += '-detailed'
         return ref
@@ -418,7 +418,14 @@ class ExecutionHandlers(ObjectHandlers):
     def get_object(self, plugin: str, project, history, **exec_args):  # noee
         from .models.utils import PluginExecutor  # pylint: disable=import-outside-toplevel
 
-        return PluginExecutor(plugin, self.backend(plugin), self.opts(plugin), project, history, exec_args)
+        return PluginExecutor(
+            plugin,
+            self.backend(plugin),
+            self.opts(plugin),
+            project,
+            history,
+            exec_args,
+        )
 
 
 class InventoryPluginHandlers(ObjectHandlers):

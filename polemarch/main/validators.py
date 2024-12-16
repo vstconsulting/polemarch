@@ -7,7 +7,7 @@ from django.core.validators import (
     RegexValidator,
     URLValidator as OldURLValidator
 )
-from vstutils.utils import lazy_translate as __
+from vstutils.utils import lazy_translate as __, translate as _
 
 
 ##############################################################################
@@ -41,5 +41,5 @@ class DomainNameValidator(RegexValidator):
 
 
 def validate_hostname(address: AnyStr):
-    msg = __("Invalid hostname or IP '{}'.".format(address))
+    msg = _("Invalid hostname or IP '{}'.").format(address)
     DomainNameValidator(message=msg)(address)

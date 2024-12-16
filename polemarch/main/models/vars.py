@@ -58,9 +58,6 @@ class Variable(BModel):
     key = models.CharField(max_length=512)
     value = models.TextField(null=True)
 
-    def __unicode__(self):  # pragma: no cover
-        return "{}={}".format(self.key, self.value)
-
 
 class AbstractVarsQuerySet(BQuerySet):
     use_for_related_fields = True
@@ -81,11 +78,6 @@ class AbstractModel(ACLModel):
         abstract = True
 
     BOOLEAN_VARS = []
-
-    def __unicode__(self):  # pragma: no cover
-        _vars = " ".join(["{}={}".format(k, v)
-                          for k, v in self.vars.items()])
-        return "{} {}".format(self.name, _vars)
 
     def get_hook_data(self, when: str) -> OrderedDict:
         # pylint: disable=unused-argument

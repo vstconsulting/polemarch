@@ -91,13 +91,13 @@ class Git(_VCS):
             return result
 
     def _update_submodules(self, repo: git.Repo, **kwargs):
-        logger.debug('Update GIT submodules in project [{}]'.format(self.proj.id))
+        logger.debug('Update GIT submodules in project [%s]', self.proj.id)
         for sm in repo.submodules:
             # Calling git directly for own submodules
             # since using relative path is not working in gitpython
             # see https://github.com/gitpython-developers/GitPython/issues/730
             try:
-                logger.debug('Update module "{}" in project [{}].'.format(sm.name, self.proj.id))
+                logger.debug('Update module "%s" in project [%s].', sm.name, self.proj.id)
                 repo.git.submodule('init', sm.name)
                 repo.git.submodule('update', sm.name, **kwargs)
             except git.GitCommandError as error:
@@ -123,7 +123,7 @@ class Git(_VCS):
         return reponame
 
     def make_clone(self, env: ENV_VARS_TYPE) -> Tuple[git.Repo, None]:  # pylint: disable=arguments-renamed
-        kw = dict(**self.options.get("CLONE_KWARGS", {}))
+        kw = {**self.options.get("CLONE_KWARGS", {})}
         if 'timeout' in env:
             kw['kill_after_timeout'] = env.pop('timeout')
         destination = env.pop('destination', self.path)
@@ -164,13 +164,13 @@ class Git(_VCS):
             repo = self._get_or_create_repo(env)
             result = self.vcs_update(repo, env)
         except git.InvalidGitRepositoryError:
-            logger.info('Convert project [{}] to GIT.'.format(self.proj.id))
+            logger.info('Convert project [%s] to GIT.', self.proj.id)
             repo = git.Repo.init(self.path)
             repo.create_remote('origin', self.proj.repository)
             with repo.git.custom_environment(**env):
                 kwargs = self.options.get("FETCH_KWARGS", {})
                 origin = repo.remote('origin')
-                logger.debug('Fetch remote branches for project [{}].'.format(self.proj.id))
+                logger.debug('Fetch remote branches for project [%s].', self.proj.id)
                 origin.fetch(**kwargs)
                 if not list(origin.refs):
                     config_writer = repo.config_writer()
@@ -181,7 +181,7 @@ class Git(_VCS):
                     config_writer.set_value("user", "name", user_name).release()
                     repo.git.add(A=True)
                     repo.git.commit(m='Create project from Polemarch.')
-                    logger.debug('Push project [{}] as master.'.format(self.proj.id))
+                    logger.debug('Push project [%s] as master.', self.proj.id)
                     repo.git.push('--set-upstream', 'origin', 'master')
 
             result = self.vcs_update(repo, env)
@@ -200,7 +200,7 @@ class Git(_VCS):
 
     def _with_password(self, tmp, env_vars: ENV_VARS_TYPE) -> ENV_VARS_TYPE:
         env_vars.update(self.env.get("PASSWORD", {}))
-        tmp.write("echo '{}'".format(self.proj.vars["repo_password"]))
+        tmp.write(f"echo '{self.proj.vars['repo_password']}'")
         os.chmod(tmp.name, 0o700)
         env_vars["GIT_ASKPASS"] = env_vars.get("GIT_ASKPASS", tmp.name)
         tmp.close()
@@ -210,9 +210,9 @@ class Git(_VCS):
         env_vars.update(self.env.get("KEY", {}))
         tmp.write(self.proj.vars["repo_key"])
         tmp.close()
-        ssh = "ssh -vT -i {} -F /dev/null".format(tmp.name)
+        ssh = f"ssh -vT -i {tmp.name} -F /dev/null"
         for key, value in self._ssh_options.items():
-            ssh += " -o {}={}".format(key, value)
+            ssh += f" -o {key}={value}"
         env_vars["GIT_SSH_COMMAND"] = env_vars.get("GIT_SSH_COMMAND", ssh)
         return env_vars
 

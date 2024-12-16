@@ -18,6 +18,11 @@ class InventoryAutoCompletionField(vstfields.VSTCharField):
                 path_validator(inventory)
         return inventory
 
+    def to_representation(self, value):
+        if isinstance(value, Inventory):
+            return super().to_representation(value.id)
+        return super().to_representation(value)
+
 
 class DynamicPluginField(vstfields.DependEnumField):
     def get_real_field(self, data):

@@ -64,60 +64,60 @@
 </template>
 
 <script>
-    export default {
-        name: 'InventoryFieldEdit',
-        components: {
-            TagsSelector: spa.components.TagsSelector,
-        },
-        mixins: [spa.fields.base.BaseFieldContentEdit],
-        data() {
-            return {
-                disabled: Boolean(!this.value),
-                types: {
-                    fk: 'Inventory',
-                    hosts: 'Hosts list',
-                    path: 'Inventory path',
-                },
-            };
-        },
-        computed: {
-            type() {
-                return this.value?.type || 'fk';
+export default {
+    name: 'InventoryFieldEdit',
+    components: {
+        TagsSelector: spa.components.TagsSelector,
+    },
+    mixins: [spa.fields.base.BaseFieldContentEdit],
+    data() {
+        return {
+            disabled: Boolean(!this.value),
+            types: {
+                fk: 'Inventory',
+                hosts: 'Hosts list',
+                path: 'Inventory path',
             },
-            realValue() {
-                return this.value?.value;
-            },
+        };
+    },
+    computed: {
+        type() {
+            return this.value?.type || 'fk';
         },
-        mounted() {
-            this.$watch(
-                'disabled',
-                (value) => {
-                    if (this.type === 'fk') {
-                        this.$el.querySelector('select').disabled = value;
-                    }
-                },
-                { immediate: true },
-            );
+        realValue() {
+            return this.value?.value;
         },
-        methods: {
-            setType(e) {
-                this.setValue({ type: e.target.dataset.type, value: undefined });
-            },
-            toggleDisabled() {
-                if (this.disabled) {
-                    this.disabled = false;
-                } else {
-                    this.disabled = true;
-                    this.setValue(this.field.required ? null : undefined);
+    },
+    mounted() {
+        this.$watch(
+            'disabled',
+            (value) => {
+                if (this.type === 'fk') {
+                    this.$el.querySelector('select').disabled = value;
                 }
             },
-            validateHost(host) {
-                if (host && !host.includes(',')) {
-                    return host;
-                }
-            },
+            { immediate: true },
+        );
+    },
+    methods: {
+        setType(e) {
+            this.setValue({ type: e.target.dataset.type, value: undefined });
         },
-    };
+        toggleDisabled() {
+            if (this.disabled) {
+                this.disabled = false;
+            } else {
+                this.disabled = true;
+                this.setValue(this.field.required ? null : undefined);
+            }
+        },
+        validateHost(host) {
+            if (host && !host.includes(',')) {
+                return host;
+            }
+        },
+    },
+};
 </script>
 
 <style lang="scss">

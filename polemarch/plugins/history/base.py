@@ -1,10 +1,13 @@
 import re
 import contextlib
+from typing import TYPE_CHECKING
 
 import orjson
 from asgiref.sync import async_to_sync
 
-from ...main.models import History
+
+if TYPE_CHECKING:  # nocv
+    from ...main.models import History
 
 
 class BasePlugin:
@@ -13,7 +16,7 @@ class BasePlugin:
     readable = False
     ansi_escape = re.compile(r'\x1b[^m]*m')
 
-    def __init__(self, history: History, **options):
+    def __init__(self, history: "History", **options):
         self.history = history
         self.options = options
 

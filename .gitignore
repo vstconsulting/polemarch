@@ -16,7 +16,6 @@ env
 *.pid
 *nbproject
 pylint_*
-index.html
 .idea/*
 /polemarch.egg-info/
 /polemarch/projects/
@@ -136,6 +135,7 @@ venv.bak/
 # Frontend
 node_modules
 polemarch/static/polemarch
+polemarch/static/spa
 yarn-error.log
 
 # werf and helm

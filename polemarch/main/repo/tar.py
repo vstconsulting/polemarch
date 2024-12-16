@@ -40,6 +40,6 @@ class Tar(_ArchiveRepo):
                 self.delete()
             shutil.move(path + ".bak", path) if moved else None
             raise
-        else:
-            shutil.rmtree(path + ".bak") if moved else None
-            return Path(path), True
+
+        shutil.rmtree(path + ".bak") if moved else None
+        return Path(path), True

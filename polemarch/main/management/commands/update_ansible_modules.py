@@ -23,8 +23,8 @@ class Command(ServiceCommand):
         # pylint: disable=try-except-raise
         except:  # nocv
             raise
-        else:
-            self._print('The modules have been successfully updated.', 'SUCCESS')
+
+        self._print('The modules have been successfully updated.', 'SUCCESS')
 
     def handle(self, *args, **options):
         super().handle(*args, **options)
