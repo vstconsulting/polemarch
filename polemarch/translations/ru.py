@@ -55,6 +55,8 @@ TRANSLATION = {
     'Template': 'Шаблон',
     'Template opt': 'Опция шаблона',
     'Enabled': 'Доступен',
+    'Token': 'Токен',
+    'Expires': 'Срок действия',
 
     'General': 'Общее',
     'New owner': 'Новый владелец',

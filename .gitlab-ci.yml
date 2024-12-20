@@ -72,11 +72,8 @@ stages:
 code_style:
   <<: *branch_tests
   stage: code_standarts
-  parallel:
-    matrix:
-      - TOX_ENVS:
-          - flake
-          - pylint
+  variables:
+    TOX_ENVS: "flake,pylint"
 
 js_style:
   <<: *branch_js_tests
@@ -87,12 +84,10 @@ js_style:
 
 functional_test:
   <<: *branch_tests
-  parallel:
-    matrix:
-      - TOX_ENVS:
-          - py310-install
-      - TOX_ENVS:
-          - py311-coverage
+  needs: ["code_style"]
+  variables:
+    TOX_ENVS: "py311-coverage,py310-install"
+
 
 # Realese
 ###########################################
