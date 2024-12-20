@@ -8,6 +8,7 @@ import shutil
 import sys
 import threading
 import time
+from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from tempfile import mkdtemp
@@ -29,6 +30,7 @@ from requests import Response
 from rest_framework import fields as drffields
 from vstutils.api import fields as vstfields
 from vstutils.tests import BaseTestCase as VSTBaseTestCase
+from vstutils.utils import get_session_store
 
 try:
     from polemarch.main.openapi import PROJECT_MENU
@@ -4828,6 +4830,152 @@ class UserTestCase(VSTBaseTestCase):
             content_type='application/json',
         )
         self.assertEqual(response.status_code, 204)
+
+    @override_settings(SESSION_ENGINE='django.contrib.sessions.backends.db')
+    def test_oauth2_tokens(self):
+        # Reset cache to use overridden session backend
+        get_session_store.cache_clear()
+
+        user = self._create_user(is_super_user=False, is_staff=False)
+        other_user = self._create_user(is_super_user=False, is_staff=False)
+
+        # Try create with too long expires
+        with (
+            self.user_as(self, user),
+            self.patch(
+                'django.utils.timezone.now',
+                return_value=timezone.make_aware(datetime(2020, 1, 1)),
+            )
+        ):
+            [response] = self.bulk([
+                {
+                    'method': 'POST',
+                    'path': ['user', user.id, 'token'],
+                    'data': {
+                        'name': 'Some token',
+                        'expires': '2022-01-01',
+                    },
+                }
+            ])
+            self.assertEqual(response['status'], 400, response)
+            self.assertEqual(response['data'], {'expires': ['Expires must be less than 365 days']})
+
+        # Try create already expired
+        with (
+            self.user_as(self, user),
+            self.patch(
+                'django.utils.timezone.now',
+                return_value=timezone.make_aware(datetime(2020, 1, 1)),
+            )
+        ):
+            [response] = self.bulk([
+                {
+                    'method': 'POST',
+                    'path': ['user', user.id, 'token'],
+                    'data': {
+                        'name': 'Some token',
+                        'expires': '2019-01-01',
+                    },
+                }
+            ])
+            self.assertEqual(response['status'], 400, response)
+            self.assertEqual(response['data'], {'expires': ['Expires must be in the future']})
+
+        # Create token
+        with (
+            self.user_as(self, user),
+            self.patch(
+                'django.utils.timezone.now',
+                return_value=timezone.make_aware(datetime(2020, 1, 1)),
+            )
+        ):
+            [response] = self.bulk([
+                {
+                    'method': 'POST',
+                    'path': ['user', user.id, 'token'],
+                    'data': {
+                        'name': 'Some token',
+                        'expires': '2020-01-5',
+                    },
+                }
+            ])
+            self.assertEqual(response['status'], 201, response)
+            self.assertEqual(
+                response['data'],
+                {
+                    'id': response['data']['id'],
+                    'name': 'Some token',
+                    'expires': '2020-01-05',
+                    'token': response['data']['token'],
+                },
+            )
+
+        token_id = response['data']['id']
+        token = response['data']['token']
+
+        # Check token using user endpoint
+        with (
+            self.user_as(self, user),
+            self.patch(
+                'time.time',
+                return_value=datetime(2020, 1, 2).timestamp(),
+            ),
+            self.patch(
+                'django.utils.timezone.now',
+                return_value=timezone.make_aware(datetime(2020, 1, 2)),
+            ),
+        ):
+            response = self.client_class().get(
+                '/api/v4/user/profile/',
+                headers={'Authorization': f'Bearer {token}'},
+            )
+            self.assertEqual(response.status_code, 200, response.content)
+            self.assertEqual(response.json()['id'], user.id)
+
+        # Check token visibility
+        for request_user, expected_visible in [
+            (user, True),
+            (other_user, False),
+        ]:
+            with self.subTest():
+                with self.user_as(self, request_user):
+                    [response] = self.bulk([
+                        {
+                            'method': 'get',
+                            'path': ['user', user.id, 'token'],
+                        }
+                    ])
+                    self.assertEqual(
+                        response['status'],
+                        200 if expected_visible else 403,
+                    )
+
+        # Check token deletion
+        with (
+            self.user_as(self, user),
+            self.patch(
+                'time.time',
+                return_value=datetime(2020, 1, 2).timestamp(),
+            ),
+            # Fix tests login
+            self.patch(
+                'vstutils.tests.time',
+                return_value=datetime(2020, 1, 2).timestamp(),
+            ),
+        ):
+            [response] = self.bulk([
+                {
+                    'method': 'delete',
+                    'path': ['user', user.id, 'token', token_id],
+                }
+            ])
+            self.assertEqual(response['status'], 204, response)
+
+            response = self.client_class().get(
+                '/api/v4/user/profile/',
+                headers={'Authorization': f'Bearer {token}'},
+            )
+            self.assertEqual(response.status_code, 403, response.content)
 
 
 class BaseOpenAPITestCase(VSTBaseTestCase):

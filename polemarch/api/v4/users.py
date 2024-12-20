@@ -14,8 +14,10 @@ from vstutils.api import fields as vstfields
 from vstutils.api.base import CopyMixin
 from vstutils.api.actions import SimpleAction
 from vstutils.api.serializers import BaseSerializer
+from vstutils.api.decorators import nested_view
 
 from ..permissions import CreateUsersPermission, SetOwnerPermission
+from .oauth2_token import OAuth2TokenViewSet
 
 
 class UserSerializer(VSTUserSerializer):  # noee
@@ -47,6 +49,7 @@ class OneUserSerializer(UserSerializer):
         fields = tuple(filter(lambda field: field != 'is_staff', VSTOneUserSerializer.Meta.fields))
 
 
+@nested_view('token', arg='id', view=OAuth2TokenViewSet, manager_name='oauth2_token')
 class UserViewSet(VSTUserViewSet, CopyMixin):
     """
     Manage users.

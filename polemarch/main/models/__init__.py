@@ -27,6 +27,7 @@ from .execution_templates import (
     ExecutionTemplateOption,
     TemplatePeriodicTask,
 )
+from .oauth2_token import Oauth2Token
 from .hooks import Hook
 from ..validators import RegexValidator, validate_hostname, path_validator
 from ..exceptions import UnknownTypeException, Conflict

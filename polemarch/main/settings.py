@@ -353,6 +353,7 @@ PROJECT_REPOSYNC_WAIT_SECONDS = main.getseconds('repo_sync_on_run_timeout', fall
 PROJECT_CI_HANDLER_CLASS = "{}.main.ci.DefaultHandler".format(VST_PROJECT_LIB_NAME)
 METRICS_BACKEND_CLASS = "{}.metrics.PolemarchBackend".format(VST_PROJECT_LIB_NAME)
 HISTORY_METRICS_WINDOW = web.getseconds('history_metrics_window', fallback=600)
+MAX_CUSTOM_OAUTH2_TOKEN_LIFETIME_DAYS = main.getint('max_custom_oauth2_token_lifetime_days', fallback=365)
 
 
 __PWA_ICONS_SIZES = [
@@ -408,3 +409,4 @@ if "test" in sys.argv:
     }
     INVENTORY_PLUGINS['TEST_INVENTORY_PLUGIN'] = {'BACKEND': f'{tests_module_name}.TestInventoryPlugin'}
     HISTORY_OUTPUT_PLUGINS = ['database', 'logger']
+    MAX_CUSTOM_OAUTH2_TOKEN_LIFETIME_DAYS = 365

@@ -434,10 +434,10 @@
     path-browserify "^1.0.1"
     vscode-uri "^3.0.8"
 
-"@vstconsulting/vstutils@^5.11.19":
-  version "5.11.19"
-  resolved "https://registry.yarnpkg.com/@vstconsulting/vstutils/-/vstutils-5.11.19.tgz#bf7c02c17e804b2aec4ff6214187e390719b562b"
-  integrity sha512-6MXFKv/3UYsUFT6Y8Cy1C68UXYd0jTh7WcPPIvYjGFQwuyTm/nPi6CGdySlPdk9QnRa6Zeo0RRGttVbIcXXrMA==
+"@vstconsulting/vstutils@^5.12.0":
+  version "5.12.0"
+  resolved "https://registry.yarnpkg.com/@vstconsulting/vstutils/-/vstutils-5.12.0.tgz#12228f944a298b5fa7bfb08333c773e4164bca24"
+  integrity sha512-hj0eaiziYLdKC8z2J88Cf44cDn5eWueIHUKguE5QoVx8EZK21TQ3jHbI71kj4urFHJM60ZJOM90zPmxN69HW/g==
   dependencies:
     "@toast-ui/vue-editor" "^3.2.3"
 
