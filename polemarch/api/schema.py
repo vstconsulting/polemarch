@@ -30,3 +30,10 @@ class PolemarchAutoSchema(VSTAutoSchema):
     field_inspectors = [
         InventoryFieldInspector,
     ] + VSTAutoSchema.field_inspectors
+
+    def get_security(self):
+        result = super().get_security()
+        for security in result:
+            if 'oauth2' in security:
+                result.append({'bearer_auth': []})
+        return result

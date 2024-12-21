@@ -4,112 +4,110 @@ Installation
 Install from PyPI
 -----------------
 
+.. note::
+   The recommended Python versions are 3.10 or 3.11.
+   Some distributions may require additional steps to install Python 3.10/3.11.
+   For example, on Ubuntu you can use the deadsnakes PPA:
+
+   .. sourcecode:: bash
+
+      sudo apt-get update
+      sudo apt-get install software-properties-common
+      sudo add-apt-repository ppa:deadsnakes/ppa
+      sudo apt-get update
+      sudo apt-get install python3.11 python3.11-dev python3.11-venv
+
+   On Red Hat/CentOS/Alma/Rocky Linux, you can install Python 3.11 from AppStream or via an additional repo (EPEL / IUS).
+   For example (RHEL 8+ / CentOS 8+ / Alma 8+ / Rocky 8+):
+
+   .. sourcecode:: bash
+
+      sudo dnf module reset python38
+      sudo dnf module enable python39 (or python3.11 if available)
+      sudo dnf install python3.11 python3.11-devel
+      # or use the "IUS" repo if needed
 
 #. Install dependencies:
 
-   Required packages on Ubuntu 18.04:
+   Required packages on Ubuntu 22.04+ (example for Python 3.10/3.11):
 
    .. sourcecode:: bash
 
-      sudo apt-get install python3-virtualenv python3.8 python3.8-dev gcc libffi-dev libkrb5-dev libffi6 libssl-dev libyaml-dev libsasl2-dev libldap2-dev default-libmysqlclient-dev sshpass git virtualenv
+      sudo apt-get install \
+          python3-virtualenv \
+          python3.10 python3.10-dev \
+          gcc libffi-dev libkrb5-dev libssl-dev \
+          libyaml-dev libsasl2-dev libldap2-dev \
+          default-libmysqlclient-dev sshpass git
 
-   Required packages on Ubuntu 20.04:
-
-   .. sourcecode:: bash
-
-      sudo apt-get install python3-virtualenv python3.8 python3.8-dev gcc libffi-dev libkrb5-dev libffi7 libssl-dev libyaml-dev libsasl2-dev libldap2-dev default-libmysqlclient-dev sshpass git
-
-   Required packages on Ubuntu 22.04:
-
-   .. sourcecode:: bash
-
-      sudo apt-get install python3-virtualenv python3.10 python3.10-dev gcc libffi-dev libkrb5-dev libffi7 libssl-dev libyaml-dev libsasl2-dev libldap2-dev default-libmysqlclient-dev sshpass git
-
-   Required packages on Debian 11 (as root user):
+   If you're installing Python 3.11 instead of 3.10, adjust the packages accordingly:
 
    .. sourcecode:: bash
 
-      apt-get install python3-virtualenv python3.9 python3.9-dev gcc libffi-dev libkrb5-dev libffi7 libssl-dev libyaml-dev libsasl2-dev libldap2-dev default-libmysqlclient-dev sshpass git
+      # Example
+      sudo apt-get install python3.11 python3.11-dev ...
 
-   Required packages on Red Hat/CentOS 7 (sqlite not supported):
-
-   .. sourcecode:: bash
-
-      sudo yum install epel-release centos-release-scl-rh centos-release-scl
-      sudo yum --enablerepo=centos-sclo-rh install rh-python38 rh-python38-python-devel gcc openssl-devel libyaml-devel krb5-devel krb5-libs openldap-devel mysql-devel git sshpass
-      sudo /opt/rh/rh-python38/root/usr/bin/python -m pip install virtualenv
-
-   Required packages on Red Hat/Alma/Rocky 8:
+   Required packages on Red Hat/Alma/Rocky 8+ (using Python 3.10/3.11 from module streams or a third-party repo):
 
    .. sourcecode:: bash
 
       sudo dnf install epel-release
-      sudo dnf install python38-devel python3-virtualenv gcc openssl-devel libyaml krb5-devel krb5-libs openldap-devel mysql-devel git sshpass
+      sudo dnf install python3.11 python3.11-devel python3-virtualenv \
+          gcc openssl-devel libyaml krb5-devel krb5-libs \
+          openldap-devel mysql-devel git sshpass
 
    .. note::
-      If your OS is not in the list of presented OS, but you understand the differences between these OS and yours,
-      then you can adapt this list of packages to your platform. We dont tie environment to system package versions as much as possible.
+      If your OS is not listed, adapt the package list as needed.
+      Polemarch itself does not require system-wide pinned package versions.
 
+#. Install MySQL server (if you plan to use MySQL):
 
-#. Install mysql-server:
-
-   The following command is suitable for Debian and Ubuntu.
-   If you have a different operation system, you can use `official documentation <https://dev.mysql.com/doc/>`_.
+   For Debian/Ubuntu:
 
    .. sourcecode:: bash
 
       sudo apt-get install default-mysql-server
 
    .. warning::
-      Do not use MySQL version less then 8.0.
+      Do not use MySQL version older than 8.0.
 
-
-#. Create database in mysql with this commands:
+#. Create a database in MySQL with these commands (run on the DB host):
 
    .. sourcecode:: bash
 
       sudo -H mysql <<QUERY_INPUT
-      # uncomment this string on old MariaDB/MySQL versions
+      # uncomment this line on old MariaDB/MySQL versions
       # SET @@global.innodb_large_prefix = 1;
       create user db_user identified by 'db_password';
       create database db_name default CHARACTER set utf8 default COLLATE utf8_general_ci;
       grant all on db_name.* to 'db_user';
       QUERY_INPUT
 
-   .. note:: You should do it on database host if you connect to remote server.
+   .. note::
+      Adjust if connecting to a remote MySQL server.
 
-
-#. Then, if you use mysql and you have set timezone different from "UTC" you should run next command:
+#. (Optional) If you use MySQL with a non-UTC timezone, import time zone info:
 
    .. sourcecode:: bash
 
       mysql_tzinfo_to_sql /usr/share/zoneinfo | sudo -H mysql mysql
 
-   .. note:: You should do it on database host if you connect to remote server.
-
-
-#. Create user:
+#. Create a dedicated system user for Polemarch:
 
    .. sourcecode:: bash
 
       sudo useradd --user-group --create-home --shell /bin/bash polemarch
 
-   .. hint:: You can add this user to sudoers for easier installation process and support.
+   .. hint::
+      You can add this user to sudoers for easier administration.
 
-
-#. Create virtualenv and activate it:
+#. Create a virtualenv and activate it:
 
    .. sourcecode:: bash
 
-      # In some cases use sudo for first command.
-      # For rhel/centos7 use:
-      /opt/rh/rh-python38/root/usr/bin/python -m virtualenv /opt/polemarch
-      # For Debian with Python 3.9:
-      virtualenv --python=python3.9 /opt/polemarch
-      # For Ubuntu 22.04 and other debian distributions with Python 3.10:
-      virtualenv --python=python3.10 /opt/polemarch
-      # For other distributions:
-      virtualenv --python=python3.8 /opt/polemarch
+      # Adapt the python path to your installed version:
+      # For example, if you installed Python 3.11 in /usr/bin/python3.11:
+      virtualenv --python=python3.11 /opt/polemarch
 
       # Make required directories
       sudo mkdir -p /etc/polemarch
@@ -117,8 +115,9 @@ Install from PyPI
       sudo -u polemarch -i
       source /opt/polemarch/bin/activate
 
-   .. note:: If you have more then one Python version, recommended use Python 3.8 or newer for virtualenv.
-
+   .. note::
+      If you have multiple Python versions, use 3.10 or newer.
+      Adjust paths if you installed Python differently.
 
 #. Install Polemarch:
 
@@ -126,18 +125,17 @@ Install from PyPI
 
       pip install -U polemarch[mysql]
 
+#. Edit the config file:
 
-#. Edit config file:
-
-   #. Create directory for `log` and `pid` files:
+   #. Create directories for logs and pids:
 
       .. sourcecode:: bash
 
          mkdir /opt/polemarch/logs /opt/polemarch/pid
 
-   #. Open `/etc/polemarch/settings.ini`, if it does not exist, create it. Polemarch uses config from this directory.
+   #. Open `/etc/polemarch/settings.ini` (create it if it does not exist). Polemarch reads configs from `/etc/polemarch/`.
 
-   #. The default database is SQLite3, but MySQL is recommended. Settings needed for correct work MySQL database:
+   #. MySQL settings example in `settings.ini`:
 
       .. code-block:: ini
 
@@ -151,22 +149,20 @@ Install from PyPI
          connect_timeout = 20
          init_command = SET sql_mode='STRICT_TRANS_TABLES', default_storage_engine=INNODB, NAMES 'utf8', CHARACTER SET 'utf8', SESSION collation_connection = 'utf8_unicode_ci'
 
-      .. note:: Set ``host`` and ``port`` settings if you connect to remote server.
+      .. note::
+         Add ``host`` and ``port`` if the DB is remote.
 
       .. warning::
-         If you are using MariaDB, make sure that your ``settings.ini`` config contains next line:
+         If you use MariaDB, add:
 
          .. code-block:: ini
 
             [databases]
             databases_without_cte_support = default
 
-         The problem is that the implementation of recursive queries in the MariaDB
-         does not allow using it in a standard form.
-         MySQL (since 8.0) works as expected.
+         Because MariaDB’s recursive CTE support differs from MySQL’s.
 
-
-   #. The default cache system is file based cache, but RedisCache is recommended. Settings needed for correct RedisCache work:
+   #. (Optional) For better performance, configure Redis for caching and locks:
 
       .. code-block:: ini
 
@@ -178,9 +174,7 @@ Install from PyPI
          backend = django.core.cache.backends.redis.RedisCache
          location = redis://127.0.0.1:6379/2
 
-      .. note:: Set host ip and port instead of 127.0.0.1:6379 if you connect to remote server.
-
-   #. The default celery broker is file Celery broker, but Redis is recommended. Settings needed for correct Redis work:
+   #. (Optional) For Celery/RPC, Redis or RabbitMQ is recommended:
 
       .. code-block:: ini
 
@@ -190,39 +184,34 @@ Install from PyPI
          concurrency = 8
          enable_worker = true
 
-      .. note:: Set host ip and port instead of 127.0.0.1:6379 if you connect to remote server.
+      .. hint::
+         For large networks, RabbitMQ may be preferable.
 
-      .. hint:: Use RabbitMQ in case there can be a big network delay between the Polemarch nodes.
-
-
-   #. For running Polemarch with worker, you need to create follow sections:
+   #. Configure uvicorn (HTTPS optional). For an HTTPS setup, provide keyfile/certfile:
 
       .. code-block:: ini
 
-         [uwsgi]
-         pidfile = /opt/polemarch/pid/polemarch.pid
-         log_file = /opt/polemarch/logs/polemarch_web.log
-
-         # Uncomment it for HTTPS:
-         # [uvicorn]
+         [uvicorn]
+         # Uncomment this for HTTPS support or use any proxy
          # ssl_keyfile = /etc/polemarch/polemarch.key
          # ssl_certfile = /etc/polemarch/polemarch.crt
+         # Setup here additional settings, like workers
+         # workers = 4
 
-         [worker]
-         # output will be /opt/polemarch/logs/polemarch_worker.log
-         logfile = /opt/polemarch/logs/{PROG_NAME}_worker.log
-         # output will be /opt/polemarch/pid/polemarch_worker.pid
-         pidfile = /opt/polemarch/pid/{PROG_NAME}_worker.pid
-         loglevel = INFO
+         [web]
+         # default is
+         addrport = 0.0.0.0:8080
 
-      Also if you need to set your own path for logfile or pidfile,
-      different from the path from example, you can do it, but make sure,
-      that user, which starts Polemarch has write-permissions for these directory and file.
-      If you run it as root, we recommend to add in ``[uwsig]`` params ``uid`` and ``gid``
-      (`read more <https://uwsgi-docs.readthedocs.io/en/latest/Namespaces.html#the-old-way-the-namespace-option>`_).
+   #. If the server is not behind HTTPS or any TLS-terminating proxy, you need to allow insecure OAuth login:
 
-      .. tip:: More configuration settings you can find in :doc:`Configuration manual </config>`.
+      .. code-block:: ini
 
+         [oauth]
+         server_allow_insecure = true
+
+      .. note::
+         Alternatively, place Polemarch behind a TLS-terminating proxy such as Nginx, Traefik, or HAProxy
+         and remove `server_allow_insecure = true`.
 
 #. Make migrations:
 
@@ -230,34 +219,57 @@ Install from PyPI
 
       polemarchctl migrate
 
-.. note::
-    The first time run this command, the first superuser ``admin`` will be created in the database with the same password.
-    We recommend changing the user's password immediately after the first login.
+   .. note::
+      On the first run, the default superuser ``admin`` is created with the same password.
+      Change it immediately after first login.
 
-#. Start Polemarch:
+Configure systemd for Polemarch
+----------------------------------
+
+Since ``polemarchctl webserver`` no longer daemonizes by default, it will keep the console busy.
+We recommend using ``systemd`` for management (start/stop/restart) of the service.
+
+1. Create a systemd unit file, for example: `/etc/systemd/system/polemarch.service`:
+
+   .. code-block:: ini
+
+      [Unit]
+      Description=Polemarch Service
+      After=network.target
+
+      [Service]
+      Type=simple
+      User=polemarch
+      Group=polemarch
+      WorkingDirectory=/opt/polemarch
+      ExecStart=/opt/polemarch/bin/polemarchctl webserver
+      # If you want to store logs in a file, you can redirect:
+      # ExecStart=/opt/polemarch/bin/polemarchctl webserver >> /opt/polemarch/logs/polemarch_web.log 2>&1
+
+      Restart=on-failure
+
+      [Install]
+      WantedBy=multi-user.target
+
+2. Enable and start the service:
 
    .. sourcecode:: bash
 
-      polemarchctl webserver
+      sudo systemctl daemon-reload
+      sudo systemctl enable polemarch
+      sudo systemctl start polemarch
 
-Polemarch starts with web interface on port 8080.
+3. Now Polemarch runs in the background. Manage it via standard systemd commands:
 
-If you need to restart Polemarch use following command:
+   .. sourcecode:: bash
 
-    .. sourcecode:: bash
+      sudo systemctl stop polemarch
+      sudo systemctl restart polemarch
+      sudo systemctl status polemarch
 
-       polemarchctl webserver reload=/opt/polemarch/pid/polemarch.pid
-
-If you use another directory for storing Polemarch pid file, use path to this file.
-
-
-If you need to stop Polemarch use following command:
-
-    .. sourcecode:: bash
-
-       polemarchctl webserver stop=/opt/polemarch/pid/polemarch.pid
-
-If you use another directory for storing Polemarch pid file, use path to this file.
+.. note::
+   Remove or ignore any references to the old `uwsgi` sections or the old `polemarchctl webserver reload=/opt/polemarch/pid/polemarch.pid` approach.
+   All process management (start/stop/restart) is now delegated to systemd.
 
 
 Install from docker
@@ -320,15 +332,8 @@ Web section
 
 * **POLEMARCH_WEB_REST_PAGE_LIMIT** - Limit elements in answer, when send REST request. Default value: `1000`.
 
-UWSGI section
-~~~~~~~~~~~~~
-
-* **POLEMARCH_UWSGI_PROCESSES** - number of uwsgi processes. Default value: `4`.
-
 Other settings
 ~~~~~~~~~~~~~~
-
-If you set `WORKER` to `ENABLE` state, uwsgi run worker as daemon.
 
 If you set `SECRET_KEY`, value of `SECRET_KEY` variable would be written to `secret`
 

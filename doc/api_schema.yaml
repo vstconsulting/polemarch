@@ -17,9 +17,9 @@ info:
     docs_url: /docs/
   x-links:
     Request:
-    - url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%203.0.3
+    - url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Ask&issue%5Btitle%5D=Ask%20about%20version%204.0.0
       name: Question
-    - url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%203.0.3
+    - url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Bug&issue%5Btitle%5D=Bug%20in%20version%204.0.0
       name: Bug report
     - url: https://gitlab.com/vstconsulting/polemarch/issues/new?issuable_template%5D=Feature%20request&issue%5Btitle%5D=
       name: Feature request
@@ -65,14 +65,14 @@ info:
     time_zone: UTC
   x-subscriptions-prefix: polemarch.update
   x-versions:
-    application: 3.0.3
-    library: 3.0.3
-    vstutils: 5.11.13
-    django: 5.1.3
+    application: 4.0.0
+    library: 4.0.0
+    vstutils: 5.12.1
+    django: 5.1.4
     djangorestframework: 3.15.2
     drf_yasg: 1.21.8
-    fastapi: 0.115.5
-    celery: 5.4.0
+    fastapi: 0.115.6
+    celery: 5.5.0rc4
     ansible: 2.9.27
   version: v4
 host: localhost:8080
@@ -86,18 +86,19 @@ produces:
 - application/json
 - application/msgpack
 securityDefinitions:
+  bearer_auth:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: 'JWT Authorization header using the Bearer scheme. Example: Authorization:
+      Bearer <token>.'
   oauth2:
     type: oauth2
     flow: password
     tokenUrl: http://testserver/api/oauth2/token/
     scopes: {}
     x-clientId: simple-client-id
-  session:
-    type: apiKey
-    name: sessionid
-    in: cookie
-  basic:
-    type: basic
+security: []
 paths:
   /community_template/:
     get:
@@ -205,8 +206,7 @@ paths:
       - community_template
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.ProjectCommunityTemplate
       x-list: true
@@ -225,8 +225,7 @@ paths:
       - community_template
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.ProjectCommunityTemplate
       x-list: false
@@ -255,8 +254,7 @@ paths:
       - community_template
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Use it
       x-multiaction: false
     parameters:
@@ -373,8 +371,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -397,8 +394,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters: []
   /group/{id}/:
     get:
@@ -414,8 +410,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -438,8 +433,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: group_edit
       description: Update one or more fields on an existing group.
@@ -458,8 +452,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: group_remove
       description: Remove an existing group.
@@ -471,8 +464,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -498,8 +490,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -614,8 +605,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Group
       x-list: true
@@ -637,8 +627,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: true
     parameters:
     - name: id
@@ -660,8 +649,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Group
       x-list: false
@@ -683,8 +671,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: group_groups_edit
       description: Update one or more fields on an existing group.
@@ -703,8 +690,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: group_groups_remove
       description: Remove an existing group.
@@ -716,8 +702,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -748,8 +733,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -874,8 +858,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -897,8 +880,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: true
     parameters:
     - name: id
@@ -925,8 +907,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -948,8 +929,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: group_groups_hosts_edit
       description: Update one or more fields on an existing host.
@@ -968,8 +948,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: group_groups_hosts_remove
       description: Remove an existing host.
@@ -981,8 +960,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -1018,8 +996,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -1055,8 +1032,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -1172,8 +1148,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -1195,8 +1170,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -1228,8 +1202,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -1251,8 +1224,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: group_groups_hosts_variables_edit
       description: Update one or more fields on an existing variable.
@@ -1271,8 +1243,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: group_groups_hosts_variables_remove
       description: Remove an existing variable.
@@ -1284,8 +1255,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -1326,8 +1296,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -1438,8 +1407,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -1461,8 +1429,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -1489,8 +1456,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -1512,8 +1478,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: group_groups_variables_edit
       description: Update one or more fields on an existing variable.
@@ -1532,8 +1497,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: group_groups_variables_remove
       description: Remove an existing variable.
@@ -1545,8 +1509,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -1694,8 +1657,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -1735,8 +1697,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: true
     parameters:
     - name: id
@@ -1776,8 +1737,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -1817,8 +1777,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: group_hosts_edit
       summary: Manage inventory hosts.
@@ -1855,8 +1814,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: group_hosts_remove
       summary: Manage inventory hosts.
@@ -1886,8 +1844,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -1936,8 +1893,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -1968,8 +1924,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -2098,8 +2053,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -2139,8 +2093,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -2185,8 +2138,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -2226,8 +2178,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: group_hosts_variables_edit
       summary: Manage inventory hosts.
@@ -2264,8 +2215,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: group_hosts_variables_remove
       summary: Manage inventory hosts.
@@ -2295,8 +2245,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -2332,8 +2281,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -2457,8 +2405,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -2498,8 +2445,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -2539,8 +2485,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -2580,8 +2525,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: group_variables_edit
       summary: Inventory hosts variables.
@@ -2618,8 +2562,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: group_variables_remove
       summary: Inventory hosts variables.
@@ -2649,8 +2592,7 @@ paths:
       - group
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -2798,8 +2740,7 @@ paths:
       - history
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.History
       x-list: true
@@ -2818,8 +2759,7 @@ paths:
       - history
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.History
       x-list: false
@@ -2834,8 +2774,7 @@ paths:
       - history
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -2861,8 +2800,7 @@ paths:
       - history
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Cancel
       x-multiaction: false
     parameters:
@@ -2883,8 +2821,7 @@ paths:
       - history
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Clear
       x-multiaction: false
     parameters:
@@ -2907,8 +2844,7 @@ paths:
       - history
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.History
       x-list: false
@@ -3047,8 +2983,7 @@ paths:
       - hook
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Hook
       x-list: true
@@ -3070,8 +3005,7 @@ paths:
       - hook
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters: []
   /hook/{id}/:
     get:
@@ -3087,8 +3021,7 @@ paths:
       - hook
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Hook
       x-list: false
@@ -3110,8 +3043,7 @@ paths:
       - hook
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: hook_edit
       description: Update one or more fields on an existing hook.
@@ -3130,8 +3062,7 @@ paths:
       - hook
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: hook_remove
       description: Remove an existing hook.
@@ -3143,8 +3074,7 @@ paths:
       - hook
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -3264,8 +3194,7 @@ paths:
       - host
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -3287,8 +3216,7 @@ paths:
       - host
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters: []
   /host/{id}/:
     get:
@@ -3304,8 +3232,7 @@ paths:
       - host
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -3327,8 +3254,7 @@ paths:
       - host
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: host_edit
       description: Update one or more fields on an existing host.
@@ -3347,8 +3273,7 @@ paths:
       - host
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: host_remove
       description: Remove an existing host.
@@ -3360,8 +3285,7 @@ paths:
       - host
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -3387,8 +3311,7 @@ paths:
       - host
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -3414,8 +3337,7 @@ paths:
       - host
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -3539,8 +3461,7 @@ paths:
       - host
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -3580,8 +3501,7 @@ paths:
       - host
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -3621,8 +3541,7 @@ paths:
       - host
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -3662,8 +3581,7 @@ paths:
       - host
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: host_variables_edit
       summary: Inventory hosts variables.
@@ -3700,8 +3618,7 @@ paths:
       - host
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: host_variables_remove
       summary: Inventory hosts variables.
@@ -3731,8 +3648,7 @@ paths:
       - host
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -3858,8 +3774,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Inventory
       x-list: true
@@ -3881,8 +3796,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters: []
   /inventory/import_inventory/:
     post:
@@ -3903,8 +3817,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Import inventory
       x-multiaction: false
     parameters: []
@@ -3922,8 +3835,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Inventory
       x-list: false
@@ -3945,8 +3857,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: inventory_edit
       description: Update one or more fields on an existing inventory.
@@ -3965,8 +3876,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: inventory_remove
       description: Remove an existing inventory.
@@ -3978,8 +3888,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -4094,8 +4003,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -4120,8 +4028,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -4267,8 +4174,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -4310,8 +4216,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -4344,8 +4249,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -4460,8 +4364,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -4484,8 +4387,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: true
     parameters:
     - name: id
@@ -4507,8 +4409,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -4531,8 +4432,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: inventory_group_edit
       description: Update one or more fields on an existing group.
@@ -4551,8 +4451,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: inventory_group_remove
       description: Remove an existing group.
@@ -4564,8 +4463,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -4595,8 +4493,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -4715,8 +4612,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Group
       x-list: true
@@ -4738,8 +4634,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: true
     parameters:
     - name: id
@@ -4765,8 +4660,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Group
       x-list: false
@@ -4788,8 +4682,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: inventory_group_groups_edit
       description: Update one or more fields on an existing group.
@@ -4808,8 +4701,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: inventory_group_groups_remove
       description: Remove an existing group.
@@ -4821,8 +4713,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -4857,8 +4748,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -4987,8 +4877,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -5010,8 +4899,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: true
     parameters:
     - name: id
@@ -5042,8 +4930,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -5065,8 +4952,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: inventory_group_groups_hosts_edit
       description: Update one or more fields on an existing host.
@@ -5085,8 +4971,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: inventory_group_groups_hosts_remove
       description: Remove an existing host.
@@ -5098,8 +4983,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -5139,8 +5023,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -5180,8 +5063,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -5301,8 +5183,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -5324,8 +5205,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -5361,8 +5241,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -5384,8 +5263,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: inventory_group_groups_hosts_variables_edit
       description: Update one or more fields on an existing variable.
@@ -5404,8 +5282,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: inventory_group_groups_hosts_variables_remove
       description: Remove an existing variable.
@@ -5417,8 +5294,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -5463,8 +5339,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -5579,8 +5454,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -5602,8 +5476,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -5634,8 +5507,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -5657,8 +5529,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: inventory_group_groups_variables_edit
       description: Update one or more fields on an existing variable.
@@ -5677,8 +5548,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: inventory_group_groups_variables_remove
       description: Remove an existing variable.
@@ -5690,8 +5560,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -5825,8 +5694,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -5848,8 +5716,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: true
     parameters:
     - name: id
@@ -5875,8 +5742,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -5898,8 +5764,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: inventory_group_hosts_edit
       description: Update one or more fields on an existing host.
@@ -5918,8 +5783,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: inventory_group_hosts_remove
       description: Remove an existing host.
@@ -5931,8 +5795,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -5967,8 +5830,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -6003,8 +5865,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -6119,8 +5980,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -6142,8 +6002,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -6174,8 +6033,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -6197,8 +6055,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: inventory_group_hosts_variables_edit
       description: Update one or more fields on an existing variable.
@@ -6217,8 +6074,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: inventory_group_hosts_variables_remove
       description: Remove an existing variable.
@@ -6230,8 +6086,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -6271,8 +6126,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -6382,8 +6236,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -6405,8 +6258,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -6432,8 +6284,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -6455,8 +6306,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: inventory_group_variables_edit
       description: Update one or more fields on an existing variable.
@@ -6475,8 +6325,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: inventory_group_variables_remove
       description: Remove an existing variable.
@@ -6488,8 +6337,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -6636,8 +6484,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -6677,8 +6524,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: true
     parameters:
     - name: id
@@ -6718,8 +6564,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -6759,8 +6604,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: inventory_hosts_edit
       summary: Manage inventory hosts.
@@ -6797,8 +6641,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: inventory_hosts_remove
       summary: Manage inventory hosts.
@@ -6828,8 +6671,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -6878,8 +6720,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -6910,8 +6751,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -7040,8 +6880,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -7081,8 +6920,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -7127,8 +6965,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -7168,8 +7005,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: inventory_hosts_variables_edit
       summary: Manage inventory hosts.
@@ -7206,8 +7042,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: inventory_hosts_variables_remove
       summary: Manage inventory hosts.
@@ -7237,8 +7072,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -7274,8 +7108,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -7298,8 +7131,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Inventory
       x-list: false
@@ -7321,8 +7153,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-multiaction: false
     parameters:
     - name: id
@@ -7445,8 +7276,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -7486,8 +7316,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -7527,8 +7356,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -7568,8 +7396,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: inventory_variables_edit
       summary: Inventory hosts variables.
@@ -7606,8 +7433,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: inventory_variables_remove
       summary: Inventory hosts variables.
@@ -7637,8 +7463,7 @@ paths:
       - inventory
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -7769,8 +7594,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Project
       x-list: true
@@ -7792,8 +7616,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters: []
   /project/{id}/:
     get:
@@ -7809,8 +7632,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Project
       x-list: false
@@ -7832,8 +7654,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: project_edit
       description: Update one or more fields on an existing project.
@@ -7852,8 +7673,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: project_remove
       description: Remove an existing project.
@@ -7865,8 +7685,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -7965,8 +7784,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.ExecutionTemplateOption
       x-list: true
@@ -7991,8 +7809,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.ExecutionTemplateOption
       x-list: false
@@ -8094,8 +7911,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Module
       x-list: true
@@ -8125,8 +7941,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Module
       x-list: false
@@ -8226,8 +8041,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.AnsiblePlaybook
       x-list: true
@@ -8257,8 +8071,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.AnsiblePlaybook
       x-list: false
@@ -8293,8 +8106,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -8320,8 +8132,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Execute ansible module
       x-multiaction: false
     parameters:
@@ -8349,8 +8160,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Execute ansible playbook
       x-multiaction: false
     parameters:
@@ -8485,8 +8295,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.ExecutionTemplate
       x-list: true
@@ -8526,8 +8335,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -8567,8 +8375,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.ExecutionTemplate
       x-list: false
@@ -8608,8 +8415,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: project_execution_templates_edit
       summary: Manage execution templates of project.
@@ -8646,8 +8452,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: project_execution_templates_remove
       summary: Manage execution templates of project.
@@ -8677,8 +8482,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -8710,8 +8514,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Execute
       x-multiaction: false
     parameters:
@@ -8880,8 +8683,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.History
       x-list: true
@@ -8929,8 +8731,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.History
       x-list: false
@@ -8963,8 +8764,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -9001,8 +8801,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Cancel
       x-multiaction: false
     parameters:
@@ -9034,8 +8833,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Clear
       x-multiaction: false
     parameters:
@@ -9069,8 +8867,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.History
       x-list: false
@@ -9206,8 +9003,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.ExecutionTemplateOption
       x-list: true
@@ -9247,8 +9043,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -9294,8 +9089,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.ExecutionTemplateOption
       x-list: false
@@ -9335,8 +9129,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: project_execution_templates_options_edit
       summary: Manage execution templates of project.
@@ -9373,8 +9166,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: project_execution_templates_options_remove
       summary: Manage execution templates of project.
@@ -9404,8 +9196,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -9441,8 +9232,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Execute
       x-multiaction: false
     parameters:
@@ -9597,8 +9387,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.TemplatePeriodicTask
       x-list: true
@@ -9638,8 +9427,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -9689,8 +9477,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.TemplatePeriodicTask
       x-list: false
@@ -9730,8 +9517,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: project_execution_templates_options_periodic_tasks_edit
       summary: Manage execution templates of project.
@@ -9768,8 +9554,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: project_execution_templates_options_periodic_tasks_remove
       summary: Manage execution templates of project.
@@ -9799,8 +9584,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -9966,8 +9750,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.History
       x-list: true
@@ -10000,8 +9783,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.History
       x-list: false
@@ -10025,8 +9807,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -10057,8 +9838,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Cancel
       x-multiaction: false
     parameters:
@@ -10084,8 +9864,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Clear
       x-multiaction: false
     parameters:
@@ -10113,8 +9892,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.History
       x-list: false
@@ -10243,8 +10021,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Inventory
       x-list: true
@@ -10266,8 +10043,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: true
     parameters:
     - name: id
@@ -10294,8 +10070,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Import inventory
       x-multiaction: false
     parameters:
@@ -10318,8 +10093,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Inventory
       x-list: false
@@ -10341,8 +10115,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: project_inventory_edit
       description: Inventory(id, hidden, notes, owner, name, plugin, _inventory_state)
@@ -10361,8 +10134,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: project_inventory_remove
       description: Inventory(id, hidden, notes, owner, name, plugin, _inventory_state)
@@ -10374,8 +10146,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -10494,8 +10265,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -10524,8 +10294,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -10657,8 +10426,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -10686,8 +10454,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -10724,8 +10491,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -10844,8 +10610,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -10868,8 +10633,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: true
     parameters:
     - name: id
@@ -10895,8 +10659,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Group
       x-deep-nested-view: groups
@@ -10919,8 +10682,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: project_inventory_group_edit
       description: Update one or more fields on an existing group.
@@ -10939,8 +10701,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: project_inventory_group_remove
       description: Remove an existing group.
@@ -10952,8 +10713,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -10987,8 +10747,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -11111,8 +10870,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Group
       x-list: true
@@ -11134,8 +10892,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: true
     parameters:
     - name: id
@@ -11165,8 +10922,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Group
       x-list: false
@@ -11188,8 +10944,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: project_inventory_group_groups_edit
       description: Update one or more fields on an existing group.
@@ -11208,8 +10963,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: project_inventory_group_groups_remove
       description: Remove an existing group.
@@ -11221,8 +10975,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -11261,8 +11014,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -11395,8 +11147,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -11418,8 +11169,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: true
     parameters:
     - name: id
@@ -11454,8 +11204,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -11477,8 +11226,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: project_inventory_group_groups_hosts_edit
       description: Update one or more fields on an existing host.
@@ -11497,8 +11245,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: project_inventory_group_groups_hosts_remove
       description: Remove an existing host.
@@ -11510,8 +11257,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -11555,8 +11301,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -11600,8 +11345,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -11725,8 +11469,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -11748,8 +11491,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -11789,8 +11531,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -11812,8 +11553,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: project_inventory_group_groups_hosts_variables_edit
       description: Update one or more fields on an existing variable.
@@ -11832,8 +11572,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: project_inventory_group_groups_hosts_variables_remove
       description: Remove an existing variable.
@@ -11845,8 +11584,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -11895,8 +11633,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -12015,8 +11752,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -12038,8 +11774,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -12074,8 +11809,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -12097,8 +11831,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: project_inventory_group_groups_variables_edit
       description: Update one or more fields on an existing variable.
@@ -12117,8 +11850,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: project_inventory_group_groups_variables_remove
       description: Remove an existing variable.
@@ -12130,8 +11862,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -12269,8 +12000,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -12292,8 +12022,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: true
     parameters:
     - name: id
@@ -12323,8 +12052,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -12346,8 +12074,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: project_inventory_group_hosts_edit
       description: Update one or more fields on an existing host.
@@ -12366,8 +12093,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: project_inventory_group_hosts_remove
       description: Remove an existing host.
@@ -12379,8 +12105,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -12419,8 +12144,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -12459,8 +12183,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -12579,8 +12302,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -12602,8 +12324,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -12638,8 +12359,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -12661,8 +12381,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: project_inventory_group_hosts_variables_edit
       description: Update one or more fields on an existing variable.
@@ -12681,8 +12400,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: project_inventory_group_hosts_variables_remove
       description: Remove an existing variable.
@@ -12694,8 +12412,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -12739,8 +12456,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -12854,8 +12570,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -12877,8 +12592,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -12908,8 +12622,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -12931,8 +12644,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: project_inventory_group_variables_edit
       description: Update one or more fields on an existing variable.
@@ -12951,8 +12663,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: project_inventory_group_variables_remove
       description: Remove an existing variable.
@@ -12964,8 +12675,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -13098,8 +12808,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: true
@@ -13121,8 +12830,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: true
     parameters:
     - name: id
@@ -13148,8 +12856,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Host
       x-list: false
@@ -13171,8 +12878,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: project_inventory_hosts_edit
       description: Update one or more fields on an existing host.
@@ -13191,8 +12897,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: project_inventory_hosts_remove
       description: Remove an existing host.
@@ -13204,8 +12909,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -13240,8 +12944,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -13276,8 +12979,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -13392,8 +13094,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -13415,8 +13116,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -13447,8 +13147,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -13470,8 +13169,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: project_inventory_hosts_variables_edit
       description: Update one or more fields on an existing variable.
@@ -13490,8 +13188,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: project_inventory_hosts_variables_remove
       description: Remove an existing variable.
@@ -13503,8 +13200,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -13544,8 +13240,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -13572,8 +13267,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Inventory
       x-list: false
@@ -13595,8 +13289,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-multiaction: false
     parameters:
     - name: id
@@ -13705,8 +13398,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -13728,8 +13420,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -13755,8 +13446,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -13778,8 +13468,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: project_inventory_variables_edit
       description: Update one or more fields on an existing variable.
@@ -13798,8 +13487,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: project_inventory_variables_remove
       description: Remove an existing variable.
@@ -13811,8 +13499,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -13847,8 +13534,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Set owner
       x-multiaction: false
     parameters:
@@ -13876,8 +13562,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-title: Sync
       x-multiaction: false
     parameters:
@@ -13983,8 +13668,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: true
@@ -14006,8 +13690,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-allow-append: false
     parameters:
     - name: id
@@ -14029,8 +13712,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - main.Variable
       x-list: false
@@ -14052,8 +13734,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: project_variables_edit
       description: Variable(id, hidden, content_type, object_id, key, value)
@@ -14072,8 +13753,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: project_variables_remove
       description: Variable(id, hidden, content_type, object_id, key, value)
@@ -14085,8 +13765,7 @@ paths:
       - project
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -14112,8 +13791,7 @@ paths:
       - stats
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-list: true
     parameters: []
   /user/:
@@ -14236,8 +13914,7 @@ paths:
       - user
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - auth.User
       x-list: true
@@ -14259,8 +13936,7 @@ paths:
       - user
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters: []
   /user/{id}/:
     get:
@@ -14276,8 +13952,7 @@ paths:
       - user
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - auth.User
       x-list: false
@@ -14299,8 +13974,7 @@ paths:
       - user
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     patch:
       operationId: user_edit
       description: Update one or more fields on an existing user.
@@ -14319,8 +13993,7 @@ paths:
       - user
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     delete:
       operationId: user_remove
       description: Remove an existing user.
@@ -14332,8 +14005,7 @@ paths:
       - user
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -14354,8 +14026,7 @@ paths:
       - user
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - auth.User
       x-list: false
@@ -14377,8 +14048,7 @@ paths:
       - user
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -14404,8 +14074,7 @@ paths:
       - user
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -14431,14 +14100,180 @@ paths:
       - user
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
       description: A unique integer value identifying this user.
       required: true
       type: integer
+  /user/{id}/token/:
+    get:
+      operationId: user_token_list
+      description: Oauth2Token(id, session, name, user, token)
+      parameters:
+      - name: id
+        in: query
+        description: A unique integer value (or comma separated list) identifying
+          this instance.
+        required: false
+        type: array
+        items:
+          type: integer
+        collectionFormat: csv
+        minItems: 1
+        uniqueItems: true
+        x-title: Primary keys
+      - name: name
+        in: query
+        description: A name string value (or comma separated list) of instance.
+        required: false
+        type: string
+        x-title: Name
+      - name: id__not
+        in: query
+        description: A unique integer value (or comma separated list) identifying
+          this instance.
+        required: false
+        type: array
+        items:
+          type: integer
+        collectionFormat: csv
+        minItems: 1
+        uniqueItems: true
+        x-title: Exclude primary keys
+      - name: name__not
+        in: query
+        description: A name string value (or comma separated list) of instance.
+        required: false
+        type: string
+        x-title: Exclude name
+      - name: ordering
+        in: query
+        description: Which field to use when ordering the results.
+        required: false
+        type: array
+        items:
+          type: string
+          format: ordering_choices
+          enum:
+          - id
+          - -id
+          - name
+          - -name
+        x-title: Ordering
+      - name: __search
+        in: query
+        description: A search term.
+        required: false
+        type: string
+      - name: limit
+        in: query
+        description: Number of results to return per page.
+        required: false
+        type: integer
+      - name: offset
+        in: query
+        description: The initial index from which to return the results.
+        required: false
+        type: integer
+      responses:
+        '200':
+          description: OK
+          schema:
+            required:
+            - count
+            - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Oauth2Token'
+      tags:
+      - user
+      security:
+      - oauth2: []
+      - bearer_auth: []
+      x-subscribe-labels:
+      - main.Oauth2Token
+      x-list: true
+    post:
+      operationId: user_token_add
+      description: Oauth2Token(id, session, name, user, token)
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/OAuth2TokenCreate'
+      responses:
+        '201':
+          description: CREATED
+          schema:
+            $ref: '#/definitions/OAuth2TokenCreate'
+      tags:
+      - user
+      security:
+      - oauth2: []
+      - bearer_auth: []
+      x-allow-append: false
+    parameters:
+    - name: id
+      in: path
+      description: A unique integer value identifying this user.
+      required: true
+      type: integer
+  /user/{id}/token/{token_id}/:
+    get:
+      operationId: user_token_get
+      description: Oauth2Token(id, session, name, user, token)
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OAuth2TokenOne'
+      tags:
+      - user
+      security:
+      - oauth2: []
+      - bearer_auth: []
+      x-subscribe-labels:
+      - main.Oauth2Token
+      x-list: false
+    delete:
+      operationId: user_token_remove
+      description: Oauth2Token(id, session, name, user, token)
+      parameters: []
+      responses:
+        '204':
+          description: NO CONTENT
+      tags:
+      - user
+      security:
+      - oauth2: []
+      - bearer_auth: []
+    parameters:
+    - name: id
+      in: path
+      description: A unique integer value identifying this user.
+      required: true
+      type: integer
+    - name: token_id
+      in: path
+      required: true
+      type: string
   /user/{id}/twofa/:
     get:
       operationId: user_twofa_get
@@ -14453,8 +14288,7 @@ paths:
       - user
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
       x-subscribe-labels:
       - auth.User
       x-list: false
@@ -14476,8 +14310,7 @@ paths:
       - user
       security:
       - oauth2: []
-      - session: []
-      - basic: []
+      - bearer_auth: []
     parameters:
     - name: id
       in: path
@@ -18380,6 +18213,92 @@ definitions:
       - password
       - password2
     x-view-field-name: password
+  Oauth2Token:
+    required:
+    - name
+    type: object
+    properties:
+      id:
+        title: Id
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 30
+        minLength: 1
+      expires:
+        title: Expires
+        type: string
+        readOnly: true
+    x-properties-groups:
+      '':
+      - id
+      - name
+      - expires
+    x-view-field-name: name
+  OAuth2TokenCreate:
+    required:
+    - name
+    - expires
+    type: object
+    properties:
+      id:
+        title: Id
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 30
+        minLength: 1
+      expires:
+        title: Expires
+        type: string
+        format: date
+      token:
+        title: Token
+        type: string
+        readOnly: true
+        minLength: 1
+    x-properties-groups:
+      '':
+      - id
+      - name
+      - expires
+      - token
+    x-view-field-name: name
+  OAuth2TokenOne:
+    required:
+    - name
+    type: object
+    properties:
+      id:
+        title: Id
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 30
+        minLength: 1
+      expires:
+        title: Expires
+        type: string
+        format: date
+        readOnly: true
+      token:
+        title: Token
+        type: string
+        readOnly: true
+        minLength: 1
+    x-properties-groups:
+      '':
+      - id
+      - name
+      - expires
+      - token
+    x-view-field-name: name
   TwoFA:
     type: object
     properties:

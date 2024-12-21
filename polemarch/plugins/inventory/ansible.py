@@ -142,7 +142,7 @@ class PolemarchDB(BaseAnsiblePlugin):
             elif isinstance(obj, Host):
                 result[obj.name], obj_keys = cls._host_to_dict(obj, tmp_dir)
             else:
-                raise NotImplementedError()
+                raise NotImplementedError  # nocv
             keys += obj_keys
         return result, keys
 

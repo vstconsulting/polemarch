@@ -10,7 +10,7 @@ build:
   os: ubuntu-22.04
   tools:
     python: "3.11"
-    nodejs: "18"
+    nodejs: "20"
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:

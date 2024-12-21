@@ -1,9 +1,6 @@
 import re
 
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.exceptions import ParseError
 from rest_framework import fields as drffields
-from vstutils.api.responses import HTTP_204_NO_CONTENT
 from vstutils.api.auth import (
     UserViewSet as VSTUserViewSet,
     UserSerializer as VSTUserSerializer,
@@ -79,18 +76,6 @@ class UserViewSet(VSTUserViewSet, CopyMixin):
 
     copy_related = ['groups']
     copy_field_name = 'username'
-
-
-class TokenView(ObtainAuthToken):
-    schema = None
-
-    def delete(self, request, *args, **kwargs):
-        token = request.auth
-        if token:
-            key = token.key
-            token.delete()
-            return HTTP_204_NO_CONTENT(f'Token {key} removed.')
-        raise ParseError('Token not found.')
 
 
 class OwnerSerializerMixin:

@@ -64,7 +64,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Polemarch'
-copyright = 'VST Consulting, 2019-2023'
+copyright = 'VST Consulting, 2019-2025'
 author = 'VST Consulting'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -187,8 +187,7 @@ texinfo_documents = [
 intersphinx_mapping = {
     'environ': ('https://django-environ.readthedocs.io/en/stable', None),
     'vstutils': ('https://vstutils.vstconsulting.net/en/stable', None),
-    'python': ('https://docs.python.org/3.8', None),
-    'uwsgi': ('https://uwsgi-docs.readthedocs.io/en/latest', None),
+    'python': ('https://docs.python.org/3.11', None),
     'celery': ('https://docs.celeryq.dev/en/latest/', None),
 }
 intersphinx_disabled_reftypes = []

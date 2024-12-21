@@ -244,6 +244,12 @@ class BaseTestCase(VSTBaseTestCase):
             object_id=self.inventory.id,
             content_type=host_type,
         )
+        self.get_model_class('main.Variable').objects.create(
+            key='ansible_python_interpreter',
+            value=sys.executable,
+            object_id=self.inventory.id,
+            content_type=host_type,
+        )
         super().setUp()
 
 
@@ -284,6 +290,7 @@ class BaseProjectTestCase(BaseTestCase):
                 'connection': 'local',
                 'inventory': 'localhost,',
                 'group': 'all',
+                'extra-vars': f'ansible_python_interpreter={ sys.executable }',
             },
         )
 
@@ -4813,23 +4820,6 @@ class UserTestCase(VSTBaseTestCase):
         self.assertEqual(results[0]['status'], 200)
         self.assertEqual(results[0]['data']['username'], 'new_username')
         self.assertEqual(results[1]['data']['username'], 'new_username')
-
-    def test_delete_token(self):
-        response = self.client.delete(self.get_url('token'))
-        self.assertEqual(response.status_code, 400)
-
-        self.client.logout()
-        result = self.result(
-            self.client.post,
-            self.get_url('token'),
-            data={'username': self.user.username, 'password': self.user.username.upper()},
-        )
-        response = self.client.delete(
-            self.get_url('token'),
-            HTTP_AUTHORIZATION=f'Token {result["token"]}',
-            content_type='application/json',
-        )
-        self.assertEqual(response.status_code, 204)
 
     @override_settings(SESSION_ENGINE='django.contrib.sessions.backends.db')
     def test_oauth2_tokens(self):

@@ -1,5 +1,3 @@
-import os
-
 from vstutils.settings import *
 
 WEBSERVER_COMMAND = 'webserver'
@@ -43,6 +41,7 @@ LANGUAGES = (
     ('ru', 'Русский'),
 )
 
+API_URL = 'api'
 API[VST_API_VERSION] = {
     'host': {
         'view': f'{VST_PROJECT_LIB_NAME}.api.v4.hosts.HostViewSet',
@@ -71,13 +70,13 @@ API[VST_API_VERSION] = {
     'user': {
         'view': f'{VST_PROJECT_LIB_NAME}.api.v4.users.UserViewSet',
     },
-    'token': {
-        'view': f'{VST_PROJECT_LIB_NAME}.api.v4.users.TokenView',
-        'type': 'view',
-    },
 }
 
 PROJECT_GUI_MENU = []
+
+REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = [
+    'vstutils.oauth2.authentication.JWTBearerTokenAuthentication',
+]
 
 OPENAPI_HOOKS = [
     'polemarch.main.openapi.set_gui_menu_ce',
@@ -86,11 +85,15 @@ OPENAPI_HOOKS = [
 
 SWAGGER_SETTINGS['DEFAULT_INFO'] = '{}.api.swagger.api_info'.format(VST_PROJECT_LIB_NAME)
 SWAGGER_SETTINGS['DEFAULT_AUTO_SCHEMA_CLASS'] = '{}.api.schema.PolemarchAutoSchema'.format(VST_PROJECT_LIB_NAME)
-
-REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += (
-    'rest_framework.authentication.TokenAuthentication',
-    'rest_framework.authentication.BasicAuthentication',
-)
+SWAGGER_SETTINGS['SECURITY_DEFINITIONS'] = {
+    "bearer_auth": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header",
+        "description": "JWT Authorization header using the Bearer scheme. Example: Authorization: Bearer <token>."
+    },
+}
+SWAGGER_SETTINGS['SECURITY_REQUIREMENTS'] = []
 
 OPENAPI_EXTRA_LINKS = dict()
 OPENAPI_EXTRA_LINKS['Request'] = [
@@ -353,7 +356,7 @@ PROJECT_REPOSYNC_WAIT_SECONDS = main.getseconds('repo_sync_on_run_timeout', fall
 PROJECT_CI_HANDLER_CLASS = "{}.main.ci.DefaultHandler".format(VST_PROJECT_LIB_NAME)
 METRICS_BACKEND_CLASS = "{}.metrics.PolemarchBackend".format(VST_PROJECT_LIB_NAME)
 HISTORY_METRICS_WINDOW = web.getseconds('history_metrics_window', fallback=600)
-MAX_CUSTOM_OAUTH2_TOKEN_LIFETIME_DAYS = main.getint('max_custom_oauth2_token_lifetime_days', fallback=365)
+MAX_CUSTOM_OAUTH2_TOKEN_LIFETIME_DAYS = web.getint('max_custom_oauth2_token_lifetime_days', fallback=365)
 
 
 __PWA_ICONS_SIZES = [
