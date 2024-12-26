@@ -109,6 +109,9 @@ Install from PyPI
       # For example, if you installed Python 3.11 in /usr/bin/python3.11:
       virtualenv --python=python3.11 /opt/polemarch
 
+      # Create separated venv for ansible.
+      virtualenv --python=python3.11 /opt/polemarch/ansible
+
       # Make required directories
       sudo mkdir -p /etc/polemarch
       sudo chown -R polemarch:polemarch /opt/polemarch /etc/polemarch
@@ -123,7 +126,12 @@ Install from PyPI
 
    .. sourcecode:: bash
 
+      # Here is example for mysql support.
+      # Use extra 'postgresql' instead of 'mysql' when install it on PG.
       pip install -U polemarch[mysql]
+
+      # Install polemarch-ansible (here is example for ansible 2.5-2.9 support.
+      /opt/polemarch/ansible/bin/pip install 'polemarch-ansible~=2.2.0'
 
 #. Edit the config file:
 
@@ -134,6 +142,13 @@ Install from PyPI
          mkdir /opt/polemarch/logs /opt/polemarch/pid
 
    #. Open `/etc/polemarch/settings.ini` (create it if it does not exist). Polemarch reads configs from `/etc/polemarch/`.
+
+   #. Setup path for ansible module. You can wrap it to any script and realize any additional functionality (resource isolation, for example).
+
+      .. code-block:: ini
+
+         [main]
+         executor_path = /opt/polemarch/ansible/bin/python -m pm_ansible
 
    #. MySQL settings example in `settings.ini`:
 

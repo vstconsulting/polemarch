@@ -19,6 +19,7 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Internet :: WWW/HTTP",
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
@@ -59,7 +60,7 @@ namespaces = false
 
 [tool.flake8]
 ignore = "E221,E222,E121,E123,E126,E226,E24,E704,E116,E731,E722,E741,W503,W504,B001,B008,B010,B023,C812,C815,CFQ002,CFQ004,B019,I100,DJ01"
-exclude = "./polemarch/*/migrations/*,./polemarch/main/settings*.py,.tox/*,./etc/*,./*/__init__.py,*__main.py,./t_openstack.py,./polemarch/projects/*,./env/*"
+exclude = "./polemarch/*/migrations/*,./polemarch/main/settings*.py,.tox/*,./etc/*,./*/__init__.py,*__main.py,./t_openstack.py,./polemarch/projects/*,./env/*,tests.py"
 max-line-length = 120
 import-order-style = 'pep8'
 

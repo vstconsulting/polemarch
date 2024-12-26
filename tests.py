@@ -246,7 +246,7 @@ class BaseTestCase(VSTBaseTestCase):
         )
         self.get_model_class('main.Variable').objects.create(
             key='ansible_python_interpreter',
-            value=sys.executable,
+            value=os.environ.get("POLEMARCH_EXECUTOR_PYTHON", sys.executable),
             object_id=self.inventory.id,
             content_type=host_type,
         )
@@ -290,7 +290,7 @@ class BaseProjectTestCase(BaseTestCase):
                 'connection': 'local',
                 'inventory': 'localhost,',
                 'group': 'all',
-                'extra-vars': f'ansible_python_interpreter={ sys.executable }',
+                'extra-vars': f'ansible_python_interpreter={os.environ.get("POLEMARCH_EXECUTOR_PYTHON", sys.executable)}',
             },
         )
 

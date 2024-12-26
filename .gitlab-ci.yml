@@ -85,7 +85,7 @@ functional_test:
   <<: *branch_tests
   needs: ["code_style"]
   variables:
-    TOX_ENVS: "py311-coverage,py310-install"
+    TOX_ENVS: "py312-coverage,py310-install"
 
 
 # Realese

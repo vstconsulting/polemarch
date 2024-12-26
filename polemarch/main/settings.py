@@ -345,7 +345,7 @@ HOOKS = {
 
 HOOKS_DIR = main.get("hooks_dir", fallback="/etc/polemarch/hooks/")
 
-__EXECUTOR_DEFAULT = '{INTERPRETER} -m pm_ansible'
+__EXECUTOR_DEFAULT = f'{os.environ.get("POLEMARCH_EXECUTOR_PYTHON", sys.executable)} -m pm_ansible'
 EXECUTOR = main.get("executor_path", fallback=__EXECUTOR_DEFAULT).strip().split(' ')
 SELFCARE = '/tmp/'
 

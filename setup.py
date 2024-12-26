@@ -30,6 +30,8 @@ kwargs = dict(
         ],
         'mysql': ['mysqlclient<2.2'],
         'postgresql': ['psycopg[pool,c]'],
+        # Ansible required packages
+        'ansible29': load_requirements('requirements-ansible29.txt', os.getcwd()),
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt', os.getcwd()),
