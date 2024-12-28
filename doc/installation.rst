@@ -132,6 +132,8 @@ Install from PyPI
 
       # Install polemarch-ansible (here is example for ansible 2.5-2.9 support.
       /opt/polemarch/ansible/bin/pip install 'polemarch-ansible~=2.2.0'
+      # or install latest ansible-core
+      /opt/polemarch/ansible/bin/pip install 'polemarch-ansible~=3.0.1' 'ansible-core~=2.18.1'
 
 #. Edit the config file:
 

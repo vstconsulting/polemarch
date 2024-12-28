@@ -73,7 +73,7 @@ info:
     drf_yasg: 1.21.8
     fastapi: 0.115.6
     celery: 5.5.0rc4
-    ansible: 2.9.27
+    ansible: 2.17.7
   version: v4
 host: localhost:8080
 schemes:
@@ -7838,12 +7838,22 @@ paths:
         in: query
         description: Full path to module.
         required: false
-        type: string
+        type: array
+        items:
+          type: string
+        collectionFormat: csv
+        minItems: 1
+        uniqueItems: true
       - name: path__not
         in: query
         description: Full path to module.
         required: false
-        type: string
+        type: array
+        items:
+          type: string
+        collectionFormat: csv
+        minItems: 1
+        uniqueItems: true
       - name: name
         in: query
         description: Full path to module.
@@ -7972,12 +7982,22 @@ paths:
         in: query
         description: Playbook filename.
         required: false
-        type: string
+        type: array
+        items:
+          type: string
+        collectionFormat: csv
+        minItems: 1
+        uniqueItems: true
       - name: playbook__not
         in: query
         description: Playbook filename.
         required: false
-        type: string
+        type: array
+        items:
+          type: string
+        collectionFormat: csv
+        minItems: 1
+        uniqueItems: true
       - name: pb_filter
         in: query
         description: Playbook filename - filter for prefetch.
@@ -14933,8 +14953,11 @@ definitions:
                     usePrefetch: true
                 verbose:
                   title: Verbose
-                  description: verbose mode (-vvv for more, -vvvv to enable connection
-                    debugging)
+                  description: Causes Ansible to print more debug messages. Adding
+                    multiple -v will increase the verbosity, the builtin plugins currently
+                    evaluate up to -vvvvvv. A reasonable level to start is -vvv, connection
+                    debugging might require -vvvv. This argument may be specified
+                    multiple times.
                   type: integer
                   maximum: 4
                   minimum: 0
@@ -14953,11 +14976,12 @@ definitions:
                   type: string
                 connection:
                   title: Connection
-                  description: connection type to use (default=smart)
+                  description: connection type to use (default=ssh)
                   type: string
                 timeout:
                   title: Timeout
-                  description: override the connection timeout in seconds (default=10)
+                  description: override the connection timeout in seconds (default
+                    depends on connection)
                   type: integer
                 ssh_common_args:
                   title: Ssh common args
@@ -14997,22 +15021,18 @@ definitions:
                   type: string
                 tags:
                   title: Tags
-                  description: only run plays and tasks tagged with these values
-                  type: string
+                  description: only run plays and tasks tagged with these values.
+                    This argument may be specified multiple times.
+                  type: integer
                 skip_tags:
                   title: Skip tags
                   description: only run plays and tasks whose tags do not match these
-                    values
-                  type: string
+                    values. This argument may be specified multiple times.
+                  type: integer
                 check:
                   title: Check
                   description: don't make any changes; instead, try to predict some
                     of the changes that may occur
-                  type: boolean
-                syntax_check:
-                  title: Syntax check
-                  description: perform a syntax check on the playbook, but do not
-                    execute it
                   type: boolean
                 diff:
                   title: Diff
@@ -15022,9 +15042,11 @@ definitions:
                 inventory:
                   title: Inventory
                   description: specify inventory host path or comma separated host
-                    list. --inventory-file is deprecated
+                    list. --inventory-file is deprecated. This argument may be specified
+                    multiple times.
                   type: string
                   format: inventory
+                  minLength: 1
                   x-options:
                     filters:
                       plugin: POLEMARCH_DB,ANSIBLE_FILE,ANSIBLE_STRING
@@ -15040,7 +15062,8 @@ definitions:
                 extra_vars:
                   title: Extra vars
                   description: set additional variables as key=value or YAML/JSON,
-                    if filename prepend with @
+                    if filename prepend with @. This argument may be specified multiple
+                    times.
                   type: string
                 vault_password_file:
                   title: Vault password file
@@ -15055,6 +15078,11 @@ definitions:
                   title: Forks
                   description: specify number of parallel processes to use (default=5)
                   type: integer
+                syntax_check:
+                  title: Syntax check
+                  description: perform a syntax check on the playbook, but do not
+                    execute it
+                  type: boolean
                 list_tasks:
                   title: List tasks
                   description: list all tasks that would be executed
@@ -15094,7 +15122,6 @@ definitions:
                 - tags
                 - skip_tags
                 - check
-                - syntax_check
                 - diff
                 - inventory
                 - list_hosts
@@ -15102,6 +15129,7 @@ definitions:
                 - extra_vars
                 - vault_password_file
                 - forks
+                - syntax_check
                 - list_tasks
                 - list_tags
                 - step
@@ -15127,8 +15155,11 @@ definitions:
                     usePrefetch: true
                 verbose:
                   title: Verbose
-                  description: verbose mode (-vvv for more, -vvvv to enable connection
-                    debugging)
+                  description: Causes Ansible to print more debug messages. Adding
+                    multiple -v will increase the verbosity, the builtin plugins currently
+                    evaluate up to -vvvvvv. A reasonable level to start is -vvv, connection
+                    debugging might require -vvvv. This argument may be specified
+                    multiple times.
                   type: integer
                   maximum: 4
                   minimum: 0
@@ -15145,9 +15176,11 @@ definitions:
                 inventory:
                   title: Inventory
                   description: specify inventory host path or comma separated host
-                    list. --inventory-file is deprecated
+                    list. --inventory-file is deprecated. This argument may be specified
+                    multiple times.
                   type: string
                   format: inventory
+                  minLength: 1
                   x-options:
                     filters:
                       plugin: POLEMARCH_DB,ANSIBLE_FILE,ANSIBLE_STRING
@@ -15191,11 +15224,12 @@ definitions:
                   type: string
                 connection:
                   title: Connection
-                  description: connection type to use (default=smart)
+                  description: connection type to use (default=ssh)
                   type: string
                 timeout:
                   title: Timeout
-                  description: override the connection timeout in seconds (default=10)
+                  description: override the connection timeout in seconds (default
+                    depends on connection)
                   type: integer
                 ssh_common_args:
                   title: Ssh common args
@@ -15220,11 +15254,6 @@ definitions:
                   description: don't make any changes; instead, try to predict some
                     of the changes that may occur
                   type: boolean
-                syntax_check:
-                  title: Syntax check
-                  description: perform a syntax check on the playbook, but do not
-                    execute it
-                  type: boolean
                 diff:
                   title: Diff
                   description: when changing (small) files and templates, show the
@@ -15233,7 +15262,8 @@ definitions:
                 extra_vars:
                   title: Extra vars
                   description: set additional variables as key=value or YAML/JSON,
-                    if filename prepend with @
+                    if filename prepend with @. This argument may be specified multiple
+                    times.
                   type: string
                 vault_password_file:
                   title: Vault password file
@@ -15251,9 +15281,14 @@ definitions:
                 playbook_dir:
                   title: Playbook dir
                   description: Since this tool does not use playbooks, use this as
-                    a substitute playbook directory.This sets the relative path for
+                    a substitute playbook directory. This sets the relative path for
                     many features including roles/ group_vars/ etc.
                   type: string
+                task_timeout:
+                  title: Task timeout
+                  description: set task timeout limit in seconds, must be positive
+                    integer.
+                  type: integer
                 args:
                   title: Args
                   description: host pattern
@@ -15284,12 +15319,12 @@ definitions:
                 - scp_extra_args
                 - ssh_extra_args
                 - check
-                - syntax_check
                 - diff
                 - extra_vars
                 - vault_password_file
                 - forks
                 - playbook_dir
+                - task_timeout
                 - args
                 - group
               x-view-field-name: verbose
@@ -16252,7 +16287,10 @@ definitions:
           usePrefetch: true
       verbose:
         title: Verbose
-        description: verbose mode (-vvv for more, -vvvv to enable connection debugging)
+        description: Causes Ansible to print more debug messages. Adding multiple
+          -v will increase the verbosity, the builtin plugins currently evaluate up
+          to -vvvvvv. A reasonable level to start is -vvv, connection debugging might
+          require -vvvv. This argument may be specified multiple times.
         type: integer
         maximum: 4
         minimum: 0
@@ -16268,9 +16306,10 @@ definitions:
       inventory:
         title: Inventory
         description: specify inventory host path or comma separated host list. --inventory-file
-          is deprecated
+          is deprecated. This argument may be specified multiple times.
         type: string
         format: inventory
+        minLength: 1
         x-options:
           filters:
             plugin: POLEMARCH_DB,ANSIBLE_FILE,ANSIBLE_STRING
@@ -16313,11 +16352,12 @@ definitions:
         type: string
       connection:
         title: Connection
-        description: connection type to use (default=smart)
+        description: connection type to use (default=ssh)
         type: string
       timeout:
         title: Timeout
-        description: override the connection timeout in seconds (default=10)
+        description: override the connection timeout in seconds (default depends on
+          connection)
         type: integer
       ssh_common_args:
         title: Ssh common args
@@ -16340,10 +16380,6 @@ definitions:
         description: don't make any changes; instead, try to predict some of the changes
           that may occur
         type: boolean
-      syntax_check:
-        title: Syntax check
-        description: perform a syntax check on the playbook, but do not execute it
-        type: boolean
       diff:
         title: Diff
         description: when changing (small) files and templates, show the differences
@@ -16352,7 +16388,7 @@ definitions:
       extra_vars:
         title: Extra vars
         description: set additional variables as key=value or YAML/JSON, if filename
-          prepend with @
+          prepend with @. This argument may be specified multiple times.
         type: string
       vault_password_file:
         title: Vault password file
@@ -16370,9 +16406,13 @@ definitions:
       playbook_dir:
         title: Playbook dir
         description: Since this tool does not use playbooks, use this as a substitute
-          playbook directory.This sets the relative path for many features including
+          playbook directory. This sets the relative path for many features including
           roles/ group_vars/ etc.
         type: string
+      task_timeout:
+        title: Task timeout
+        description: set task timeout limit in seconds, must be positive integer.
+        type: integer
       args:
         title: Args
         description: host pattern
@@ -16403,12 +16443,12 @@ definitions:
       - scp_extra_args
       - ssh_extra_args
       - check
-      - syntax_check
       - diff
       - extra_vars
       - vault_password_file
       - forks
       - playbook_dir
+      - task_timeout
       - args
       - group
     x-view-field-name: verbose
@@ -16470,7 +16510,10 @@ definitions:
           usePrefetch: true
       verbose:
         title: Verbose
-        description: verbose mode (-vvv for more, -vvvv to enable connection debugging)
+        description: Causes Ansible to print more debug messages. Adding multiple
+          -v will increase the verbosity, the builtin plugins currently evaluate up
+          to -vvvvvv. A reasonable level to start is -vvv, connection debugging might
+          require -vvvv. This argument may be specified multiple times.
         type: integer
         maximum: 4
         minimum: 0
@@ -16489,11 +16532,12 @@ definitions:
         type: string
       connection:
         title: Connection
-        description: connection type to use (default=smart)
+        description: connection type to use (default=ssh)
         type: string
       timeout:
         title: Timeout
-        description: override the connection timeout in seconds (default=10)
+        description: override the connection timeout in seconds (default depends on
+          connection)
         type: integer
       ssh_common_args:
         title: Ssh common args
@@ -16530,20 +16574,18 @@ definitions:
         type: string
       tags:
         title: Tags
-        description: only run plays and tasks tagged with these values
-        type: string
+        description: only run plays and tasks tagged with these values. This argument
+          may be specified multiple times.
+        type: integer
       skip_tags:
         title: Skip tags
-        description: only run plays and tasks whose tags do not match these values
-        type: string
+        description: only run plays and tasks whose tags do not match these values.
+          This argument may be specified multiple times.
+        type: integer
       check:
         title: Check
         description: don't make any changes; instead, try to predict some of the changes
           that may occur
-        type: boolean
-      syntax_check:
-        title: Syntax check
-        description: perform a syntax check on the playbook, but do not execute it
         type: boolean
       diff:
         title: Diff
@@ -16553,9 +16595,10 @@ definitions:
       inventory:
         title: Inventory
         description: specify inventory host path or comma separated host list. --inventory-file
-          is deprecated
+          is deprecated. This argument may be specified multiple times.
         type: string
         format: inventory
+        minLength: 1
         x-options:
           filters:
             plugin: POLEMARCH_DB,ANSIBLE_FILE,ANSIBLE_STRING
@@ -16570,7 +16613,7 @@ definitions:
       extra_vars:
         title: Extra vars
         description: set additional variables as key=value or YAML/JSON, if filename
-          prepend with @
+          prepend with @. This argument may be specified multiple times.
         type: string
       vault_password_file:
         title: Vault password file
@@ -16585,6 +16628,10 @@ definitions:
         title: Forks
         description: specify number of parallel processes to use (default=5)
         type: integer
+      syntax_check:
+        title: Syntax check
+        description: perform a syntax check on the playbook, but do not execute it
+        type: boolean
       list_tasks:
         title: List tasks
         description: list all tasks that would be executed
@@ -16624,7 +16671,6 @@ definitions:
       - tags
       - skip_tags
       - check
-      - syntax_check
       - diff
       - inventory
       - list_hosts
@@ -16632,6 +16678,7 @@ definitions:
       - extra_vars
       - vault_password_file
       - forks
+      - syntax_check
       - list_tasks
       - list_tags
       - step
@@ -16712,8 +16759,11 @@ definitions:
                     usePrefetch: true
                 verbose:
                   title: Verbose
-                  description: verbose mode (-vvv for more, -vvvv to enable connection
-                    debugging)
+                  description: Causes Ansible to print more debug messages. Adding
+                    multiple -v will increase the verbosity, the builtin plugins currently
+                    evaluate up to -vvvvvv. A reasonable level to start is -vvv, connection
+                    debugging might require -vvvv. This argument may be specified
+                    multiple times.
                   type: integer
                   maximum: 4
                   minimum: 0
@@ -16732,11 +16782,12 @@ definitions:
                   type: string
                 connection:
                   title: Connection
-                  description: connection type to use (default=smart)
+                  description: connection type to use (default=ssh)
                   type: string
                 timeout:
                   title: Timeout
-                  description: override the connection timeout in seconds (default=10)
+                  description: override the connection timeout in seconds (default
+                    depends on connection)
                   type: integer
                 ssh_common_args:
                   title: Ssh common args
@@ -16776,22 +16827,18 @@ definitions:
                   type: string
                 tags:
                   title: Tags
-                  description: only run plays and tasks tagged with these values
-                  type: string
+                  description: only run plays and tasks tagged with these values.
+                    This argument may be specified multiple times.
+                  type: integer
                 skip_tags:
                   title: Skip tags
                   description: only run plays and tasks whose tags do not match these
-                    values
-                  type: string
+                    values. This argument may be specified multiple times.
+                  type: integer
                 check:
                   title: Check
                   description: don't make any changes; instead, try to predict some
                     of the changes that may occur
-                  type: boolean
-                syntax_check:
-                  title: Syntax check
-                  description: perform a syntax check on the playbook, but do not
-                    execute it
                   type: boolean
                 diff:
                   title: Diff
@@ -16801,9 +16848,11 @@ definitions:
                 inventory:
                   title: Inventory
                   description: specify inventory host path or comma separated host
-                    list. --inventory-file is deprecated
+                    list. --inventory-file is deprecated. This argument may be specified
+                    multiple times.
                   type: string
                   format: inventory
+                  minLength: 1
                   x-options:
                     filters:
                       plugin: POLEMARCH_DB,ANSIBLE_FILE,ANSIBLE_STRING
@@ -16819,7 +16868,8 @@ definitions:
                 extra_vars:
                   title: Extra vars
                   description: set additional variables as key=value or YAML/JSON,
-                    if filename prepend with @
+                    if filename prepend with @. This argument may be specified multiple
+                    times.
                   type: string
                 vault_password_file:
                   title: Vault password file
@@ -16834,6 +16884,11 @@ definitions:
                   title: Forks
                   description: specify number of parallel processes to use (default=5)
                   type: integer
+                syntax_check:
+                  title: Syntax check
+                  description: perform a syntax check on the playbook, but do not
+                    execute it
+                  type: boolean
                 list_tasks:
                   title: List tasks
                   description: list all tasks that would be executed
@@ -16873,7 +16928,6 @@ definitions:
                 - tags
                 - skip_tags
                 - check
-                - syntax_check
                 - diff
                 - inventory
                 - list_hosts
@@ -16881,6 +16935,7 @@ definitions:
                 - extra_vars
                 - vault_password_file
                 - forks
+                - syntax_check
                 - list_tasks
                 - list_tags
                 - step
@@ -16906,8 +16961,11 @@ definitions:
                     usePrefetch: true
                 verbose:
                   title: Verbose
-                  description: verbose mode (-vvv for more, -vvvv to enable connection
-                    debugging)
+                  description: Causes Ansible to print more debug messages. Adding
+                    multiple -v will increase the verbosity, the builtin plugins currently
+                    evaluate up to -vvvvvv. A reasonable level to start is -vvv, connection
+                    debugging might require -vvvv. This argument may be specified
+                    multiple times.
                   type: integer
                   maximum: 4
                   minimum: 0
@@ -16924,9 +16982,11 @@ definitions:
                 inventory:
                   title: Inventory
                   description: specify inventory host path or comma separated host
-                    list. --inventory-file is deprecated
+                    list. --inventory-file is deprecated. This argument may be specified
+                    multiple times.
                   type: string
                   format: inventory
+                  minLength: 1
                   x-options:
                     filters:
                       plugin: POLEMARCH_DB,ANSIBLE_FILE,ANSIBLE_STRING
@@ -16970,11 +17030,12 @@ definitions:
                   type: string
                 connection:
                   title: Connection
-                  description: connection type to use (default=smart)
+                  description: connection type to use (default=ssh)
                   type: string
                 timeout:
                   title: Timeout
-                  description: override the connection timeout in seconds (default=10)
+                  description: override the connection timeout in seconds (default
+                    depends on connection)
                   type: integer
                 ssh_common_args:
                   title: Ssh common args
@@ -16999,11 +17060,6 @@ definitions:
                   description: don't make any changes; instead, try to predict some
                     of the changes that may occur
                   type: boolean
-                syntax_check:
-                  title: Syntax check
-                  description: perform a syntax check on the playbook, but do not
-                    execute it
-                  type: boolean
                 diff:
                   title: Diff
                   description: when changing (small) files and templates, show the
@@ -17012,7 +17068,8 @@ definitions:
                 extra_vars:
                   title: Extra vars
                   description: set additional variables as key=value or YAML/JSON,
-                    if filename prepend with @
+                    if filename prepend with @. This argument may be specified multiple
+                    times.
                   type: string
                 vault_password_file:
                   title: Vault password file
@@ -17030,9 +17087,14 @@ definitions:
                 playbook_dir:
                   title: Playbook dir
                   description: Since this tool does not use playbooks, use this as
-                    a substitute playbook directory.This sets the relative path for
+                    a substitute playbook directory. This sets the relative path for
                     many features including roles/ group_vars/ etc.
                   type: string
+                task_timeout:
+                  title: Task timeout
+                  description: set task timeout limit in seconds, must be positive
+                    integer.
+                  type: integer
                 args:
                   title: Args
                   description: host pattern
@@ -17063,12 +17125,12 @@ definitions:
                 - scp_extra_args
                 - ssh_extra_args
                 - check
-                - syntax_check
                 - diff
                 - extra_vars
                 - vault_password_file
                 - forks
                 - playbook_dir
+                - task_timeout
                 - args
                 - group
               x-view-field-name: verbose
@@ -17237,8 +17299,11 @@ definitions:
                     usePrefetch: true
                 verbose:
                   title: Verbose
-                  description: verbose mode (-vvv for more, -vvvv to enable connection
-                    debugging)
+                  description: Causes Ansible to print more debug messages. Adding
+                    multiple -v will increase the verbosity, the builtin plugins currently
+                    evaluate up to -vvvvvv. A reasonable level to start is -vvv, connection
+                    debugging might require -vvvv. This argument may be specified
+                    multiple times.
                   type: integer
                   maximum: 4
                   minimum: 0
@@ -17257,11 +17322,12 @@ definitions:
                   type: string
                 connection:
                   title: Connection
-                  description: connection type to use (default=smart)
+                  description: connection type to use (default=ssh)
                   type: string
                 timeout:
                   title: Timeout
-                  description: override the connection timeout in seconds (default=10)
+                  description: override the connection timeout in seconds (default
+                    depends on connection)
                   type: integer
                 ssh_common_args:
                   title: Ssh common args
@@ -17301,22 +17367,18 @@ definitions:
                   type: string
                 tags:
                   title: Tags
-                  description: only run plays and tasks tagged with these values
-                  type: string
+                  description: only run plays and tasks tagged with these values.
+                    This argument may be specified multiple times.
+                  type: integer
                 skip_tags:
                   title: Skip tags
                   description: only run plays and tasks whose tags do not match these
-                    values
-                  type: string
+                    values. This argument may be specified multiple times.
+                  type: integer
                 check:
                   title: Check
                   description: don't make any changes; instead, try to predict some
                     of the changes that may occur
-                  type: boolean
-                syntax_check:
-                  title: Syntax check
-                  description: perform a syntax check on the playbook, but do not
-                    execute it
                   type: boolean
                 diff:
                   title: Diff
@@ -17326,9 +17388,11 @@ definitions:
                 inventory:
                   title: Inventory
                   description: specify inventory host path or comma separated host
-                    list. --inventory-file is deprecated
+                    list. --inventory-file is deprecated. This argument may be specified
+                    multiple times.
                   type: string
                   format: inventory
+                  minLength: 1
                   x-options:
                     filters:
                       plugin: POLEMARCH_DB,ANSIBLE_FILE,ANSIBLE_STRING
@@ -17344,7 +17408,8 @@ definitions:
                 extra_vars:
                   title: Extra vars
                   description: set additional variables as key=value or YAML/JSON,
-                    if filename prepend with @
+                    if filename prepend with @. This argument may be specified multiple
+                    times.
                   type: string
                 vault_password_file:
                   title: Vault password file
@@ -17359,6 +17424,11 @@ definitions:
                   title: Forks
                   description: specify number of parallel processes to use (default=5)
                   type: integer
+                syntax_check:
+                  title: Syntax check
+                  description: perform a syntax check on the playbook, but do not
+                    execute it
+                  type: boolean
                 list_tasks:
                   title: List tasks
                   description: list all tasks that would be executed
@@ -17398,7 +17468,6 @@ definitions:
                 - tags
                 - skip_tags
                 - check
-                - syntax_check
                 - diff
                 - inventory
                 - list_hosts
@@ -17406,6 +17475,7 @@ definitions:
                 - extra_vars
                 - vault_password_file
                 - forks
+                - syntax_check
                 - list_tasks
                 - list_tags
                 - step
@@ -17431,8 +17501,11 @@ definitions:
                     usePrefetch: true
                 verbose:
                   title: Verbose
-                  description: verbose mode (-vvv for more, -vvvv to enable connection
-                    debugging)
+                  description: Causes Ansible to print more debug messages. Adding
+                    multiple -v will increase the verbosity, the builtin plugins currently
+                    evaluate up to -vvvvvv. A reasonable level to start is -vvv, connection
+                    debugging might require -vvvv. This argument may be specified
+                    multiple times.
                   type: integer
                   maximum: 4
                   minimum: 0
@@ -17449,9 +17522,11 @@ definitions:
                 inventory:
                   title: Inventory
                   description: specify inventory host path or comma separated host
-                    list. --inventory-file is deprecated
+                    list. --inventory-file is deprecated. This argument may be specified
+                    multiple times.
                   type: string
                   format: inventory
+                  minLength: 1
                   x-options:
                     filters:
                       plugin: POLEMARCH_DB,ANSIBLE_FILE,ANSIBLE_STRING
@@ -17495,11 +17570,12 @@ definitions:
                   type: string
                 connection:
                   title: Connection
-                  description: connection type to use (default=smart)
+                  description: connection type to use (default=ssh)
                   type: string
                 timeout:
                   title: Timeout
-                  description: override the connection timeout in seconds (default=10)
+                  description: override the connection timeout in seconds (default
+                    depends on connection)
                   type: integer
                 ssh_common_args:
                   title: Ssh common args
@@ -17524,11 +17600,6 @@ definitions:
                   description: don't make any changes; instead, try to predict some
                     of the changes that may occur
                   type: boolean
-                syntax_check:
-                  title: Syntax check
-                  description: perform a syntax check on the playbook, but do not
-                    execute it
-                  type: boolean
                 diff:
                   title: Diff
                   description: when changing (small) files and templates, show the
@@ -17537,7 +17608,8 @@ definitions:
                 extra_vars:
                   title: Extra vars
                   description: set additional variables as key=value or YAML/JSON,
-                    if filename prepend with @
+                    if filename prepend with @. This argument may be specified multiple
+                    times.
                   type: string
                 vault_password_file:
                   title: Vault password file
@@ -17555,9 +17627,14 @@ definitions:
                 playbook_dir:
                   title: Playbook dir
                   description: Since this tool does not use playbooks, use this as
-                    a substitute playbook directory.This sets the relative path for
+                    a substitute playbook directory. This sets the relative path for
                     many features including roles/ group_vars/ etc.
                   type: string
+                task_timeout:
+                  title: Task timeout
+                  description: set task timeout limit in seconds, must be positive
+                    integer.
+                  type: integer
                 args:
                   title: Args
                   description: host pattern
@@ -17588,12 +17665,12 @@ definitions:
                 - scp_extra_args
                 - ssh_extra_args
                 - check
-                - syntax_check
                 - diff
                 - extra_vars
                 - vault_password_file
                 - forks
                 - playbook_dir
+                - task_timeout
                 - args
                 - group
               x-view-field-name: verbose

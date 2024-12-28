@@ -221,7 +221,7 @@ export function setupDetailView(path) {
                 if (
                     store.instance.value === null ||
                     (store.instance.value.kind === 'ANSIBLE_MODULE' &&
-                        store.instance.value.mode.name === 'system.setup' &&
+                        ['system.setup', 'ansible.builtin.setup'].includes(store.instance.value.mode.name) &&
                         store.instance.value.status === 'OK')
                 ) {
                     return store.sublinks.value;

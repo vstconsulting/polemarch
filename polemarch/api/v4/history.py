@@ -71,7 +71,9 @@ class HistoryViewMixin(HistoryModelViewSet):
         history = self.get_object()
         if history.status not in HistoryStatus.get_stopped_statuses():
             raise DataNotReady("Execution still in process.")
-        if history.kind != 'ANSIBLE_MODULE' or history.mode != 'system.setup' or history.status != 'OK':
+        if (history.kind != 'ANSIBLE_MODULE' or
+                history.mode not in ('system.setup', 'ansible.builtin.setup') or
+                history.status != 'OK'):
             raise history.NoFactsAvailableException()
         return {'facts': self.plugin_handler.get_reader(history).get_facts()}
 

@@ -1,7 +1,7 @@
 # pylint: disable=invalid-name,ungrouped-imports
 from __future__ import unicode_literals
 
-import json
+import tempfile
 import logging
 import os
 import re
@@ -14,6 +14,7 @@ try:
     from yaml import CLoader as Loader, CDumper as Dumper, load, dump
 except ImportError:  # nocv
     from yaml import Loader, Dumper, load, dump
+import orjson
 from django.conf import settings
 from django.db import transaction, models
 from django.utils import timezone
@@ -86,12 +87,12 @@ class task(object):
     __slots__ = 'app', 'args', 'kwargs'
 
     def __init__(self, app, *args, **kwargs):
-        '''
+        """
         :param app: -- CeleryApp object
         :type app: celery.Celery
         :param args: -- args for CeleryApp
         :param kwargs: -- kwargs for CeleryApp
-        '''
+        """
         self.app = app
         self.args, self.kwargs = args, kwargs
 
@@ -127,7 +128,7 @@ class BaseTask(PMObject):
         self.task_class = self.__class__
 
     def start(self):
-        ''' Method that starts task executions. '''
+        """ Method that starts task executions. """
         return self.run()
 
     def run(self):  # pragma: no cover
@@ -185,9 +186,9 @@ class PMAnsible(PMObject):
             self.output = result
             return self.output
 
-    def __init__(self, execute_path: str = '/tmp/'):
+    def __init__(self, execute_path: str = None):
         super().__init__()
-        self.execute_path = execute_path
+        self.execute_path = execute_path or tempfile.gettempdir()
 
     def get_ansible_cache(self):
         if not hasattr(self, 'cache'):
@@ -195,7 +196,7 @@ class PMAnsible(PMObject):
         return self.cache
 
     def _get_only_json(self, output):
-        return json.loads(self._regex.findall(output)[0])
+        return orjson.loads(self._regex.findall(output)[0])
 
     def get_ref(self, cache=False):
         ref = self.ref_name
@@ -233,6 +234,7 @@ class AnsibleArgumentsReference(PMAnsible):
         # Excluded because now we could not send any to worker process
         'ask-sudo-pass', 'ask-su-pass', 'ask-pass',
         'ask-vault-pass', 'ask-become-pass',
+        'ask-vault-password',
     ]
 
     def __init__(self):
@@ -246,12 +248,12 @@ class AnsibleArgumentsReference(PMAnsible):
         return cmd
 
     def _extract_from_cli(self):
-        '''
+        """
         Format dict with args for API
 
         :return: args for ansible cli
         :rtype: dict
-        '''
+        """
         # pylint: disable=protected-access,
         data = self.get_data()
         self.version = data['version']

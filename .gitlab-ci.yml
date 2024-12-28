@@ -84,8 +84,12 @@ js_style:
 functional_test:
   <<: *branch_tests
   needs: ["code_style"]
-  variables:
-    TOX_ENVS: "py312-coverage,py310-install"
+  parallel:
+    matrix:
+      - TOX_ENVS:
+          - py310-install-generatekey
+      - TOX_ENVS:
+          - py312-coverage-generatekey
 
 
 # Realese

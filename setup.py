@@ -32,6 +32,7 @@ kwargs = dict(
         'postgresql': ['psycopg[pool,c]'],
         # Ansible required packages
         'ansible29': load_requirements('requirements-ansible29.txt', os.getcwd()),
+        'ansible-core': ['polemarch-ansible~=3.0.1'],
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt', os.getcwd()),
