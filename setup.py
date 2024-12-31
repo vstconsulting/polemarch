@@ -28,6 +28,7 @@ kwargs = dict(
             for i in install_requirements
             if isinstance(i, str) and 'vstutils' in i
         ],
+        'production': ['uvloop', 'httptools'],
         'mysql': ['mysqlclient<2.2'],
         'postgresql': ['psycopg[pool,c]'],
         # Ansible required packages

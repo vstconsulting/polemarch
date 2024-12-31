@@ -42,12 +42,12 @@ class _Base:
 
     @raise_context()
     def _load_yaml(self) -> Dict[Text, Any]:
-        '''
+        """
         Loading `.polemarch.yaml` data.
 
         :return: Data from `.polemarch.yaml` file.
         :type ret: dict
-        '''
+        """
         self.proj.get_yaml_subcache().clear()
         return self.proj.get_yaml()
 
@@ -250,12 +250,12 @@ class _Base:
         return chain(self.search_files(repo, '*.yml'), path_list_additional)
 
     def _make_operations(self, operation: Callable) -> Any:
-        '''
+        """
         Handle VCS operations and sync data from project.
 
         :param operation: function that should be handled.
         :return: tuple with repo-object and fetch-results
-        '''
+        """
         self._set_status("SYNC")
         try:
             with transaction.atomic():
@@ -276,19 +276,19 @@ class _Base:
         return result
 
     def make_clone(self, options):  # pragma: no cover
-        '''
+        """
         Make operations for clone repo
         :param options: any options, like env variables or any thing
         :return: tuple object with 2 args: repo obj and fetch results
-        '''
+        """
         raise NotImplementedError
 
     def make_update(self, options):  # pragma: no cover
-        '''
+        """
         Make operation for fetch repo tree
         :param options: any options, like env variables or any thing
         :return: tuple object with 2 args: repo obj and fetch results
-        '''
+        """
         raise NotImplementedError
 
     def get_revision(self, *args, repo=None, **kwargs) -> Text:
@@ -299,11 +299,11 @@ class _Base:
         return "NO VCS"
 
     def delete(self) -> Text:
-        '''
+        """
         Handler, which removes project data directory.
 
         :return: user message
-        '''
+        """
         if os.path.exists(self.path):
             if os.path.isfile(self.path):
                 os.remove(self.path)  # nocv

@@ -366,9 +366,14 @@ class ExecutionHandlers(ObjectHandlers):
         }
 
         if settings.TESTS_RUN:  # TODO: do something better?
-            task_class.do(**task_kwargs)
+            task_class().apply_async(kwargs=task_kwargs)
         else:
-            transaction.on_commit(partial(task_class.do, **task_kwargs))  # nocv
+            transaction.on_commit(  # nocv
+                partial(
+                    task_class().apply_async,
+                    kwargs=task_kwargs,
+                )
+            )
 
         return history
 

@@ -69,7 +69,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     python3.12 -m pip install cryptography paramiko 'pip~=23.3.1' && \
     mkdir -p /projects /hooks /run/openldap /etc/polemarch/hooks /var/lib/polemarch && \
     ls -la /polemarch_env/wheels && \
-    python3.12 -m pip install --no-index --find-links /polemarch_env/wheels $PACKAGE_NAME[mysql,postgresql,ansible-core] && \
+    python3.12 -m pip install --no-index --find-links /polemarch_env/wheels $PACKAGE_NAME[mysql,postgresql,ansible-core,production] && \
     find /usr/lib/python3.12 -regex '.*\(*.pyc\|__pycache__\).*' -delete && \
     apt remove gpg wget lsb-release -y && \
     apt autoremove -y && \
