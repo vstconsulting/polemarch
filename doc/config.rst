@@ -106,7 +106,7 @@ example than general howto) you must do such steps:
 
            [Service]
            Type=simple
-           ExecStart=/opt/polemarch/bin/polemarchctl web
+           ExecStart=/opt/polemarch/bin/polemarchctl web --nomigrate
            ExecReload=/bin/kill -HUP $MAINPID
            ExecStop=/bin/kill -SIGTERM $MAINPID
            WorkingDirectory=/opt/polemarch
@@ -144,6 +144,9 @@ example than general howto) you must do such steps:
 
        .. sourcecode:: bash
 
+           # migrate database data
+           /opt/polemarch/bin/polemarchctl migrate
+           # then start service
            systemctl start polemarch.service
 
    #. Repeat all steps in other nodes and connect them to one DB, cache, MQ and storage.

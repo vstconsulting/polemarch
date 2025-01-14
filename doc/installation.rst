@@ -23,7 +23,7 @@ Install from PyPI
    .. sourcecode:: bash
 
       sudo dnf module reset python38
-      sudo dnf module enable python39 (or python3.11 if available)
+      sudo dnf module enable python311 (or python3.12 if available)
       sudo dnf install python3.11 python3.11-devel
       # or use the "IUS" repo if needed
 

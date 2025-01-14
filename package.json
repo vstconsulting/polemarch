@@ -20,7 +20,7 @@
     "@biomejs/biome": "1.9.4",
     "@types/node": "^22.9.0",
     "@vitejs/plugin-vue2": "^2.3.1",
-    "@vstconsulting/vstutils": "^5.12.1",
+    "@vstconsulting/vstutils": "^5.12.3",
     "concurrently": "^9.1.0",
     "sass": "^1.81.0",
     "typescript": "^5.6.3",
