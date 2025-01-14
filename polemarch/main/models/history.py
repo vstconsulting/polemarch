@@ -9,6 +9,7 @@ from collections import OrderedDict
 from datetime import timedelta, datetime
 from typing import Any, Dict, List, TypeVar
 
+import orjson
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -136,7 +137,7 @@ class History(BModel):
 
     @property
     def execute_args(self) -> Dict[str, Any]:
-        return json.loads(self.json_args)
+        return orjson.loads(self.json_args)
 
     @execute_args.setter
     def execute_args(self, value: Dict) -> None:
@@ -149,7 +150,7 @@ class History(BModel):
     # options
     @property
     def options(self) -> Dict:
-        return json.loads(self.json_options)
+        return orjson.loads(self.json_options)
 
     @options.setter
     def options(self, value: Dict) -> None:

@@ -28,6 +28,14 @@
     }
 }
 
+.column-initiator, .column-inventory {
+    max-width: 240px;
+}
+
+.list-History, .list-ProjectHistory {
+    overflow: scroll;
+}
+
 @each $status, $color in $history-status-colors {
     .model-ProjectHistory.field-component.name-status.value-#{$status} {
         color: #{$color};

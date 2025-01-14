@@ -89,3 +89,18 @@ onAppCreated((app) => {
 onAppAfterInit(({ app }) => {
     app.views.get('/group/{id}/groups/{groups_id}/hosts/').nestedQueryset = app.views.get('/host/').objects;
 });
+
+
+class BooleanField extends spa.fields.boolean.BooleanField {
+    getInitialValue(): undefined {
+        return undefined;
+    }
+}
+
+onAppCreated((app) => {
+    app.fieldsResolver.registerField(
+        'boolean',
+        app.fieldsResolver._types.get('boolean').keys().next().value,
+        BooleanField
+    );
+});

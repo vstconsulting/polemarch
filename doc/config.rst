@@ -105,15 +105,16 @@ example than general howto) you must do such steps:
            After=network.target remote-fs.target nss-lookup.target redis.service mysql.service
 
            [Service]
-           Type=forking
-           ExecStart=/opt/polemarch/bin/polemarchctl webserver
-           ExecReload=/opt/polemarch/bin/polemarchctl webserver reload=/opt/polemarch/pid/web.pid
-           ExecStop=/opt/polemarch/bin/polemarchctl webserver stop=/opt/polemarch/pid/web.pid
-           PIDFile=/opt/polemarch/pid/web.pid
+           Type=simple
+           ExecStart=/opt/polemarch/bin/polemarchctl web
+           ExecReload=/bin/kill -HUP $MAINPID
+           ExecStop=/bin/kill -SIGTERM $MAINPID
+           WorkingDirectory=/opt/polemarch
            User=polemarch
            Group=polemarch
-           KillSignal=SIGCONT
+           KillSignal=SIGTERM
            Restart=always
+           RestartSec=5
 
            # Uncomment this if used privileged ports
            # Capabilities=CAP_NET_BIND_SERVICE+ep
