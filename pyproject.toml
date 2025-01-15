@@ -1,0 +1,107 @@
+[build-system]
+requires = ["setuptools>=61.2", "vstcompile~=3.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "polemarch"
+authors = [{name = "VST Consulting", email = "sergey.k@vstconsulting.net"}]
+license = {text = "AGPLv3+"}
+description = "Polemarch is ansible based service for orchestration infrastructure."
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 5.1",
+    "Operating System :: POSIX",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Software Development :: User Interfaces",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Utilities",
+]
+requires-python = ">=3.10"
+dynamic = ["version", "dependencies", "optional-dependencies"]
+
+[project.urls]
+Home = "https://gitlab.com/vstconsulting/polemarch"
+"Web Site" = "https://polemarch.org/"
+"Issue Tracker" = "https://gitlab.com/vstconsulting/polemarch/issues"
+"Source Code" = "https://gitlab.com/vstconsulting/polemarch"
+Releases = "https://github.com/vstconsulting/polemarch/releases"
+DockerHub = "https://hub.docker.com/r/vstconsulting/polemarch/"
+Documentation = "https://about.polemarch.org/"
+
+[project.readme]
+file = "README.rst"
+content-type = "text/x-rst"
+
+[project.scripts]
+polemarchctl = "polemarch:cmd_execution"
+
+[tool.setuptools]
+zip-safe = false
+include-package-data = true
+license-files = ["LICENSE"]
+
+[tool.setuptools.dynamic]
+version = {attr = "polemarch.__version__"}
+
+[tool.setuptools.packages.find]
+include = ['polemarch', 'polemarch.*']
+namespaces = false
+
+[tool.flake8]
+ignore = "E221,E222,E121,E123,E126,E226,E24,E704,E116,E731,E722,E741,W503,W504,B001,B008,B010,B023,C812,C815,CFQ002,CFQ004,B019,I100,DJ01"
+exclude = "./polemarch/*/migrations/*,./polemarch/main/settings*.py,.tox/*,./etc/*,./*/__init__.py,*__main.py,./t_openstack.py,./polemarch/projects/*,./env/*,tests.py"
+max-line-length = 120
+import-order-style = 'pep8'
+
+[tool.coverage.run]
+# branch = true
+source = [
+    'polemarch',
+]
+parallel = true
+concurrency = [
+    'thread',
+    'multiprocessing',
+]
+omit = [
+    '.tox/*',
+    '*/main/management/daemon.py',
+    '*/*/migrations/*',
+    '*/main/wsgi.py',
+    '*/wsgi.py',
+    '*/manage.py',
+    '*ihsctl',
+    '*setup.py',
+    'test.py',
+    'upload_big.py',
+    'polemarch/__init__.py',
+    'polemarch/__main__.py',
+    'polemarch/wapp.py',
+    'polemarch/main/management/commands/webserver.py',
+    'polemarch/main/tests/repos.py',
+    'polemarch/main/tests/tasks.py',
+    'polemarch/main/tests/project.py',
+    'polemarch/main/tests/ansible.py',
+    'polemarch/api/v1/*',
+    '*celery_beat_scheduler.py',
+]
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+exclude_lines = [
+    'pragma: no cover',
+    'nocv',
+    'noce',
+    'raise NotImplementedError',
+]

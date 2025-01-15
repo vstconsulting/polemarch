@@ -1,9 +1,11 @@
 # pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
+
 import io
-from typing import Text, Tuple
 import tarfile
 from pathlib import Path
+from typing import Text, Tuple
+
 from ._base import _ArchiveRepo, shutil
 
 
@@ -38,6 +40,6 @@ class Tar(_ArchiveRepo):
                 self.delete()
             shutil.move(path + ".bak", path) if moved else None
             raise
-        else:
-            shutil.rmtree(path + ".bak") if moved else None
-            return Path(path), True
+
+        shutil.rmtree(path + ".bak") if moved else None
+        return Path(path), True

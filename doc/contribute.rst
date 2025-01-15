@@ -14,13 +14,13 @@ Here is how to proceed:
    To do so install required dependencies. See
    ":ref:`Install from PyPI`" for more detailed
    explanation, which dependencies and why they are needed. System packages
-   (example for Ubuntu 20.04):
+   (example for Ubuntu 22.04):
 
    .. sourcecode:: bash
 
-      sudo apt-get install python3-virtualenv python3.8 python3.8-dev gcc libffi-dev libkrb5-dev libffi7 libssl-dev libyaml-dev libsasl2-dev libldap2-dev default-libmysqlclient-dev sshpass git tox
+      sudo apt-get install python3-virtualenv python3.11 python3.11-dev gcc libffi-dev libkrb5-dev libffi7 libssl-dev libyaml-dev libsasl2-dev libldap2-dev default-libmysqlclient-dev sshpass git tox
 
-   .. note:: Your patch must work at Python 3.8 because older Python may not work correctly with Polemarch.
+   .. note:: Your patch must work at Python 3.11 because older Python may not work correctly with Polemarch.
 
 #. Make fork of our repository and clone it to your local development
    machine.

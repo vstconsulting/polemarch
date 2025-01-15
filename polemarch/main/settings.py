@@ -1,5 +1,3 @@
-import os
-
 from vstutils.settings import *
 
 WEBSERVER_COMMAND = 'webserver'
@@ -43,6 +41,7 @@ LANGUAGES = (
     ('ru', 'Русский'),
 )
 
+API_URL = 'api'
 API[VST_API_VERSION] = {
     'host': {
         'view': f'{VST_PROJECT_LIB_NAME}.api.v4.hosts.HostViewSet',
@@ -71,13 +70,13 @@ API[VST_API_VERSION] = {
     'user': {
         'view': f'{VST_PROJECT_LIB_NAME}.api.v4.users.UserViewSet',
     },
-    'token': {
-        'view': f'{VST_PROJECT_LIB_NAME}.api.v4.users.TokenView',
-        'type': 'view',
-    },
 }
 
 PROJECT_GUI_MENU = []
+
+REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = [
+    'vstutils.oauth2.authentication.JWTBearerTokenAuthentication',
+]
 
 OPENAPI_HOOKS = [
     'polemarch.main.openapi.set_gui_menu_ce',
@@ -86,11 +85,15 @@ OPENAPI_HOOKS = [
 
 SWAGGER_SETTINGS['DEFAULT_INFO'] = '{}.api.swagger.api_info'.format(VST_PROJECT_LIB_NAME)
 SWAGGER_SETTINGS['DEFAULT_AUTO_SCHEMA_CLASS'] = '{}.api.schema.PolemarchAutoSchema'.format(VST_PROJECT_LIB_NAME)
-
-REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += (
-    'rest_framework.authentication.TokenAuthentication',
-    'rest_framework.authentication.BasicAuthentication',
-)
+SWAGGER_SETTINGS['SECURITY_DEFINITIONS'] = {
+    "bearer_auth": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header",
+        "description": "JWT Authorization header using the Bearer scheme. Example: Authorization: Bearer <token>."
+    },
+}
+SWAGGER_SETTINGS['SECURITY_REQUIREMENTS'] = []
 
 OPENAPI_EXTRA_LINKS = dict()
 OPENAPI_EXTRA_LINKS['Request'] = [
@@ -236,6 +239,7 @@ REPO_BACKENDS = {
 # Custom user repos
 DEFAULT_COMMUNITY_REPOS_URL = 'https://gitlab.com/vstconsulting/polemarch-community-repos/raw/master/projects.yaml'
 COMMUNITY_REPOS_URL = main.get('community_projects_url', fallback=DEFAULT_COMMUNITY_REPOS_URL)
+COMMUNITY_REPOS_FETCHING_TIMEOUT = main.getseconds('community_projects_fetching_timeout', fallback=60)
 
 # Execution plugins
 class ExecutionPluginSection(BaseAppendSection):
@@ -307,7 +311,7 @@ LOGGING['loggers']['polemarch.history.output'] = {
 }
 
 # RPC tasks settings
-CELERY_TASK_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'msgpack'
 
 TASKS_HANDLERS = {
     "REPO": {
@@ -325,6 +329,7 @@ NOTIFY_WITHOUT_QUEUE_MODELS = [
     'main.History',
     'main.Project',
 ]
+NOTIFICATOR_CLIENT_CLASS = "{}.notificator.PolemarchNotificator".format(VST_PROJECT_LIB_NAME)
 
 CLONE_RETRY = rpc.getint('clone_retry_count', fallback=5)
 
@@ -341,7 +346,7 @@ HOOKS = {
 
 HOOKS_DIR = main.get("hooks_dir", fallback="/etc/polemarch/hooks/")
 
-__EXECUTOR_DEFAULT = '{INTERPRETER} -m pm_ansible'
+__EXECUTOR_DEFAULT = f'{os.environ.get("POLEMARCH_EXECUTOR_PYTHON", sys.executable)} -m pm_ansible'
 EXECUTOR = main.get("executor_path", fallback=__EXECUTOR_DEFAULT).strip().split(' ')
 SELFCARE = '/tmp/'
 
@@ -352,6 +357,7 @@ PROJECT_REPOSYNC_WAIT_SECONDS = main.getseconds('repo_sync_on_run_timeout', fall
 PROJECT_CI_HANDLER_CLASS = "{}.main.ci.DefaultHandler".format(VST_PROJECT_LIB_NAME)
 METRICS_BACKEND_CLASS = "{}.metrics.PolemarchBackend".format(VST_PROJECT_LIB_NAME)
 HISTORY_METRICS_WINDOW = web.getseconds('history_metrics_window', fallback=600)
+MAX_CUSTOM_OAUTH2_TOKEN_LIFETIME_DAYS = web.getint('max_custom_oauth2_token_lifetime_days', fallback=365)
 
 
 __PWA_ICONS_SIZES = [
@@ -370,17 +376,14 @@ PWA_MANIFEST = {
     ),
 }
 
-SPA_STATIC += [
-    {'priority': 149, 'type': 'js', 'name': 'polemarch/pmlib.js'},
-]
-
 # TEST settings
 if "test" in sys.argv:
     os.environ['DJANGO_ALLOW_ASYNC_UNSAFE'] = 'true'
+    os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
     REPO_BACKENDS['GIT']['OPTIONS']['CLONE_KWARGS']['local'] = True
     CLONE_RETRY = 0
-    PROJECTS_DIR = '/tmp/polemarch_projects' + str(KWARGS['PY_VER'])
-    HOOKS_DIR = '/tmp/polemarch_hooks' + str(KWARGS['PY_VER'])
+    PROJECTS_DIR = f'{gettempdir()}/polemarch_projects' + str(KWARGS['PY_VER'])
+    HOOKS_DIR = f'{gettempdir()}/polemarch_hooks' + str(KWARGS['PY_VER'])
     os.makedirs(PROJECTS_DIR) if not os.path.exists(PROJECTS_DIR) else None
     os.makedirs(HOOKS_DIR) if not os.path.exists(HOOKS_DIR) else None
 
@@ -410,3 +413,4 @@ if "test" in sys.argv:
     }
     INVENTORY_PLUGINS['TEST_INVENTORY_PLUGIN'] = {'BACKEND': f'{tests_module_name}.TestInventoryPlugin'}
     HISTORY_OUTPUT_PLUGINS = ['database', 'logger']
+    MAX_CUSTOM_OAUTH2_TOKEN_LIFETIME_DAYS = 365

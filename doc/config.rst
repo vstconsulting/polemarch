@@ -105,15 +105,16 @@ example than general howto) you must do such steps:
            After=network.target remote-fs.target nss-lookup.target redis.service mysql.service
 
            [Service]
-           Type=forking
-           ExecStart=/opt/polemarch/bin/polemarchctl webserver
-           ExecReload=/opt/polemarch/bin/polemarchctl webserver reload=/opt/polemarch/pid/web.pid
-           ExecStop=/opt/polemarch/bin/polemarchctl webserver stop=/opt/polemarch/pid/web.pid
-           PIDFile=/opt/polemarch/pid/web.pid
+           Type=simple
+           ExecStart=/opt/polemarch/bin/polemarchctl web --nomigrate
+           ExecReload=/bin/kill -HUP $MAINPID
+           ExecStop=/bin/kill -SIGTERM $MAINPID
+           WorkingDirectory=/opt/polemarch
            User=polemarch
            Group=polemarch
-           KillSignal=SIGCONT
+           KillSignal=SIGTERM
            Restart=always
+           RestartSec=5
 
            # Uncomment this if used privileged ports
            # Capabilities=CAP_NET_BIND_SERVICE+ep
@@ -143,6 +144,9 @@ example than general howto) you must do such steps:
 
        .. sourcecode:: bash
 
+           # migrate database data
+           /opt/polemarch/bin/polemarchctl migrate
+           # then start service
            systemctl start polemarch.service
 
    #. Repeat all steps in other nodes and connect them to one DB, cache, MQ and storage.
@@ -202,9 +206,21 @@ So in this case authorization logic will be the following:
 * **ldap-default-domain** - Default domain for auth.
 * **timezone** - Timezone of web-application. ``Default: UTC``.
 * **log_level** - Logging level. ``Default: WARNING``.
-* **projects_dir** - Path where projects will be stored.
+* **projects_dir** - Path to the directory where projects will be stored. During project
+  synchronization, this directory will be used to save project files. Moreover, whenever a plugin
+  is launched within a project, the contents of this directory will be copied for isolated
+  execution. This directory must be in a shared file storage accessible to both the web server
+  and worker nodes.
 * **hooks_dir** - Path where hook scripts stored.
-* **executor_path** - Path for polemarch-ansible wrapper binary.
+* **community_projects_url** - A URL pointing to a YAML file that contains a structured set of
+  links for project templates. ``Default: https://gitlab.com/vstconsulting/polemarch-community-repos/raw/master/projects.yaml``.
+* **community_projects_fetching_timeout** - Maximum server response time for fetching the list
+  of project templates.
+* **executor_path** - Path to the ``polemarch-ansible`` binary. You can implement your own script
+  that introduces the necessary adjustments for your environment, for example, launching in a
+  chroot environment, using some predefined parameters, or running inside a separate virtual
+  environment. It is important that it correctly implements all the existing `pm_ansible`
+  commands.
 * **enable_django_logs** - Enable or disable Django logger to output. Useful for debugging. ``Default: false``.
 * **enable_user_self_remove** - Enable or disable user self-removing. ``Default: false``.
 * **auth-cache-user** - Enable or disable user instance caching. It increases session performance
@@ -261,6 +277,34 @@ Finally, you should add some options to MariaDB configuration:
 .. note:: You can find more database options in :ref:`vstutils:database`.
 
 
+To simplify the configuration of database connections, you can use the ``DATABASE_URL`` environment variable in conjunction with the ``django-environ`` package.
+This approach allows you to define your database connection in a single environment variable,
+which is especially useful for managing different environments (development, testing, production) without changing the code.
+
+**DATABASE_URL** - An environment variable that contains the database connection URL.
+This variable is parsed by ``django-environ`` to configure the database settings. The format of the URL is:
+
+.. sourcecode:: bash
+
+    backend://user:password@host:port/database_name
+
+
+**Examples:**
+
+- **PostgreSQL:**
+
+    .. sourcecode:: bash
+
+        DATABASE_URL=postgres://user:password@localhost:5432/mydatabase
+
+
+- **MySQL:**
+
+    .. sourcecode:: bash
+
+        DATABASE_URL=mysql://user:password@localhost:3306/mydatabase
+
+
 .. _cache:
 
 Cache settings
@@ -276,6 +320,44 @@ additional plugins. You can find details about cache configuration at
 In clusterization scenario we advice to share cache between nodes to speedup their
 work using client-server cache realizations.
 We recommend to use Redis in production environments.
+
+To simplify the configuration of cache backends, you can use the ``CACHE_URL`` environment variable in conjunction with the ``django-environ`` package.
+This approach allows you to define your cache configuration in a single environment variable,
+making it easy to switch between different cache backends without changing the code.
+
+**CACHE_URL** - An environment variable that contains the cache backend connection URL.
+This variable is parsed by django-environ to configure the cache settings in Django.
+The format of the URL is:
+
+.. sourcecode:: bash
+
+    backend://username:password@host:port
+
+
+**Examples:**
+
+- Memcached using MemcacheCache backend
+
+    .. sourcecode:: bash
+
+        CACHE_URL=memcache://127.0.0.1:11211
+
+- Memcached using PyLibMCCache backend
+
+    .. sourcecode:: bash
+
+        CACHE_URL=pymemcache://127.0.0.1:11211
+
+- Redis cache
+
+    .. sourcecode:: bash
+
+        CACHE_URL=redis://127.0.0.1:6379/1
+
+**LOCKS_CACHE_URL**, **SESSIONS_CACHE_URL**, **ETAG_CACHE_URL** - Environment variables for configuring specific cache backends for locks, session data, and ETag caching respectively.
+These allow you to use different cache configurations for different purposes within your application.
+
+
 
 .. _locks:
 
@@ -344,7 +426,6 @@ Section ``[worker]``.
 Celery worker options for start. Useful settings:
 
 * **loglevel** - Celery worker logging level. Default: from main section ``log_level``.
-* **pidfile** - Celery worker pidfile. ``Default: /run/polemarch_worker.pid``
 * **autoscale** - Options for autoscaling. Two comma separated numbers: max,min.
 * **beat** - Enable or disable celery beat scheduler. ``Default: true``.
 
@@ -358,14 +439,56 @@ Web settings
 
 Section ``[web]``.
 
-Here placed settings related to web-server. Those settings like:
-session_timeout, static_files_url or pagination limit.
+Here placed settings related to web-server.
 
 * **session_timeout** - Session life-cycle time. ``Default: 2w`` (two weeks).
 * **rest_page_limit** - Default limit of objects in API list. ``Default: 1000``.
 * **history_metrics_window** - Timeframe in seconds of collecting execution history statuses. ``Default: 1min``.
+* **enable_gravatar** - Enable/disable gravatar service using for users. Default: ``True``.
+* **gravatar_url** - URL for Gravatar service. Placeholder `[email_hash]` can be used.
+
+* **allow_cors** - Enable Cross-Origin Resource Sharing (CORS).
+  When set to ``true``, the application will accept requests from origins other than its own domain, which is necessary when the API is accessed from different domains.
+  This setting corresponds to enabling ``CORSMiddleware`` in FastAPI. Default: ``false``.
+* **cors_allowed_origins** - A list of origins that are allowed to make cross-origin requests.
+  This corresponds to the ``allow_origins`` parameter in ``fastapi.middleware.cors.CORSMiddleware``.
+  Each origin should be a string representing a domain, e.g., ``https://example.com``.
+  Wildcards like ``*`` are accepted to allow all origins. Default: ``*`` if ``allow_cors`` is set or empty list set.
+* **cors_allow_methods** - A list of HTTP methods that are allowed when making cross-origin requests.
+  This corresponds to the ``allow_methods`` parameter in ``CORSMiddleware``.
+  By specifying this, you control which HTTP methods are permitted for CORS requests to your application.
+  Common methods include ``GET``, ``POST``, ``PUT``, ``PATCH``, ``DELETE``, and ``OPTIONS``.
+  Default: ``GET`` if ``allow_cors`` is not set. Else - ``GET``.
+* **cors_allow_headers** - A list of HTTP headers that are allowed when making cross-origin requests.
+  This corresponds to the ``allow_headers`` parameter in ``CORSMiddleware``.
+  Use this setting to specify which HTTP headers are allowed in CORS requests.
+  Common headers include ``Content-Type``, ``Authorization``, etc.
+  Default: ``*`` if ``allow_cors`` is set or empty list set.
+* **cors_allowed_credentials** - Indicate that cookies and authorization headers should be supported for cross-origin requests.
+  Default: ``true`` if allow_cors else ``false``.
+
+* **case_sensitive_api_filter** - Enable or disable case-sensitive search for name filtering in the API.
+  When set to ``true``, filters applied to fields such as ``name`` will be case-sensitive,
+  meaning that the search will distinguish between uppercase and lowercase letters.
+  When set to ``false``, the search will be case-insensitive.
+  Adjust this setting based on whether you want users to have case-sensitive searches.
+  Default: ``true``.
+* **secure_proxy_ssl_header_name** - Header name which activates SSL urls in responses.
+  Read :django_docs:`more <settings/#secure-proxy-ssl-header>`. Default: ``HTTP_X_FORWARDED_PROTOCOL``.
+* **secure_proxy_ssl_header_value** - Header value which activates SSL urls in responses.
+  Read :django_docs:`more <settings/#secure-proxy-ssl-header>`. Default: ``https``.
+
+* **max_custom_oauth2_token_lifetime_days** - The maximum possible duration of user tokens in days.
+  This limitation is not related to ``server_token_expires_in``. It specifies the maximum lifespan of user tokens specifically.
+  By default, it is set to 365 days.
 
 .. note:: You can find more Web options in :ref:`vstutils:web`.
+
+
+Section ``[oauth]``.
+
+* **server_allow_insecure**: If enabled then server will allow HTTP requests. Default: ``False``.
+* **server_token_expires_in**: Token expiration time in seconds. Duration values can be used, for example ``3d2h32m``. Default: ``864000``.
 
 
 .. _centrifugo:
@@ -441,19 +564,9 @@ Other parameters are set in the plugin options section: ``history.plugin.PLUGIN_
 Production web settings
 -----------------------
 
-Section ``[uwsgi]``.
-
-Here placed settings related to web-server used by Polemarch in production
-(for deb and rpm packages by default). Most of them related to system paths
-(logging, PID-file and so on).
-
-.. note:: More settings in :doc:`uwsgi:Configuration` (deprecated) and `uvicorn docs <https://www.uvicorn.org/settings/#production>`_.
+.. note:: More settings in `uvicorn docs <https://www.uvicorn.org/settings/#production>`_.
 
 .. warning:: In production, it is recommended to use Centrifugo in order to reduce the load on the backend from automatic page updates.
-
-
-Configuration options
------------------------------
 
 This section contains additional information for configure additional elements.
 
@@ -467,6 +580,16 @@ This section contains additional information for configure additional elements.
         # ssl_certfile = /etc/polemarch/polemarch.crt
 
 #. We strictly do not recommend running the web server from root. Use HTTP proxy to run on privileged ports.
+
+#. We recommend to install ``uvloop`` to your environment and setup ``loop = uvloop`` in ``[uvicorn]`` section for performance reasons.
+
+In the context of vstutils, the adoption of ``uvloop`` is paramount for optimizing the performance of the application, especially because utilizing ``uvicorn`` as the ASGI server.
+``uvloop`` is an ultra-fast, drop-in replacement for the default event loop provided by Python.
+It is built on top of ``libuv``, a high-performance event loop library, and is specifically designed to optimize the execution speed of asynchronous code.
+
+By leveraging ``uvloop``, developers can achieve substantial performance improvements in terms of reduced latency and increased throughput.
+This is especially critical in scenarios where applications handle a large number of concurrent connections.
+The improved efficiency of event loop handling directly translates to faster response times and better overall responsiveness of the application.
 
 .. note:: If you need more options you can find it in :doc:`vstutils:config` in the official vstutils documentation.
 

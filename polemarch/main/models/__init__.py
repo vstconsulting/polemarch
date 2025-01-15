@@ -27,10 +27,10 @@ from .execution_templates import (
     ExecutionTemplateOption,
     TemplatePeriodicTask,
 )
+from .oauth2_token import Oauth2Token
 from .hooks import Hook
 from ..validators import RegexValidator, validate_hostname, path_validator
 from ..exceptions import UnknownTypeException, Conflict
-from ..utils import CmdExecutor
 from .utils import validate_inventory_arguments
 from ...main.constants import ProjectVariablesEnum, ANSIBLE_REFERENCE
 
@@ -233,10 +233,10 @@ def save_to_beat(instance: TemplatePeriodicTask, **kwargs) -> None:
         return
 
     instance_pt_type = instance.type.lower()
-    types_dict = dict(
-        interval=IntervalSchedule,
-        crontab=CrontabSchedule,
-    )
+    types_dict = {
+        "interval": IntervalSchedule,
+        "crontab": CrontabSchedule,
+    }
 
     # Try get Celery Periodic Task, that linked with Polemarch Periodic Task
     celery_task = CPTask.objects.filter(
@@ -245,15 +245,15 @@ def save_to_beat(instance: TemplatePeriodicTask, **kwargs) -> None:
 
     # Prepare data for Schedule
     if instance_pt_type == 'interval':
-        schedule_data = dict(
-            every=instance.get_schedule(),
-            period=types_dict[instance_pt_type].SECONDS
-        )
+        schedule_data = {
+            "every": instance.get_schedule(),
+            "period": types_dict[instance_pt_type].SECONDS
+        }
     elif instance_pt_type == 'crontab':
         schedule_data = instance.crontab_kwargs
         schedule_data['timezone'] = settings.TIME_ZONE
     else:
-        raise ValidationError("Unknown periodic task type `{}`.".format(instance.type))  # nocv
+        raise ValidationError(f"Unknown periodic task type `{instance.type}`.")  # nocv
 
 
     if celery_task:

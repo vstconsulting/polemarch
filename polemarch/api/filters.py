@@ -1,10 +1,12 @@
 # pylint: disable=import-error
 from functools import reduce
 from operator import or_
+
 from django.db.models import Q
 from django_filters import CharFilter
 from vstutils.api.filters import DefaultIDFilter, name_filter
 from vstutils.utils import lazy_translate as __
+
 from ..main import models
 
 name_help = 'A name string value (or comma separated list) of instance.'
@@ -15,7 +17,7 @@ def filter_name_endswith(queryset, field, value):
     # pylint: disable=unused-argument
     return queryset.filter(
         reduce(or_, (
-            Q(path__endswith='.{}'.format(v))
+            Q(path__endswith=f'.{v}')
             for v in value.split(',')
         ))
     )

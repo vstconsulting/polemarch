@@ -1,5 +1,6 @@
-from typing import Callable, Mapping, List, Tuple, Type, Optional, Any
 from pathlib import Path
+from typing import Callable, Mapping, MutableMapping, List, Tuple, Type, Optional, Any
+
 from rest_framework.fields import Field
 from vstutils.api.serializers import BaseSerializer
 
@@ -26,7 +27,7 @@ class BasePlugin:
         'env_vars',
     )
 
-    base_command: List[str]
+    base_command: List[str] = []
     """
     Base command (usually binary) from which execution command starts, e.g. ``['echo']``. You may also override this
     attribute as a property if more complex logic needs to be performed.
@@ -201,7 +202,7 @@ class BasePlugin:
 
         return SerializerMeta
 
-    def _get_serializer_fields(self, exclude_fields: tuple = ()) -> Mapping[str, Field]:
+    def _get_serializer_fields(self, exclude_fields: tuple = ()) -> MutableMapping[str, Field]:
         """
         Returns field name and field instance mapping used to generate fields for serializer.
 

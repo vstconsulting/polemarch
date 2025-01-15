@@ -23,25 +23,25 @@
 </template>
 
 <script>
-    import { Chart, registerables } from 'chart.js';
-    import TasksChart from './TasksChart.vue';
-    Chart.register(...registerables);
+import { Chart, registerables } from 'chart.js';
+import TasksChart from './TasksChart.vue';
+Chart.register(...registerables);
 
-    export default {
-        components: {
-            TasksChart,
-            SmallBoxWidget: spa.components.widgets.SmallBoxWidget,
+export default {
+    components: {
+        TasksChart,
+        SmallBoxWidget: spa.components.widgets.SmallBoxWidget,
+    },
+    mixins: [spa.components.BaseViewMixin],
+    computed: {
+        smallBoxesValues() {
+            return Object.fromEntries(
+                this.store.smallBoxes.map(({ key }) => [key, this.store.statsData?.[key] || 0]),
+            );
         },
-        mixins: [spa.components.BaseViewMixin],
-        computed: {
-            smallBoxesValues() {
-                return Object.fromEntries(
-                    this.store.smallBoxes.map(({ key }) => [key, this.store.statsData?.[key] || 0]),
-                );
-            },
-            jobs() {
-                return this.store.statsData?.jobs;
-            },
+        jobs() {
+            return this.store.statsData?.jobs;
         },
-    };
+    },
+};
 </script>

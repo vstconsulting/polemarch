@@ -1,10 +1,13 @@
 import re
 import contextlib
+from typing import TYPE_CHECKING
 
 import orjson
 from asgiref.sync import async_to_sync
 
-from ...main.models import History
+
+if TYPE_CHECKING:  # nocv
+    from ...main.models import History
 
 
 class BasePlugin:
@@ -13,7 +16,7 @@ class BasePlugin:
     readable = False
     ansi_escape = re.compile(r'\x1b[^m]*m')
 
-    def __init__(self, history: History, **options):
+    def __init__(self, history: "History", **options):
         self.history = history
         self.options = options
 
@@ -56,8 +59,8 @@ class BasePlugin:
             r" \{\s([^\r]*?\"[\w]{1,}\"\: .*?\s)\}\s{0,1}"
         )
         subst = '"\\1": {\n\t"status": "\\2", \n\\3},'
-        result = re.sub(regex, subst, data, 0, re.MULTILINE)
-        result = re.findall(r'^".*":[\s\S]*$', result, re.MULTILINE)[0]
+        result = re.sub(regex, subst, data, count=0, flags=re.MULTILINE)
+        result = re.findall(r'^".*":[\s\S]*$', result, flags=re.MULTILINE)[0]
         result = "{" + result[:-1] + "\n}"
         return orjson.loads(result)  # pylint: disable=no-member
 

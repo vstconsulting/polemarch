@@ -3,6 +3,9 @@
         .column-status {
             display: none;
         }
+        .column-name {
+            max-width: 240px;
+        }
     }
     @media (max-width: 1400px) {
         .column-type {

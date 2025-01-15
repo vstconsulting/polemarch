@@ -50,7 +50,7 @@ spa.signals.once('APP_CREATED', (app) => {
     app.fieldsResolver.registerField('string', RunPlaybookField.format, RunPlaybookField);
 });
 
-spa.signals.once(`models[OneProject].fields.beforeInit`, (fields) => {
+spa.signals.once('models[OneProject].fields.beforeInit', (fields) => {
     fields.execute_view_data = {
         type: 'string',
         format: RunPlaybookField.format,

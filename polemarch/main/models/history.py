@@ -1,29 +1,29 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
 
-from typing import Any, Dict, List, TypeVar
-import logging
-from collections import OrderedDict
-from datetime import timedelta, datetime
 import json
+import logging
 import re
 import signal
+from collections import OrderedDict
+from datetime import timedelta, datetime
+from typing import Any, Dict, List, TypeVar
 
+import orjson
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils import timezone
-from django.contrib.auth import get_user_model
 from django.db.models import functions as dbfunc, Count
+from django.utils import timezone
 from django.utils.timezone import now
-
 from vstutils.environment import get_celery_app
 from vstutils.models import BaseModel, BModel, BQuerySet
+
 from . import Inventory
+from .execution_templates import ExecutionTemplate, TemplatePeriodicTask
 from .projects import Project
 from ..constants import HiddenArgumentsEnum, HistoryInitiatorType, HistoryStatus
 from ..exceptions import NotApplicable
-from .execution_templates import ExecutionTemplate, TemplatePeriodicTask
-
 
 logger = logging.getLogger("polemarch")
 InvOrString = TypeVar('InvOrString', str, int, Inventory, None)
@@ -118,10 +118,10 @@ class History(BModel):
         if when == "after_execution":
             data['stop_time'] = self.stop_time.isoformat()
             data['status'] = self.status
-        data["initiator"] = dict(
-            initiator_type=self.initiator_type,
-            initiator_id=self.initiator,
-        )
+        data["initiator"] = {
+            'initiator_type': self.initiator_type,
+            'initiator_id': self.initiator,
+        }
         if self.initiator_type in ["template", "scheduler"]:
             data["initiator"]['name'] = self.initiator_object.name
         return data
@@ -137,12 +137,12 @@ class History(BModel):
 
     @property
     def execute_args(self) -> Dict[str, Any]:
-        return json.loads(self.json_args)
+        return orjson.loads(self.json_args)
 
     @execute_args.setter
     def execute_args(self, value: Dict) -> None:
         if not isinstance(value, dict):
-            raise ValidationError(dict(args="Should be a dict."))
+            raise ValidationError({'args': "Should be a dict."})
         data = {k: v for k, v in value.items() if k not in ['group']}
         HiddenArgumentsEnum.hide_values(data)
         self.json_args = json.dumps(data)
@@ -150,12 +150,12 @@ class History(BModel):
     # options
     @property
     def options(self) -> Dict:
-        return json.loads(self.json_options)
+        return orjson.loads(self.json_options)
 
     @options.setter
     def options(self, value: Dict) -> None:
         if not isinstance(value, dict):
-            raise ValidationError(dict(args="Should be a dict."))  # nocv
+            raise ValidationError({'args': "Should be a dict."})  # nocv
         self.json_options = json.dumps(value)
 
     @property

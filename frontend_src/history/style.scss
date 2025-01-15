@@ -1,4 +1,4 @@
-@import "../style";
+@import "../style.scss";
 
 .list-History, .list-ProjectHistory {
     @media (max-width: 600px) {
@@ -26,6 +26,14 @@
             display: none;
         }
     }
+}
+
+.column-initiator, .column-inventory {
+    max-width: 240px;
+}
+
+.list-History, .list-ProjectHistory {
+    overflow: scroll;
 }
 
 @each $status, $color in $history-status-colors {

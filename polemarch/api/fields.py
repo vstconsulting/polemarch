@@ -1,4 +1,5 @@
 from vstutils.api import fields as vstfields
+
 from ..main.models import Inventory
 from ..main.validators import path_validator
 
@@ -16,6 +17,11 @@ class InventoryAutoCompletionField(vstfields.VSTCharField):
             if ',' not in inventory:
                 path_validator(inventory)
         return inventory
+
+    def to_representation(self, value):
+        if isinstance(value, Inventory):
+            return super().to_representation(value.id)
+        return super().to_representation(value)
 
 
 class DynamicPluginField(vstfields.DependEnumField):

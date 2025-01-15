@@ -42,146 +42,148 @@
 </template>
 
 <script setup>
-    import { ref, onMounted, nextTick, computed } from 'vue';
-    import HistoryLineVue from './HistoryLine.vue';
-    const Card = spa.components.Card;
-    const ModelFields = spa.components.page.ModelFields;
+import { computed, nextTick, onMounted, ref } from 'vue';
+import HistoryLineVue from './HistoryLine.vue';
+const Card = spa.components.Card;
+const ModelFields = spa.components.page.ModelFields;
 
-    const app = spa.getApp();
+const app = spa.getApp();
 
-    const ExecuteArgsModel = computed(() => {
-        const OneHistoryModel = app.schema.definitions.OneHistory;
-        return app.modelsResolver.bySchemaObject(
-            {
-                properties: {
-                    execute_args: OneHistoryModel.properties.execute_args,
-                },
-                type: 'object',
+const ExecuteArgsModel = computed(() => {
+    const OneHistoryModel = app.schema.definitions.OneHistory;
+    return app.modelsResolver.bySchemaObject(
+        {
+            properties: {
+                execute_args: OneHistoryModel.properties.execute_args,
             },
-            'ExecuteArgsModel',
-        );
+            type: 'object',
+        },
+        'ExecuteArgsModel',
+    );
+});
+
+const LINES_LIMIT = 500;
+const linesUrl = spa.utils.joinPaths(app.router.currentRoute.path, '/lines/');
+
+spa.autoupdate.useAutoUpdate({
+    labels: ['history_lines'],
+    pk: app.store.page.instance.getPkValue(),
+    callback: loadLines,
+});
+
+const isLoading = ref(false);
+const lines = ref([]);
+const outputEl = ref(null);
+
+onMounted(() => {
+    loadLines();
+});
+
+async function sendLinesRequest(query = {}) {
+    isLoading.value = true;
+    const response = await app.api.makeRequest({
+        method: spa.utils.HttpMethods.GET,
+        path: linesUrl,
+        query,
+        useBulk: true,
+        auth: true,
     });
+    isLoading.value = false;
+    return response;
+}
 
-    const LINES_LIMIT = 500;
-    const linesUrl = spa.utils.joinPaths(app.router.currentRoute.path, '/lines/');
+async function loadLines({ ascending = false } = {}) {
+    const query = { limit: LINES_LIMIT, ordering: '-line_gnumber' };
 
-    spa.autoupdate.useAutoUpdate({
-        labels: ['history_lines'],
-        pk: app.store.page.instance.getPkValue(),
-        callback: loadLines,
-    });
+    if (lines.value.length > 0) {
+        if (ascending) {
+            if (lines.value.at(0).line_gnumber === 1) return;
+            query.before = lines.value.at(0).line_gnumber;
+        } else {
+            query.after = lines.value.at(-1).line_gnumber;
+        }
+    }
 
-    const isLoading = ref(false);
-    const lines = ref([]);
-    const outputEl = ref(null);
+    const response = await sendLinesRequest(query);
+    saveLines({ newLines: response.data.results, ascending });
 
-    onMounted(() => {
-        loadLines();
-    });
-
-    async function sendLinesRequest(query = {}) {
-        isLoading.value = true;
-        const response = await app.api.makeRequest({
-            method: spa.utils.HttpMethods.GET,
-            path: linesUrl,
-            query,
-            useBulk: true,
+    if (!ascending && !isLoading.value && outputEl.value.scrollHeight - outputEl.value.scrollTop < 800) {
+        nextTick(() => {
+            outputEl.value.scroll({ top: outputEl.value.scrollHeight });
         });
-        isLoading.value = false;
-        return response;
     }
+}
 
-    async function loadLines({ ascending = false } = {}) {
-        const query = { limit: LINES_LIMIT, ordering: '-line_gnumber' };
+function isSameLine(first, second) {
+    return first.line_number === second.line_number && first.line_gnumber === second.line_gnumber;
+}
 
-        if (lines.value.length > 0) {
+function saveLines({ newLines = [], ascending = false } = {}) {
+    if (!ascending) {
+        newLines = newLines.reverse();
+    }
+    for (const newLine of newLines) {
+        if (!lines.value.some((line) => isSameLine(line, newLine))) {
             if (ascending) {
-                if (lines.value.at(0).line_gnumber === 1) return;
-                query.before = lines.value.at(0).line_gnumber;
+                lines.value.unshift(newLine);
             } else {
-                query.after = lines.value.at(-1).line_gnumber;
-            }
-        }
-
-        const response = await sendLinesRequest(query);
-        saveLines({ newLines: response.data.results, ascending });
-
-        if (!ascending && !isLoading.value && outputEl.value.scrollHeight - outputEl.value.scrollTop < 800) {
-            nextTick(() => {
-                outputEl.value.scroll({ top: outputEl.value.scrollHeight });
-            });
-        }
-    }
-
-    function isSameLine(first, second) {
-        return first.line_number === second.line_number && first.line_gnumber === second.line_gnumber;
-    }
-
-    function saveLines({ newLines = [], ascending = false } = {}) {
-        if (!ascending) {
-            newLines = newLines.reverse();
-        }
-        for (const newLine of newLines) {
-            if (!lines.value.some((line) => isSameLine(line, newLine))) {
-                if (ascending) {
-                    lines.value.unshift(newLine);
-                } else {
-                    lines.value.push(newLine);
-                }
+                lines.value.push(newLine);
             }
         }
     }
+}
 
-    async function clear() {
-        isLoading.value = true;
-        try {
-            const responses = await Promise.all([
-                app.api.makeRequest({
-                    method: spa.utils.HttpMethods.DELETE,
-                    path: spa.utils.joinPaths(app.router.currentRoute.path, '/clear/'),
-                    useBulk: true,
-                }),
-                sendLinesRequest(),
-            ]);
-            lines.value = responses[1].data.results;
-        } catch (e) {
-            app.error_handler.defineErrorAndShow(e.data.detail);
-        } finally {
-            isLoading.value = false;
-        }
+async function clear() {
+    isLoading.value = true;
+    try {
+        const responses = await Promise.all([
+            app.api.makeRequest({
+                method: spa.utils.HttpMethods.DELETE,
+                path: spa.utils.joinPaths(app.router.currentRoute.path, '/clear/'),
+                useBulk: true,
+                auth: true,
+            }),
+            sendLinesRequest(),
+        ]);
+        lines.value = responses[1].data.results;
+    } catch (e) {
+        app.error_handler.defineErrorAndShow(e.data.detail);
+    } finally {
+        isLoading.value = false;
     }
+}
 
-    function toggleMaximize() {
-        document.body.classList.toggle('output-lines-maximized');
+function toggleMaximize() {
+    document.body.classList.toggle('output-lines-maximized');
+}
+
+function _throttle(func, delay = 400) {
+    let shouldWait = false;
+    return (...args) => {
+        if (shouldWait) return;
+        func(...args);
+        shouldWait = true;
+        setTimeout(() => {
+            shouldWait = false;
+        }, delay);
+    };
+}
+
+const _loadTopThrottled = _throttle(async (prevHeight) => {
+    await loadLines({ ascending: true });
+    const newScroll = outputEl.value.scrollHeight - prevHeight;
+    if (newScroll > 0) {
+        outputEl.value.scroll({ top: newScroll });
     }
+});
 
-    function _throttle(func, delay = 400) {
-        let shouldWait = false;
-        return (...args) => {
-            if (shouldWait) return;
-            func(...args);
-            shouldWait = true;
-            setTimeout(() => {
-                shouldWait = false;
-            }, delay);
-        };
+async function handleScroll() {
+    if (outputEl.value.scrollTop > 600) {
+        return;
     }
-
-    const _loadTopThrottled = _throttle(async (prevHeight) => {
-        await loadLines({ ascending: true });
-        const newScroll = outputEl.value.scrollHeight - prevHeight;
-        if (newScroll > 0) {
-            outputEl.value.scroll({ top: newScroll });
-        }
-    });
-
-    async function handleScroll() {
-        if (outputEl.value.scrollTop > 600) {
-            return;
-        }
-        const prevHeight = outputEl.value.scrollHeight;
-        _loadTopThrottled(prevHeight);
-    }
+    const prevHeight = outputEl.value.scrollHeight;
+    _loadTopThrottled(prevHeight);
+}
 </script>
 
 <style lang="scss">

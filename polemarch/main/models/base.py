@@ -1,10 +1,11 @@
 # pylint: disable=no-name-in-module
 from __future__ import unicode_literals
-from typing import Any
-from django.db import models
-from django.contrib.auth import get_user_model
-from vstutils.models import BModel
 
+from typing import Any
+
+from django.contrib.auth import get_user_model
+from django.db import models
+from vstutils.models import BModel
 
 User = get_user_model()
 
@@ -25,11 +26,11 @@ class AccessExtendsFieldMixin(object):
     access_to_related = True
 
 
-class ManyToManyFieldACL(models.ManyToManyField, AccessExtendsFieldMixin):
+class ManyToManyFieldACL(models.ManyToManyField, AccessExtendsFieldMixin):  # pylint: disable=abstract-method
     through: Any
 
 
-class ForeignKeyACL(models.ForeignKey, AccessExtendsFieldMixin):
+class ForeignKeyACL(models.ForeignKey, AccessExtendsFieldMixin):  # pylint: disable=abstract-method
     pass
 
 
@@ -37,11 +38,14 @@ class ReverseAccessExtendsFieldMixin(object):
     reverse_access_to_related = True
 
 
-class ManyToManyFieldACLReverse(models.ManyToManyField, ReverseAccessExtendsFieldMixin):
+class ManyToManyFieldACLReverse(
+    models.ManyToManyField,
+    ReverseAccessExtendsFieldMixin,
+):  # pylint: disable=abstract-method
     through: Any
 
 
-class ForeignKeyACLReverse(models.ForeignKey, ReverseAccessExtendsFieldMixin):
+class ForeignKeyACLReverse(models.ForeignKey, ReverseAccessExtendsFieldMixin):  # pylint: disable=abstract-method
     pass
 
 

@@ -1,18 +1,19 @@
-from uuid import uuid1
 from functools import partial
+from uuid import uuid1
+
 from django.db import transaction
 from django.db.models import F, Value
 from django.db.models.functions import Concat
-from rest_framework import fields as drffields
 from django_filters import CharFilter
-from vstutils.utils import create_view, lazy_translate as __, translate as _
+from rest_framework import fields as drffields
 from vstutils.api import fields as vstfields
+from vstutils.api.actions import EmptyAction, Action
 from vstutils.api.filter_backends import VSTFilterBackend
 from vstutils.api.filters import extra_filter
-from vstutils.api.actions import EmptyAction, Action
 from vstutils.api.serializers import DataSerializer, BaseSerializer
-from ...main.models import Project, ProjectCommunityTemplate, ExecutionTemplateOption
-from ...main.constants import ProjectStatus, ProjectType, ProjectRepoAuthType, ProjectVariablesEnum
+from vstutils.utils import create_view, lazy_translate as __, translate as _
+
+from .ansible import AnsiblePlaybookViewSet, AnsibleModuleViewSet
 from .base import (
     VariablesCopyViewMixin,
     ExecuteResponseSerializer,
@@ -20,12 +21,13 @@ from .base import (
     _VariableViewSet,
     _VariableSerializer,
 )
-from .users import OwnerViewMixin, UserSerializer
-from ...main.executions import PLUGIN_HANDLERS
-from .ansible import AnsiblePlaybookViewSet, AnsibleModuleViewSet
-from .hosts import InventoryViewSet, ImportInventorySerializer
-from .history import HistoryViewSet
 from .execution_templates import ExecutionTemplateViewSet
+from .history import HistoryViewSet
+from .hosts import InventoryViewSet, ImportInventorySerializer
+from .users import OwnerViewMixin, UserSerializer
+from ...main.constants import ProjectStatus, ProjectType, ProjectRepoAuthType, ProjectVariablesEnum
+from ...main.executions import PLUGIN_HANDLERS
+from ...main.models import Project, ProjectCommunityTemplate, ExecutionTemplateOption
 
 
 class CreateProjectSerializer(BaseSerializer):

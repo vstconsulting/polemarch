@@ -1,12 +1,13 @@
 from __future__ import unicode_literals
-from typing import Text, Any, List
-import logging
-import collections
-import uuid
-from django.db import models
-from vstutils.utils import raise_context, ModelHandlers
-from vstutils.models import BModel, BQuerySet
 
+import collections
+import logging
+import uuid
+from typing import Text, Any, List
+
+from django.db import models
+from vstutils.models import BModel, BQuerySet
+from vstutils.utils import raise_context, ModelHandlers
 
 logger = logging.getLogger('polemarch')
 
@@ -29,7 +30,7 @@ class HookHandlers(ModelHandlers):
 
     @raise_context(AttributeError, exclude=True)
     def handle(self, obj: BModel, when: Text, message: Any):
-        logger.debug("Send hook {} triggered by {}.".format(obj.name, when))
+        logger.debug(f"Send hook {obj.name} triggered by {when}.")
         return getattr(self.get_handler(obj), when)(message)
 
     def validate(self, obj: BModel):

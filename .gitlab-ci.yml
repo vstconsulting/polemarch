@@ -1,6 +1,6 @@
 # set to local images because too long execution
 default:
-  image: registry.gitlab.com/vstconsulting/images:ubuntu-v2
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v4
 
 variables:
   GET_SOURCES_ATTEMPTS: 3
@@ -9,7 +9,6 @@ variables:
   DJANGO_LOG_LEVEL: 'DEBUG'
   TOX_ARGS: "--workdir /cache/.tox_polemarch_${CI_BUILD_REF_NAME}"
   CCACHE_DIR: /cache/.ccache
-  CC: ccache gcc
   DOCKER_DRIVER: "overlay2"
   REGISTRY_IMAGE: "${CI_REGISTRY_IMAGE}"
   REGISTRY_IMAGE_TAG: "${KUBE_NAMESPACE}"
@@ -34,7 +33,7 @@ stages:
 ###########################################
 .branch_tests_template: &branch_tests
   stage: test
-  image: registry.gitlab.com/vstconsulting/images:ubuntu-v2
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v4
   coverage: '/\d+\%\s*$/'
   variables:
     TOX_ENVS: ""
@@ -60,7 +59,7 @@ stages:
 
 .js_tests_template: &branch_js_tests
   <<: *branch_tests
-  image: registry.gitlab.com/vstconsulting/images:node18-tests
+  image: registry.gitlab.com/vstconsulting/images:node20-tests
   before_script:
     - yarn install --pure-lockfile --mutex network
   script:
@@ -72,11 +71,8 @@ stages:
 code_style:
   <<: *branch_tests
   stage: code_standarts
-  parallel:
-    matrix:
-      - TOX_ENVS:
-          - flake
-          - pylint
+  variables:
+    TOX_ENVS: "flake,pylint"
 
 js_style:
   <<: *branch_js_tests
@@ -87,18 +83,20 @@ js_style:
 
 functional_test:
   <<: *branch_tests
+  needs: ["code_style"]
   parallel:
     matrix:
       - TOX_ENVS:
-          - py38-install
+          - py310-install
       - TOX_ENVS:
-          - py311-coverage
+          - py312-coverage
+
 
 # Realese
 ###########################################
 release:
   stage: release
-  image: registry.gitlab.com/vstconsulting/images:ubuntu-v2
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v4
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $GIT_ACCESS_USER && $GIT_ACCESS_PASSWORD'
       when: on_success
@@ -126,7 +124,7 @@ pages:
 
 release_pypi:
   stage: release
-  image: registry.gitlab.com/vstconsulting/images:build
+  image: registry.gitlab.com/vstconsulting/images:manylinux_2_17
   rules:
     - if: '$CI_COMMIT_TAG && $PYPI_UPLOAD_PASSWORD && $PYPI_UPLOAD_NAME'
       when: on_success
@@ -162,7 +160,7 @@ publish_docker:
 
 publish_release:
   stage: publish
-  image: registry.gitlab.com/vstconsulting/images:ubuntu-v2
+  image: registry.gitlab.com/vstconsulting/images:ubuntu-v4
   allow_failure: true
   needs: ["release_pypi"]
   rules:

@@ -1,18 +1,20 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
-from typing import Any, Tuple, Dict, List, Text, Union
+
 import logging
 import uuid
-
-from functools import reduce
 from collections import OrderedDict
+from functools import reduce
+from typing import Any, Tuple, Dict, List, Text, Union
+
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 from django.db import transaction, models
 from django.db.models import Case, When, Value
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
-from vstutils.utils import tmp_file
-from vstutils.models import BQuerySet, BModel
 from vstutils.api.decorators import cache_method_result
+from vstutils.models import BQuerySet, BModel
+from vstutils.utils import tmp_file
+
 from .base import ACLModel
 from ..constants import CYPHER, InventoryVariablesEnum
 
@@ -56,9 +58,6 @@ class Variable(BModel):
     key = models.CharField(max_length=512)
     value = models.TextField(null=True)
 
-    def __unicode__(self):  # pragma: no cover
-        return "{}={}".format(self.key, self.value)
-
 
 class AbstractVarsQuerySet(BQuerySet):
     use_for_related_fields = True
@@ -79,11 +78,6 @@ class AbstractModel(ACLModel):
         abstract = True
 
     BOOLEAN_VARS = []
-
-    def __unicode__(self):  # pragma: no cover
-        _vars = " ".join(["{}={}".format(k, v)
-                          for k, v in self.vars.items()])
-        return "{} {}".format(self.name, _vars)
 
     def get_hook_data(self, when: str) -> OrderedDict:
         # pylint: disable=unused-argument

@@ -2,6 +2,7 @@ from drf_yasg.inspectors.base import FieldInspector, NotHandled
 from drf_yasg import openapi
 from vstutils.api.schema.schema import VSTAutoSchema
 from vstutils.api.schema.inspectors import field_extra_handler, X_OPTIONS
+
 from .fields import InventoryAutoCompletionField
 
 
@@ -29,3 +30,10 @@ class PolemarchAutoSchema(VSTAutoSchema):
     field_inspectors = [
         InventoryFieldInspector,
     ] + VSTAutoSchema.field_inspectors
+
+    def get_security(self):
+        result = super().get_security()
+        for security in result:
+            if 'oauth2' in security:
+                result.append({'bearer_auth': []})
+        return result

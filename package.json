@@ -1,44 +1,37 @@
 {
   "name": "polemarch",
   "version": "1.7.1b1",
+  "type": "module",
   "author": "VST Consulting",
   "license": "AGPL-3.0-only",
-  "browserslist": [
-    "> 0.25%",
-    "not dead"
-  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
-    "build": "APP_ENV=prod webpack",
-    "devBuild": "webpack",
-    "lint": "eslint --ext .js,.vue frontend_src/"
+    "dev": "yarn vite dev --config ./frontend_src/vite.config.ts --host",
+    "build": "yarn vite build --config ./frontend_src/vite.config.ts",
+    "devBuild": "yarn vite build --config ./frontend_src/vite.config.ts --mode development",
+    "lint:code": "biome check --config-path ./frontend_src/biome.jsonc ./frontend_src",
+    "lint:types": "cd frontend_src && vue-tsc --noEmit",
+    "lint": "conc --group --timings yarn:lint:*",
+    "fix:code": "biome check --write --config-path ./frontend_src/biome.jsonc ./frontend_src"
   },
   "devDependencies": {
-    "@babel/core": "^7.16.7",
-    "@babel/eslint-parser": "^7.16.5",
-    "@babel/plugin-transform-runtime": "^7.16.8",
-    "@babel/preset-env": "^7.16.8",
-    "babel-loader": "^8.2.3",
-    "core-js": "^3.26.1",
-    "css-loader": "^6.5.1",
-    "dotenv": "^11.0.0",
-    "eslint": "^8.6.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "eslint-plugin-vue": "^8.2.0",
-    "prettier": "^2.5.1",
-    "sass": "^1.48.0",
-    "sass-loader": "^12.4.0",
-    "style-loader": "^3.3.1",
-    "vue": "^2.7.0",
-    "vue-loader": "^15.9.8",
-    "vue-template-compiler": "^2.7.12",
-    "webpack": "^5.74.0",
-    "webpack-bundle-analyzer": "^4.6.1",
-    "webpack-cli": "^4.10.0"
+    "@biomejs/biome": "1.9.4",
+    "@types/node": "^22.9.0",
+    "@vitejs/plugin-vue2": "^2.3.1",
+    "@vstconsulting/vstutils": "^5.12.3",
+    "concurrently": "^9.1.0",
+    "sass": "^1.81.0",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vue-tsc": "^2.1.10"
   },
   "dependencies": {
     "chart.js": "^3.1.1",
     "codemirror": "^5.65.6",
-    "highlight.js": "9.15.10"
-  }
+    "highlight.js": "10.4.1",
+    "vue": "^2.7.16"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

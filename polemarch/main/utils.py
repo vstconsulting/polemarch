@@ -1,24 +1,23 @@
 # pylint: disable=invalid-name,ungrouped-imports
 from __future__ import unicode_literals
-from functools import partial
 
+import tempfile
 import logging
 import os
-import subprocess
-
-import sys
 import re
-import json
+import subprocess
+import sys
+from functools import partial
 from os.path import dirname
-from django.conf import settings
-from django.utils import timezone
-from django.db import transaction
 
 try:
     from yaml import CLoader as Loader, CDumper as Dumper, load, dump
 except ImportError:  # nocv
     from yaml import Loader, Dumper, load, dump
-
+import orjson
+from django.conf import settings
+from django.db import transaction, models
+from django.utils import timezone
 from vstutils.tasks import TaskClass
 from vstutils.utils import (
     tmp_file_context,
@@ -88,12 +87,12 @@ class task(object):
     __slots__ = 'app', 'args', 'kwargs'
 
     def __init__(self, app, *args, **kwargs):
-        '''
+        """
         :param app: -- CeleryApp object
         :type app: celery.Celery
         :param args: -- args for CeleryApp
         :param kwargs: -- kwargs for CeleryApp
-        '''
+        """
         self.app = app
         self.args, self.kwargs = args, kwargs
 
@@ -129,7 +128,7 @@ class BaseTask(PMObject):
         self.task_class = self.__class__
 
     def start(self):
-        ''' Method that starts task executions. '''
+        """ Method that starts task executions. """
         return self.run()
 
     def run(self):  # pragma: no cover
@@ -149,7 +148,7 @@ class SubCacheInterface(PMObject):
 
     @property
     def key(self) -> str:
-        return '{}-{}'.format(self.cache_name, self.prefix)
+        return f'{self.cache_name}-{self.prefix}'
 
     def set(self, value):
         self.cache.set(self.key, dump(value, Dumper=Dumper), self.timeout)
@@ -167,7 +166,7 @@ class AnsibleCache(SubCacheInterface):
 
 
 class PMAnsible(PMObject):
-    __slots__ = ('execute_path', 'cache',)
+    __slots__ = ('execute_path', 'cache')
     # Json regex
     _regex = re.compile(r"([\{\[\"]{1}.*[\}\]\"]{1})", re.MULTILINE | re.DOTALL)
     ref_name = 'object'
@@ -187,9 +186,9 @@ class PMAnsible(PMObject):
             self.output = result
             return self.output
 
-    def __init__(self, execute_path: str = '/tmp/'):
+    def __init__(self, execute_path: str = None):
         super().__init__()
-        self.execute_path = execute_path
+        self.execute_path = execute_path or tempfile.gettempdir()
 
     def get_ansible_cache(self):
         if not hasattr(self, 'cache'):
@@ -197,12 +196,12 @@ class PMAnsible(PMObject):
         return self.cache
 
     def _get_only_json(self, output):
-        return json.loads(self._regex.findall(output)[0])
+        return orjson.loads(self._regex.findall(output)[0])
 
     def get_ref(self, cache=False):
         ref = self.ref_name
         if cache:
-            ref += '-python{}'.format(sys.version_info[0])
+            ref += f'-python{sys.version_info[0]}'
         return ref
 
     def get_args(self):
@@ -235,6 +234,7 @@ class AnsibleArgumentsReference(PMAnsible):
         # Excluded because now we could not send any to worker process
         'ask-sudo-pass', 'ask-su-pass', 'ask-pass',
         'ask-vault-pass', 'ask-become-pass',
+        'ask-vault-password',
     ]
 
     def __init__(self):
@@ -248,12 +248,12 @@ class AnsibleArgumentsReference(PMAnsible):
         return cmd
 
     def _extract_from_cli(self):
-        '''
+        """
         Format dict with args for API
 
         :return: args for ansible cli
         :rtype: dict
-        '''
+        """
         # pylint: disable=protected-access,
         data = self.get_data()
         self.version = data['version']
@@ -289,7 +289,7 @@ class AnsibleModules(PMAnsible):
     def get_ref(self, cache=False):
         ref = super().get_ref(cache)
         if cache and self.key:
-            ref += '-{}'.format(self.key)
+            ref += f'-{self.key}'
         if cache and self.detailed:
             ref += '-detailed'
         return ref
@@ -340,6 +340,13 @@ class ExecutionHandlers(ObjectHandlers):
 
         task_class = project.task_handlers.backend('EXECUTION')
 
+        if execute_args:
+            for key, value in execute_args.items():
+                if isinstance(value, models.Model):
+                    with raise_context():  # nocv
+                        # Cannot be covered because persist only on production build
+                        execute_args[key] = value.pk
+
         history = self.create_history(
             project,
             plugin,
@@ -351,9 +358,6 @@ class ExecutionHandlers(ObjectHandlers):
             options=kwargs.pop('options', {}),
         )
 
-        with raise_context():
-            execute_args['inventory'] = execute_args['inventory'].id
-
         task_kwargs = {
             'plugin': plugin,
             'project_id': project.id,
@@ -362,9 +366,14 @@ class ExecutionHandlers(ObjectHandlers):
         }
 
         if settings.TESTS_RUN:  # TODO: do something better?
-            task_class.do(**task_kwargs)
+            task_class().apply_async(kwargs=task_kwargs)
         else:
-            transaction.on_commit(partial(task_class.do, **task_kwargs))  # nocv
+            transaction.on_commit(  # nocv
+                partial(
+                    task_class().apply_async,
+                    kwargs=task_kwargs,
+                )
+            )
 
         return history
 
@@ -416,7 +425,14 @@ class ExecutionHandlers(ObjectHandlers):
     def get_object(self, plugin: str, project, history, **exec_args):  # noee
         from .models.utils import PluginExecutor  # pylint: disable=import-outside-toplevel
 
-        return PluginExecutor(plugin, self.backend(plugin), self.opts(plugin), project, history, exec_args)
+        return PluginExecutor(
+            plugin,
+            self.backend(plugin),
+            self.opts(plugin),
+            project,
+            history,
+            exec_args,
+        )
 
 
 class InventoryPluginHandlers(ObjectHandlers):
