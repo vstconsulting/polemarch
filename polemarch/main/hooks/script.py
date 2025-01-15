@@ -1,12 +1,13 @@
 from __future__ import unicode_literals
-from typing import Dict
-import os
-import json
-import traceback
-import logging
-import subprocess
-from .base import BaseHook
 
+import json
+import logging
+import os
+import subprocess
+import traceback
+from typing import Dict
+
+from .base import BaseHook
 
 logger = logging.getLogger("polemarch")
 
@@ -17,7 +18,7 @@ class Backend(BaseHook):
     def execute(self, script, when, file) -> str:  # pylint: disable=arguments-renamed
         try:
             work_dir = self.conf['HOOKS_DIR']
-            script = '{}/{}'.format(work_dir, script)
+            script = f'{work_dir}/{script}'
             return subprocess.check_output(
                 [script, when],
                 cwd=work_dir, universal_newlines=True, input=file

@@ -6,7 +6,7 @@ because our GUI also uses this API to work. Below there is an information about 
 entity we have in Polemarch and methods applicable to it.
 
 This is an example of api schema, but you can find actual schema on Polemarch host at
-``/api/v3/openapi/``.
+``/api/endpoint/``.
 
 .. _structure:
 

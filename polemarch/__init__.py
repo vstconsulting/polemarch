@@ -13,7 +13,7 @@ try:
     from vstutils.environment import prepare_environment, cmd_execution
 except ImportError:
     warnings.warn('"vstutils" was not installed', ImportWarning)
-    prepare_environment = lambda *args, **kwargs: ()
+    def prepare_environment(*args, **kwargs): pass
     cmd_execution = prepare_environment
 
 default_settings = {
@@ -31,6 +31,6 @@ default_settings = {
     "VST_ROOT_URLCONF": os.getenv("VST_ROOT_URLCONF", 'vstutils.urls'),
 }
 
-__version__ = "3.0.3"
+__version__ = "4.0.0"
 
 prepare_environment(**default_settings)

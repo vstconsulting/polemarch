@@ -1,17 +1,18 @@
 [Unit]
-Description=Polemarch Service
+Description=Polemarch Service HTTP Server
 After=network.target remote-fs.target nss-lookup.target
 
 [Service]
-Type=forking
-ExecStart=/opt/polemarch/bin/polemarchctl webserver
-ExecReload=/opt/polemarch/bin/polemarchctl webserver reload=/var/run/polemarch/web.pid
-ExecStop=/opt/polemarch/bin/polemarchctl webserver stop=/var/run/polemarch/web.pid
-PIDFile=/var/run/polemarch/web.pid
+Type=simple
+ExecStart=/opt/polemarch/bin/polemarchctl web
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStop=/bin/kill -SIGTERM $MAINPID
+WorkingDirectory=/opt/polemarch
 User=polemarch
 Group=polemarch
-KillSignal=SIGCONT
+KillSignal=SIGTERM
 Restart=always
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target

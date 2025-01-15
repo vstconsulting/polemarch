@@ -42,6 +42,7 @@ export class ExecutionTimeField extends spa.fields.datetime.UptimeField {
     static format = 'execution-time';
 
     static get mixins() {
+        // biome-ignore lint/complexity/noThisInStatic: its ok
         return super.mixins.concat(ExecutionTimeFieldMixin);
     }
 }

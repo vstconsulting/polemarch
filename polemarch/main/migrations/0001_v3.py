@@ -35,7 +35,7 @@ def sync_modules(apps, schema_editor):
     modules_list.sort()
     Module.objects.bulk_create([
         Module(path=module, project=None) for module in modules_list
-    ])
+    ], update_fields=['path'], unique_fields=['path'])
 
 
 class Migration(migrations.Migration):

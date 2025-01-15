@@ -1,20 +1,20 @@
-import re
 import base64
 import mimetypes
-from uuid import uuid1
-from typing import Tuple, Any
+import re
 from pathlib import Path
-import orjson
+from typing import Tuple, Any
+from uuid import uuid1
 
 try:
     from yaml import dump as to_yaml, CDumper as Dumper, ScalarNode
 except ImportError:  # nocv
     from yaml import dump as to_yaml, Dumper, ScalarNode
-
+import orjson
 from django.db import transaction
 from rest_framework import fields as drffields
 from vstutils.api import fields as vstfields
 from vstutils.api.validators import RegularExpressionValidator
+
 from .base import BasePlugin
 from ...main.constants import HiddenVariablesEnum, CYPHER
 from ...main.utils import AnsibleInventoryParser
@@ -141,6 +141,8 @@ class PolemarchDB(BaseAnsiblePlugin):
                 result[obj.name], obj_keys = cls._group_to_dict(obj, tmp_dir)
             elif isinstance(obj, Host):
                 result[obj.name], obj_keys = cls._host_to_dict(obj, tmp_dir)
+            else:
+                raise NotImplementedError  # nocv
             keys += obj_keys
         return result, keys
 

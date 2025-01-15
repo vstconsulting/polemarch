@@ -1,13 +1,13 @@
 <template>
     <router-link :to="{ name: 'home' }" class="brand-link logo app-logo">
         <img
-            :src="$app.config.staticPath + 'img/logo/logo.png'"
+            src="./../assets/logo/logo.png"
             :alt="title"
             class="brand-image img-circle elevation-3"
             style="opacity: 0.8; float: inherit"
         />
         <img
-            :src="$app.config.staticPath + 'img/logo/horizontal.svg'"
+            src="./../assets/logo/horizontal.svg"
             :alt="title"
             class="brand-image text-logo"
             style="opacity: 0.8"
@@ -15,11 +15,10 @@
     </router-link>
 </template>
 
-<script>
-    export default {
-        name: 'Logo',
-        mixins: [spa.components.items.Logo],
-    };
+<script setup lang="ts">
+defineProps<{
+    title?: string;
+}>();
 </script>
 
 <style>

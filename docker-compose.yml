@@ -1,8 +1,6 @@
-version: '3'
-
 services:
   traefik:
-    image: traefik:2.9
+    image: traefik:3.2
     restart: unless-stopped
     volumes:
       - ./traefik_dynamic.yml:/traefik_dynamic.yml:ro
@@ -70,7 +68,7 @@ services:
       - data-volume:/var/lib/mysql
 
   centrifugo:
-    image: centrifugo/centrifugo:v3
+    image: centrifugo/centrifugo:v5
     restart: unless-stopped
     tty: true
     environment:
@@ -83,6 +81,7 @@ services:
       CENTRIFUGO_HISTORY_TTL: "300s"
       CENTRIFUGO_HEALTH: "true"
       CENTRIFUGO_ALLOWED_ORIGINS: "*"
+      CENTRIFUGO_ALLOW_SUBSCRIBE_FOR_CLIENT: "true"
     healthcheck:
       test: [ "CMD", "sh", "-c", "wget -nv -O - http://localhost:8000/health" ]
       interval: 3s

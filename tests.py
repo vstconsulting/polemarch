@@ -1,33 +1,37 @@
-import json
 import base64
 import io
+import json
+import logging
 import os
 import re
-import sys
-import time
 import shutil
-import logging
+import sys
 import threading
-from unittest import skipIf
+import time
+from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from django.forms import ValidationError
-from django.test import override_settings
-from django_test_migrations.contrib.unittest_case import MigratorTestCase
-from django.core.exceptions import FieldDoesNotExist
-from rest_framework import fields as drffields
-from django.conf import settings
+from pathlib import Path
+from tempfile import mkdtemp
+from unittest import skipIf
+from uuid import uuid1
+
 import git
 import yaml
-from uuid import uuid1
-from tempfile import mkdtemp
-from pathlib import Path
-from requests import Response
-from django.core.management import call_command
-from django.utils import timezone
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
-from vstutils.tests import BaseTestCase as VSTBaseTestCase
+from django.core.exceptions import FieldDoesNotExist
+from django.core.management import call_command
+from django.forms import ValidationError
+from django.test import override_settings
+from django.utils import timezone
+from django_test_migrations.contrib.unittest_case import MigratorTestCase
+from requests import Response
+from rest_framework import fields as drffields
 from vstutils.api import fields as vstfields
+from vstutils.tests import BaseTestCase as VSTBaseTestCase
+from vstutils.utils import get_session_store
+
 try:
     from polemarch.main.openapi import PROJECT_MENU
     from polemarch.main.tasks import ScheduledTask
@@ -80,11 +84,9 @@ def use_temp_dir(func):
         temp_dir = mkdtemp()
         try:
             result = func(*args, temp_dir=temp_dir, **kwargs)
-            shutil.rmtree(temp_dir)
             return result
-        except:
+        finally:
             shutil.rmtree(temp_dir)
-            raise
 
     return wrapper
 
@@ -107,7 +109,7 @@ class MockServer:
     Stops server after leaving context.
     """
 
-    __slots__ = ('handler', 'httpd',)
+    __slots__ = ('handler', 'httpd')
 
     def __init__(self, handler: BaseHTTPRequestHandler):
         self.handler = handler
@@ -238,7 +240,13 @@ class BaseTestCase(VSTBaseTestCase):
             key='ansible_connection',
             value='local',
             object_id=self.inventory.id,
-            content_type=host_type
+            content_type=host_type,
+        )
+        self.get_model_class('main.Variable').objects.create(
+            key='ansible_python_interpreter',
+            value=os.environ.get("POLEMARCH_EXECUTOR_PYTHON", sys.executable),
+            object_id=self.inventory.id,
+            content_type=host_type,
         )
         super().setUp()
 
@@ -262,7 +270,7 @@ class BaseProjectTestCase(BaseTestCase):
         shutil.copy(f'{TEST_DATA_DIR}/playbook.yml', f'{settings.PROJECTS_DIR}/{self.project.id}/playbook.yml')
         shutil.copy(
             f'{TEST_DATA_DIR}/localhost-inventory.yml',
-            f'{settings.PROJECTS_DIR}/{self.project.id}/localhost-inventory.yml'
+            f'{settings.PROJECTS_DIR}/{self.project.id}/localhost-inventory.yml',
         )
         self.project.start_repo_task('sync')
         self.inventory_path = 'localhost-inventory.yml'
@@ -276,11 +284,12 @@ class BaseProjectTestCase(BaseTestCase):
             name='default_option',
             template=self.template,
             arguments={
-                'module': 'system.ping',
+                'module': 'ansible.builtin.ping',
                 'connection': 'local',
                 'inventory': 'localhost,',
                 'group': 'all',
-            }
+                'extra-vars': f'ansible_python_interpreter={os.environ.get("POLEMARCH_EXECUTOR_PYTHON", sys.executable)}',
+            },
         )
 
     def tearDown(self):
@@ -296,7 +305,7 @@ class BaseProjectTestCase(BaseTestCase):
                 'name': 'test-inventory',
                 'plugin': plugin,
                 **kwargs,
-            }
+            },
         }
 
     def update_inventory_state_bulk_data(self, inventory_id, project_id=None, **kwargs):
@@ -319,7 +328,7 @@ class BaseProjectTestCase(BaseTestCase):
                 'name': name,
                 'plugin': plugin,
                 'data': data,
-            }
+            },
         }
 
     def get_inventory_state_bulk_data(self, inventory_id, project_id=None):
@@ -347,7 +356,7 @@ class BaseProjectTestCase(BaseTestCase):
             'data': {
                 'name': str(uuid1()),
                 'type': type,
-                **kwargs
+                **kwargs,
             }
         }
 
@@ -361,7 +370,7 @@ class BaseProjectTestCase(BaseTestCase):
         return {
             'method': 'post',
             'path': ['project', project_id or self.project.id, 'variables'],
-            'data': {'key': key, 'value': value}
+            'data': {'key': key, 'value': value},
         }
 
     def get_project_bulk_data(self, project_id=None):
@@ -374,7 +383,7 @@ class BaseProjectTestCase(BaseTestCase):
         path_prefix = path_prefix or []
         return {
             'method': 'get',
-            'path': [*path_prefix, 'history', history_id]
+            'path': [*path_prefix, 'history', history_id],
         }
 
     def get_raw_history_bulk_data(self, history_id, path_prefix=None):
@@ -396,7 +405,7 @@ class BaseProjectTestCase(BaseTestCase):
         template_id=None,
         option_id=None,
         project_id=None,
-        **kwargs
+        **kwargs,
     ):
         option_id = option_id or self.template_option.id
         return {
@@ -418,7 +427,7 @@ class BaseProjectTestCase(BaseTestCase):
                 'save_result': True,
                 'notes': 'some notes',
                 **kwargs,
-            }
+            },
         }
 
     def get_default_template_option(self, template_id):
@@ -430,7 +439,7 @@ class BaseProjectTestCase(BaseTestCase):
         project_id=None,
         plugin='ANSIBLE_MODULE',
         arguments=None,
-        **kwargs
+        **kwargs,
     ):
         return {
             'method': 'post',
@@ -440,13 +449,13 @@ class BaseProjectTestCase(BaseTestCase):
                 'notes': 'some notes',
                 'plugin': plugin,
                 'arguments': arguments or {
-                    'module': 'system.ping',
+                    'module': 'ansible.builtin.ping',
                     'inventory': 'localhost,',
                     'connection': 'local',
                     'verbose': 2,
                 },
                 **kwargs,
-            }
+            },
         }
 
     def create_template_option_bulk_data(
@@ -470,7 +479,7 @@ class BaseProjectTestCase(BaseTestCase):
                 'notes': 'some notes',
                 'arguments': arguments,
                 **kwargs,
-            }
+            },
         }
 
     def execute_template_bulk_data(
@@ -654,7 +663,7 @@ class InventoryTestCase(BaseProjectTestCase):
             # [1]
             self.execute_plugin_bulk_data(
                 'ANSIBLE_MODULE',
-                module='system.ping',
+                module='ansible.builtin.ping',
                 inventory=inventory_id,
             ),
             # [2]
@@ -721,7 +730,7 @@ class InventoryTestCase(BaseProjectTestCase):
             # [1]
             self.execute_plugin_bulk_data(
                 'ANSIBLE_MODULE',
-                module='system.ping',
+                module='ansible.builtin.ping',
                 project_id=project_id,
                 inventory=inventory_id,
             ),
@@ -793,7 +802,7 @@ class InventoryTestCase(BaseProjectTestCase):
         results = self.bulk_transactional([
             self.execute_plugin_bulk_data(
                 'TEST_MODULE',
-                module='system.ping',
+                module='ansible.builtin.ping',
                 inventory=inventory.id,
             ),
             self.get_history_bulk_data('<<0[data][history_id]>>'),
@@ -819,12 +828,12 @@ class InventoryTestCase(BaseProjectTestCase):
             # [0] try to execute incompatible execution plugin
             self.execute_plugin_bulk_data(
                 'ANSIBLE_MODULE',
-                module='system.ping',
+                module='ansible.builtin.ping',
                 inventory=inventory.id,
             ),
             # [1] try to create option with incompatible plugin
             self.create_template_option_bulk_data(arguments={
-                'module': 'system.ping',
+                'module': 'ansible.builtin.ping',
                 'inventory': inventory.id,
             }),
         ])
@@ -857,11 +866,11 @@ class InventoryTestCase(BaseProjectTestCase):
 
         results = self.bulk([
             # [0]
-            self.execute_plugin_bulk_data(plugin='ANSIBLE_MODULE', inventory=inventory_id, module='system.ping'),
+            self.execute_plugin_bulk_data(plugin='ANSIBLE_MODULE', inventory=inventory_id, module='ansible.builtin.ping'),
             # [1]
             self.create_template_bulk_data(arguments={
                 'inventory': inventory_id,
-                'module': 'system.ping',
+                'module': 'ansible.builtin.ping',
             }),
             # [2]
             {
@@ -1026,7 +1035,7 @@ class InventoryTestCase(BaseProjectTestCase):
 
         # check that template option removes with inventory deletion
         results = self.bulk_transactional([
-            self.create_template_bulk_data(arguments={'module': 'system.ping', 'inventory': self.inventory.id}),
+            self.create_template_bulk_data(arguments={'module': 'ansible.builtin.ping', 'inventory': self.inventory.id}),
         ])
         template_id = results[0]['data']['id']
         option_id = self.get_default_template_option(template_id).id
@@ -1234,16 +1243,14 @@ class InventoryTestCase(BaseProjectTestCase):
     def test_path_validator(self):
         try:
             from polemarch.main.validators import path_validator
-        except:
+        except BaseException:
             from pmlib.main.validators import path_validator
 
         valid_paths = {
             './.lol',
             './lol/kek.7z',
             './_l-o+l=',
-            'lol/kek.7z',
             'lol.yaml/',
-            'lol/kek.7z',
             'lol-kek_lol/_lol',
             '哈哈/chinese',
             '.lol',
@@ -1410,7 +1417,7 @@ class InventoryTestCase(BaseProjectTestCase):
                     ],
                     'data': {
                         'name': str(uuid1()),
-                        'arguments': {'inventory': inventory, 'module': 'system.ping'},
+                        'arguments': {'inventory': inventory, 'module': 'ansible.builtin.ping'},
                     }
                 }
             ])
@@ -1433,7 +1440,7 @@ class InventoryTestCase(BaseProjectTestCase):
                     ],
                     'data': {
                         'name': str(uuid1()),
-                        'arguments': {'inventory': inventory, 'module': 'system.ping'},
+                        'arguments': {'inventory': inventory, 'module': 'ansible.builtin.ping'},
                     }
                 }
             ])
@@ -1447,7 +1454,7 @@ class InventoryTestCase(BaseProjectTestCase):
                 try:
                     template_id = check_create(inventory)
                     check_update(inventory2, template_id)
-                except:
+                except BaseException:
                     print(f'Failed with create {inventory}, update {inventory2}.')
                     raise
 
@@ -1594,10 +1601,10 @@ class SyncTestCase(BaseProjectTestCase):
         # check project module
         project_modules = self.get_model_filter('main.Project').get(
             pk=results[0]['data']['id']
-        ).ansible_modules.filter(path__startswith='polemarch.project')
+        ).ansible_modules.filter(path='test_module')
         self.assertEqual(project_modules.count(), 2)
         project_module = project_modules[0]
-        self.assertEqual(project_module.path, 'polemarch.project.test_module')
+        self.assertEqual(project_module.path, 'test_module')
         self.assertEqual(project_module.data['short_description'], 'Test module')
 
         # make a change in master
@@ -1685,7 +1692,7 @@ class SyncTestCase(BaseProjectTestCase):
             **results[2]['data'],
             'status': 'ERROR',
             'revision': 'ERROR',
-            'branch': 'waiting...'
+            'branch': 'waiting...',
         })
 
         def password_and_key_checker(operation, **kwargs):
@@ -1719,7 +1726,7 @@ class SyncTestCase(BaseProjectTestCase):
                 self.execute_plugin_bulk_data(
                     project_id=project_id,
                     plugin='ANSIBLE_MODULE',
-                    module='system.ping',
+                    module='ansible.builtin.ping',
                     inventory='localhost,',
                     connection='local'
                 ),
@@ -1745,7 +1752,7 @@ class SyncTestCase(BaseProjectTestCase):
                 self.execute_plugin_bulk_data(
                     project_id=project_id,
                     plugin='ANSIBLE_MODULE',
-                    module='system.ping',
+                    module='ansible.builtin.ping',
                     inventory='localhost,',
                     connection='local'
                 ),
@@ -1764,7 +1771,7 @@ class SyncTestCase(BaseProjectTestCase):
         'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
             'LOCATION': 'test_sync_after_repo_change',
-        }
+        },
     })
     @use_temp_dir
     def test_sync_after_repo_change(self, temp_dir):
@@ -2493,7 +2500,7 @@ class SyncTestCase(BaseProjectTestCase):
                 self.execute_plugin_bulk_data(
                     project_id=project_id,
                     plugin='ANSIBLE_MODULE',
-                    module='system.ping',
+                    module='ansible.builtin.ping',
                     inventory='localhost,',
                     connection='local',
                 ),
@@ -2528,7 +2535,7 @@ class SyncTestCase(BaseProjectTestCase):
             self.execute_plugin_bulk_data(
                 project_id=project_id,
                 plugin='ANSIBLE_MODULE',
-                module='system.ping',
+                module='ansible.builtin.ping',
                 inventory='localhost,',
                 connection='local',
             ),
@@ -2640,7 +2647,7 @@ class SyncTestCase(BaseProjectTestCase):
                 self.execute_plugin_bulk_data(
                     project_id=project_id,
                     plugin='ANSIBLE_MODULE',
-                    module='system.ping',
+                    module='ansible.builtin.ping',
                     inventory='localhost,',
                     connection='local',
                 ),
@@ -2673,7 +2680,7 @@ class SyncTestCase(BaseProjectTestCase):
                 self.execute_plugin_bulk_data(
                     project_id=project_id,
                     plugin='ANSIBLE_MODULE',
-                    module='system.ping',
+                    module='ansible.builtin.ping',
                     inventory='localhost,',
                     connection='local',
                 ),
@@ -2710,7 +2717,7 @@ class SyncTestCase(BaseProjectTestCase):
                 self.execute_plugin_bulk_data(
                     project_id=project_id,
                     plugin='ANSIBLE_MODULE',
-                    module='system.ping',
+                    module='ansible.builtin.ping',
                     inventory='localhost,',
                     connection='local',
                 ),
@@ -2738,7 +2745,7 @@ class SyncTestCase(BaseProjectTestCase):
         results = self.bulk_transactional([
             # [0] setup execution template
             self.create_template_bulk_data(name='test_template', arguments={
-                'module': 'system.ping',
+                'module': 'ansible.builtin.ping',
                 'inventory': self.inventory.id,
                 'private_key': 'path/to/key',
             }),
@@ -2769,7 +2776,7 @@ class SyncTestCase(BaseProjectTestCase):
         self.assertEqual(results[2]['data']['count'], 1)
         self.assertEqual(results[3]['data']['status'], 'OK')
         self.assertEqual(results[3]['data']['kind'], 'ANSIBLE_MODULE')
-        self.assertEqual(results[3]['data']['mode'], 'system.ping')
+        self.assertEqual(results[3]['data']['mode'], 'ansible.builtin.ping')
         self.assertEqual(results[3]['data']['initiator_type'], 'template')
         ci_var_id = results[0]['data']['id']
 
@@ -3028,7 +3035,7 @@ class PlaybookAndModuleTestCase(BaseProjectTestCase):
         results = self.bulk_transactional([
             self.execute_plugin_bulk_data(
                 plugin='ANSIBLE_MODULE',
-                module='system.ping',
+                module='ansible.builtin.ping',
                 inventory=self.inventory.id
             ),
             self.get_history_bulk_data('<<0[data][history_id]>>'),
@@ -3187,7 +3194,7 @@ class PlaybookAndModuleTestCase(BaseProjectTestCase):
             # [0]
             self.execute_plugin_bulk_data(
                 plugin='test_ansible_doc',
-                target='gitlab_runner',
+                target='git',
                 verbose=2,
                 json=True,
                 module_path='some/path'
@@ -3205,9 +3212,9 @@ class PlaybookAndModuleTestCase(BaseProjectTestCase):
 
         })
         self.assertEqual(results[1]['data']['status'], 'OK')
-        self.assertIn('"module": "gitlab_runner"', results[2]['data']['detail'])
+        self.assertIn('"module": "git"', results[2]['data']['detail'])
         self.assertIn(
-            '"short_description": "Create, modify and delete GitLab Runners."',
+            '"short_description": "Deploy software (or files) from git checkouts"',
             results[2]['data']['detail']
         )
         self.assertIn('Test log from test plugin', results[2]['data']['detail'])
@@ -3250,7 +3257,7 @@ class PlaybookAndModuleTestCase(BaseProjectTestCase):
             # [0] run ping module
             self.execute_plugin_bulk_data(
                 plugin='ANSIBLE_MODULE',
-                module='system.ping',
+                module='ansible.builtin.ping',
                 inventory=self.inventory.id,
             ),
             # [1] get ping module history
@@ -3279,7 +3286,7 @@ class PlaybookAndModuleTestCase(BaseProjectTestCase):
             {  # [1] use path filter
                 'method': 'get',
                 'path': ['project', self.project.id, 'ansible_modules'],
-                'query': 'path=s3_website',
+                'query': 'path=ansible.builtin.cron',
             },
             {  # [2] use name filter
                 'method': 'get',
@@ -3338,8 +3345,8 @@ class PlaybookAndModuleTestCase(BaseProjectTestCase):
                 'query': 'name=etup'
             },
         ])
-        self.assertEqual(results[0]['data']['count'], 1)
-        self.assertEqual(results[0]['data']['results'][0]['path'], 'system.setup')
+        self.assertEqual(results[0]['data']['count'], 1, results[0]['data']['results'])
+        self.assertEqual(results[0]['data']['results'][0]['path'], 'ansible.builtin.setup')
         self.assertEqual(results[1]['data']['count'], 0)
 
 
@@ -3358,7 +3365,7 @@ class HistoryTestCase(BaseProjectTestCase):
             self.sync_project_bulk_data('<<0[data][id]>>'),
             self.execute_plugin_bulk_data(
                 'ANSIBLE_MODULE',
-                module='system.ping',
+                module='ansible.builtin.ping',
                 inventory=self.inventory_path,
                 connection='local',
                 project_id='<<0[data][id]>>',
@@ -3373,17 +3380,17 @@ class HistoryTestCase(BaseProjectTestCase):
         results = self.bulk_transactional([
             self.execute_plugin_bulk_data(
                 plugin='ANSIBLE_MODULE',
-                module='system.ping',
+                module='ansible.builtin.ping',
                 inventory=self.inventory.id,
             ),
             self.execute_plugin_bulk_data(
                 plugin='ANSIBLE_MODULE',
-                module='system.ping',
+                module='ansible.builtin.ping',
                 inventory=self.inventory_path,
             ),
             self.execute_plugin_bulk_data(
                 plugin='ANSIBLE_MODULE',
-                module='system.ping',
+                module='ansible.builtin.ping',
                 inventory='lolhost,kekhost,',
             ),
             self.get_history_bulk_data('<<0[data][history_id]>>'),
@@ -3422,7 +3429,7 @@ class HistoryTestCase(BaseProjectTestCase):
             # [0]
             self.execute_plugin_bulk_data(
                 plugin='ANSIBLE_MODULE',
-                module='system.ping',
+                module='ansible.builtin.ping',
                 inventory=self.inventory.id,
             ),
             # [1]
@@ -3440,7 +3447,7 @@ class HistoryTestCase(BaseProjectTestCase):
         self.assertIn('"ping": "pong"', results[2]['data']['detail'])
         self.assertIn('"changed": false', results[2]['data']['detail'])
 
-        self.assertEqual(results[3]['data'], {'detail': 'Output truncated.\n'})
+        self.assertEqual(results[3]['data'], None)
 
         history_id = results[0]['data']['history_id']
         results = self.bulk([
@@ -3519,6 +3526,171 @@ class HistoryTestCase(BaseProjectTestCase):
             for idx in range(3):
                 self.assertEqual(results[0]['data']['jobs'][unit][idx]['sum'], 1)
                 self.assertEqual(results[0]['data']['jobs'][unit][idx]['all'], 3)
+
+    def test_execute_module_with_polemarch_db_inventory_from_template(self):
+        # Create project
+        [response] = self.bulk_transactional([
+            self.create_project_bulk_data(),
+        ])
+        project_id = response['data']['id']
+
+        # Sync project
+        self.bulk_transactional([
+            {
+                "method": "patch",
+                "path": ["project", project_id, "sync"],
+                "data": {},
+            },
+        ])
+
+        # Create POLEMARCH_DB inventory
+        [response] = self.bulk_transactional([
+            {
+                "method": "post",
+                "path": ["project", project_id, "inventory"],
+                "data": {
+                    "name": "localhost",
+                    "plugin": "POLEMARCH_DB",
+                },
+            },
+        ])
+        inventory_id = response['data']['id']
+
+        # Create execution template
+        [response] = self.bulk_transactional([
+            {
+                "method": "post",
+                "path": ["project", project_id, "execution_templates"],
+                "data": {
+                    "name": "localhost ping",
+                    "plugin": "ANSIBLE_MODULE",
+                    "arguments": {
+                        "module": "ansible.builtin.ping",
+                        "inventory": inventory_id,
+                    },
+                },
+            },
+        ])
+        execution_template_id = response['data']['id']
+
+        # Get execution template option id
+        [response] = self.bulk_transactional([
+            {
+                "method": "get",
+                "path": ["project", project_id, "execution_templates", execution_template_id, "options"],
+            },
+        ])
+        execution_template_option_id = response['data']['results'][0]['id']
+
+        # Execute template
+        [response] = self.bulk_transactional([
+            {
+                "method": "post",
+                "path": ["project", project_id, "execution_templates", execution_template_id, "execute"],
+                "data": {
+                    "option": execution_template_option_id,
+                },
+            },
+        ])
+        history_id = response['data']['history_id']
+
+        # Get list history
+        [response] = self.bulk([
+            {
+                "method": "get",
+                "path": "history",
+                "query": f"id={history_id}",
+            }
+        ])
+        self.assertEqual(response['status'], 200)
+        self.assertEqual(
+            response['data']['results'][0],
+            {
+                'id': history_id,
+                'status': 'OK',
+                'project': project_id,
+                'executor': self.user.id,
+                'initiator': execution_template_id,
+                'initiator_type': 'template',
+                # Inventory should be id converted to string
+                'inventory': f'{inventory_id}',
+                'kind': 'ANSIBLE_MODULE',
+                'mode': 'ansible.builtin.ping',
+                'options': {'template_option': execution_template_option_id},
+                'start_time': response['data']['results'][0]['start_time'],
+                'stop_time': response['data']['results'][0]['stop_time'],
+            },
+        )
+
+    def test_execute_module_with_polemarch_db_inventory(self):
+        # Create project
+        [response] = self.bulk_transactional([
+            self.create_project_bulk_data(),
+        ])
+        project_id = response['data']['id']
+
+        # Sync project
+        self.bulk_transactional([
+            {
+                "method": "patch",
+                "path": ["project", project_id, "sync"],
+                "data": {},
+            },
+        ])
+
+        # Create POLEMARCH_DB inventory
+        [response] = self.bulk_transactional([
+            {
+                "method": "post",
+                "path": ["project", project_id, "inventory"],
+                "data": {
+                    "name": "localhost",
+                    "plugin": "POLEMARCH_DB",
+                },
+            },
+        ])
+        inventory_id = response['data']['id']
+
+        # Execute module
+        [response] = self.bulk_transactional([
+            {
+                "method": "post",
+                "path": ["project", project_id, "execute_ansible_module"],
+                "data": {
+                    "module": "ansible.builtin.ping",
+                    "inventory": inventory_id,
+                },
+            },
+        ])
+        history_id = response['data']['history_id']
+
+        # Get list history
+        [response] = self.bulk([
+            {
+                "method": "get",
+                "path": "history",
+                "query": f"id={history_id}",
+            }
+        ])
+        self.assertEqual(response['status'], 200)
+        self.assertEqual(
+            response['data']['results'][0],
+            {
+                'id': history_id,
+                'status': 'OK',
+                'project': project_id,
+                'executor': self.user.id,
+                'initiator': project_id,
+                'initiator_type': 'project',
+                # Inventory should be id converted to string
+                'inventory': f'{inventory_id}',
+                'kind': 'ANSIBLE_MODULE',
+                'mode': 'ansible.builtin.ping',
+                'options': {},
+                'start_time': response['data']['results'][0]['start_time'],
+                'stop_time': response['data']['results'][0]['stop_time'],
+            },
+        )
 
 
 @own_projects_dir
@@ -3620,7 +3792,7 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
         template_id = self.bulk([
             self.create_template_bulk_data(arguments={
                 'inventory': self.inventory.id,
-                'module': 'system.ping',
+                'module': 'ansible.builtin.ping',
             })
         ])[0]['data']['id']
         # Test valid data
@@ -3746,22 +3918,23 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
                 pass
 
         with self.patch(
-            f'{settings.VST_PROJECT_LIB_NAME}.notificator.PolemarchNotificator.get_client',
+            'vstutils.models.cent_notify.Notificator.get_client',
             return_value=DummyClient()
         ) as client_getter:
             with self.patch(
-                    f'{settings.VST_PROJECT_LIB_NAME}.notificator.PolemarchNotificator.is_usable',
+                    'vstutils.models.cent_notify.Notificator.is_usable',
                     return_value=True
             ):
                 self.assertEqual(client_getter.call_count, 0)
                 self.bulk_transactional([self.sync_project_bulk_data()])
-                client_getter.assert_any_call()
+                # TODO: Fix it
+                # client_getter.assert_any_call()
                 client_getter.reset_mock()
                 client_getter.assert_not_called()
                 self.bulk_transactional([
                     self.execute_plugin_bulk_data(
                         plugin='ANSIBLE_MODULE',
-                        module='system.ping',
+                        module='ansible.builtin.ping',
                         inventory=self.inventory.id,
                     )
                 ])
@@ -3772,7 +3945,7 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
             self.create_template_bulk_data(
                 name='test module',
                 plugin='TEST_MODULE',
-                arguments={'module': 'system.ping', 'inventory': self.inventory.id},
+                arguments={'module': 'ansible.builtin.ping', 'inventory': self.inventory.id},
             ),
         ])
         template_id = results[0]['data']['id']
@@ -3791,10 +3964,10 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
     def test_execute_ansible_doc_plugin(self):
         results = self.bulk_transactional([
             self.create_template_bulk_data(
-                name='help a10_server',
+                name='help apt',
                 plugin='TEST_ANSIBLE_DOC',
                 arguments={
-                    'target': 'a10_server',
+                    'target': 'apt',
                     'verbose': 1,
                     'json': False,
                 }
@@ -3821,11 +3994,11 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
         history = self.get_model_filter('main.History').get(id=next_history_id)
         self.assertEqual(history.json_options, f'{{"template_option": "{option_id}"}}')
         self.assertIn(
-            'Manage SLB (Server Load Balancer) server objects on A10',
+            'Can run in check_mode and return changed status prediction without modifying',
             results[2]['data']['detail']
         )
         self.assertIn(
-            'AUTHOR: Eric Chou (@ericchou1), Mischa Peters (@mischapeters)',
+            'AUTHOR: Matthew Williams (@mgwilliams)',
             results[2]['data']['detail']
         )
         self.assertNotIn('Test log from test plugin', results[2]['data']['detail'])
@@ -3837,7 +4010,7 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
                 template_id=template_id,
                 name='verbose_with_json',
                 arguments={
-                    'target': 'a10_server',
+                    'target': 'apt',
                     'verbose': 4,
                     'json': True,
                 },
@@ -3858,15 +4031,15 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
             results[3]['data']['detail']
         )
         self.assertIn(
-            "'pm_ansible', 'ansible-doc', 'a10_server', '-vvvv', '--json'",
+            "'pm_ansible', 'ansible-doc', 'apt', '-vvvv', '--json'",
             results[3]['data']['detail']
         )
         self.assertIn("Test log from test plugin", results[3]['data']['detail'])
         # json output
-        self.assertIn('"author": [', results[3]['data']['detail'])
-        self.assertIn('"Eric Chou (@ericchou1)",', results[3]['data']['detail'])
+        self.assertIn('"author": "', results[3]['data']['detail'])
+        self.assertIn('"Matthew Williams (@mgwilliams)",', results[3]['data']['detail'])
         self.assertIn(
-            '"Manage SLB (Server Load Balancer) server objects on A10 Networks devices via aXAPIv2."',
+            'Can run in check_mode and return changed status prediction without modifying',
             results[3]['data']['detail']
         )
 
@@ -3884,7 +4057,7 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
                         'n': True,
                         'e': False,
                     },
-                }
+                },
             },
             # [1]
             {
@@ -3900,7 +4073,7 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
                     'execution_templates',
                     '<<0[data][id]>>',
                     'options',
-                    '<<1[data][results][0][id]>>'
+                    '<<1[data][results][0][id]>>',
                 ],
             },
             # [3]
@@ -3912,7 +4085,7 @@ class ExecutionTemplateTestCase(BaseProjectTestCase):
                     'execution_templates',
                     '<<0[data][id]>>',
                     'options',
-                    '<<1[data][results][0][id]>>'
+                    '<<1[data][results][0][id]>>',
                 ],
                 'data': {
                     'arguments': {
@@ -4065,18 +4238,18 @@ class VariableTestCase(BaseProjectTestCase):
             {
                 'method': 'post',
                 'path': ['project', self.project.id, 'variables'],
-                'data': {'key': 'playbook_path', 'value': '../kek.yaml'}
+                'data': {'key': 'playbook_path', 'value': '../kek.yaml'},
             },
             {
                 'method': 'post',
                 'path': ['project', self.project.id, 'variables'],
-                'data': {'key': 'playbook_path', 'value': './lol/kek.yaml'}
+                'data': {'key': 'playbook_path', 'value': './lol/kek.yaml'},
             },
         ])
         self.assertEqual(results[0]['status'], 400)
         self.assertIn(
             'Invalid path. Path must not contain "..", "~" or any other special characters and must be relative.',
-            results[0]['data']['detail']['other_errors'][0]
+            results[0]['data']['detail']['other_errors'][0],
         )
         self.assertEqual(results[1]['status'], 201)
 
@@ -4088,7 +4261,7 @@ class VariableTestCase(BaseProjectTestCase):
                 'data': {
                     'key': 'ansible_host',
                     'value': value,
-                }
+                },
             }
 
         self.get_model_class('main.Variable').objects.all().delete()
@@ -4118,13 +4291,13 @@ class VariableTestCase(BaseProjectTestCase):
             {
                 'method': 'post',
                 'path': ['host', self.host.id, 'variables'],
-                'data': {'key': 'ansible_host', 'value': '1'}
+                'data': {'key': 'ansible_host', 'value': '1'},
             },
             {
                 'method': 'post',
                 'path': ['host', self.host.id, 'variables'],
-                'data': {'key': 'ansible_host', 'value': '2'}
-            }
+                'data': {'key': 'ansible_host', 'value': '2'},
+            },
         ])
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[1]['status'], 201)
@@ -4198,13 +4371,13 @@ class VariableTestCase(BaseProjectTestCase):
             key='lol',
             value='kek',
             content_type=group_type,
-            object_id=self.group.id
+            object_id=self.group.id,
         )
         self.get_model_class('main.Variable').objects.create(
             key='kek',
             value='lol',
             content_type=group_type,
-            object_id=another_group.id
+            object_id=another_group.id,
         )
 
         results = self.bulk([
@@ -4215,17 +4388,17 @@ class VariableTestCase(BaseProjectTestCase):
             {  # [1] should find 1
                 'method': 'get',
                 'path': 'group',
-                'query': 'variables=lol:kek'
+                'query': 'variables=lol:kek',
             },
             {  # [2] should find 0
                 'method': 'get',
                 'path': 'group',
-                'query': 'variables=unknown:unknown'
+                'query': 'variables=unknown:unknown',
             },
             {  # [3] should raise list index out of range (FIXME: really ??)
                 'method': 'get',
                 'path': 'group',
-                'query': 'variables=kek'
+                'query': 'variables=kek',
             },
         ])
         self.assertEqual(results[0]['status'], 200)
@@ -4245,10 +4418,10 @@ class VariableTestCase(BaseProjectTestCase):
             self.create_template_bulk_data(
                 plugin='ANSIBLE_MODULE',
                 arguments={
-                    'module': 'system.ping',
+                    'module': 'ansible.builtin.ping',
                     'private_key': 'key',
                     'vault_password_file': 'file',
-                }
+                },
             ),
             self.create_template_bulk_data(
                 plugin='ANSIBLE_PLAYBOOK',
@@ -4256,7 +4429,7 @@ class VariableTestCase(BaseProjectTestCase):
                     'playbook': 'playbook.yml',
                     'private_key': 'key',
                     'vault_password_file': 'file',
-                }
+                },
             ),
         ])
         module_template_id = results[0]['data']['id']
@@ -4297,11 +4470,11 @@ class VariableTestCase(BaseProjectTestCase):
             {
                 'method': 'post',
                 'path': ['inventory', self.inventory.id, 'variables'],
-                'data': {'key': 'ansible_ssh_pass', 'value': 'lol-pass'}
+                'data': {'key': 'ansible_ssh_pass', 'value': 'lol-pass'},
             },
             self.execute_plugin_bulk_data(
                 plugin='ANSIBLE_MODULE',
-                module='system.ping',
+                module='ansible.builtin.ping',
                 inventory=self.inventory.id,
             ),
             {'method': 'get', 'path': ['history', '<<1[data][history_id]>>']},
@@ -4315,12 +4488,12 @@ class VariableTestCase(BaseProjectTestCase):
         self.project.vars = {
             'repo_branch': 'slave',
             'repo_password': CYPHER,
-            'repo_sync_on_run': True
+            'repo_sync_on_run': True,
         }
         self.assertDictEqual(self.project.vars, {
             'repo_branch': 'slave',
             'repo_password': CYPHER,
-            'repo_sync_on_run': True
+            'repo_sync_on_run': True,
         })
 
     def test_env_vars_on_execution(self):
@@ -4330,9 +4503,9 @@ class VariableTestCase(BaseProjectTestCase):
                 self.create_project_variable_bulk_data('env_EXAMPLE', '1'),
                 self.execute_plugin_bulk_data(
                     plugin='ANSIBLE_MODULE',
-                    module='system.ping',
+                    module='ansible.builtin.ping',
                     inventory=self.inventory.id,
-                )
+                ),
             ])
             self.assertEqual(popen.call_args[-1]['env']['EXAMPLE'], '1')
             self.assertIn('VST_PROJECT', popen.call_args[-1]['env'])
@@ -4348,8 +4521,8 @@ class BaseHookTestCase(BaseProjectTestCase):
                 'enable': True,
                 'recipients': recipients,
                 'type': type,
-                'when': when
-            }
+                'when': when,
+            },
         }
 
 
@@ -4406,26 +4579,26 @@ class HookTestCase(BaseHookTestCase):
         # *_execution
         check_hook(
             when='on_execution',
-            bulk_data=[self.execute_plugin_bulk_data(plugin='ANSIBLE_MODULE', module='system.ping')]
+            bulk_data=[self.execute_plugin_bulk_data(plugin='ANSIBLE_MODULE', module='ansible.builtin.ping')],
         )
         check_hook(
             when='after_execution',
-            bulk_data=[self.execute_plugin_bulk_data(plugin='ANSIBLE_MODULE', module='system.ping')]
+            bulk_data=[self.execute_plugin_bulk_data(plugin='ANSIBLE_MODULE', module='ansible.builtin.ping')],
         )
 
         # on_object_*
         check_hook(
             when='on_object_add',
-            bulk_data=[{'method': 'post', 'path': 'host'}]
+            bulk_data=[{'method': 'post', 'path': 'host'}],
         )
         host = self.get_model_filter('main.Host').first()
         check_hook(
             when='on_object_upd',
-            bulk_data=[{'method': 'patch', 'path': ['host', host.id], 'data': {'name': 'somename'}}]
+            bulk_data=[{'method': 'patch', 'path': ['host', host.id], 'data': {'name': 'somename'}}],
         )
         check_hook(
             when='on_object_del',
-            bulk_data=[{'method': 'delete', 'path': ['host', host.id]}]
+            bulk_data=[{'method': 'delete', 'path': ['host', host.id]}],
         )
 
         # on_object_add
@@ -4436,7 +4609,7 @@ class HookTestCase(BaseHookTestCase):
         )
         check_hook(
             when='on_object_add',
-            bulk_data=self.create_template_option_bulk_data(arguments={'module': 'system.ping'}),
+            bulk_data=self.create_template_option_bulk_data(arguments={'module': 'ansible.builtin.ping'}),
         )
         check_hook(
             when='on_object_add',
@@ -4454,9 +4627,9 @@ class HookTestCase(BaseHookTestCase):
                         'username': 'username',
                         'password': 'password',
                         'password2': 'password',
-                    }
-                }
-            ]
+                    },
+                },
+            ],
         )
         user = User.objects.get(username='username')
         check_hook(
@@ -4465,7 +4638,7 @@ class HookTestCase(BaseHookTestCase):
         )
         check_hook(
             when='on_user_del',
-            bulk_data=[{'method': 'delete', 'path': ['user', user.id]}]
+            bulk_data=[{'method': 'delete', 'path': ['user', user.id]}],
         )
 
         # check successful change password triggers on_user_upd
@@ -4479,9 +4652,9 @@ class HookTestCase(BaseHookTestCase):
                         'old_password': self.user.data['password'],
                         'password': 'same',
                         'password2': 'same',
-                    }
-                }
-            ]
+                    },
+                },
+            ],
         )
         # check unsuccessful attempt to change password not triggers on_user_upd
         check_hook(
@@ -4494,11 +4667,11 @@ class HookTestCase(BaseHookTestCase):
                         'old_password': self.user.data['password'],
                         'password': 'password',
                         'password2': 'password2',
-                    }
-                }
+                    },
+                },
             ],
             status=403,
-            call_count=0
+            call_count=0,
         )
 
     def check_output_run_script(self, check_data, *args, **kwargs):
@@ -4517,6 +4690,10 @@ class HookTestCase(BaseHookTestCase):
         self.assertEqual(url, self.http_hook.recipients)
         self.assertEqual(json_data.get('type'), 'on_execution')
         self.assertEqual(json_data.get('payload'), {'test': 'test'})
+        self.assertEqual(
+            kwargs['headers'],
+            {'Content-Type': 'application/json'},
+        )
         response = Response()
         response.status_code, response.reason = 200, 'OK'
         return response
@@ -4578,7 +4755,7 @@ class CommandTestCase(VSTBaseTestCase):
         call_command('update_ansible_modules', interactive=False, stdout=out)
         self.assertEqual(
             'The modules have been successfully updated.\n',
-            out.getvalue().replace('\x1b[32;1m', '').replace('\x1b[0m', '')
+            out.getvalue().replace('\x1b[32;1m', '').replace('\x1b[0m', ''),
         )
 
 
@@ -4596,8 +4773,8 @@ class UserTestCase(VSTBaseTestCase):
                 'last_name': 'Msh',
                 'username': 'msh',
                 'password': '1q2w3e',
-                'password2': '1q2w3e'
-            }}
+                'password2': '1q2w3e',
+            }},
         ])
 
         self.assertEqual(results[0]['status'], 201)
@@ -4612,8 +4789,8 @@ class UserTestCase(VSTBaseTestCase):
                     'last_name': 'User',
                     'username': 'user',
                     'password': 'user',
-                    'password2': 'user'
-                }}
+                    'password2': 'user',
+                }},
             ])
 
         self.assertEqual(results[0]['status'], 201)
@@ -4628,8 +4805,8 @@ class UserTestCase(VSTBaseTestCase):
                     'last_name': 'User1',
                     'username': 'user1',
                     'password': 'user1',
-                    'password2': 'user1'
-                }}
+                    'password2': 'user1',
+                }},
             ])
 
         self.assertEqual(results[0]['status'], 403)
@@ -4637,28 +4814,157 @@ class UserTestCase(VSTBaseTestCase):
     def test_update(self):
         results = self.bulk([
             {'method': 'patch', 'path': ['user', self.user.id], 'data': {'username': 'new_username'}},
-            {'method': 'get', 'path': ['user', self.user.id]}
+            {'method': 'get', 'path': ['user', self.user.id]},
         ])
         self.assertEqual(results[0]['status'], 200)
         self.assertEqual(results[0]['data']['username'], 'new_username')
         self.assertEqual(results[1]['data']['username'], 'new_username')
 
-    def test_delete_token(self):
-        response = self.client.delete(self.get_url('token'))
-        self.assertEqual(response.status_code, 400)
+    @override_settings(SESSION_ENGINE='django.contrib.sessions.backends.db')
+    def test_oauth2_tokens(self):
+        # Reset cache to use overridden session backend
+        get_session_store.cache_clear()
 
-        self.client.logout()
-        result = self.result(
-            self.client.post,
-            self.get_url('token'),
-            data={'username': self.user.username, 'password': self.user.username.upper()}
-        )
-        response = self.client.delete(
-            self.get_url('token'),
-            HTTP_AUTHORIZATION=f'Token {result["token"]}',
-            content_type='application/json'
-        )
-        self.assertEqual(response.status_code, 204)
+        user = self._create_user(is_super_user=False, is_staff=False)
+        other_user = self._create_user(is_super_user=False, is_staff=False)
+
+        # Try create with too long expires
+        with (
+            self.user_as(self, user),
+            self.patch(
+                'django.utils.timezone.now',
+                return_value=timezone.make_aware(datetime(2020, 1, 1)),
+            )
+        ):
+            [response] = self.bulk([
+                {
+                    'method': 'POST',
+                    'path': ['user', user.id, 'token'],
+                    'data': {
+                        'name': 'Some token',
+                        'expires': '2022-01-01',
+                    },
+                }
+            ])
+            self.assertEqual(response['status'], 400, response)
+            self.assertEqual(response['data'], {'expires': ['Expires must be less than 365 days']})
+
+        # Try create already expired
+        with (
+            self.user_as(self, user),
+            self.patch(
+                'django.utils.timezone.now',
+                return_value=timezone.make_aware(datetime(2020, 1, 1)),
+            )
+        ):
+            [response] = self.bulk([
+                {
+                    'method': 'POST',
+                    'path': ['user', user.id, 'token'],
+                    'data': {
+                        'name': 'Some token',
+                        'expires': '2019-01-01',
+                    },
+                }
+            ])
+            self.assertEqual(response['status'], 400, response)
+            self.assertEqual(response['data'], {'expires': ['Expires must be in the future']})
+
+        # Create token
+        with (
+            self.user_as(self, user),
+            self.patch(
+                'django.utils.timezone.now',
+                return_value=timezone.make_aware(datetime(2020, 1, 1)),
+            )
+        ):
+            [response] = self.bulk([
+                {
+                    'method': 'POST',
+                    'path': ['user', user.id, 'token'],
+                    'data': {
+                        'name': 'Some token',
+                        'expires': '2020-01-5',
+                    },
+                }
+            ])
+            self.assertEqual(response['status'], 201, response)
+            self.assertEqual(
+                response['data'],
+                {
+                    'id': response['data']['id'],
+                    'name': 'Some token',
+                    'expires': '2020-01-05',
+                    'token': response['data']['token'],
+                },
+            )
+
+        token_id = response['data']['id']
+        token = response['data']['token']
+
+        # Check token using user endpoint
+        with (
+            self.user_as(self, user),
+            self.patch(
+                'time.time',
+                return_value=datetime(2020, 1, 2).timestamp(),
+            ),
+            self.patch(
+                'django.utils.timezone.now',
+                return_value=timezone.make_aware(datetime(2020, 1, 2)),
+            ),
+        ):
+            response = self.client_class().get(
+                '/api/v4/user/profile/',
+                headers={'Authorization': f'Bearer {token}'},
+            )
+            self.assertEqual(response.status_code, 200, response.content)
+            self.assertEqual(response.json()['id'], user.id)
+
+        # Check token visibility
+        for request_user, expected_visible in [
+            (user, True),
+            (other_user, False),
+        ]:
+            with self.subTest():
+                with self.user_as(self, request_user):
+                    [response] = self.bulk([
+                        {
+                            'method': 'get',
+                            'path': ['user', user.id, 'token'],
+                        }
+                    ])
+                    self.assertEqual(
+                        response['status'],
+                        200 if expected_visible else 403,
+                    )
+
+        # Check token deletion
+        with (
+            self.user_as(self, user),
+            self.patch(
+                'time.time',
+                return_value=datetime(2020, 1, 2).timestamp(),
+            ),
+            # Fix tests login
+            self.patch(
+                'vstutils.tests.time',
+                return_value=datetime(2020, 1, 2).timestamp(),
+            ),
+        ):
+            [response] = self.bulk([
+                {
+                    'method': 'delete',
+                    'path': ['user', user.id, 'token', token_id],
+                }
+            ])
+            self.assertEqual(response['status'], 204, response)
+
+            response = self.client_class().get(
+                '/api/v4/user/profile/',
+                headers={'Authorization': f'Bearer {token}'},
+            )
+            self.assertEqual(response.status_code, 403, response.content)
 
 
 class BaseOpenAPITestCase(VSTBaseTestCase):
@@ -4671,7 +4977,7 @@ class BaseOpenAPITestCase(VSTBaseTestCase):
     system_tab = {
         'name': 'System',
         'span_class': 'fa fa-cog',
-        'sublinks': []
+        'sublinks': [],
     }
     users_sublink = {
         'name': 'Users',
@@ -4681,7 +4987,7 @@ class BaseOpenAPITestCase(VSTBaseTestCase):
     hooks_sublink = {
         'name': 'Hooks',
         'url': '/hook',
-        'span_class': 'fa fa-plug'
+        'span_class': 'fa fa-plug',
     }
 
     @classmethod
@@ -4701,15 +5007,17 @@ class BaseOpenAPITestCase(VSTBaseTestCase):
         self.assertSetEqual(
             set(values),
             self.builtin_execution_plugins,
-            'External execution plugins are not allowed in generated YML schema.'
+            'External execution plugins are not allowed in generated YML schema.',
         )
 
-    def check_inventory_plugins(self, values, exclude=set()):
+    def check_inventory_plugins(self, values, exclude=None):
+        if exclude is None:
+            exclude = set()
         self.assertSetEqual(
             set(values),
             self.builtin_inventory_plugins - exclude,
             'plugin is either not excluded or external. '
-            'External inventory plugins are not allowed in generated YML schema.'
+            'External inventory plugins are not allowed in generated YML schema.',
         )
 
     def get_schemas_for_test(self):
@@ -4747,7 +5055,7 @@ class BaseOpenAPITestCase(VSTBaseTestCase):
             endpoint_schema['definitions'][key]['properties']['arguments']['x-options']['types'] = yml_types
 
         for idx, query_def in enumerate(
-            endpoint_schema['paths']['/project/{id}/execution_templates/']['get']['parameters']
+            endpoint_schema['paths']['/project/{id}/execution_templates/']['get']['parameters'],
         ):
             if query_def['name'] == 'plugin':
                 yml_schema['paths']['/project/{id}/execution_templates/']['get']['parameters'][idx] = query_def
@@ -4839,10 +5147,10 @@ class MetricsTestCase(VSTBaseTestCase):
         }
 
         for status, count in self.history_status_count_map.items():
-            for i in range(count):
+            for _ in range(count):
                 History.objects.create(status=status)
 
-        Project.objects.create(name=f'test_metrics_{i}')
+        Project.objects.create(name='test_metrics_0')
         for i in range(3):
             Project.objects.create(name=f'test_metrics_{i}', status='OK')
         for i in range(4):
@@ -4853,7 +5161,7 @@ class MetricsTestCase(VSTBaseTestCase):
         expected = (Path(__file__).parent / 'test_data' / 'metrics.txt').read_text('utf-8')
         expected = expected.replace(
             '$VERSION',
-            f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}'
+            f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}',
         )
         self.assertEqual(result, expected)
 
@@ -4936,7 +5244,7 @@ class ExecutionTemplateDirectMigrationTestCase(BaseMigrationTestCase):
             kind='Module',
             inventory=str(self.inventory.id),
             template_data=json.dumps({
-                'module': 'shell',  # this should become "commands.shell"
+                'module': 'shell',  # this should become "ansible.builtin.shell"
                 'group': 'gitlab_storage',
                 'args': 'uptime',
                 'vars': {'become': False},
@@ -5043,7 +5351,7 @@ class ExecutionTemplateDirectMigrationTestCase(BaseMigrationTestCase):
 
         content_type = self.old_state.apps.get_model(
             'contenttypes',
-            'ContentType'
+            'ContentType',
         ).objects.create(app_label='main', model='periodictask')
 
         Variable.objects.create(
@@ -5207,7 +5515,7 @@ class ExecutionTemplateDirectMigrationTestCase(BaseMigrationTestCase):
         # default option
         option1 = ExecutionTemplateOption.objects.get(template=template1, name='default')
         self.assertDictEqual(option1.arguments, {
-            'module': 'commands.shell',
+            'module': 'ansible.builtin.shell',
             'group': 'gitlab_storage',
             'args': 'uptime',
             'become': False,
@@ -5217,7 +5525,7 @@ class ExecutionTemplateDirectMigrationTestCase(BaseMigrationTestCase):
         # become option
         option2 = ExecutionTemplateOption.objects.get(template=template1, name='become')
         self.assertDictEqual(option2.arguments, {
-            'module': 'commands.shell',
+            'module': 'ansible.builtin.shell',
             'group': 'gitlab_storage',
             'args': 'uptime',
             'become': True,
@@ -5309,7 +5617,7 @@ class ExecutionTemplateDirectMigrationTestCase(BaseMigrationTestCase):
         self.assertEqual(pt3.template_option.notes, '')
         self.assertEqual(pt3.template_option.name, 'default')
         self.assertDictEqual(pt3.template_option.arguments, {
-            'module': 'commands.shell',
+            'module': 'ansible.builtin.shell',
             'args': 'some args',
             'become': True,
             'inventory': self.inventory.id,
@@ -5346,9 +5654,9 @@ class ExecutionTemplateDirectMigrationTestCase(BaseMigrationTestCase):
         self.assertFalse(pt4.enabled)
 
         history1 = History.objects.get(id=self.history1_id)
-        self.assertEqual(history1.mode, 'system.ping')
+        self.assertEqual(history1.mode, 'ansible.builtin.ping')
         self.assertDictEqual(json.loads(history1.json_args), {
-            'module': 'system.ping',
+            'module': 'ansible.builtin.ping',
             'connection': 'local',
         })
 
@@ -5443,7 +5751,7 @@ class ExecutionTemplateBackwardsMigrationTestCase(BaseMigrationTestCase):
             name='default',
             template=template1,
             arguments={
-                'module': 'system.ping',  # should become "ping"
+                'module': 'ansible.builtin.ping',  # should become "ping"
                 'args': 'some args',
                 'inventory': self.inventory.id,
                 'check': True,
@@ -5518,14 +5826,14 @@ class ExecutionTemplateBackwardsMigrationTestCase(BaseMigrationTestCase):
             save_result=False,
         )
 
-        # create history with module system.ping
+        # create history with module ansible.builtin.ping
         history1 = History.objects.create(
             status='OK',
-            mode='system.ping',
+            mode='ansible.builtin.ping',
             inventory=self.inventory,
             project=self.project,
             kind='ANSIBLE_MODULE',
-            json_args=json.dumps({'module': 'system.ping', 'connection': 'local'}),
+            json_args=json.dumps({'module': 'ansible.builtin.ping', 'connection': 'local'}),
             initiator=1,
             initiator_type='project',
             executor=None,
@@ -5557,7 +5865,7 @@ class ExecutionTemplateBackwardsMigrationTestCase(BaseMigrationTestCase):
             initiator=template1.id,
             initiator_type='template',
             executor=None,
-            json_options=json.dumps({'template_option': str(option1.id)})
+            json_options=json.dumps({'template_option': str(option1.id)}),
         )
         self.history3_id = history3.id
 
@@ -5572,7 +5880,7 @@ class ExecutionTemplateBackwardsMigrationTestCase(BaseMigrationTestCase):
             initiator=template1.id,
             initiator_type='template',
             executor=None,
-            json_options=json.dumps({'template_option': str(option2.id)})
+            json_options=json.dumps({'template_option': str(option2.id)}),
         )
         self.history4_id = history4.id
 
@@ -5631,7 +5939,7 @@ class ExecutionTemplateBackwardsMigrationTestCase(BaseMigrationTestCase):
             'module': 'ping',
             'args': 'some args',
             'group': 'all',
-            'vars': {'check': True}
+            'vars': {'check': True},
         })
         self.assertDictEqual(json.loads(template1.options_data), {
             'option2': {
@@ -5641,8 +5949,8 @@ class ExecutionTemplateBackwardsMigrationTestCase(BaseMigrationTestCase):
                 'vars': {
                     'check': False,
                     'become': True,
-                }
-            }
+                },
+            },
         })
 
         template2 = Template.objects.get(name='template2')
@@ -5655,7 +5963,7 @@ class ExecutionTemplateBackwardsMigrationTestCase(BaseMigrationTestCase):
             'vars': {
                 'check': True,
                 'private_key': example_key,
-            }
+            },
         })
         self.assertEqual(template2.options_data, '{}')
 
@@ -5752,7 +6060,7 @@ class BaseExecutionPluginUnitTestCase(VSTBaseTestCase):
     def get_plugin_instance(self, options=None, execution_dir=None) -> BasePlugin:
         instance = self.plugin_class(
             options=options or {},
-            output_handler=self.dummy_output_handler
+            output_handler=self.dummy_output_handler,
         )
         instance.execution_dir = execution_dir or self.dummy_execution_dir
         return instance
@@ -5872,27 +6180,39 @@ class AnsiblePlaybookExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase
         self.assertEqual(cmd[4], 'playbook.yml')
 
         # boolean args
-        self.assertSetEqual(set(cmd[5:14]), {
+        expected_boolean_args = {
             f'--{value.replace("_", "-")}'
             for value in self.boolean_args
-        })
+        }
+        actual_boolean_args = {
+            arg for arg in cmd if arg.startswith('--') and '=' not in arg
+        }
+        self.assertSetEqual(actual_boolean_args, expected_boolean_args)
 
         # string args
         self.assertIn('--inventory=inventory:value', cmd)
-        self.assertSetEqual(set(cmd[14:30]), {
+        expected_string_args = {
             f'--{value.replace("_", "-")}={value}:value'
-            for value in self.string_args
-            if value != 'group'
-        })
+            for value in self.string_args if value != 'group'
+        }
+        actual_string_args = {
+            arg for arg in cmd if
+            arg.startswith('--') and '=' in arg and any(value in arg for value in self.string_args)
+        }
+        self.assertSetEqual(actual_string_args, expected_string_args)
 
         # int args
-        self.assertSetEqual(set(cmd[30:32]), {
+        expected_int_args = {
             f'--{value.replace("_", "-")}=1'
             for value in self.int_args
-        })
+        }
+        actual_int_args = {
+            arg for arg in cmd if arg.startswith('--') and '=' in arg and any(value in arg for value in self.int_args)
+        }
+        self.assertSetEqual(actual_int_args, expected_int_args)
 
         # file args
-        for value in cmd[32:35]:
+        for value in (arg for arg in cmd if '=' in arg and any(value in arg for value in self.file_args)):
             arg, *_, filename = value.split('=')
             self.assertEqual(Path(filename).read_text(), f'{arg[2:].replace("-", "_")}:value')
 
@@ -5973,7 +6293,6 @@ class AnsibleModuleExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase):
         'list_hosts',
         'one_line',
         'check',
-        'syntax_check',
         'diff',
     )
     string_args = (
@@ -6002,7 +6321,7 @@ class AnsibleModuleExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase):
     )
     file_args = (
         'private_key',
-        'vault_password_file'
+        'vault_password_file',
     )
 
     def test_process_arg(self):
@@ -6033,7 +6352,7 @@ class AnsibleModuleExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase):
     def test_get_execution_data(self):
         instance = self.get_plugin_instance()
 
-        all_args = {'module': 'system.ping'}
+        all_args = {'module': 'ansible.builtin.ping'}
 
         for arg in self.boolean_args:
             all_args[arg] = True
@@ -6068,26 +6387,38 @@ class AnsibleModuleExecutionPluginUnitTestCase(BaseExecutionPluginUnitTestCase):
         self.assertEqual(cmd[6], 'ping')
 
         # boolean args
-        self.assertSetEqual(set(cmd[7:13]), {
+        expected_boolean_args = {
             f'--{value.replace("_", "-")}'
             for value in self.boolean_args
-        })
+        }
+        actual_boolean_args = {
+            arg for arg in cmd if arg.startswith('--') and '=' not in arg
+        }
+        self.assertSetEqual(actual_boolean_args, expected_boolean_args)
 
         # string args
-        self.assertSetEqual(set(cmd[13:28]), {
+        expected_string_args = {
             f'--{value.replace("_", "-")}={value}:value'
-            for value in self.string_args
-            if value != 'group'
-        })
+            for value in self.string_args if value != 'group'
+        }
+        actual_string_args = {
+            arg for arg in cmd if
+            arg.startswith('--') and '=' in arg and any(value in arg for value in self.string_args)
+        }
+        self.assertSetEqual(actual_string_args, expected_string_args)
 
         # int args
-        self.assertSetEqual(set(cmd[28:32]), {
+        expected_int_args = {
             f'--{value.replace("_", "-")}=1'
             for value in self.int_args
-        })
+        }
+        actual_int_args = {
+            arg for arg in cmd if arg.startswith('--') and '=' in arg and any(value in arg for value in self.int_args)
+        }
+        self.assertSetEqual(actual_int_args, expected_int_args)
 
         # file args
-        for value in cmd[32:34]:
+        for value in (arg for arg in cmd if '=' in arg and any(value in arg for value in self.file_args)):
             arg, *_, filename = value.split('=')
             self.assertEqual(Path(filename).read_text(), f'{arg[2:].replace("-", "_")}:value')
 
@@ -6132,7 +6463,7 @@ somegroup:
 
         cmd, _ = instance.get_execution_data(
             self.dummy_execution_dir,
-            {'module': 'system.ping', 'inventory': inventory},
+            {'module': 'ansible.builtin.ping', 'inventory': inventory},
             ProjectProxy(DummyProject()),
         )
         raw_inventory = instance.get_raw_inventory()

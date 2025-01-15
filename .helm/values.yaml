@@ -26,7 +26,7 @@ centrifugo:
     namespaces: []
   fullnameOverride: centrifugo
   image:
-    tag: v3.2
+    tag: v5
   ingress:
     enabled: false
   secrets:
@@ -68,11 +68,12 @@ polemarch:
           requests:
             storage: 5Gi
       livenessProbe:
-        exec:
-          command:
-            - /bin/sh
-            - -c
-            - "ps -A | grep uwsgi"
+        httpGet:
+          httpHeaders:
+            - name: Connection
+              value: keep-alive
+          path: /api/live/
+          port: 8080
         initialDelaySeconds: 10
         periodSeconds: 20
         timeoutSeconds: 15
@@ -99,9 +100,7 @@ polemarch:
           projects_dir = /storage/projects
           hooks_dir = /storage/hooks
 
-          [uwsgi]
-          daemon = false
-          pidfile = /tmp/web.pid
+          [web]
           addrport = 0.0.0.0:8080
 
           [centrifugo]

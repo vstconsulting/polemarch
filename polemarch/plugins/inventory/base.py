@@ -1,10 +1,11 @@
 import typing as _t
 from pathlib import Path
+
 from django.conf import settings
 from rest_framework.fields import Field
 from vstutils.api.serializers import BaseSerializer
-from ...main.exceptions import NotSupported
 
+from ...main.exceptions import NotSupported
 
 InventoryType = f"{settings.VST_PROJECT_LIB_NAME}.main.models.hosts.Inventory"
 

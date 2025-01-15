@@ -294,7 +294,6 @@ dist
 !ce/doc
 !ce/package.json
 !ce/frontend_src
-!ce/webpack.config.js
 !ce/.dockerignore
 !ce/requirements.txt
 !ce/requirements-doc.txt

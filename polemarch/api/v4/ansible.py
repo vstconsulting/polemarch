@@ -1,7 +1,8 @@
 from rest_framework import fields as drffields
 from django_filters import CharFilter
 from vstutils.utils import create_view, lazy_translate as __
-from vstutils.api.filters import name_filter
+from vstutils.api.filters import extra_filter
+
 from ...main.models import AnsiblePlaybook, Module
 from ..filters import playbook_filter, filter_name_endswith
 
@@ -21,11 +22,11 @@ ansible_playbook_viewset_data = {
     ),
     'filterset_fields': {
         'playbook': CharFilter(
-            method=name_filter,
+            method=extra_filter,
             help_text=__('Playbook filename.')
         ),
         'playbook__not': CharFilter(
-            method=name_filter,
+            method=extra_filter,
             help_text=__('Playbook filename.')
         ),
         'pb_filter': CharFilter(
@@ -64,8 +65,8 @@ ansible_module_viewset_data = {
         'data': drffields.JSONField(),
     },
     'filterset_fields': {
-        'path': CharFilter(method=name_filter, help_text=__('Full path to module.')),
-        'path__not': CharFilter(method=name_filter, help_text=__('Full path to module.')),
+        'path': CharFilter(method=extra_filter, help_text=__('Full path to module.')),
+        'path__not': CharFilter(method=extra_filter, help_text=__('Full path to module.')),
         'name': CharFilter(method=filter_name_endswith, help_text=__('Full path to module.')),
     },
 }

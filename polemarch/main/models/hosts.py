@@ -1,18 +1,20 @@
 # pylint: disable=protected-access,no-member
 from __future__ import unicode_literals
+
 import logging
 from functools import cached_property
+
 from django.db.models import Q
 from vstutils.models import BModel
 from vstutils.utils import translate as _
-from .base import models
-from .base import ManyToManyFieldACL, ManyToManyFieldACLReverse
-from .vars import AbstractModel, AbstractVarsQuerySet
-from ...main import exceptions as ex
-from ...main.utils import InventoryPluginHandlers
-from ..validators import RegexValidator
-from ...main.exceptions import NotApplicable
 
+from .base import ManyToManyFieldACL, ManyToManyFieldACLReverse
+from .base import models
+from .vars import AbstractModel, AbstractVarsQuerySet
+from ..validators import RegexValidator
+from ...main import exceptions as ex
+from ...main.exceptions import NotApplicable
+from ...main.utils import InventoryPluginHandlers
 
 logger = logging.getLogger("polemarch")
 
@@ -44,9 +46,6 @@ class Host(AbstractModel):
 
     class Meta:
         default_related_name = "hosts"
-
-    def __unicode__(self):
-        return "{}".format(self.name)  # nocv
 
 
 class Group(AbstractModel):
@@ -103,9 +102,6 @@ class Inventory(AbstractModel):
 
     class Meta:
         default_related_name = "inventories"
-
-    def __unicode__(self):
-        return str(self.id)  # pragma: no cover
 
     @cached_property
     def plugin_object(self):

@@ -1,19 +1,20 @@
-import { ref, computed } from 'vue';
+import { onAppAfterInit, onAppCreated, onSchemaViewsCreated, spa } from '@vstconsulting/vstutils';
+import { computed, ref } from 'vue';
+
 import './style.scss';
 import './layout';
 import './hooks';
 import './users';
-import * as inventory from './inventory';
+import './inventory';
 import './project';
-import * as history from './history';
+import './history';
 
 import Home from './Home.vue';
 import { UserObjectField } from './fields/UserObjectField';
 
-export { inventory, history };
-
-spa.signals.once('allViews.created', ({ views }) => {
+onSchemaViewsCreated(({ views }) => {
     const homeView = new spa.views.View(
+        // @ts-expect-error vstutils types are not perfect
         { path: '/', routeName: 'home', title: 'Dashboard', autoupdate: true },
         null,
         [Home],
@@ -30,9 +31,9 @@ spa.signals.once('allViews.created', ({ views }) => {
     views.set('/', homeView);
     homeView.extendStore((store) => {
         const app = spa.getApp();
-        let statsData = ref(null);
-        let period = ref(14);
-        let smallBoxes = ref([
+        const statsData = ref();
+        const period = ref(14);
+        const smallBoxes = ref([
             { key: 'projects', label: 'Projects', href: '#/project', icon: 'fa fa-cog' },
             { key: 'users', label: 'Users', href: '#/user', icon: 'fa fa-cog' },
             { key: 'inventories', label: 'Inventories', href: '#/inventory', icon: 'fas fa-cog' },
@@ -41,12 +42,13 @@ spa.signals.once('allViews.created', ({ views }) => {
         ]);
         const additionalSections = computed(() => []);
 
-        async function updateData(requestPeriod) {
+        async function updateData(requestPeriod?: number) {
             const finalPeriod = requestPeriod || period.value;
             const response = await app.api.makeRequest({
                 useBulk: true,
                 method: 'get',
                 path: 'stats',
+                auth: true,
                 query: { last: finalPeriod },
             });
             if (response.status !== 200) {
@@ -70,7 +72,7 @@ spa.signals.once('allViews.created', ({ views }) => {
     });
 });
 
-spa.signals.once('APP_CREATED', (app) => {
+onAppCreated((app) => {
     const ownerField = {
         type: 'string',
         format: UserObjectField.format,
@@ -84,6 +86,20 @@ spa.signals.once('APP_CREATED', (app) => {
     }
 });
 
-spa.signals.connect('app.afterInit', ({ app }) => {
+onAppAfterInit(({ app }) => {
     app.views.get('/group/{id}/groups/{groups_id}/hosts/').nestedQueryset = app.views.get('/host/').objects;
+});
+
+class BooleanField extends spa.fields.boolean.BooleanField {
+    getInitialValue(): undefined {
+        return undefined;
+    }
+}
+
+onAppCreated((app) => {
+    app.fieldsResolver.registerField(
+        'boolean',
+        app.fieldsResolver._types.get('boolean').keys().next().value,
+        BooleanField,
+    );
 });

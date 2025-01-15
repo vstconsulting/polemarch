@@ -1,21 +1,25 @@
 # pylint: disable=expression-not-assigned,abstract-method,import-error
 from __future__ import unicode_literals
+
 import io
-from typing import Any, Text, Dict, List, Tuple, Union, Iterable, Callable, TypeVar
-import os
-import shutil
-import pathlib
 import logging
+import os
+import pathlib
+import shutil
 import traceback
 from itertools import chain
+from typing import Any, Callable, Dict, Iterable, List, Text, Tuple, TypeVar, Union
+
 import requests
-from django.db import transaction
 from django.conf import settings
-from vstutils.utils import raise_context, import_class
-from ..utils import AnsibleModules
-from ..models.projects import Project
-from ...main.exceptions import MaxContentLengthExceeded, SyncOnRunTimeout
+from django.db import transaction
+from django.utils.module_loading import import_string
+from vstutils.utils import raise_context
+
 from ...main.constants import TEMPLATE_KIND_PLUGIN_MAP
+from ...main.exceptions import MaxContentLengthExceeded, SyncOnRunTimeout
+from ..models.projects import Project
+from ..utils import AnsibleModules
 
 logger = logging.getLogger("polemarch")
 FILENAME = TypeVar('FILENAME', Text, str)
@@ -25,7 +29,7 @@ class _Base:
     __slots__ = 'options', 'proj', 'path'
 
     regex = r"(^[\w\d\.\-_]{1,})\.yml"
-    handler_class = import_class(settings.PROJECT_CI_HANDLER_CLASS)
+    handler_class = import_string(settings.PROJECT_CI_HANDLER_CLASS)
     attempts = 2
 
     def __init__(self, project: Project, **options):
@@ -38,12 +42,12 @@ class _Base:
 
     @raise_context()
     def _load_yaml(self) -> Dict[Text, Any]:
-        '''
+        """
         Loading `.polemarch.yaml` data.
 
         :return: Data from `.polemarch.yaml` file.
         :type ret: dict
-        '''
+        """
         self.proj.get_yaml_subcache().clear()
         return self.proj.get_yaml()
 
@@ -55,22 +59,23 @@ class _Base:
 
     def message(self, message: Any, level: Text = 'debug') -> None:
         getattr(logger, level.lower(), logger.debug)(
-            'Syncing project [{}] - {}'.format(self.proj.id, message)
+            'Syncing project [%s] - %s', self.proj.id, message
         )
 
     def pm_handle_sync_on_run(self, feature: Text, data: bool) -> None:
-        '''
+        """
         Set sync_on_run if it is setted in `.polemarch.yaml`.
 
         :param feature: feature name
         :param data: all data from file
-        '''
+        """
         value = str(data[feature])
         _, created = self.proj.variables.update_or_create(
-            key='repo_sync_on_run', defaults=dict(value=value)
+            key='repo_sync_on_run',
+            defaults={'value': value},
         )
         self.message(
-            '{} repo_sync_on_run to {}'.format('Set' if created else 'Update', value)
+            f"{'Set' if created else 'Update'} repo_sync_on_run to {value}"
         )
 
     def _format_template_data(self, template_data):
@@ -138,7 +143,7 @@ class _Base:
         existed = qs_existed.values_list('name', flat=True)
         for template_name, template_data in data.items():
             if not rewrite and template_name in existed:
-                self.message('Template[{}] already in project.'.format(template_name))
+                self.message(f'Template[{template_name}] already in project.')
                 continue
             self.__create_template(template_name, template_data)
 
@@ -158,7 +163,7 @@ class _Base:
         '''
         Logging unknowing data from `.polemarch.yaml`.
         '''
-        self.message('{} - this feature is not realised yet.'.format(feature), 'info')
+        self.message(f'{feature} - this feature is not realised yet.', 'info')
         logger.debug(str(data))
 
     def _handle_yaml(self, data: Union[Dict, None]) -> None:
@@ -166,10 +171,10 @@ class _Base:
         Loads and returns data from `.polemarch.yaml` file
         """
         for feature in data.keys():
-            if feature in ['templates_rewrite', ]:
+            if feature in ['templates_rewrite']:
                 continue
-            self.message('Set settings from ".polemarch.yaml" - {}.'.format(feature))
-            feature_name = 'pm_handle_{}'.format(feature)
+            self.message(f'Set settings from ".polemarch.yaml" - {feature}.')
+            feature_name = f'pm_handle_{feature}'
             getattr(self, feature_name, self.pm_handle_unknown)(feature, data)
 
     def _set_tasks_list(self, playbooks_names: Iterable[pathlib.Path]) -> None:
@@ -188,7 +193,7 @@ class _Base:
                 hidden=hidden, project=project
             ) for p in playbooks_names
         )
-        PlaybookModel.objects.bulk_create(playbook_objects) if playbook_objects else None
+        PlaybookModel.objects.bulk_create(playbook_objects)
 
     def __get_project_modules(self, module_path: Iterable[Text]) -> List[Union[Text, Dict]]:
         valid_paths = tuple(filter(self._dir_exists, module_path))
@@ -227,7 +232,7 @@ class _Base:
     def search_files(self, repo: Any = None, pattern: Text = '**/*') -> Iterable[pathlib.Path]:
         # pylint: disable=unused-argument
         path = pathlib.Path(self.path)
-        return map(lambda x: x.relative_to(self.path), path.glob(pattern))
+        return (x.relative_to(self.path) for x in path.glob(pattern))
 
     def _operate(self, operation: Callable, **kwargs) -> Any:
         return operation(kwargs)
@@ -245,12 +250,12 @@ class _Base:
         return chain(self.search_files(repo, '*.yml'), path_list_additional)
 
     def _make_operations(self, operation: Callable) -> Any:
-        '''
+        """
         Handle VCS operations and sync data from project.
 
         :param operation: function that should be handled.
         :return: tuple with repo-object and fetch-results
-        '''
+        """
         self._set_status("SYNC")
         try:
             with transaction.atomic():
@@ -262,28 +267,28 @@ class _Base:
                 self.proj.save()
         except Exception as err:
             logger.debug(traceback.format_exc())
-            self.message('Sync error: {}'.format(err), 'error')
+            self.message(f'Sync error: {err}', 'error')
             self._set_status("ERROR")
             raise
-        else:
-            with raise_context(verbose=True):
-                self.handler_class(self, result).trigger_execution()
-            return result
+
+        with raise_context(verbose=True):
+            self.handler_class(self, result).trigger_execution()
+        return result
 
     def make_clone(self, options):  # pragma: no cover
-        '''
+        """
         Make operations for clone repo
         :param options: any options, like env variables or any thing
         :return: tuple object with 2 args: repo obj and fetch results
-        '''
+        """
         raise NotImplementedError
 
     def make_update(self, options):  # pragma: no cover
-        '''
+        """
         Make operation for fetch repo tree
         :param options: any options, like env variables or any thing
         :return: tuple object with 2 args: repo obj and fetch results
-        '''
+        """
         raise NotImplementedError
 
     def get_revision(self, *args, repo=None, **kwargs) -> Text:
@@ -294,11 +299,11 @@ class _Base:
         return "NO VCS"
 
     def delete(self) -> Text:
-        '''
+        """
         Handler, which removes project data directory.
 
         :return: user message
-        '''
+        """
         if os.path.exists(self.path):
             if os.path.isfile(self.path):
                 os.remove(self.path)  # nocv
@@ -308,23 +313,23 @@ class _Base:
         return "Repository does not exists."  # nocv
 
     def clone(self) -> Text:
-        # pylint: disable=broad-except
+        # pylint: disable=broad-exception-raised
         for __ in range(self.attempts):
             try:
                 repo = self._make_operations(self.make_clone)[0]
-                return "Received {} files.".format(len(list(self.search_files(repo))))
+                return f"Received {len(list(self.search_files(repo)))} files."
             except:
                 self.delete()
-        raise Exception("Clone didn't perform by {} attempts.".format(self.attempts))
+        raise Exception(f"Clone didn't perform by {self.attempts} attempts.")
 
     def get(self) -> Any:
-        # pylint: disable=broad-except
+        # pylint: disable=broad-exception-raised
         for __ in range(self.attempts):
             try:
                 return self._make_operations(self.make_update)
             except:
                 self.delete()
-        raise Exception("Upd didn't perform by {} attempts.".format(self.attempts))
+        raise Exception(f"Upd didn't perform by {self.attempts} attempts.")
 
     def check(self):
         pass  # nocv

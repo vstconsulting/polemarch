@@ -1,17 +1,19 @@
+import contextlib
 import os
 import re
-import contextlib
-from uuid import uuid1
 from functools import lru_cache
 from typing import Type, Mapping, Optional
+from uuid import uuid1
+
 from django.conf import settings
 from rest_framework import fields
-from vstutils.api.serializers import BaseSerializer
 from vstutils.api.fields import VSTCharField, SecretFileInString, AutoCompletionField
+from vstutils.api.serializers import BaseSerializer
+
+from .base import BasePlugin
+from ...api.fields import InventoryAutoCompletionField
 from ...main.constants import ANSIBLE_REFERENCE, HiddenArgumentsEnum, HiddenVariablesEnum, HistoryStatus
 from ...main.models import Inventory
-from ...api.fields import InventoryAutoCompletionField
-from .base import BasePlugin
 from ...plugins.inventory.ansible import BaseAnsiblePlugin as BaseAnsibleInventoryPlugin
 
 
@@ -33,6 +35,11 @@ class BaseAnsiblePlugin(BasePlugin):
     }
 
     arg_shown_on_history_as_inventory = 'inventory'
+
+    EXCEPTED_INNER = (
+        'extra-vars',
+        'playbook-dir',
+    )
 
     def __init__(self, options=None, output_handler=None):
         super().__init__(options, output_handler)
@@ -105,9 +112,9 @@ class BaseAnsiblePlugin(BasePlugin):
             if key == 'verbose':
                 return '-' + 'v' * int(value) if value else ''
             argtype = self.reference[key]['type']
-            if argtype is None and value:
+            if (argtype is None or argtype == 'bool') and value:
                 return f'--{key}'
-            if argtype == 'inner':
+            if argtype == 'inner' and key not in self.EXCEPTED_INNER:
                 value = self._put_into_tmpfile(value)
             return super()._process_arg(key, value)
 
@@ -125,11 +132,11 @@ class BaseAnsiblePlugin(BasePlugin):
             field_type = field_def.get('type')
             kwargs = {'help_text': field_def.get('help', ''), 'required': False}
             field = None
-            if field_type is None:
+            if field_type is None or field_type == 'bool':
                 field = fields.BooleanField
             elif field_type == 'int':
                 field = fields.IntegerField
-            elif field_type in ('string', 'choice'):
+            elif field_type in ('string', 'choice') or field_name in self.EXCEPTED_INNER:
                 field = VSTCharField
                 kwargs['allow_blank'] = True
 

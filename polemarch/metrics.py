@@ -1,8 +1,10 @@
 from datetime import timedelta
+
 from django.conf import settings
-from django.utils.timezone import now
 from django.db.models import Count
+from django.utils.timezone import now
 from vstutils.api.metrics import DefaultBackend
+
 from .main.models import History, Project
 
 

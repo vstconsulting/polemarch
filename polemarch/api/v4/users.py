@@ -1,8 +1,6 @@
 import re
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.exceptions import ParseError
+
 from rest_framework import fields as drffields
-from vstutils.api.responses import HTTP_204_NO_CONTENT
 from vstutils.api.auth import (
     UserViewSet as VSTUserViewSet,
     UserSerializer as VSTUserSerializer,
@@ -13,7 +11,10 @@ from vstutils.api import fields as vstfields
 from vstutils.api.base import CopyMixin
 from vstutils.api.actions import SimpleAction
 from vstutils.api.serializers import BaseSerializer
+from vstutils.api.decorators import nested_view
+
 from ..permissions import CreateUsersPermission, SetOwnerPermission
+from .oauth2_token import OAuth2TokenViewSet
 
 
 class UserSerializer(VSTUserSerializer):  # noee
@@ -45,6 +46,7 @@ class OneUserSerializer(UserSerializer):
         fields = tuple(filter(lambda field: field != 'is_staff', VSTOneUserSerializer.Meta.fields))
 
 
+@nested_view('token', arg='id', view=OAuth2TokenViewSet, manager_name='oauth2_token')
 class UserViewSet(VSTUserViewSet, CopyMixin):
     """
     Manage users.
@@ -74,18 +76,6 @@ class UserViewSet(VSTUserViewSet, CopyMixin):
 
     copy_related = ['groups']
     copy_field_name = 'username'
-
-
-class TokenView(ObtainAuthToken):
-    schema = None
-
-    def delete(self, request, *args, **kwargs):
-        token = request.auth
-        if token:
-            key = token.key
-            token.delete()
-            return HTTP_204_NO_CONTENT(f'Token {key} removed.')
-        raise ParseError('Token not found.')
 
 
 class OwnerSerializerMixin:

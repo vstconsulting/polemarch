@@ -27,6 +27,7 @@ try:
     import polemarch
 except ImportError:
     import pmlib as polemarch
+    sys.modules['polemarch'] = sys.modules['pmlib']
 
 prepare_environment()
 setup()
@@ -63,7 +64,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Polemarch'
-copyright = 'VST Consulting, 2019-2023'
+copyright = 'VST Consulting, 2019-2025'
 author = 'VST Consulting'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -117,7 +118,7 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static', polemarch.__path__[0]+'/static', vstutils.__path__[0]+'/static']
+html_static_path = ['_static', polemarch.__path__[0]+'/static']
 html_logo = 'img/html_logo.png'
 
 
@@ -186,8 +187,7 @@ texinfo_documents = [
 intersphinx_mapping = {
     'environ': ('https://django-environ.readthedocs.io/en/stable', None),
     'vstutils': ('https://vstutils.vstconsulting.net/en/stable', None),
-    'python': ('https://docs.python.org/3.8', None),
-    'uwsgi': ('https://uwsgi-docs.readthedocs.io/en/latest', None),
+    'python': ('https://docs.python.org/3.11', None),
     'celery': ('https://docs.celeryq.dev/en/latest/', None),
 }
 intersphinx_disabled_reftypes = []

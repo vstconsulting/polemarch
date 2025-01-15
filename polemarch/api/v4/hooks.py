@@ -2,6 +2,7 @@ from rest_framework import fields as drffields
 from django_filters import ChoiceFilter
 from vstutils.utils import create_view, lazy_translate as __
 from vstutils.api.permissions import StaffPermission
+
 from ...main.models import Hook
 
 
@@ -33,7 +34,7 @@ hook_viewset_data = {
         'recipients': drffields.CharField(help_text=__(
             '<b>HTTP</b>: list of URLs, separated by "|".<br><b>SCRIPT</b>: script files, separated by "|" '
             'Files must be in HOOKS_DIR directory.'
-        ),),
+        )),
     },
     'permission_classes': (StaffPermission,),
     'filterset_fields': {
