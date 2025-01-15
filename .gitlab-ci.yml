@@ -87,9 +87,9 @@ functional_test:
   parallel:
     matrix:
       - TOX_ENVS:
-          - py310-install-generatekey
+          - py310-install
       - TOX_ENVS:
-          - py312-coverage-generatekey
+          - py312-coverage
 
 
 # Realese
